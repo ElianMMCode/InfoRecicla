@@ -8,7 +8,7 @@ class InicioController extends Controller
 {
     //
 
-    public function view_inicio()
+    public function __invoke()
     {
         // Lógica para la página de inicio
         //return $this->view('/Inicio/', 'inicio');
