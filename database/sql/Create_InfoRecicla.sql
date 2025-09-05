@@ -1,12 +1,12 @@
---jorge sp 
+-- jorge sp 
 -- =========================================================
 -- InfoRecicla - Esquema completo con IDs NO secuenciales
 -- Regenerado a partir de Create_InfoRecicla.sql + ajustes
 -- =========================================================
 -- 0) Base de datos
-CREATE DATABASE IF NOT EXISTS InfoRecicla DEFAULT CHARACTER
-SET
-  utf8mb4 DEFAULT COLLATE utf8mb4_0900_ai_ci;
+CREATE DATABASE IF NOT EXISTS InfoRecicla 
+DEFAULT CHARACTER SET utf8mb4
+DEFAULT COLLATE utf8mb4_unicode_ci;
 
 USE InfoRecicla;
 
@@ -67,7 +67,7 @@ CREATE TABLE
     genero ENUM (
       'masculino',
       'femenino',
-      'otro',
+      'otro'
     ) NULL,
     localidad VARCHAR(60) NULL,
     estado ENUM ('activo', 'inactivo', 'bloqueado') NOT NULL DEFAULT 'activo',
@@ -220,15 +220,6 @@ CREATE TABLE
     UNIQUE KEY uq_inv_eca_material (punto_eca_id, material_id)
   ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
--- Relación N:N materiales aceptados por cada centro de acopio
-CREATE TABLE materiales_centros_acopio (
-  centro_acopio_id CHAR(36) NOT NULL,
-  material_id      CHAR(36) NOT NULL,
-  PRIMARY KEY (centro_acopio_id, material_id),
-  CONSTRAINT fk_mca_cac      FOREIGN KEY (centro_acopio_id) REFERENCES centros_acopio(id),
-  CONSTRAINT fk_mca_material FOREIGN KEY (material_id)      REFERENCES materiales(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 -- Movimientos (entradas/salidas) y agenda de despachos
 CREATE TABLE compras (
   id              CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID()),
@@ -239,113 +230,6 @@ CREATE TABLE compras (
   creado          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_comp_inv FOREIGN KEY (inventario_id) REFERENCES inventario(id),
   KEY idx_compras_inv_fecha (inventario_id, fecha)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE salidas (
-  id                CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID()),
-  inventario_id     CHAR(36) NOT NULL,
--- =========================================================
--- 9) Vistas útiles (opcionales)
--- =========================================================
-CREATE
-OR REPLACE VIEW vw_inventario_estado AS
-SELECT
-  i.id,
-  i.punto_eca_id,
-  e.nombre AS punto_eca_nombre,
-  i.material_id,
-  m.nombre AS material_nombre,
-  i.capacidad_max,
-  i.stock_actual,
-  i.unidad_medida,
-  i.umbral_alerta,
-  i.umbral_critico,
-  CASE
-    WHEN i.capacidad_max IS NULL
-    OR i.capacidad_max = 0 THEN NULL
-    ELSE ROUND((i.stock_actual / i.capacidad_max) * 100, 2)
-  END AS porcentaje_ocupacion,
-  CASE
-    WHEN i.umbral_critico IS NOT NULL
-    AND i.stock_actual >= i.umbral_critico THEN 'critico'
-    WHEN i.umbral_alerta IS NOT NULL
-    AND i.stock_actual >= i.umbral_alerta THEN 'alerta'
-    ELSE 'ok'
-  END AS estado_almacen
-FROM
-  inventario i
-  JOIN puntos_eca e ON e.id = i.punto_eca_id
-  JOIN materiales m ON m.id = i.material_id;
-
-CREATE
-OR REPLACE VIEW vw_publicaciones_metricas AS
-SELECT
-  p.id,
-  p.titulo,
-  p.usuario_id,
-  p.estado,
-  p.creado,
-  COALESCE(
-    SUM(
-      CASE
-        WHEN v.valor = 'like' THEN 1
-        ELSE 0
-      END
-    ),
-    0
-  ) AS likes,
-  COALESCE(
-    SUM(
-      CASE
-        WHEN v.valor = 'dislike' THEN 1
-        ELSE 0
-      END
-    ),
-    0
-  ) AS dislikes
-FROM
-  publicaciones p
-  LEFT JOIN votos v ON v.tipo = 'publicacion'
-  AND v.referencia_id = p.id
-GROUP BY
-  p.id,
-  p.titulo,
-  p.usuario_id,
-  p.estado,
-  p.creado;
-
--- =========================================================
--- 10) Triggers UUID (si tu motor NO acepta DEFAULT(UUID()))
---    Descomenta y duplica para cada tabla que lo requiera
--- =========================================================
-/*
-DELIMITER $$
-
-CREATE TRIGGER bi_uuid_usuarios
-BEFORE INSERT ON usuarios
-FOR EACH ROW
-BEGIN
-IF (NEW.id IS NULL OR NEW.id = '') THEN SET NEW.id = UUID(); END IF;
-END$$
-
--- Repite para: puntos_eca, guardados, publicaciones, publicaciones_multimedia,
--- etiquetas, categorias_publicaciones, votos, comentarios, tipos_material,
--- categorias_material, materiales, inventario, compras, salidas, despachos,
--- proveedores, perfiles_ciudadano, conversaciones, mensajes, plantas_reciclaje,
--- materiales_plantas_reciclaje, programacion_recoleccion.
-
-DELIMITER ;
- */
--- =========================================================
--- FIN DEL ESQUEMA
--- =========================================================
-  fecha             DATE NOT NULL,
-  kg                DECIMAL(12,3) NOT NULL,
-  centro_acopio_id  CHAR(36) NULL,   -- destino externo (centro de acopio)
-  creado            DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_sal_inv  FOREIGN KEY (inventario_id)    REFERENCES inventario(id),
-  CONSTRAINT fk_sal_cac  FOREIGN KEY (centro_acopio_id) REFERENCES centros_acopio(id),
-  KEY idx_salidas_inv_fecha (inventario_id, fecha)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -382,6 +266,18 @@ CREATE TABLE centros_acopio (
   UNIQUE KEY uq_cac_scoped (nombre, tipo, alcance, owner_punto_eca_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE salidas (
+  id                CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID()),
+  inventario_id     CHAR(36) NOT NULL,
+  fecha             DATE NOT NULL,
+  kg                DECIMAL(12,3) NOT NULL,
+  centro_acopio_id  CHAR(36) NULL,   -- destino externo (centro de acopio)
+  creado            DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_sal_inv  FOREIGN KEY (inventario_id)    REFERENCES inventario(id),
+  CONSTRAINT fk_sal_cac  FOREIGN KEY (centro_acopio_id) REFERENCES centros_acopio(id),
+  KEY idx_salidas_inv_fecha (inventario_id, fecha)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Relación N:N materiales aceptados por cada centro de acopio
 CREATE TABLE materiales_centros_acopio (
   centro_acopio_id CHAR(36) NOT NULL,
@@ -391,34 +287,24 @@ CREATE TABLE materiales_centros_acopio (
   CONSTRAINT fk_mca_material FOREIGN KEY (material_id)      REFERENCES materiales(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
-
 -- =========================================================
 -- 8) Programación de recolección (adaptado a UUID)
 -- =========================================================
-CREATE TABLE
-  programacion_recoleccion (
-    id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID ()),
-    punto_eca_id CHAR(36) NOT NULL,
-    material_id CHAR(36) NOT NULL,
-    planta_reciclaje_id CHAR(36) NULL,
-    fecha DATE NOT NULL,
-    hora TIME NULL,
-    frecuencia ENUM (
-      'manual',
-      'semanal',
-      'quincenal',
-      'mensual',
-      'unico'
-    ) NOT NULL DEFAULT 'manual',
-    notas VARCHAR(300) NULL,
-    creado DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_prog_rec_eca FOREIGN KEY (punto_eca_id) REFERENCES puntos_eca (id),
-    CONSTRAINT fk_prog_rec_mat FOREIGN KEY (material_id) REFERENCES materiales (id),
-    CONSTRAINT fk_prog_rec_plan FOREIGN KEY (planta_reciclaje_id) REFERENCES plantas_reciclaje (id),
-    KEY idx_prog_rec (punto_eca_id, fecha)
-  ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
-
+CREATE TABLE programacion_recoleccion (
+  id                    CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID()),
+  punto_eca_id          CHAR(36) NOT NULL,
+  material_id           CHAR(36) NOT NULL,
+  centro_acopio_id      CHAR(36) NULL, -- sustituye antiguas plantas/proveedores
+  fecha                 DATE NOT NULL,
+  hora                  TIME NULL,
+  frecuencia            ENUM('manual','semanal','quincenal','mensual','unico') NOT NULL DEFAULT 'manual',
+  notas                 VARCHAR(300) NULL,
+  creado                DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_prog_rec_eca   FOREIGN KEY (punto_eca_id)        REFERENCES puntos_eca(id),
+  CONSTRAINT fk_prog_rec_mat   FOREIGN KEY (material_id)         REFERENCES materiales(id),
+  CONSTRAINT fk_prog_rec_cac   FOREIGN KEY (centro_acopio_id)    REFERENCES centros_acopio(id),
+  KEY idx_prog_rec (punto_eca_id, fecha)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
   -- =========================================================
 -- 6) Conversaciones y mensajes
