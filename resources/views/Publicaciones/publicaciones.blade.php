@@ -3,23 +3,23 @@
 
 <x-app-layout>
 
-    <!-- ========= NAVBAR ========= -->
-  <x-navbar-layout>
+    <!--=========NAVBAR=========-->
+    <x-navbar-layout>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-            <div id="nav" class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
-                    <li class="nav-item"><a class="nav-link active" href="#">Publicaciones</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/mapa">Puntos ECA</a></li>
-                    <li class="nav-item">
-                        <a class="btn btn-light text-success" href="/">Inicio</a>
-                    </li>
-                </ul>
-            </div>
-        </x-navbar-layout>
+        <div id="nav" class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+                <li class="nav-item"><a class="nav-link active" href="#">Publicaciones</a></li>
+                <li class="nav-item"><a class="nav-link" href="/mapa">Puntos ECA</a></li>
+                <li class="nav-item">
+                    <a class="btn btn-light text-success" href="/">Inicio</a>
+                </li>
+            </ul>
+        </div>
+    </x-navbar-layout>
 
     <!-- ========= HERO: Carrusel de principales noticias ========= -->
     <header class="container my-4">
