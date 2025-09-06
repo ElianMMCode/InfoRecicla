@@ -14,7 +14,7 @@
     {{-- Contenido principal --}}
     {{ $slot }}
 
-    
+
     <!-- FOOTER -->
     <footer class="bg-light border-top py-4">
         <div class="container">

@@ -1,8 +1,6 @@
-<link rel="stylesheet" href="css/Publicaciones/stylePublicaciones.css">
-
-
 <x-app-layout>
 
+    <link rel="stylesheet" href="css/Publicaciones/stylePublicaciones.css">
     <!--=========NAVBAR=========-->
     <x-navbar-layout>
 
