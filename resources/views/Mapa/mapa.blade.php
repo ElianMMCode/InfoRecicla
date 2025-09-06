@@ -1,9 +1,7 @@
-<!-- Leaflet (sin llave) -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="/css/Mapa/styleMapa.css') }}">
-
 <x-app-layout>
-
+    <!-- Leaflet (sin llave) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/Mapa/styleMapa.css">
 
     <!-- NAVBAR -->
     <x-navbar-layout>
@@ -116,7 +114,10 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap + Leaflet -->
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script src="js/Mapa/mapa.js"></script>
 
 </x-app-layout>
