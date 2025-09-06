@@ -7,24 +7,17 @@ use Illuminate\Http\Request;
 class UsuarioController extends Controller
 {
     //
-    public function view_registro()
+    public function view_registro($tipo = null)
     {
-        // Lógica para la vista de registro
-        return view('Registro.registro');
-    }
-    public function view_registro_ciudadano()
-    {
-        // Lógica para la vista de registro
-        return view('Registro.registro_ciudadano');
-    }
-    public function view_registro_eca()
-    {
-        // Lógica para la vista de registro
-        return view('Registro.registro_eca');
-    }
-    public function view_registro_exitoso()
-    {
-        // Lógica para la vista de registro exitoso
-        return view('Registro.registro_exitoso');
+        switch ($tipo) {
+            case 'ciudadano':
+                return view('Registro.registro_ciudadano');
+            case 'eca':
+                return view('Registro.registro_eca');
+            case 'exitoso':
+                return view('Registro.registro_exitoso');
+            default:
+                return view('Registro.registro');
+        }
     }
 }
