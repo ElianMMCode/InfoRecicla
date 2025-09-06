@@ -18,4 +18,6 @@ Route::get('/punto-eca', [PuntoEcaController::class, 'view_punto_eca']);
 Route::get('/mapa', [MapaController::class, 'view_mapa']);
 Route::get('/publicaciones', [PublicacionController::class, 'view_publicaciones']);
 Route::get('/publicacion', [PublicacionController::class, 'view_publicacion']);
-Route::get('/usuario', [UsuarioController::class, 'view_registro']);
+
+//Rutas POST
+Route::post('/registro/ciudadano', [UsuarioController::class, 'store']);

@@ -92,6 +92,8 @@
 
         <!-- FORMULARIO -->
         <form method="POST" action="/registro/ciudadano" id="citizenForm" class="needs-validation" novalidate enctype="multipart/form-data">
+          @csrf
+            <input type="hidden" name="tipo" value="Ciudadano">
           <!-- Datos de acceso (tabla users) -->
           <div class="row g-3">
             <div class="col-md-6">
@@ -100,8 +102,8 @@
               <div class="invalid-feedback">Ingresa un correo válido.</div>
             </div>
             <div class="col-md-3">
-              <label for="contraseña" class="form-label">Contraseña</label>
-              <input type="password" class="form-control" id="contraseña" name="contraseña" minlength="8" maxlength="64"
+              <label for="password" class="form-label">Contraseña</label>
+              <input type="password" class="form-control" id="password" name="password" minlength="8" maxlength="64"
                 required>
               <div class="invalid-feedback">Mínimo 8 caracteres.</div>
             </div>
@@ -174,7 +176,7 @@
                 <div class="form-check"><input class="form-check-input" type="radio" name="genero" id="gF"
                     value="Femenino"><label class="form-check-label" for="gF">Femenino</label></div>
                 <div class="form-check"><input class="form-check-input" type="radio" name="genero" id="gNB"
-                    value="Otro"><label class="form-check-label" for=id="recibeNotificaciones""gNB">Otro</label></div>
+                    value="Otro"><label class="form-check-label" for="gNB">Otro</label></div>
               </div>
             </div>
 
