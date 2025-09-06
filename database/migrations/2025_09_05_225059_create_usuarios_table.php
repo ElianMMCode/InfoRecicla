@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('usuarios', function (Blueprint $table) {
             $table->char('id', 36)->default('uuid()')->primary();
             $table->string('correo', 160)->unique('uq_usuarios_email');
-            $table->string('password_hash');
+            $table->string('password');
             $table->string('nombre', 50);
             $table->string('apellido', 50);
             $table->enum('rol', ['Ciudadano', 'GestorECA', 'Administrador']);
-            $table->string('tipo_documento', 30)->nullable();
+            $table->string('tipo_documento', ['Cédula de Ciudadanía', 'Cédula de Extranjería', 'Tarjeta de Identidad', 'Pasaporte'])->nullable();
             $table->string('numero_documento', 30)->nullable();
             $table->string('telefono', 20)->nullable();
             $table->boolean('recibe_notificaciones')->default(true);
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('direccion', 200)->nullable();
             $table->string('avatar_url', 300)->nullable();
             $table->string('nombre_usuario', 60)->nullable()->unique('uq_usuarios_username');
-            $table->enum('genero', ['masculino', 'femenino', 'otro'])->nullable();
+            $table->enum('genero', ['Masculino', 'Femenino', 'Otro'])->nullable();
             $table->string('localidad', 60)->nullable();
             $table->enum('estado', ['activo', 'inactivo', 'bloqueado'])->default('activo');
             $table->dateTime('creado')->useCurrent();
