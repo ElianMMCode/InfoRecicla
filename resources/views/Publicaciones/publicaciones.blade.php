@@ -1,64 +1,10 @@
-<!DOCTYPE html>
-<html lang="es">
+<link rel="stylesheet" href="css/Publicaciones/stylePublicaciones.css">
 
-<head>
-    <!-- ========= Meta & Bootstrap ========= -->
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>InfoRecicla — Publicaciones</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <style>
-        /* ====== Estilo suave para cards y truncado ====== */
-        body {
-            background: #f7faf8;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 .75rem 1rem rgba(0, 0, 0, .08);
-        }
-
-        .card {
-            transition: transform .2s ease, box-shadow .2s ease;
-        }
-
-        /* Trunca la descripción a 3 líneas */
-        .clamp-3 {
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        /* Hero carousel altura adaptable */
-        .carousel-item img {
-            object-fit: cover;
-            height: 380px;
-        }
-
-        @media (min-width: 992px) {
-            .carousel-item img {
-                height: 460px;
-            }
-        }
-
-        .section-title {
-            font-weight: 700;
-            color: #198754;
-        }
-    </style>
-</head>
-
-<body>
+<x-app-layout>
 
     <!-- ========= NAVBAR ========= -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
-                <img src="/imagenes/logo.png" alt="Logo" width="90" height="90" class="rounded">
-                <span class="fs-1 fw-semibold">InfoRecicla</span>
-            </a>
+  <x-navbar-layout>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
                 <span class="navbar-toggler-icon"></span>
@@ -73,8 +19,7 @@
                     </li>
                 </ul>
             </div>
-        </div>
-    </nav>
+        </x-navbar-layout>
 
     <!-- ========= HERO: Carrusel de principales noticias ========= -->
     <header class="container my-4">
@@ -382,61 +327,4 @@
 
     </main>
 
-    <!-- ========= Footer ========= -->
-    <footer class="bg-white border-top mt-5">
-        <div class="container py-4 text-center text-muted small">
-            &copy; <span id="year"></span> InfoRecicla — Publicaciones
-        </div>
-    </footer>
-
-    <!-- ========= Scripts ========= -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Año del footer
-        document.getElementById('year').textContent = new Date().getFullYear();
-
-        /* =========================================================
-           GANCHOS PARA TU BD / API
-           (Cuando tengas endpoints, solo reemplaza el contenido
-            de cada sección o inyecta cards dinámicamente)
-           =========================================================
-           Ejemplos de endpoints:
-           - GET /api/news/featured        -> carrusel
-           - GET /api/news?category=...    -> listas por categoría (paginación)
-           - GET /api/news/{id}            -> detalle de noticia
-           - GET /api/categories           -> catálogo de categorías
-        */
-
-        // Ejemplo (comentado) de cómo inyectar cards dinámicamente:
-        /*
-        async function loadCategory(catKey, containerSelector) {
-          const res = await fetch(`/api/news?category=${catKey}&limit=8`);
-          const data = await res.json(); // [{id, title, image, excerpt, url}, ...]
-          const cont = document.querySelector(containerSelector);
-          const row = cont.querySelector('.row');
-          row.innerHTML = data.map(item => `
-            <div class="col-12 col-sm-6 col-lg-3">
-              <article class="card h-100 shadow-sm" data-article-id="${item.id}">
-                <img src="${item.image}" class="card-img-top" alt="${item.title}">
-                <div class="card-body">
-                  <h6 class="card-title">${item.title}</h6>
-                  <p class="card-text clamp-3">${item.excerpt}</p>
-                  <a href="/publicacion.html?id=${item.id}" class="stretched-link">Leer más</a>
-                </div>
-              </article>
-            </div>
-          `).join('');
-        }
-    
-        // Llamadas de ejemplo:
-        // loadCategory('reciclaje', '#cat-reciclaje');
-        // loadCategory('medioambiente', '#cat-medioambiente');
-        // loadCategory('tecnologia', '#cat-tecnologia');
-        // loadCategory('eventos', '#cat-eventos');
-        */
-
-        // Si quieres "skeletons" de carga, puedes agregar placeholders y luego reemplazar.
-    </script>
-</body>
-
-</html>
+</x-app-layout>
