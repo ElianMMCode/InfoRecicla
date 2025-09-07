@@ -112,6 +112,11 @@
               <input type="password" class="form-control" id="password_confirm" name="password_confirm" required>
               <div class="invalid-feedback">Las contraseñas no coinciden.</div>
             </div>
+            <div class="col-md-6">
+              <label for="nombre_usuario" class="form-label">Nombre de usuario</label>
+              <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario" required>
+              <div class="invalid-feedback">Campo obligatorio.</div>
+            </div>
           </div>
 
           <hr class="my-4">
@@ -128,46 +133,44 @@
               <input type="text" class="form-control" id="apellido" name="apellido" required>
               <div class="invalid-feedback">Campo obligatorio.</div>
             </div>
-            <div class="col-md-6">
-              <label for="telefono" class="form-label">Teléfono</label>
-              <input type="tel" class="form-control" id="telefono" name="telefono" inputmode="tel"
-                pattern="^[0-9\s()+-]{7,20}$" required>
-              <div class="invalid-feedback">Ingresa un teléfono válido.</div>
-            </div>
-
-            <div class="col-md-6">
-              <label for="tipoDocumento" class="form-label">Tipo de documento</label>
-              <select id="tipoDocumento" name="tipoDocumento" class="form-select" required>
-                <option value="" selected disabled>Selecciona...</option>
-                <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
-                <option value="Cédula de Extranjería">Cédula de Extranjería</option>
-                <option value="Tarjeta de Identidad">Tarjeta de Identidad</option>
-                <option value="Pasaporte">Pasaporte</option>
-              </select>
-              <div class="invalid-feedback">Selecciona un tipo de documento.</div>
-            </div>
-            <div class="col-md-6">
-              <label for="numeroDocumento" class="form-label">Número de documento</label>
-              <input type="text" class="form-control" id="numeroDocumento" name="numeroDocumento" minlength="5"
-                maxlength="20" required>
-              <div class="invalid-feedback">Ingresa un número válido.</div>
-            </div>
 
             <div class="col-md-6">
               <label for="fechaNacimiento" class="form-label">Fecha de nacimiento</label>
               <input type="date" class="form-control" id="fechaNacimiento" name="fechaNacimiento" required>
               <div class="invalid-feedback">Selecciona una fecha válida.</div>
             </div>
-            <div class="col-md-6">
-              <label for="direccion" class="form-label">Dirección</label>
-              <input type="text" class="form-control" id="direccion" name="direccion" required>
-              <div class="invalid-feedback">Campo obligatorio.</div>
-            </div>
 
             <div class="col-md-6">
               <label for="avatar" class="form-label">Foto de perfil (opcional)</label>
               <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
             </div>
+            <div class="col-md-6">
+              <label for="localidad" class="form-label">Localidad</label>
+                                <select id="localidad" name="localidad" class="form-select" required>
+                                  <option value="" disabled selected>Selecciona localidad...</option>
+                                  <option value="Usaquen">Usaquén</option>
+                                  <option value="Chapinero">Chapinero</option>
+                                  <option value="Santa Fe">Santa Fe</option>
+                                  <option value="San Cristobal">San Cristóbal</option>
+                                  <option value="Usme">Usme</option>
+                                  <option value="Tunjuelito">Tunjuelito</option>
+                                  <option value="Bosa">Bosa</option>
+                                  <option value="Kennedy">Kennedy</option>
+                                  <option value="Fontibon">Fontibón</option>
+                                  <option value="Engativa">Engativá</option>
+                                  <option value="Suba">Suba</option>
+                                  <option value="Barrios Unidos">Barrios Unidos</option>
+                                  <option value="Teusaquillo">Teusaquillo</option>
+                                  <option value="Los Martires">Los Mártires</option>
+                                  <option value="Antonio Narino">Antonio Nariño</option>
+                                  <option value="Puente Aranda">Puente Aranda</option>
+                                  <option value="La Candelaria">La Candelaria</option>
+                                  <option value="Rafael Uribe">Rafael Uribe</option>
+                                  <option value="Ciudad Bolivar">Ciudad Bolívar</option>
+                                  <option value="Sumapaz">Sumapaz</option>
+                                </select>
+                <div class="invalid-feedback">Selecciona una localidad.</div>
+             </div>
             <div class="col-md-6">
               <label class="form-label d-block">Género (opcional)</label>
               <div class="d-flex gap-3">
@@ -179,6 +182,8 @@
                     value="Otro"><label class="form-check-label" for="gNB">Otro</label></div>
               </div>
             </div>
+
+            
 
             <div class="form-check mt-4">
               <input type="hidden" name="recibeNotificaciones" value="0" id="recibeNotificaciones">

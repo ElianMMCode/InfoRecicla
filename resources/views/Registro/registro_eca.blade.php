@@ -36,7 +36,7 @@
     <!-- NAVBAR -->
     <nav class=" navbar navbar-expand-lg navbar-dark bg-success">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{route('inicio')}}">
                 <img src="/imagenes/logo.png" alt="Logo InfoRecicla" width="90" height="90" class="rounded">
                 <span class="fs-1 fw-semibold">InfoRecicla</span>
             </a>
@@ -47,20 +47,20 @@
 
             <div id="nav" class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto align-items-lg-center align-items-center gap-2">
-                    <li class="nav-item"><a class="nav-link" href="/publicaciones">Publicaciones</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/mapa">Mapa ECA</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{route('publicaciones')}}">Publicaciones</a></li>
+                    <li class="nav-item"><a class="nav-link" href={{route('mapa')}}>Mapa ECA</a></li>
 
                     <li class="nav-item dropdown">
                         <a class="btn btn-light text-success fw-semibold px-3 dropdown-toggle" href="#"
                             data-bs-toggle="dropdown" aria-expanded="true">Acceder</a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/login">Iniciar sesión</a></li>
+                            <li><a class="dropdown-item" href="{{route('inicio-sesion')}}">Iniciar sesión</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="/registro-ciudadano">Registrarse (Ciudadano)</a>
+                            <li><a class="dropdown-item" href="{{route('registro', 'ciudadano')}}">Registrarse (Ciudadano)</a>
                             </li>
-                            <li><a class="dropdown-item" href="/registro-eca">Registrar Punto ECA</a></li>
+                            <li><a class="dropdown-item" href="{{route('registro', 'eca')}}">Registrar Punto ECA</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -75,9 +75,11 @@
 
                 <!-- ALERTAS (reservado para tu script futuro) -->
                 <div id="formAlert" class="alert d-none" role="alert"></div>
-
-                <!-- FORMULARIO -->
+               
                 <form method="POST" action="/registro/eca" id="ecaForm" class="needs-validation" novalidate enctype="multipart/form-data">
+                     @csrf
+                <input type="hidden" name="tipo" value="GestorECA">
+                <!-- FORMULARIO -->
                     <!-- ======= 1) Datos de cuenta (users) ======= -->
                     <p class="section-title">Datos de cuenta</p>
                     <input type="hidden" name="account_type" value="eca">
@@ -89,14 +91,14 @@
                             <div class="invalid-feedback">Ingresa un correo válido.</div>
                         </div>
                         <div class="col-md-3">
-                            <label for="contraseña" class="form-label">Contraseña</label>
-                            <input type="contraseña" class="form-control" id="contraseña" name="contraseña" minlength="8"
+                            <label for="password" class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="password" name="password" minlength="8"
                                 maxlength="64" required>
                             <div class="invalid-feedback">Mínimo 8 caracteres.</div>
                         </div>
                         <div class="col-md-3">
-                            <label for="contraseña_confirm" class="form-label">Confirmar</label>
-                            <input type="contraseña" class="form-control" id="contraseña_confirm" name="contraseña_confirm"
+                            <label for="pass_confirmation" class="form-label">Confirmar</label>
+                            <input type="password" class="form-control" id="pass_confirmation" name="password_confirmation"
                                 required>
                             <div class="invalid-feedback">Las contraseñas no coinciden.</div>
                         </div>
@@ -134,21 +136,15 @@
                                 minlength="5" maxlength="20" required>
                             <div class="invalid-feedback">Ingresa un número válido.</div>
                         </div>
-                        <div class="col-md-4">
-                            <label for="telefono" class="form-label">Teléfono del gestor</label>
-                            <input type="tel" class="form-control" id="telefono" name="telefono"
-                                inputmode="tel" pattern="^[0-9\s()+-]{7,20}$" required>
-                            <div class="invalid-feedback">Ingresa un teléfono válido.</div>
-                        </div>
 
-                        <hr class="my-4">
+                       <hr class="my-4">
 
                         <!-- ======= 3) Datos del Punto ECA (eca_points) ======= -->
                         <p class="section-title">Información de la estación</p>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label for="nombrePuntoEca" class="form-label">Nombre del Punto ECA</label>
-                                <input type="text" class="form-control" id="nombrePuntoEca" name="nombrePuntoEca" required>
+                                <label for="nombrePunto" class="form-label">Nombre del Punto ECA</label>
+                                <input type="text" class="form-control" id="nombrePunto" name="nombrePunto" required>
                                 <div class="invalid-feedback">Campo obligatorio.</div>
                             </div>
                             <div class="col-md-3">
@@ -160,22 +156,22 @@
 
                         <div class="row g-3 mt-1">
                             <div class="col-md-6">
-                                <label for="horarioPuntoEca" class="form-label">Horario de atención (opcional)</label>
-                                <input type="text" class="form-control" id="horarioPuntoEca" name="horarioPuntoEca"
+                                <label for="horarioAtencion" class="form-label">Horario de atención (opcional)</label>
+                                <input type="text" class="form-control" id="horarioAtencion" name="horarioAtencion"
                                     placeholder="Lun-Vie 8:00–17:00, Sáb 9:00–13:00">
                             </div>
                         </div>
 
                         <div class="row g-3 mt-1">
                             <div class="col-md-6">
-                                <label for="correoPuntoEca" class="form-label">Correo de contacto del punto</label>
-                                <input type="email" class="form-control" id="correoPuntoEca" name="correoPuntoEca"
+                                <label for="correoPunto" class="form-label">Correo de contacto del punto</label>
+                                <input type="email" class="form-control" id="correoPunto" name="correoPunto"
                                     placeholder="Puede ser distinto al de acceso" required>
                                 <div class="invalid-feedback">Ingresa un correo válido.</div>
                             </div>
                             <div class="col-md-6">
-                                <label for="telefonoPuntoEca" class="form-label">Teléfono de contacto del punto</label>
-                                <input type="tel" class="form-control" id="telefonoPuntoEca" name="telefonoPuntoEca"
+                                <label for="telefonoPunto" class="form-label">Teléfono de contacto del punto</label>
+                                <input type="tel" class="form-control" id="telefonoPunto" name="telefonoPunto"
                                     inputmode="tel" pattern="^[0-9\s()+-]{7,20}$" required>
                                 <div class="invalid-feedback">Ingresa un teléfono válido.</div>
                             </div>
@@ -183,42 +179,42 @@
 
                         <div class="row g-3 mt-1">
                             <div class="col-md-6">
-                                <label for="direccionPuntoEca" class="form-label">Dirección del punto</label>
-                                <input type="text" class="form-control" id="direccionPuntoEca" name="direccionPuntoEca" required>
+                                <label for="direccionPunto" class="form-label">Dirección del punto</label>
+                                <input type="text" class="form-control" id="direccionPunto" name="direccionPunto" required>
                                 <div class="invalid-feedback">Campo obligatorio.</div>
                             </div>
                             <div class="col-md-3">
-                                <label for="ciudadPuntoEca" class="form-label">Ciudad</label>
-                                <select id="ciudadPuntoEca" name="ciudadPuntoEca" class="form-select" required>
+                                <label for="ciudad" class="form-label">Ciudad</label>
+                                <select id="ciudad" name="ciudad" class="form-select" required>
                                     <option value="" disabled selected>Selecciona...</option>
-                                    <option value="1">Bogotá</option>
+                                    <option value="Bogotá">Bogotá</option>
                                 </select>
                                 <div class="invalid-feedback">Selecciona una ciudad.</div>
                             </div>
                             <div class="col-md-3">
-                                <label for="localidadPuntoEca" class="form-label">Localidad</label>
-                                <select id="localidadPuntoEca" name="localidadPuntoEca" class="form-select" required>
+                                <label for="localidadPunto" class="form-label">Localidad</label>
+                                <select id="localidadPunto" name="localidadPunto" class="form-select" required>
                                     <option value="" disabled selected>Selecciona localidad...</option>
-                                    <option value="1">Usaquén</option>
-                                    <option value="2">Chapinero</option>
-                                    <option value="3">Santa Fe</option>
-                                    <option value="4">San Cristóbal</option>
-                                    <option value="5">Usme</option>
-                                    <option value="6">Tunjuelito</option>
-                                    <option value="7">Bosa</option>
-                                    <option value="8">Kennedy</option>
-                                    <option value="9">Fontibón</option>
-                                    <option value="10">Engativá</option>
-                                    <option value="11">Suba</option>
-                                    <option value="12">Barrios Unidos</option>
-                                    <option value="13">Teusaquillo</option>
-                                    <option value="14">Los Mártires</option>
-                                    <option value="15">Antonio Nariño</option>
-                                    <option value="16">Puente Aranda</option>
-                                    <option value="17">La Candelaria</option>
-                                    <option value="18">Rafael Uribe</option>
-                                    <option value="19">Ciudad Bolívar</option>
-                                    <option value="20">Sumapaz</option>
+                                    <option value="Usaquén">Usaquén</option>
+                                    <option value="Chapinero">Chapinero</option>
+                                    <option value="Santa Fe">Santa Fe</option>
+                                    <option value="San Cristóbal">San Cristóbal</option>
+                                    <option value="Usme">Usme</option>
+                                    <option value="Tunjuelito">Tunjuelito</option>
+                                    <option value="Bosa">Bosa</option>
+                                    <option value="Kennedy">Kennedy</option>
+                                    <option value="Fontibón">Fontibón</option>
+                                    <option value="Engativá">Engativá</option>
+                                    <option value="Suba">Suba</option>
+                                    <option value="Barrios Unidos">Barrios Unidos</option>
+                                    <option value="Teusaquillo">Teusaquillo</option>
+                                    <option value="Los Mártires">Los Mártires</option>
+                                    <option value="Antonio Nariño">Antonio Nariño</option>
+                                    <option value="Puente Aranda">Puente Aranda</option>
+                                    <option value="La Candelaria">La Candelaria</option>
+                                    <option value="Rafael Uribe">Rafael Uribe</option>
+                                    <option value="Ciudad Bolívar">Ciudad Bolívar</option>
+                                    <option value="Sumapaz">Sumapaz</option>
                                 </select>
                                 <div class="invalid-feedback">Selecciona una localidad.</div>
                             </div>
@@ -230,34 +226,40 @@
                             <div id="locationDisplay" class="form-text mt-2">Presiona para otorgar permiso de ubicación.
                             </div>
                             <!-- Campos lat/lng (para tu script de geoloc) -->
-                            <input type="hidden" id="latitudPuntoEca" name="latitudPuntoEca">
-                            <input type="hidden" id="longitudPuntoEca" name="longitudPuntoEca">
+                            <input type="hidden" id="latitud" name="latitud">
+                            <input type="hidden" id="longitud" name="longitud">
                         </div>
 
                         <div class="row g-3 mt-1">
+                            
                             <div class="col-md-6">
-                                <label for="sitioWebPuntoEca" class="form-label">Sitio web (opcional)</label>
-                                <input type="url" class="form-control" id="sitioWebPuntoEca" name="sitioWebPuntoEca"
+                                <label for="logo" class="form-label">Logo del punto (opcional)</label>
+                                <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="foto" class="form-label">Foto del punto (opcional)</label>
+                                <input type="file" class="form-control" id="foto" name="foto" accept="image/*">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="sitioWeb" class="form-label">Sitio web (opcional)</label>
+                                <input type="url" class="form-control" id="sitioWeb" name="sitioWeb"
                                     placeholder="https://">
                             </div>
-                            <div class="col-md-6">
-                                <label for="logoPuntoEca" class="form-label">Logo del punto (opcional)</label>
-                                <input type="file" class="form-control" id="logoPuntoEca" name="logoPuntoEca" accept="image/*">
-                            </div>
+
                         </div>
 
                         <div class="form-check mt-4">
-                            <input class="form-check-input" type="checkbox" value="1" id="mostrarMapaPuntoEca"
-                                name="mostrarMapaPuntoEca" checked>
-                            <label class="form-check-label" for="mostrarMapaPuntoEca">
+                            <input class="form-check-input" type="checkbox" value="1" id="mostrarMapa"
+                                name="mostrarMapa" required>
+                            <label class="form-check-label" for="mostrarMapa">
                                 Mostrar el punto en el mapa público cuando sea aprobado.
                             </label>
                         </div>
 
                         <div class="form-check mt-2">
-                            <input class="form-check-input" type="checkbox" value="1" id="recibe_notificaciones"
-                                name="recibe_notificaciones" checked>
-                            <label class="form-check-label" for="recibe_notificaciones">
+                            <input class="form-check-input" type="checkbox" value="1" id="recibeNotificaciones"
+                                name="recibeNotificaciones" required>
+                            <label class="form-check-label" for="recibeNotificaciones">
                                 Deseo recibir notificaciones (aprobaciones, comentarios en publicaciones del punto,
                                 etc.).
                             </label>
@@ -276,7 +278,7 @@
                         </div>
 
                         <p class="text-center mt-3 mb-0">
-                            <small>¿Ya tienes cuenta? <a href="/login">Inicia sesión</a></small>
+                            <small>¿Ya tienes cuenta? <a href="{{route('inicio-sesion')}}">Inicia sesión</a></small>
                         </p>
                 </form>
             </div>
