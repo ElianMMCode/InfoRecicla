@@ -324,5 +324,6 @@
         </section>
 
     </main>
+    <script src="js/Publicaciones/publicaciones.js"></script>
 
 </x-app-layout>

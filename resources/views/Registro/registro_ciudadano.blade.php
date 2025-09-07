@@ -11,10 +11,12 @@
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <div id="nav" class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto align-items-lg-center align-items-center gap-2">
-          <li class="nav-item"><a class="nav-link" href="/publicaciones">Publicaciones</a></li>
-          <li class="nav-item"><a class="nav-link" href="/mapa">Mapa ECA</a></li>
+  </x-navbar-layout>
+
+  <div id="nav" class="collapse navbar-collapse">
+    <ul class="navbar-nav ms-auto align-items-lg-center align-items-center gap-2">
+      <li class="nav-item"><a class="nav-link" href="/publicaciones">Publicaciones</a></li>
+      <li class="nav-item"><a class="nav-link" href="/mapa">Mapa ECA</a></li>
 
           <li class="nav-item dropdown">
             <a class="btn btn-light text-success fw-semibold px-3 dropdown-toggle" href="#" data-bs-toggle="dropdown"
