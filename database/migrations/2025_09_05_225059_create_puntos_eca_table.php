@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('nombre', 150);
             $table->string('descripcion', 500)->nullable();
             $table->string('direccion', 200)->nullable();
+            $table->string('telefonoPunto', 20)->nullable();
+            $table->string('correoPunto', 120)->nullable();
             $table->string('ciudad', 60)->nullable();
             $table->string('localidad', 60)->nullable();
             $table->decimal('latitud', 10, 6)->nullable();

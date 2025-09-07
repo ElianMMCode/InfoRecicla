@@ -18,12 +18,11 @@ return new class extends Migration
             $table->string('nombre', 50);
             $table->string('apellido', 50);
             $table->enum('rol', ['Ciudadano', 'GestorECA', 'Administrador']);
-            $table->string('tipo_documento', ['Cédula de Ciudadanía', 'Cédula de Extranjería', 'Tarjeta de Identidad', 'Pasaporte'])->nullable();
+            $table->enum('tipo_documento', ['Cédula de Ciudadanía', 'Cédula de Extranjería', 'Tarjeta de Identidad', 'Pasaporte']);
             $table->string('numero_documento', 30)->nullable();
             $table->string('telefono', 20)->nullable();
             $table->boolean('recibe_notificaciones')->default(true);
             $table->date('fecha_nacimiento')->nullable();
-            $table->string('direccion', 200)->nullable();
             $table->string('avatar_url', 300)->nullable();
             $table->string('nombre_usuario', 60)->nullable()->unique('uq_usuarios_username');
             $table->enum('genero', ['Masculino', 'Femenino', 'Otro'])->nullable();
@@ -31,7 +30,6 @@ return new class extends Migration
             $table->enum('estado', ['activo', 'inactivo', 'bloqueado'])->default('activo');
             $table->dateTime('creado')->useCurrent();
             $table->dateTime('actualizado')->useCurrentOnUpdate()->useCurrent();
-
             $table->index(['tipo_documento', 'numero_documento'], 'idx_usuarios_doc');
         });
     }
