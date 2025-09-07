@@ -2,7 +2,7 @@
     <link rel="stylesheet" href="css/Ciudadano/styleCiudadano.css">
 
 
-<body>
+
     <!-- ===== NAVBAR ===== -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-success">
         <div class="container">
@@ -337,8 +337,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // ========= Utilidad: toast =========
-        const toast = new bootstrap.Toast(document.getElementById('toastOK'), { delay: 1800 });
-        const showToast = (msg) => { document.getElementById('toastText').textContent = msg; toast.show(); };
+        const toast = new bootstrap.Toast(document.getElementById('toastOK'), {
+            delay: 1800
+        });
+        const showToast = (msg) => {
+            document.getElementById('toastText').textContent = msg;
+            toast.show();
+        };
 
         // ========= Modal: guardar perfil (simulado) =========
         document.getElementById('editarPerfilForm').addEventListener('submit', (e) => {
@@ -380,5 +385,5 @@
             // TODO: fetch publicaciones/guardados/comentarios y renderizar
         })();
     </script>
-</body>
+
 </x-app-layout>
