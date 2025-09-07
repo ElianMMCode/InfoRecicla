@@ -9,7 +9,6 @@
       aria-expanded="false" aria-label="Alternar navegación">
       <span class="navbar-toggler-icon"></span>
     </button>
-
   </x-navbar-layout>
 
   <div id="nav" class="collapse navbar-collapse">
