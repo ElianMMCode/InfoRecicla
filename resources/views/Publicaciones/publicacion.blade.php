@@ -278,6 +278,7 @@
             </aside>
         </div>
     </main>
+    <script src="/js/Publicaciones/publicacion.js"></script>
 
 
 </x-app-layout>

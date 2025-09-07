@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InicioController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CiudadanoController;
 use App\Http\Controllers\InicioSesionController;
 use App\Http\Controllers\PuntoEcaController;

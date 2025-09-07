@@ -1,64 +1,38 @@
-<!DOCTYPE html>
-<html lang="es">
+<x-app-layout>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>InfoRecicla — Registro Ciudadano</title>
-  <!-- Bootstrap -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    .card {
-      max-width: 720px;
-      margin: 3rem auto;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 .75rem 1rem rgba(0, 0, 0, .08);
-    }
-
-    .card {
-      transition: transform .2s ease, box-shadow .2s ease;
-    }
-  </style>
-</head>
-
-<body class="bg-success">
+  <link rel="stylesheet" href="css/Registro/styleRegistro.css">
 
   <!-- NAVBAR -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-success">
-    <div class="container">
-      <a class="navbar-brand d-flex align-items-center gap-2" href="/">
-        <img src="/imagenes/logo.png" alt="Logo InfoRecicla" width="90" height="90" class="rounded">
-        <span class="fs-1 fw-semibold">InfoRecicla</span>
-      </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav"
-        aria-expanded="false" aria-label="Alternar navegación">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+  <x-navbar-layout>
 
-      <div id="nav" class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto align-items-lg-center align-items-center gap-2">
-          <li class="nav-item"><a class="nav-link" href="/publicaciones">Publicaciones</a></li>
-          <li class="nav-item"><a class="nav-link" href="/mapa">Mapa ECA</a></li>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav"
+      aria-expanded="false" aria-label="Alternar navegación">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-          <li class="nav-item dropdown">
-            <a class="btn btn-light text-success fw-semibold px-3 dropdown-toggle" href="#" data-bs-toggle="dropdown"
-              aria-expanded="true">Acceder</a>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="/login">Iniciar sesión</a></li>
-              <li>
-                <hr class="dropdown-divider">
-              </li>
-              <li><a class="dropdown-item" href="/registro/ciudadano">Registrarse (Ciudadano)</a>
-              </li>
-              <li><a class="dropdown-item" href="/registro/eca">Registrar Punto ECA</a></li>
-            </ul>
+  </x-navbar-layout>
+
+  <div id="nav" class="collapse navbar-collapse">
+    <ul class="navbar-nav ms-auto align-items-lg-center align-items-center gap-2">
+      <li class="nav-item"><a class="nav-link" href="/publicaciones">Publicaciones</a></li>
+      <li class="nav-item"><a class="nav-link" href="/mapa">Mapa ECA</a></li>
+
+      <li class="nav-item dropdown">
+        <a class="btn btn-light text-success fw-semibold px-3 dropdown-toggle" href="#" data-bs-toggle="dropdown"
+          aria-expanded="true">Acceder</a>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="/login">Iniciar sesión</a></li>
+          <li>
+            <hr class="dropdown-divider">
           </li>
+          <li><a class="dropdown-item" href="/registro/ciudadano">Registrarse (Ciudadano)</a>
+          </li>
+          <li><a class="dropdown-item" href="/registro/eca">Registrar Punto ECA</a></li>
         </ul>
-      </div>
-    </div>
+      </li>
+    </ul>
+  </div>
+  </div>
   </nav>
 
   <div id="mainNav" class="collapse navbar-collapse">
@@ -220,20 +194,6 @@
     </div>
   </main>
 
-  <footer class="bg-light border-top py-4">
-    <div class="container">
-      <ul class="nav justify-content-center gap-3">
-        <li class="nav-item"><a class="nav-link text-muted" href="#">Acerca de</a></li>
-        <li class="nav-item"><a class="nav-link text-muted" href="#">Soporte</a></li>
-        <li class="nav-item"><a class="nav-link text-muted" href="#">Contacto</a></li>
-      </ul>
-      <p class="text-center text-muted mb-0 mt-2 small">&copy; <span id="year"></span> InfoRecicla</p>
-    </div>
-  </footer>
-
-  <!-- Bootstrap Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/Registro/ciudadano.js"></script>
-</body>
 
-</html>
+</x-app-layout>
