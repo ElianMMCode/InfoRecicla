@@ -24,7 +24,7 @@ class UsuarioController extends Controller
             'recibeNotificaciones' => ['nullable'], // checkbox
             'fechaNacimiento'      => ['nullable', 'date'],
             'avatar'               => ['nullable', 'url'],
-            'nombre_usuario'               => ['nullable', 'string', 'max:60'],
+            'nombre_usuario'       => ['nullable', 'string', 'max:60'],
             'genero'               => ['nullable', 'string', 'max:20'],
             'localidad'            => ['nullable', 'string', 'max:60'],
         ];
@@ -73,7 +73,7 @@ class UsuarioController extends Controller
             'telefonoPunto'        => ['required', 'string', 'max:100'],
             'correoPunto'          => ['required', 'string', 'max:100'],
             'ciudad'               => ['required', 'string', 'max:100'],
-            'localidadPunto'            => ['required', 'string', 'max:100'],
+            'localidadPunto'       => ['required', 'string', 'max:100'],
             'latitud'              => ['nullable', 'string', 'max:100'],
             'longitud'             => ['nullable', 'string', 'max:100'],
             'nit'                  => ['nullable', 'string', 'max:100'],
