@@ -1,15 +1,13 @@
-* {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-}
+  .card {
+      max-width: 720px;
+      margin: 3rem auto;
+  }
 
-body {
-	background-image: url('../imagen/paisaje.jfif');
-	background-size: cover;             /* Que cubra toda la pantalla */
-    background-repeat: no-repeat;       /* Que no se repita */
-    background-position: center center; /* Centrada */
-    height: 165vh;                      /* Altura total de la ventana */
-    margin: 0; 
-}
+  .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 .75rem 1rem rgba(0, 0, 0, .08);
+  }
 
+  .card {
+      transition: transform .2s ease, box-shadow .2s ease;
+  }
