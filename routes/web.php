@@ -8,14 +8,17 @@ use App\Http\Controllers\PuntoEcaController;
 use App\Http\Controllers\MapaController;
 use App\Http\Controllers\PublicacionController;
 use App\Http\Controllers\UsuarioController;
+use App\Models\Usuario;
 
+Route::get('/', InicioController::class)->name('inicio');
+Route::get('/registro/{tipo?}', [UsuarioController::class, 'view_registro'])->name('registro');
+Route::get('/inicio-sesion', [InicioSesionController::class, 'view_InicioSesion'])->name('inicio-sesion');
+Route::get('/ciudadano', [CiudadanoController::class, 'view_ciudadano'])->name('ciudadano');
+Route::get('/punto-eca', [PuntoEcaController::class, 'view_punto_eca'])->name('punto-eca');
+Route::get('/mapa', [MapaController::class, 'view_mapa'])->name('mapa');
+Route::get('/publicaciones', [PublicacionController::class, 'view_publicaciones'])->name('publicaciones');
+Route::get('/publicacion', [PublicacionController::class, 'view_publicacion'])->name('publicacion');
 
-Route::get('/', InicioController::class);
-Route::get('/registro/{tipo?}', [UsuarioController::class, 'view_registro']);
-Route::get('/inicio-sesion', [InicioSesionController::class, 'view_InicioSesion']);
-Route::get('/ciudadano', [CiudadanoController::class, 'view_ciudadano']);
-Route::get('/punto-eca', [PuntoEcaController::class, 'view_punto_eca']);
-Route::get('/mapa', [MapaController::class, 'view_mapa']);
-Route::get('/publicaciones', [PublicacionController::class, 'view_publicaciones']);
-Route::get('/publicacion', [PublicacionController::class, 'view_publicacion']);
-Route::get('/usuario', [UsuarioController::class, 'view_registro']);
+//Rutas POST
+Route::post('/registro/ciudadano', [UsuarioController::class, 'store'])->name('registro.ciudadano')->name('registro.ciudadano');
+Route::post('/registro/eca', [UsuarioController::class, 'storeEca'])->name('registro.eca')->name('registro.eca');
