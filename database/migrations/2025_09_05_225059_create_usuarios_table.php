@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('nombre', 50);
             $table->string('apellido', 50);
             $table->enum('rol', ['Ciudadano', 'GestorECA', 'Administrador']);
-            $table->string('tipo_documento', ['Cédula de Ciudadanía', 'Cédula de Extranjería', 'Tarjeta de Identidad', 'Pasaporte'])->nullable();
+            $table->enum('tipo_documento', ['Cédula de Ciudadanía', 'Cédula de Extranjería', 'Tarjeta de Identidad', 'Pasaporte']);
             $table->string('numero_documento', 30)->nullable();
             $table->string('telefono', 20)->nullable();
             $table->boolean('recibe_notificaciones')->default(true);
