@@ -6,13 +6,10 @@
     <!-- NAVBAR -->
     <x-navbar-layout>
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav"
-        aria-expanded="false" aria-label="Alternar navegación">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-  </x-navbar-layout>
-
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav"
+      aria-expanded="false" aria-label="Alternar navegación">
+      <span class="navbar-toggler-icon"></span>
+    </button>
   </x-navbar-layout>
 
   <div id="nav" class="collapse navbar-collapse">
