@@ -1,30 +1,25 @@
 <x-app-layout>
+
     <link rel="stylesheet" href="css/Ciudadano/styleCiudadano.css">
 
-
-
     <!-- ===== NAVBAR ===== -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
-                <img src="/imagenes/logo.png" alt="Logo InfoRecicla" width="90" height="90" class="rounded">
-                <span class="fs-1 fw-semibold">InfoRecicla</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div id="nav" class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
-                    <!-- Ajusta rutas según tu proyecto -->
-                    <li class="nav-item"><a class="nav-link" href="/publicaciones">Publicaciones</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/mapa">Mapa ECA</a></li>
-                    <li class="nav-item">
-                        <a class="btn btn-light text-success" href="/">Salir</a>
-                    </li>
-                </ul>
-            </div>
+    <x-navbar-layout>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div id="nav" class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+                <!-- Ajusta rutas según tu proyecto -->
+                <li class="nav-item"><a class="nav-link" href="/publicaciones">Publicaciones</a></li>
+                <li class="nav-item"><a class="nav-link" href="/mapa">Mapa ECA</a></li>
+                <li class="nav-item">
+                    <a class="btn btn-light text-success" href="/">Salir</a>
+                </li>
+            </ul>
         </div>
-    </nav>
+
+    </x-navbar-layout>
 
     <!-- ===== COVER ===== -->
     <div class="cover"></div>
@@ -335,55 +330,6 @@
 
     <!-- ===== Bootstrap + JS mínimo ===== -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // ========= Utilidad: toast =========
-        const toast = new bootstrap.Toast(document.getElementById('toastOK'), {
-            delay: 1800
-        });
-        const showToast = (msg) => {
-            document.getElementById('toastText').textContent = msg;
-            toast.show();
-        };
 
-        // ========= Modal: guardar perfil (simulado) =========
-        document.getElementById('editarPerfilForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            // (A futuro) Validaciones + envío a tu API (PATCH /api/citizens/profile)
-            const nombre = document.getElementById('editNombre').value.trim();
-            const correo = document.getElementById('editCorreo').value.trim();
-            const loc = document.getElementById('editLocalidad').value.trim();
-            // const avatarFile = document.getElementById('editAvatar').files[0];
-
-            // Reflejar en encabezado (optimistic UI)
-            document.getElementById('userName').textContent = nombre || '—';
-            document.getElementById('userEmail').textContent = correo || '—';
-            document.getElementById('userLocalidad').textContent = loc ? (loc + ', Bogotá') : '—';
-
-            // Cerrar modal y toast
-            bootstrap.Modal.getInstance(document.getElementById('editarPerfilModal')).hide();
-            showToast('Perfil actualizado');
-        });
-
-        // ========= Ajustes: guardar preferencias (simulado) =========
-        document.getElementById('btnGuardarAjustes').addEventListener('click', () => {
-            const prefs = {
-                receive_notifications: document.getElementById('prefNoti').checked ? 1 : 0,
-                display_name: document.getElementById('displayName').value.trim()
-            };
-            // (A futuro) POST/PATCH /api/citizens/preferences
-            console.log('Preferencias:', prefs);
-            showToast('Preferencias guardadas');
-        });
-
-        // ========= Carga inicial simulada desde "BD" =========
-        // Aquí irían tus fetch reales para rellenar todo con datos del usuario
-        (function seedFromDB() {
-            // Ejemplo: marcar preferencia desde perfil
-            document.getElementById('prefNoti').checked = true;
-            document.getElementById('displayName').value = 'JuanR';
-            // TODO: fetch publicaciones/guardados/comentarios y renderizar
-        })();
-    </script>
 
 </x-app-layout>

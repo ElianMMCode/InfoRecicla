@@ -1,29 +1,31 @@
 <x-app-layout>
 
-<body>
+    <link rel="stylesheet" href="{{ asset('/css/Inicio/styleInicio.css') }}">
 
     <!-- NAVBAR -->
-<x-navbar-layout>
-            <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
-                <div class="nav-item dropdown">
-                    <a class="btn btn-light text-success fw-semibold px-3 dropdown-toggle" href="#"
-                        data-bs-toggle="dropdown" aria-expanded="true">Acceder</a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">
-                                Iniciar sesión
-                            </a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item" href="/registro/ciudadano">Registrarse (Ciudadano)</a>
-                        </li>
-                        <li><a class="dropdown-item" href="/registro/eca">Registrar Punto ECA</a></li>
-                    </ul>
-                </div>
-            </ul>
-        </x-navbar-layout>
+    <x-navbar-layout>
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+            <div class="nav-item dropdown">
+                <a class="btn btn-light text-success fw-semibold px-3 dropdown-toggle" href="#"
+                    data-bs-toggle="dropdown" aria-expanded="true">Acceder</a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">
+                            Iniciar sesión
+                        </a>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="/registro/ciudadano">Registrarse (Ciudadano)</a>
+                    </li>
+                    <li><a class="dropdown-item" href="/registro/eca">Registrar Punto ECA</a></li>
+                </ul>
+            </div>
+        </ul>
+
+    </x-navbar-layout>
+
     <main>
 
         <!-- HERO -->
@@ -141,7 +143,7 @@
 
     </main>
 
-    
+
 
     <!-- MODAL: Iniciar Sesión -->
     <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">

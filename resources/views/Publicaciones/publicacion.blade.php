@@ -2,25 +2,19 @@
 
     <link rel="stylesheet" href="/css/Publicaciones/stylePublicacion.css">
     <!-- ========= NAVBAR ========= -->
-    <nav class=" navbar navbar-expand-lg navbar-dark bg-success">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
-                <img src="/imagenes/logo.png" alt="Logo" width="90" height="90" class="rounded">
-                <span class="fs-1 fw-semibold">InfoRecicla</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div id="nav" class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
-                    <li class="nav-item"><a class="nav-link" href="/publicaciones">Listado</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/mapa">Puntos ECA</a></li>
-                    <li class="nav-item"><a class="btn btn-light text-success" href="/">Inicio</a>
-                    </li>
-                </ul>
-            </div>
+    <x-navbar-layout>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div id="nav" class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+                <li class="nav-item"><a class="nav-link" href="/publicaciones">Listado</a></li>
+                <li class="nav-item"><a class="nav-link" href="/mapa">Puntos ECA</a></li>
+                <li class="nav-item"><a class="btn btn-light text-success" href="/">Inicio</a>
+                </li>
+            </ul>
         </div>
-    </nav>
+    </x-navbar-layout>
 
     <main class="container my-4">
         <div class="row g-4">

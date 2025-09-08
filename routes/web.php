@@ -12,6 +12,7 @@ use App\Http\Controllers\UsuarioController;
 use App\Models\Usuario;
 
 Route::get('/', InicioController::class)->name('inicio');
+Route::get('/admin', [AdminController::class, 'vie_admin'])->name('admin');
 Route::get('/registro/{tipo?}', [UsuarioController::class, 'view_registro'])->name('registro');
 Route::get('/inicio-sesion', [InicioSesionController::class, 'view_InicioSesion'])->name('inicio-sesion');
 Route::get('/ciudadano', [CiudadanoController::class, 'view_ciudadano'])->name('ciudadano');

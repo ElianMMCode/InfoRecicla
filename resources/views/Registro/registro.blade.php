@@ -1,36 +1,32 @@
 <x-app-layout>
 
-<body>
+    <link rel="stylesheet" href="{{ asset('/css/Registro/styleRegistro.css') }}">
 
     <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
-                <img src="/imagenes/logo.png" alt="Logo InfoRecicla" width="90" height="90" class="rounded">
-                <span class="fs-1 fw-semibold">InfoRecicla</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"
-                aria-controls="nav" aria-expanded="false" aria-label="Alternar navegación">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+    <x-navbar-layout>
 
-            <div id="nav" class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
-                    <li class="nav-item"><a class="nav-link" href="/publicaciones">Publicaciones</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/mapa">Mapa ECA</a></li>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"
+            aria-controls="nav" aria-expanded="false" aria-label="Alternar navegación">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-                    <div id="mainNav" class="collapse navbar-collapse">
-                        <ul class="navbar-nav ms-auto align-items-lg-center">
-                            <li class="nav-item">
-                                <a class="btn btn-light text-success fw-semibold px-3" href="/login">Inciar sesión
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </ul>
-            </div>
+        <div id="nav" class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+                <li class="nav-item"><a class="nav-link" href="/publicaciones">Publicaciones</a></li>
+                <li class="nav-item"><a class="nav-link" href="/mapa">Mapa ECA</a></li>
+
+                <div id="mainNav" class="collapse navbar-collapse">
+                    <ul class="navbar-nav ms-auto align-items-lg-center">
+                        <li class="nav-item">
+                            <a class="btn btn-light text-success fw-semibold px-3" href="/login">Inciar sesión
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </ul>
         </div>
-    </nav>
+    </x-navbar-layout>
+
 
     <main>
         <!-- Encabezado -->
@@ -106,6 +102,6 @@
         </section>
     </main>
 
-    
 
-    </x-app-layout>
+
+</x-app-layout>
