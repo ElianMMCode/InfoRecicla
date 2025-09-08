@@ -15,7 +15,6 @@ return new class extends Migration
             $table->char('id', 36)->default('uuid()')->primary();
             $table->string('correo', 160)->unique('uq_usuarios_email');
             $table->string('password');
-            $table->string('password');
             $table->string('nombre', 50);
             $table->string('apellido', 50);
             $table->enum('rol', ['Ciudadano', 'GestorECA', 'Administrador']);
@@ -26,7 +25,6 @@ return new class extends Migration
             $table->date('fecha_nacimiento')->nullable();
             $table->string('avatar_url', 300)->nullable();
             $table->string('nombre_usuario', 60)->nullable()->unique('uq_usuarios_username');
-            $table->enum('genero', ['Masculino', 'Femenino', 'Otro'])->nullable();
             $table->enum('genero', ['Masculino', 'Femenino', 'Otro'])->nullable();
             $table->string('localidad', 60)->nullable();
             $table->enum('estado', ['activo', 'inactivo', 'bloqueado'])->default('activo');
