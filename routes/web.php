@@ -18,6 +18,11 @@ Route::get('/punto-eca/{seccion?}', [PuntoEcaController::class, 'view_punto_eca'
     ->where('seccion', 'resumen|perfil|materiales|historial|calendario|centros|conversaciones|configuracion')
     ->name('punto-eca.seccion');
 
+
+Route::get('/punto-eca/{seccion?}', [PuntoEcaController::class, 'view_punto_eca'])
+    ->where('seccion', 'resumen|perfil|materiales|historial|calendario|centros|conversaciones|configuracion')
+    ->name('punto-eca.seccion');
+
 Route::get('/mapa', [MapaController::class, 'view_mapa'])->name('mapa');
 Route::get('/publicaciones', [PublicacionController::class, 'view_publicaciones'])->name('publicaciones');
 Route::get('/publicacion', [PublicacionController::class, 'view_publicacion'])->name('publicacion');
