@@ -8,6 +8,7 @@ class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
+     Paginator::useBootstrapFive();
      */
     public function register(): void
     {
