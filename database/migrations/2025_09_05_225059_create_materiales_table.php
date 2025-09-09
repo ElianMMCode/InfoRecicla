@@ -15,13 +15,9 @@ return new class extends Migration
             $table->char('id', 36)->default('uuid()')->primary();
             $table->string('nombre', 120)->unique('uq_mat_nombre');
             $table->string('descripcion', 400)->nullable();
-            $table->enum('unidad_medida', ['kg', 'unidad', 'l', 'm3'])->default('kg');
             $table->char('tipo_id', 36)->nullable()->index('fk_mat_tipo');
             $table->char('categoria_id', 36)->nullable()->index('fk_mat_cat');
             $table->string('imagen_url', 300)->nullable();
-            $table->decimal('precio_compra', 12)->nullable();
-            $table->decimal('precio_venta', 12)->nullable();
-            $table->boolean('activo')->default(true);
         });
     }
 

@@ -2,6 +2,8 @@
 
 return [
 
+    'default_punto_eca_id' => env('DEFAULT_PUNTO_ECA_ID'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Name

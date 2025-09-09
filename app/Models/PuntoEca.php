@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PuntoEca extends Model
 {
@@ -44,4 +44,8 @@ class PuntoEca extends Model
         'creado'      => 'datetime',
         'actualizado' => 'datetime',
     ];
+    public function inventarios()
+    {
+        return $this->hasMany(Inventario::class, 'punto_eca_id');
+    }
 }
