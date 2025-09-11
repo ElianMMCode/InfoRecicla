@@ -62,7 +62,7 @@
                                     <li>Recibe notificaciones relevantes.</li>
                                 </ul>
                                 <div class="mt-auto">
-                                    <a href="/registro-ciudadano" class="btn btn-success w-100">Registrarme como
+                                    <a href="{{route('registro', 'ciudadano')}}" class="btn btn-success w-100">Registrarme como
                                         Ciudadano</a>
                                 </div>
                             </div>
@@ -85,7 +85,7 @@
                                     <li>Flujo de aprobación por administrador.</li>
                                 </ul>
                                 <div class="mt-auto">
-                                    <a href="/registro-eca" class="btn btn-outline-success w-100">Registrar Punto
+                                    <a href="{{route('registro', 'eca')}}" class="btn btn-outline-success w-100">Registrar Punto
                                         ECA</a>
                                 </div>
                             </div>
@@ -98,7 +98,7 @@
                 <div class="row mt-4">
                     <div class="col-12">
                         <div class="alert alert-info mb-0" role="alert">
-                            ¿Ya tienes cuenta? <a href="/login" class="alert-link">Inicia sesión aquí</a>.
+                            ¿Ya tienes cuenta? <a href="{{route('inicio-sesion')}}" class="alert-link">Inicia sesión aquí</a>.
                         </div>
                     </div>
                 </div>

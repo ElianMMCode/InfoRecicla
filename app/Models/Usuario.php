@@ -2,47 +2,59 @@
 
 namespace App\Models;
 
+use Illuminate\Foundation\Auth\User as Authenticatable; // <-- IMPORTANTE
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Hash;
 
-class Usuario extends Model
+class Usuario extends Authenticatable   // <-- EXTENDER Authenticatable
 {
-    //
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $table = 'usuarios';
+
     protected $primaryKey = 'id';
-    public $incrementing = false;   // UUID en char(36)
+    public $incrementing = false;      // UUID char(36)
     protected $keyType = 'string';
-    public $timestamps = false;     // usamos creado/actualizado
+
+    // Timestamps personalizados
+    const CREATED_AT = 'creado';
+    const UPDATED_AT = 'actualizado';
 
     protected $fillable = [
         'id',
-        'rol',
         'correo',
-        'password',              // <- tu migración actual usa 'password'
+        'password',
         'nombre',
         'apellido',
+        'rol',
+        'tipo_documento',
+        'numero_documento',
         'telefono',
         'recibe_notificaciones',
         'fecha_nacimiento',
         'avatar_url',
         'nombre_usuario',
         'genero',
-        'localidad',
-        'tipo_documento',
-        'numero_documento',
         'estado',
-        'creado',
-        'actualizado',
+        'remember_token', // si lo agregaste
     ];
 
-    protected $hidden = ['password'];
+    protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
         'recibe_notificaciones' => 'boolean',
         'fecha_nacimiento'      => 'date',
         'creado'                => 'datetime',
         'actualizado'           => 'datetime',
+        // Si quieres hash automático al asignar password en claro (Laravel 10+ podrías usar 'password'=>'hashed')
     ];
+
+    // Mutator para hashear si guardas en claro
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = Hash::needsRehash($value)
+            ? Hash::make($value)
+            : $value;
+    }
 }

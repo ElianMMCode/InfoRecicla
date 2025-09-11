@@ -65,6 +65,8 @@ return [
     | will be used by the PHP date and date-time functions. The timezone
     | is set to "UTC" by default as it is suitable for most use cases.
     |
+    se laravel\sanctum\hasapitokens;
+
     */
 
     'timezone' => 'UTC',
@@ -124,5 +126,8 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+
+
+
 
 ];
