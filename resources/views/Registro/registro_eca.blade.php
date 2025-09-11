@@ -39,36 +39,45 @@
                 <div class="card-body">
                     <h1 class="h3 text-center mb-4">Registrar Punto ECA</h1>
 
-                    <!-- ALERTAS (reservado para tu script futuro) -->
-                    <div id="formAlert" class="alert d-none" role="alert"></div>
-
-                    <form method="POST" action="/registro/eca" id="ecaForm" class="needs-validation" novalidate enctype="multipart/form-data">
-                        @csrf
-                        <input type="hidden" name="tipo" value="GestorECA">
-                        <!-- FORMULARIO -->
-                        <!-- ======= 1) Datos de cuenta (users) ======= -->
-                        <p class="section-title">Datos de cuenta</p>
-                        <input type="hidden" name="account_type" value="eca">
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label for="correo" class="form-label">Correo electrónico (acceso)</label>
-                                <input type="email" class="form-control" id="correo" name="correo" autocomplete="email"
-                                    required>
-                                <div class="invalid-feedback">Ingresa un correo válido.</div>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="password" class="form-label">Contraseña</label>
-                                <input type="password" class="form-control" id="password" name="password" minlength="8"
-                                    maxlength="64" required>
-                                <div class="invalid-feedback">Mínimo 8 caracteres.</div>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="pass_confirmation" class="form-label">Confirmar</label>
-                                <input type="password" class="form-control" id="pass_confirmation" name="password_confirmation"
-                                    required>
-                                <div class="invalid-feedback">Las contraseñas no coinciden.</div>
-                            </div>
+                <!-- ALERTAS (reservado para tu script futuro) -->
+                <div id="formAlert" class="alert d-none" role="alert"></div>
+               
+                <form method="POST" action="{{ route('registro.eca') }}" id="ecaForm" class="needs-validation" novalidate enctype="multipart/form-data">
+                     @csrf
+                <input type="hidden" name="tipo" value="GestorECA">
+                <!-- FORMULARIO -->
+                    <!-- ======= 1) Datos de cuenta (users) ======= -->
+                    <p class="section-title">Datos de cuenta</p>
+                    <input type="hidden" name="account_type" value="eca">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="correo" class="form-label">Correo electrónico (acceso)</label>
+                            <input type="email" class="form-control" id="correo" name="correo" autocomplete="email"
+                                required>
+                            <div class="invalid-feedback">Ingresa un correo válido.</div>
                         </div>
+                        <div class="col-md-3">
+                            <label for="password" class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="password" name="password" minlength="8"
+                                maxlength="64" required>
+                            <div class="invalid-feedback">Mínimo 8 caracteres.</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="pass_confirmation" class="form-label">Confirmar</label>
+                            <input type="password" class="form-control" id="pass_confirmation" name="password_confirmation"
+                                required>
+                            <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+                        </div>
+                    </div>
+
+                    @if(session('error'))
+  <div class="alert alert-danger">{{ session('error') }}</div>
+@endif
+@if($errors->any())
+  <div class="alert alert-danger">
+    <ul>@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+  </div>
+@endif
 
                         <hr class="my-4">
 

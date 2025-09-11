@@ -145,41 +145,83 @@
 
 
 
-    <!-- MODAL: Iniciar Sesión -->
-    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content shadow">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title">Iniciar Sesión</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Cerrar"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Formulario de login -->
-                    <form id="loginForm" novalidate>
-                        <div class="mb-3">
-                            <label for="loginEmail" class="form-label">Correo electrónico</label>
-                            <input type="email" class="form-control" id="loginEmail" placeholder="ejemplo@correo.com"
-                                required>
-                            <div class="invalid-feedback">Ingresa un correo válido.</div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="loginPassword" class="form-label">Contraseña</label>
-                            <input type="password" class="form-control" id="loginPassword" placeholder="••••••••"
-                                required>
-                            <div class="invalid-feedback">La contraseña es obligatoria.</div>
-                        </div>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-success">Ingresar</button>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer justify-content-between">
-                    <small class="text-muted">¿No tienes cuenta?</small>
-                    <a href="/registro" class="btn btn-outline-success btn-sm">Registrarse</a>
-                </div>
+    <!-- Modal Login -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">Iniciar Sesión</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Muestra errores -->
+        @if ($errors->any())
+          <div class="alert alert-danger">
+            <ul class="mb-0">
+              @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+              @endforeach
+            </ul>
+          </div>
+        @endif
+
+        <form id="loginForm" action="{{ route('login.post') }}" method="POST" novalidate>
+          @csrf
+
+          <div class="mb-3">
+            <label for="loginEmail" class="form-label">Correo electrónico</label>
+            <input
+              type="email"
+              class="form-control"
+              id="loginEmail"
+              name="correo"      {{-- o name="email" si tu campo se llama así --}}
+              value="{{ old('correo') }}"
+              placeholder="ejemplo@correo.com"
+              required>
+          </div>
+
+          <div class="mb-3">
+            <label for="loginPassword" class="form-label">Contraseña</label>
+            <input
+              type="password"
+              class="form-control"
+              id="loginPassword"
+              name="password"
+              placeholder="••••••••"
+              required>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="remember" name="remember" {{ old('remember') ? 'checked' : '' }}>
+              <label class="form-check-label" for="remember">Recordarme</label>
             </div>
-        </div>
+          </div>
+
+          <div class="d-grid">
+            <button type="submit" class="btn btn-success">Ingresar</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer justify-content-between">
+        <small class="text-muted">¿No tienes cuenta?</small>
+        <a href="/registro" class="btn btn-outline-success btn-sm">Registrarse</a>
+      </div>
     </div>
+  </div>
+</div>
+
+{{-- Reabrir el modal si hubo errores de validación --}}
+@if ($errors->any())
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const modal = new bootstrap.Modal(document.getElementById('loginModal'));
+      modal.show();
+    });
+  </script>
+@endif
+
 
 </x-app-layout>

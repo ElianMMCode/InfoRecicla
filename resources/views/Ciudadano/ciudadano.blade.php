@@ -3,23 +3,30 @@
     <link rel="stylesheet" href="css/Ciudadano/styleCiudadano.css">
 
     <!-- ===== NAVBAR ===== -->
-    <x-navbar-layout>
-
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div id="nav" class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
-                <!-- Ajusta rutas según tu proyecto -->
-                <li class="nav-item"><a class="nav-link" href="/publicaciones">Publicaciones</a></li>
-                <li class="nav-item"><a class="nav-link" href="/mapa">Mapa ECA</a></li>
-                <li class="nav-item">
-                    <a class="btn btn-light text-success" href="/">Salir</a>
-                </li>
-            </ul>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <img src="/imagenes/logo.png" alt="Logo InfoRecicla" width="90" height="90" class="rounded">
+                <span class="fs-1 fw-semibold">InfoRecicla</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div id="nav" class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+                    <!-- Ajusta rutas según tu proyecto -->
+                    <li class="nav-item"><a class="nav-link" href="/publicaciones">Publicaciones</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/mapa">Mapa ECA</a></li>
+                    <li class="nav-item">
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="btn btn-light text-success fw-semibold px-3">Cerrar sesión</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
         </div>
-
-    </x-navbar-layout>
+    </nav>
 
     <!-- ===== COVER ===== -->
     <div class="cover"></div>

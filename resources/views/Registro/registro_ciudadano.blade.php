@@ -7,7 +7,7 @@
     <x-navbar-layout>
 
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav"
-        aria-expanded="false" aria-label="Alternar navegación">
+        aria-expanded="false" aria-label="Alternar navegación"/
         <span class="navbar-toggler-icon"></span>
       </button>
 
@@ -65,7 +65,7 @@
           <div id="formAlert" class="alert d-none" role="alert"></div>
 
         <!-- FORMULARIO -->
-        <form method="POST" action="/registro/ciudadano" id="citizenForm" class="needs-validation" novalidate enctype="multipart/form-data">
+        <form method="POST" action="{{ route('registro.ciudadano') }}" id="citizenForm" class="needs-validation" novalidate enctype="multipart/form-data">
           @csrf
             <input type="hidden" name="tipo" value="Ciudadano">
           <!-- Datos de acceso (tabla users) -->
@@ -82,7 +82,7 @@
               <div class="invalid-feedback">Mínimo 8 caracteres.</div>
             </div>
             <div class="col-md-3">
-              <label for="password_confirm" class="form-label">Confirmar</label>
+              <label for="password_confirmation" class="form-label">Confirmar</label>
               <input type="password" class="form-control" id="password_confirm" name="password_confirm" required>
               <div class="invalid-feedback">Las contraseñas no coinciden.</div>
             </div>
@@ -93,6 +93,14 @@
             </div>
           </div>
 
+          @if(session('error'))
+  <div class="alert alert-danger">{{ session('error') }}</div>
+@endif
+@if($errors->any())
+  <div class="alert alert-danger">
+    <ul>@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+  </div>
+@endif
             <hr class="my-4">
 
           <!-- Perfil ciudadano (tabla citizen_profiles) -->
