@@ -34,7 +34,11 @@ class AuthController extends Controller
 
             // Redirige según el rol
             if ($usuario->rol === 'GestorECA' || $usuario->rol === 'Administrador') {
+<<<<<<< HEAD
                 return redirect()->intended(route('eca.index', ['seccion' => 'resumen']));
+=======
+                return redirect()->intended(route('punto-eca.seccion', ['seccion' => 'resumen']));
+>>>>>>> f7eb6f5 (Creacion de login, actualizacion de registro y logout. Creacion distintos roles para la redireccion de cada usuario a su respectiva area, bloqueo de rutas por tipo de usuario y la integrasion de una sesion activa.)
             } elseif ($usuario->rol === 'Ciudadano') {
                 return redirect()->intended(route('ciudadano'));
             }
@@ -59,4 +63,8 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
         return redirect(route('login'))->with('success', 'Saliendo...');
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> f7eb6f5 (Creacion de login, actualizacion de registro y logout. Creacion distintos roles para la redireccion de cada usuario a su respectiva area, bloqueo de rutas por tipo de usuario y la integrasion de una sesion activa.)

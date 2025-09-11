@@ -10,12 +10,15 @@ use App\Http\Controllers\MapaController;
 use App\Http\Controllers\PublicacionController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\Auth\AuthController;
+<<<<<<< HEAD
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\CompraController;
 use App\Http\Controllers\MovimientosController;
 use App\Http\Controllers\MaterialController;
 use App\Models\PuntoEca;
 use App\Models\Compra;
+=======
+>>>>>>> f7eb6f5 (Creacion de login, actualizacion de registro y logout. Creacion distintos roles para la redireccion de cada usuario a su respectiva area, bloqueo de rutas por tipo de usuario y la integrasion de una sesion activa.)
 
 /*
 |--------------------------------------------------------------------------
@@ -62,6 +65,7 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:GestorECA,Administrador'])->group(function () {
+<<<<<<< HEAD
 
     // Panel general de Punto ECA (resumen, perfil, materiales, etc.)
     Route::get('/eca/{seccion?}', [PuntoEcaController::class, 'view_punto_eca'])
@@ -80,6 +84,18 @@ Route::middleware(['auth', 'role:GestorECA,Administrador'])->group(function () {
     Route::get('/eca/movimientos', [MovimientosController::class, 'index'])->name('eca.moviento.index');
     Route::post('/eca/movimientos/compras', [MovimientosController::class, 'storeCompra'])->name('eca.movimientos.compra.store');
     Route::post('/eca/movimientos/ventas', [MovimientosController::class, 'storeVenta'])->name('eca.movimientos.venta.store');
+=======
+    // Inventario (GestorEca y Administrador)
+    Route::get('/punto-eca/{seccion?}', [PuntoEcaController::class, 'view_punto_eca'])
+        ->where('seccion', 'resumen|perfil|materiales|historial|calendario|centros|conversaciones|configuracion')
+        ->name('punto-eca.seccion');
+    Route::put('/punto-eca/inventario/{inventario}', [PuntoEcaController::class, 'updateInventario'])
+        ->name('punto-eca.inventario.update');
+    Route::post('/punto-eca/inventario', [PuntoEcaController::class, 'storeInventario'])
+        ->name('punto-eca.inventario.store');
+    Route::delete('/punto-eca/inventario/{inventario}', [PuntoEcaController::class, 'destroyInventario'])
+        ->name('punto-eca.inventario.destroy');
+>>>>>>> f7eb6f5 (Creacion de login, actualizacion de registro y logout. Creacion distintos roles para la redireccion de cada usuario a su respectiva area, bloqueo de rutas por tipo de usuario y la integrasion de una sesion activa.)
 });
 
 Route::middleware(['auth', 'role:Ciudadano'])->group(function () {
@@ -93,5 +109,9 @@ Route::middleware(['auth', 'role:Ciudadano'])->group(function () {
 */
 Route::get('/mapa', [MapaController::class, 'view_mapa'])->name('mapa');
 Route::get('/publicaciones', [PublicacionController::class, 'view_publicaciones'])->name('publicaciones');
+<<<<<<< HEAD
 Route::get('/publicacion', [PublicacionController::class, 'view_publicacion'])->name('publicacion');
 Route::get('/admin', [AdminController::class, 'view_admin'])->name('admin');
+=======
+Route::get('/publicacion', [PublicacionController::class, 'view_publicacion'])->name('publicacion');
+>>>>>>> f7eb6f5 (Creacion de login, actualizacion de registro y logout. Creacion distintos roles para la redireccion de cada usuario a su respectiva area, bloqueo de rutas por tipo de usuario y la integrasion de una sesion activa.)
