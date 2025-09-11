@@ -32,8 +32,14 @@
             <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
                 <li class="nav-item"><a class="nav-link" href="/publicaciones">Publicaciones</a></li>
                 <li class="nav-item"><a class="nav-link" href="/mapa">Mapa ECA</a></li>
-                <li class="nav-item"><a class="btn btn-light text-success fw-semibold" href="/">Salir</a></li>
-            </ul>
+                    <li class="nav-item">
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="btn btn-light text-success fw-semibold px-3">Cerrar sesión</button>
+                        </form>
+                    </li>
+                </ul>   
+
         </div>
     </x-navbar-layout>
 

@@ -2,47 +2,62 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Foundation\Auth\User as Authenticatable; // <- clave
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Hash;
 
-class User extends Authenticatable
+class Usuario extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    protected $table = 'usuarios';
+    protected $primaryKey = 'id';
+    public $incrementing = false;   // UUID (char 36)
+    protected $keyType = 'string';
+
+    // Tus timestamps personalizados:
+    const CREATED_AT = 'creado';
+    const UPDATED_AT = 'actualizado';
+
     protected $fillable = [
-        'name',
-        'email',
+        'id',
+        'correo',
         'password',
+        'nombre',
+        'apellido',
+        'rol',
+        'tipo_documento',
+        'numero_documento',
+        'telefono',
+        'recibe_notificaciones',
+        'fecha_nacimiento',
+        'avatar_url',
+        'nombre_usuario',
+        'genero',
+        'estado',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
+    protected $hidden = ['password', 'remember_token'];
+
+    protected $casts = [
+        'recibe_notificaciones' => 'boolean',
+        'fecha_nacimiento'      => 'date',
+        'creado'                => 'datetime',
+        'actualizado'           => 'datetime',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    // Hash automático si asignas password en claro:
+    public function setPasswordAttribute($value)
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        $this->attributes['password'] = Hash::needsRehash($value)
+            ? Hash::make($value)
+            : $value;
+    }
+
+    // (Opcional) explícito, tu password ya se llama 'password':
+    public function getAuthPassword()
+    {
+        return $this->password;
     }
 }

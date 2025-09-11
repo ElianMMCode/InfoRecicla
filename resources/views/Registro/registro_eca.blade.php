@@ -76,7 +76,7 @@
                 <!-- ALERTAS (reservado para tu script futuro) -->
                 <div id="formAlert" class="alert d-none" role="alert"></div>
                
-                <form method="POST" action="/registro/eca" id="ecaForm" class="needs-validation" novalidate enctype="multipart/form-data">
+                <form method="POST" action="{{ route('registro.eca') }}" id="ecaForm" class="needs-validation" novalidate enctype="multipart/form-data">
                      @csrf
                 <input type="hidden" name="tipo" value="GestorECA">
                 <!-- FORMULARIO -->
@@ -103,6 +103,15 @@
                             <div class="invalid-feedback">Las contraseñas no coinciden.</div>
                         </div>
                     </div>
+
+                    @if(session('error'))
+  <div class="alert alert-danger">{{ session('error') }}</div>
+@endif
+@if($errors->any())
+  <div class="alert alert-danger">
+    <ul>@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+  </div>
+@endif
 
                     <hr class="my-4">
 
