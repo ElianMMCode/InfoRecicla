@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InicioController;
 use App\Http\Controllers\CiudadanoController;
@@ -9,6 +10,12 @@ use App\Http\Controllers\MapaController;
 use App\Http\Controllers\PublicacionController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\InventarioController;
+use App\Http\Controllers\CompraController;
+use App\Http\Controllers\MovimientosController;
+use App\Http\Controllers\MaterialController;
+use App\Models\PuntoEca;
+use App\Models\Compra;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,16 +62,24 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:GestorECA,Administrador'])->group(function () {
-    // Inventario (GestorEca y Administrador)
-    Route::get('/punto-eca/{seccion?}', [PuntoEcaController::class, 'view_punto_eca'])
-        ->where('seccion', 'resumen|perfil|materiales|historial|calendario|centros|conversaciones|configuracion')
-        ->name('punto-eca.seccion');
-    Route::put('/punto-eca/inventario/{inventario}', [PuntoEcaController::class, 'updateInventario'])
-        ->name('punto-eca.inventario.update');
-    Route::post('/punto-eca/inventario', [PuntoEcaController::class, 'storeInventario'])
-        ->name('punto-eca.inventario.store');
-    Route::delete('/punto-eca/inventario/{inventario}', [PuntoEcaController::class, 'destroyInventario'])
-        ->name('punto-eca.inventario.destroy');
+
+    // Panel general de Punto ECA (resumen, perfil, materiales, etc.)
+    Route::get('/eca/{seccion?}', [PuntoEcaController::class, 'view_punto_eca'])
+        ->where('seccion', 'resumen|perfil|materiales|movimientos|historial|calendario|centros|conversaciones|configuracion')
+        ->name('eca.index');
+
+    // Catálogo de materiales (lista filtrada para agregar al inventario)
+    Route::get('/eca/materiales', [MaterialController::class, 'index'])->name('eca.materiales.index');
+
+    // Inventario (listar, agregar, actualizar, eliminar)
+    Route::post('/eca/inventario', [InventarioController::class, 'store'])->name('eca.inventario.store');
+    Route::put('/eca/inventario/{inventario}', [InventarioController::class, 'update'])->name('eca.inventario.update');
+    Route::delete('/eca/inventario/{inventario}', [InventarioController::class, 'destroy'])->name('eca.inventario.destroy');
+
+    //Movimientos (Compra-Venta)
+    Route::get('/eca/movimientos', [MovimientosController::class, 'index'])->name('eca.moviento.index');
+    Route::post('/eca/movimientos/compras', [MovimientosController::class, 'storeCompra'])->name('eca.movimientos.compra.store');
+    Route::post('/eca/movimientos/ventas', [MovimientosController::class, 'storeVenta'])->name('eca.movimientos.venta.store');
 });
 
 Route::middleware(['auth', 'role:Ciudadano'])->group(function () {
@@ -79,3 +94,4 @@ Route::middleware(['auth', 'role:Ciudadano'])->group(function () {
 Route::get('/mapa', [MapaController::class, 'view_mapa'])->name('mapa');
 Route::get('/publicaciones', [PublicacionController::class, 'view_publicaciones'])->name('publicaciones');
 Route::get('/publicacion', [PublicacionController::class, 'view_publicacion'])->name('publicacion');
+Route::get('/admin', [AdminController::class, 'view_admin'])->name('admin');

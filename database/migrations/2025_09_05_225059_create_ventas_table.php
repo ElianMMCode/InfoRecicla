@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('salidas', function (Blueprint $table) {
+        Schema::create('ventas', function (Blueprint $table) {
             $table->char('id', 36)->default('uuid()')->primary();
             $table->char('inventario_id', 36);
+            $table->decimal('cantidad', 12, 3);
             $table->date('fecha');
-            $table->decimal('kg', 12, 3);
-            $table->char('centro_acopio_id', 36)->nullable()->index('fk_sal_cac');
-            $table->dateTime('creado')->useCurrent();
-
-            $table->index(['inventario_id', 'fecha'], 'idx_salidas_inv_fecha');
+            $table->decimal('precio_venta', 12)->nullable();
+            $table->char('centro_acopio_id', 36)->nullable()->index('fk_vent_cac');
+            $table->index(['inventario_id', 'fecha'], 'idx_ventas_inv_fecha');
+            $table->timestamps();
         });
     }
 
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('salidas');
+        Schema::dropIfExists('ventas');
     }
 };
