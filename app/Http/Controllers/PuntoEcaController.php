@@ -18,7 +18,6 @@ use App\Models\Compra;
 use Illuminate\Support\Carbon;
 
 
-
 class PuntoEcaController extends Controller
 
 
@@ -32,7 +31,6 @@ class PuntoEcaController extends Controller
             $seccion = 'resumen';
         }
 
-<<<<<<< HEAD
         // 2) Punto ECA del gestor autenticado
         $punto = DB::table('puntos_eca')
             ->select(
@@ -94,73 +92,6 @@ class PuntoEcaController extends Controller
             ->orderBy('nombre')
             ->paginate(6)
             ->withQueryString();
-=======
-        // Solo preparar datos si es la sección "materiales"
-        // Punto ECA actual (ajusta a tu lógica real)
-        $punto = DB::table('puntos_eca')
-            ->select('id', 'gestor_id')
-            ->where('gestor_id', Auth::id())
-            ->first();
-        $puntoEcaId = $punto->id;               // ====== CATÁLOGOS para los <select> ======
-        $categorias = CategoriaMaterial::orderBy('nombre')->get(['id', 'nombre']);
-        $tipos      = TipoMaterial::orderBy('nombre')->get(['id', 'nombre']);
-
-        // ====== FILTROS del catálogo (arriba) ======
-        $f = $request->validate([
-            'categoria' => ['nullable', 'uuid', 'exists:categorias_material,id'],
-            'tipo'      => ['nullable', 'uuid', 'exists:tipos_material,id'],
-            'nombre'    => ['nullable', 'string', 'max:120'],
-        ]);
-
-        // Excluir los materiales ya registrados para este punto (opcional pero recomendado)
-        $materialesYaRegistrados = Inventario::query()
-            ->when($puntoEcaId, fn($q) => $q->where('punto_eca_id', $puntoEcaId))
-            ->pluck('material_id');
-
-        // Catálogo de materiales disponibles
-        $materiales = Material::query()
-            ->with(['categoria:id,nombre', 'tipo:id,nombre'])
-            ->when($f['categoria'] ?? null, fn($q, $v) => $q->where('categoria_id', $v))
-            ->when($f['tipo'] ?? null,      fn($q, $v) => $q->where('tipo_id', $v))
-            ->when($f['nombre'] ?? null,    fn($q, $v) => $q->where('nombre', 'like', "%{$v}%"))
-            ->when($puntoEcaId, fn($q) => $q->whereNotIn('id', $materialesYaRegistrados))
-            ->orderBy('nombre')
-            ->paginate(6)
-            ->withQueryString();
-
-        // ====== FILTROS del inventario (abajo) ======
-        $q = $request->validate([
-            'q_categoria' => ['nullable', 'uuid', 'exists:categorias_material,id'],
-            'q_tipo'      => ['nullable', 'uuid', 'exists:tipos_material,id'],
-            'q_nombre'    => ['nullable', 'string', 'max:120'],
-        ]);
-
-        // Inventario ya registrado para el Punto ECA
-        $inventario = Inventario::query()
-            ->with([
-                'material:id,nombre,categoria_id,tipo_id',
-                'material.categoria:id,nombre',
-                'material.tipo:id,nombre'
-            ])
-            ->when($puntoEcaId, fn($q2) => $q2->where('punto_eca_id', $puntoEcaId))
-            ->when($q['q_categoria'] ?? null, fn($q2, $v) => $q2->whereHas('material', fn($qq) => $qq->where('categoria_id', $v)))
-            ->when($q['q_tipo'] ?? null,      fn($q2, $v) => $q2->whereHas('material', fn($qq) => $qq->where('tipo_id', $v)))
-            ->when($q['q_nombre'] ?? null,    fn($q2, $v) => $q2->whereHas('material', fn($qq) => $qq->where('nombre', 'like', "%{$v}%")))
-            ->orderByDesc('creado') // usa tus columnas custom de timestamp
-            ->paginate(6)
-            ->withQueryString();
-
-        // Renderizar la misma Blade que ya tienes
-        return view('PuntoECA.punto-eca', compact(
-            'seccion',
-            'categorias',
-            'tipos',
-            'materiales',
-            'inventario',
-            'puntoEcaId'
-        ));
-
->>>>>>> f7eb6f5 (Creacion de login, actualizacion de registro y logout. Creacion distintos roles para la redireccion de cada usuario a su respectiva area, bloqueo de rutas por tipo de usuario y la integrasion de una sesion activa.)
 
         // ===== Filtros del INVENTARIO (abajo)
         $q = $request->validate([
