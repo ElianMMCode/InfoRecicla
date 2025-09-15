@@ -40,4 +40,9 @@ class Material extends Model
     {
         return $q->when($tipoId, fn($qq) => $qq->where('tipo_id', $tipoId));
     }
+
+    public function total()
+    {
+        return $this->all()->count('id');
+    }
 }

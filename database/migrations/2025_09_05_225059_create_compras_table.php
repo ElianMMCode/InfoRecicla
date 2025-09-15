@@ -14,12 +14,11 @@ return new class extends Migration
         Schema::create('compras', function (Blueprint $table) {
             $table->char('id', 36)->default('uuid()')->primary();
             $table->char('inventario_id', 36);
+            $table->decimal('cantidad', 12, 3);
             $table->date('fecha');
-            $table->decimal('kg', 12, 3);
-            $table->decimal('precio_unit', 12)->nullable();
-            $table->dateTime('creado')->useCurrent();
-
+            $table->decimal('precio_compra', 12)->nullable();
             $table->index(['inventario_id', 'fecha'], 'idx_compras_inv_fecha');
+            $table->timestampS();
         });
     }
 

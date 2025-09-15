@@ -45,7 +45,12 @@ class Inventario extends Model
     }
     public function material()
     {
-        return $this->belongsTo(Material::class);
+        return $this->belongsTo(Material::class, 'material_id');
+    }
+
+    public function unidadMedida()
+    {
+        return $this->belongsTo(Inventario::class);
     }
 
     /** Scopes para filtros de inventario */
