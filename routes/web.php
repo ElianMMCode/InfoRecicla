@@ -67,7 +67,7 @@ Route::middleware(['auth', 'role:GestorECA,Administrador'])->group(function () {
     Route::get('/eca/{seccion?}', [PuntoEcaController::class, 'view_punto_eca'])
         ->where('seccion', 'resumen|perfil|materiales|movimientos|historial|calendario|centros|conversaciones|configuracion')
         ->name('eca.index');
-
+    Route::put('/perfil', [UsuarioController::class, 'updatePerfil'])->name('eca.perfil.update');
     // Catálogo de materiales (lista filtrada para agregar al inventario)
     Route::get('/eca/materiales', [MaterialController::class, 'index'])->name('eca.materiales.index');
 

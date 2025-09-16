@@ -9,9 +9,25 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\ValidationException;
 
 class UsuarioController extends Controller
 {
+    public function indexEca(Request $request)
+    {
+        $user = Auth::user();
+
+        $gestor = DB::table('usuarios')
+            ->where('id', $user->id)
+            ->where('tipo', 'GestorECA')
+            ->first();
+
+        return view('users.indexEca', compact('gestor'));
+    }
     //
     public function store(Request $request)
     {
@@ -67,7 +83,7 @@ class UsuarioController extends Controller
             'tipoDocumento'        => ['nullable', 'string', 'max:30'],
             'numeroDocumento'      => ['nullable', 'string', 'max:30'],
             'recibeNotificaciones' => ['required'], // checkbox
-            //Punto Eca 
+            //Punto Eca
             'nombrePunto'          => ['required', 'string', 'max:100'],
             'direccionPunto'       => ['required', 'string', 'max:100'],
             'telefonoPunto'        => ['required', 'string', 'max:100'],
@@ -126,8 +142,107 @@ class UsuarioController extends Controller
                 ]);
             }
         });
-
         return redirect('/registro/exitoso')->with('ok', true);
+    }
+
+    public function updatePerfil(Request $request)
+    {
+        $authUser = Usuario::findOrFail(Auth::user()->id);
+
+        // Reobtener el Punto ECA como modelo para update
+        $punto = PuntoEca::where('gestor_id', $authUser->id)->firstOrFail();
+
+        // Validación combinada (usuario + punto)
+        $rules = [
+            // ======= USER (encargado) =======
+            'usuarios.nombre'              => ['required', 'string', 'max:120'],
+            'usuarios.apellido'            => ['required', 'string', 'max:120'],
+            'usuarios.telefono'             => ['nullable', 'string', 'max:30'],
+            'usuarios.correo'             => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('usuarios', 'correo')->ignore($authUser->id),
+            ],
+            'usario.avatar'            => ['nullable', 'image', 'max:2048'], // 2MB
+
+            // Password (opcional): si se envía nueva, exige current_password y confirmación
+            'usuarios.current_password'  => ['nullable:usuario:password', 'current_password:web'],             // valida contra el usuarios logueado
+            'usuarios.password'          => ['nullable', 'min:8', 'confirmed'],            // requiere user[password_confirmation]
+            'usuarios.password_confirmation' => ['nullable'],
+
+            // ======= PUNTO ECA =======
+            'punto.nombre'           => ['required', 'string', 'max:120'],
+            'punto.direccion'        => ['nullable', 'string', 'max:200'],
+            'punto.ciudad'           => ['nullable', 'string', 'max:100'],
+            'punto.localidad'        => ['nullable', 'string', 'max:100'],
+            'punto.latitud'          => ['nullable', 'numeric'],
+            'punto.longitud'         => ['nullable', 'numeric'],
+            'punto.horario_atencion' => ['nullable', 'string', 'max:120'],
+            'punto.foto'             => ['nullable', 'image', 'max:4096'], // 4MB
+            'punto.logo'             => ['nullable', 'image', 'max:2048'], // 2MB, si manejas logo aparte
+        ];
+
+        $data = $request->validate($rules);
+
+        // Pequeña regla de negocio: si quiere cambiar contraseña, debe traer la nueva.
+        if (!empty($data['usuarios']['current_password']) && empty($data['usuarios']['password'])) {
+            throw ValidationException::withMessages([
+                'usuarios.password' => 'Debes indicar la nueva contraseña.',
+            ]);
+        }
+        DB::transaction(function () use ($data, $authUser, $punto, $request) {
+
+            // ====== USER ======
+            $authUser->nombre = $data['usuarios']['nombre'];
+            $authUser->correo = $data['usuarios']['correo'];
+            // 1) Si no viene nueva, no toques nada
+            $nueva = $data['usuarios']['password'] ?? null;
+            if (!filled($nueva)) {
+                // nada que hacer con password
+            } else {
+                $authUser->password = $nueva;               // el cast se encarga del hash
+                $authUser->save();
+            }
+
+            // Avatar (opcional)
+            if ($request->hasFile('usuarios.avatar')) {
+                $path = $request->file('usuarios.avatar')->store('avatars', 'public');
+                // si tu tabla users tiene 'avatar_url' o 'foto_url', ajusta el nombre:
+                $authUser->avatar_url = Storage::url($path);
+            }
+
+            // Password (opcional)
+            if (!empty($data['usario']['password'])) {
+                // OJO: current_password ya se validó con la regla 'current_password'
+                $authUser->password = Hash::make($data['usuarios']['password']);
+            }
+
+            $authUser->save();
+
+            // ====== PUNTO ECA ======
+            $punto->nombre            = $data['punto']['nombre'];
+            $punto->direccion         = $data['punto']['direccion'] ?? null;
+            $punto->ciudad            = $data['punto']['ciudad'] ?? null;
+            $punto->localidad         = $data['punto']['localidad'] ?? null;
+            $punto->latitud           = $data['punto']['latitud'] ?? null;
+            $punto->longitud          = $data['punto']['longitud'] ?? null;
+            $punto->horario_atencion  = $data['punto']['horario_atencion'] ?? null;
+
+            // Foto y logo (opcionales)
+            if ($request->hasFile('punto.foto')) {
+                $path = $request->file('punto.foto')->store('puntos', 'public');
+                $punto->foto_url = Storage::url($path);
+            }
+            if ($request->hasFile('punto.logo')) {
+                $path = $request->file('punto.logo')->store('logos', 'public');
+                $punto->logo_url = Storage::url($path);
+            }
+
+            $punto->save();
+        });
+
+        return back()->with('ok', 'Perfil actualizado correctamente.');
     }
 
     public function view_registro($tipo = null)
