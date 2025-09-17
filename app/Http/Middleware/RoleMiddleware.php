@@ -20,9 +20,7 @@ class RoleMiddleware
         $userRole = Auth::user()->rol;
         \Illuminate\Support\Facades\Log::info('RoleMiddleware', ['user_role' => $userRole, 'allowed' => $roles]);
         if (!in_array((string) $userRole, array_map('strval', $roles), true)) {
-            // Mejor redirige con mensaje que abortar “en seco”
             return redirect()->route('login')->with('error', 'No tienes permiso para acceder.');
-            // Si prefieres cortar: abort(403, 'Forbidden');
         }
 
         return $next($request);

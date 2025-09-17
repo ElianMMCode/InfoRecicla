@@ -57,4 +57,9 @@ class Usuario extends Authenticatable   // <-- EXTENDER Authenticatable
             ? Hash::make($value)
             : $value;
     }
+
+    public function getAuthPassword()
+    {
+        return $this->password;
+    }
 }

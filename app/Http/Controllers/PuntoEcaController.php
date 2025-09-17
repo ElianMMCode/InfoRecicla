@@ -1,100 +1,323 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-
 use App\Models\TipoMaterial;
 use App\Models\CategoriaMaterial;
 use App\Models\Material;
 use App\Models\Inventario;
+use App\Models\Venta;
 use App\Models\PuntoEca;
-
+use App\Models\Compra;
+use Illuminate\Support\Carbon;
+use App\Models\CentroAcopio;
 
 class PuntoEcaController extends Controller
-
-
 {
-    protected $permitidas = ['resumen', 'perfil', 'materiales', 'historial', 'calendario', 'centros', 'conversaciones', 'configuracion'];
+    protected $permitidas = ['resumen', 'perfil', 'materiales', 'movimientos', 'historial', 'calendario', 'centros', 'conversaciones', 'configuracion'];
 
     public function view_punto_eca(Request $request, $seccion = null)
     {
+        $usuario = Auth::user();
+        // 1) Sección válida
         if ($seccion === null || !in_array($seccion, $this->permitidas, true)) {
             $seccion = 'resumen';
         }
 
-        // Solo preparar datos si es la sección "materiales"
-        // Punto ECA actual (ajusta a tu lógica real)
+        // 2) Punto ECA del gestor autenticado
         $punto = DB::table('puntos_eca')
-            ->select('id', 'gestor_id')
+            ->select(
+                'id',
+                'gestor_id',
+                'nombre',
+                'mostrar_mapa',
+                'direccion',
+                'ciudad',
+                'localidad',
+                'latitud',
+                'longitud',
+                'nit',
+                'horario_atencion',
+                'sitio_web',
+                'logo_url',
+                'foto_url',
+                'estado'
+            )
             ->where('gestor_id', Auth::id())
             ->first();
-        $puntoEcaId = $punto->id;               // ====== CATÁLOGOS para los <select> ======
+
+        if (!$punto) {
+            abort(404, 'No se encontró Punto ECA para este usuario.');
+        }
+
+        $puntoEcaId = $punto->id;
+
+        // Variables base que siempre pasas
+        $payload = [
+            'seccion'    => $seccion,
+            'puntoEcaId' => $puntoEcaId,
+            'punto'      => $punto,
+        ];
+
+        // ===== Catálogos para los <select>
         $categorias = CategoriaMaterial::orderBy('nombre')->get(['id', 'nombre']);
         $tipos      = TipoMaterial::orderBy('nombre')->get(['id', 'nombre']);
 
-        // ====== FILTROS del catálogo (arriba) ======
+        // ===== Filtros del CATÁLOGO (arriba)
         $f = $request->validate([
             'categoria' => ['nullable', 'uuid', 'exists:categorias_material,id'],
             'tipo'      => ['nullable', 'uuid', 'exists:tipos_material,id'],
             'nombre'    => ['nullable', 'string', 'max:120'],
         ]);
 
-        // Excluir los materiales ya registrados para este punto (opcional pero recomendado)
+        // Excluir materiales ya registrados en inventario del Punto
         $materialesYaRegistrados = Inventario::query()
-            ->when($puntoEcaId, fn($q) => $q->where('punto_eca_id', $puntoEcaId))
+            ->where('punto_eca_id', $puntoEcaId)
             ->pluck('material_id');
 
-        // Catálogo de materiales disponibles
+        // Catálogo de materiales (paginado)
         $materiales = Material::query()
             ->with(['categoria:id,nombre', 'tipo:id,nombre'])
             ->when($f['categoria'] ?? null, fn($q, $v) => $q->where('categoria_id', $v))
-            ->when($f['tipo'] ?? null,      fn($q, $v) => $q->where('tipo_id', $v))
-            ->when($f['nombre'] ?? null,    fn($q, $v) => $q->where('nombre', 'like', "%{$v}%"))
-            ->when($puntoEcaId, fn($q) => $q->whereNotIn('id', $materialesYaRegistrados))
+            ->when($f['tipo'] ?? null, fn($q, $v) => $q->where('tipo_id', $v))
+            ->when($f['nombre'] ?? null, fn($q, $v) => $q->where('nombre', 'like', "%{$v}%"))
+            ->whereNotIn('id', $materialesYaRegistrados)
             ->orderBy('nombre')
             ->paginate(6)
             ->withQueryString();
 
-        // ====== FILTROS del inventario (abajo) ======
+        // ===== Filtros del INVENTARIO (abajo)
         $q = $request->validate([
             'q_categoria' => ['nullable', 'uuid', 'exists:categorias_material,id'],
             'q_tipo'      => ['nullable', 'uuid', 'exists:tipos_material,id'],
             'q_nombre'    => ['nullable', 'string', 'max:120'],
         ]);
 
-        // Inventario ya registrado para el Punto ECA
+        // Inventario del Punto (paginado)
         $inventario = Inventario::query()
             ->with([
                 'material:id,nombre,categoria_id,tipo_id',
                 'material.categoria:id,nombre',
-                'material.tipo:id,nombre'
+                'material.tipo:id,nombre',
             ])
-            ->when($puntoEcaId, fn($q2) => $q2->where('punto_eca_id', $puntoEcaId))
-            ->when($q['q_categoria'] ?? null, fn($q2, $v) => $q2->whereHas('material', fn($qq) => $qq->where('categoria_id', $v)))
-            ->when($q['q_tipo'] ?? null,      fn($q2, $v) => $q2->whereHas('material', fn($qq) => $qq->where('tipo_id', $v)))
-            ->when($q['q_nombre'] ?? null,    fn($q2, $v) => $q2->whereHas('material', fn($qq) => $qq->where('nombre', 'like', "%{$v}%")))
-            ->orderByDesc('creado') // usa tus columnas custom de timestamp
+            ->where('punto_eca_id', $puntoEcaId)
+            ->when($q['q_categoria'] ?? null, fn($q2, $v) => $q2->whereHas('material', fn($m) => $m->where('categoria_id', $v)))
+            ->when($q['q_tipo'] ?? null, fn($q2, $v) => $q2->whereHas('material', fn($m) => $m->where('tipo_id', $v)))
+            ->when($q['q_nombre'] ?? null, fn($q2, $v) => $q2->whereHas('material', fn($m) => $m->where('nombre', 'like', "%{$v}%")))
+            // Si tienes columna personalizada "creado", usa esa; si no, latest():
+            ->orderByDesc('creado') // ->latest() si no existe "creado"
             ->paginate(6)
             ->withQueryString();
 
-        // Renderizar la misma Blade que ya tienes
-        return view('PuntoECA.punto-eca', compact(
-            'seccion',
-            'categorias',
-            'tipos',
-            'materiales',
-            'inventario',
-            'puntoEcaId'
-        ));
+        // ===== Últimos movimientos (solo si estás en la sección "movimientos")
+        $ultimosMovimientos = collect();
 
+        if ($seccion === 'movimientos') {
+            // Relación esperada:
+            // Compra::belongsTo(Inventario::class, 'inventario_id')
+            // Venta::belongsTo(Inventario::class, 'inventario_id')
+            // Inventario::belongsTo(Material::class, 'material_id')
 
-        // Otras secciones no se tocan
+            // Compras (top 10 por fecha)
+            $compras = Compra::query()
+                ->with(['inventario.material:id,nombre'])
+                ->whereHas('inventario', fn($q2) => $q2->where('punto_eca_id', $puntoEcaId))
+                ->latest('fecha') // o ->latest() si usas created_at
+                ->take(10)
+                ->get()
+                ->map(function ($c) {
+                    return [
+                        'tipo'        => 'compra',
+                        'fecha'       => $c->fecha instanceof \Illuminate\Support\Carbon ? $c->fecha->format('Y-m-d') : (string) $c->fecha,
+                        'material'    => $c->inventario->material->nombre ?? '—',
+                        'cantidad'    => $c->cantidad,
+                        'unidad'      => $c->inventario->unidad_medida ?? '',
+                        'precio_unit' => $c->precio_compra,
+                        'observ'      => $c->observaciones ?? null,
+                    ];
+                });
+
+            // Ventas (top 10 por fecha)
+            $ventas = Venta::query()
+                ->with(['inventario.material:id,nombre'])
+                ->whereHas('inventario', fn($q2) => $q2->where('punto_eca_id', $puntoEcaId))
+                ->latest('fecha')
+                ->take(10)
+                ->get()
+                ->map(function ($v) {
+                    return [
+                        'tipo'        => 'venta',
+                        'fecha'       => $v->fecha instanceof \Illuminate\Support\Carbon ? $v->fecha->format('Y-m-d') : (string) $v->fecha,
+                        'material'    => $v->inventario->material->nombre ?? '—',
+                        'cantidad'    => $v->cantidad,
+                        'unidad'      => $v->inventario->unidad_medida ?? '',
+                        'precio_unit' => $v->precio_venta,
+                        'observ'      => $v->observaciones ?? null,
+                    ];
+                });
+
+            // Unir, ordenar y tomar top 10 en total
+            $ultimosMovimientos = $compras
+                ->concat($ventas)
+                ->sortByDesc('fecha')
+                ->take(10)
+                ->values();
+        }
+
+        $materialesPunto = Inventario::query()
+            ->where('punto_eca_id', $puntoEcaId)
+            ->with('material:id,nombre')
+            ->get()
+            ->pluck('material')
+            ->filter() // por si hay nulls
+            ->unique('id')
+            ->sortBy('nombre')
+            ->values();
+
+        // Filtros de COMPRAS (entradas)
+        $hc = $request->validate([
+            'hc_desde'    => ['nullable', 'date'],
+            'hc_hasta'    => ['nullable', 'date'],
+            'hc_material' => ['nullable', 'uuid', 'exists:materiales,id'],
+        ]);
+        // Normaliza hasta = fin del día para incluir la fecha completa
+        $hcHasta = !empty($hc['hc_hasta']) ? Carbon::parse($hc['hc_hasta'])->endOfDay() : null;
+
+        $histCompras = \App\Models\Compra::query()
+            ->with(['inventario:id,unidad_medida,material_id', 'inventario.material:id,nombre'])
+            ->whereHas('inventario', fn($q) => $q->where('punto_eca_id', $puntoEcaId))
+            ->when(
+                $hc['hc_material'] ?? null,
+                fn($q, $matId) =>
+                $q->whereHas('inventario', fn($qi) => $qi->where('material_id', $matId))
+            )
+            ->when(
+                $hc['hc_desde'] ?? null,
+                fn($q, $desde) =>
+                $q->whereDate('fecha', '>=', $desde)
+            )
+            ->when(
+                $hcHasta,
+                fn($q) =>
+                $q->where('fecha', '<=', $hcHasta)
+            )
+            ->latest('fecha')
+            ->paginate(10)
+            ->withQueryString();
+
+        // Filtros de VENTAS (salidas)
+        $hs = $request->validate([
+            'hs_desde'    => ['nullable', 'date'],
+            'hs_hasta'    => ['nullable', 'date'],
+            'hs_material' => ['nullable', 'uuid', 'exists:materiales,id'],
+        ]);
+        $hsHasta = !empty($hs['hs_hasta']) ? Carbon::parse($hs['hs_hasta'])->endOfDay() : null;
+
+        $histVentas = \App\Models\Venta::query()
+            ->with(['inventario:id,unidad_medida,material_id', 'inventario.material:id,nombre'])
+            ->whereHas('inventario', fn($q) => $q->where('punto_eca_id', $puntoEcaId))
+            ->when(
+                $hs['hs_material'] ?? null,
+                fn($q, $matId) =>
+                $q->whereHas('inventario', fn($qi) => $qi->where('material_id', $matId))
+            )
+            ->when(
+                $hs['hs_desde'] ?? null,
+                fn($q, $desde) =>
+                $q->whereDate('fecha', '>=', $desde)
+            )
+            ->when(
+                $hsHasta,
+                fn($q) =>
+                $q->where('fecha', '<=', $hsHasta)
+            )
+            ->latest('fecha')
+            ->paginate(10)
+            ->withQueryString();
+
+        // Añade al payload
+        $payload += [
+            'materialesPunto' => $materialesPunto,
+            'hc'              => $hc,
+            'hs'              => $hs,
+            'histCompras'     => $histCompras,
+            'histVentas'      => $histVentas,
+        ];
+
+        // Mezcla al payload
+        $payload += [
+            'categorias'         => $categorias,
+            'tipos'              => $tipos,
+            'materiales'         => $materiales,
+            'inventario'         => $inventario,
+            'ultimosMovimientos' => $ultimosMovimientos,
+            'usuarios'           => $usuario,
+        ];
+
+        $materialesPunto = Inventario::query()
+            ->where('punto_eca_id', $puntoEcaId)
+            ->with('material:id,nombre')
+            ->get()
+            ->pluck('material')
+            ->filter()
+            ->unique('id')
+            ->sortBy('nombre')
+            ->values();
+
+        // Filtros (GET): nombre, tipo, ciudad, estado, material
+        $f = $request->validate([
+            'f_nombre'   => ['nullable', 'string', 'max:150'],
+            'f_tipo'     => ['nullable', Rule::in(['Planta', 'Proveedor', 'Otro'])],
+            'f_ciudad'   => ['nullable', 'string', 'max:60'],
+            'f_estado'   => ['nullable', Rule::in(['activo', 'inactivo', 'bloqueado'])],
+            'f_material' => ['nullable', 'uuid', 'exists:materiales,id'],
+        ]);
+
+        // Query helper para aplicar los mismos filtros a globales y propios
+        $applyFilters = function ($q) use ($f) {
+            return $q
+                ->when($f['f_nombre']   ?? null, fn($qq, $v) => $qq->where('nombre', 'like', "%{$v}%"))
+                ->when($f['f_tipo']     ?? null, fn($qq, $v) => $qq->where('tipo', $v))
+                ->when($f['f_ciudad']   ?? null, fn($qq, $v) => $qq->where('ciudad', 'like', "%{$v}%"))
+                ->when($f['f_estado']   ?? null, fn($qq, $v) => $qq->where('estado', $v))
+                ->when($f['f_material'] ?? null, fn($qq, $v) => $qq->where('materiales_centro_acc', $v));
+        };
+
+        // Globales (catálogo)
+        $centrosGlobales = CentroAcopio::query()
+            ->with(['materiales']) // para mostrar solo nombre
+            ->where('alcance', 'global')
+            ->tap($applyFilters)
+            ->orderBy('nombre')
+            ->paginate(10)
+            ->withQueryString();
+
+        // Propios del punto (alcance eca + owner)
+        $centrosPropios = CentroAcopio::query()
+            ->with(['materiales'])
+            ->where('alcance', 'eca')
+            ->where('owner_punto_eca_id', $puntoEcaId)
+            ->tap($applyFilters)
+            ->orderBy('nombre')
+            ->paginate(10)
+            ->withQueryString();
+
+        $payload += [
+            'materialesPunto'  => $materialesPunto,
+            'f'                => $f,
+            'centrosGlobales'  => $centrosGlobales,
+            'centrosPropios'   => $centrosPropios,
+        ];
+
+        // 4) Render
+        return view('PuntoECA.punto-eca', $payload);
     }
+
+
 
     /**
      * POST: Registrar un material en inventario (botón por fila).

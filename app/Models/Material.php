@@ -40,4 +40,15 @@ class Material extends Model
     {
         return $q->when($tipoId, fn($qq) => $qq->where('tipo_id', $tipoId));
     }
+
+    public function total()
+    {
+        return $this->all()->count('id');
+    }
+
+    public function centrosAcopio()
+    {
+        return $this->belongsToMany(CentroAcopio::class, 'materiales_centros_acopio', 'material_id', 'centro_acopio_id')
+            ->withTimestamps('creado', 'actualizado');
+    }
 }
