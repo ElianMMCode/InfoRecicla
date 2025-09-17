@@ -30,7 +30,7 @@ class AuthController extends Controller
         if ($ok) {
             $request->session()->regenerate();
 
-            $usuario = Auth::user(); // aquí tienes el usuario logueado con todos sus datos
+            $usuario = Auth::user();
 
             // Redirige según el rol
             if ($usuario->rol === 'GestorECA' || $usuario->rol === 'Administrador') {

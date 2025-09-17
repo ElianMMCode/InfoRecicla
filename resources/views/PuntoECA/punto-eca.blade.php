@@ -1183,6 +1183,321 @@
                 </div>
             </section>
 
+            <section class="tab-pane fade {{ $seccion === 'centros' ? 'show active' : '' }}" id="tab-centros">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Centros de acopio</h5>
+                </div>
+
+                {{-- ===================== FILTROS ===================== --}}
+                <form class="row g-2 mb-4" method="get"
+                    action="{{ route('eca.index', ['seccion' => 'centros']) }}">
+                    <div class="col-12 col-md-3">
+                        <input type="text" name="f_nombre" class="form-control" placeholder="Buscar por nombre"
+                            value="{{ request('f_nombre') }}">
+                    </div>
+
+                    <div class="col-6 col-md-2">
+                        <select name="f_tipo" class="form-select">
+                            <option value="">Tipo (todos)</option>
+                            @foreach (['Planta', 'Proveedor', 'Otro'] as $t)
+                                <option value="{{ $t }}" @selected(request('f_tipo') === $t)>
+                                    {{ $t }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-6 col-md-2">
+                        <select name="f_estado" class="form-select">
+                            <option value="">Estado (todos)</option>
+                            @foreach (['activo', 'inactivo', 'bloqueado'] as $e)
+                                <option value="{{ $e }}" @selected(request('f_estado') === $e)>
+                                    {{ ucfirst($e) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-6 col-md-2">
+                        <input type="text" name="f_ciudad" class="form-control" placeholder="Ciudad"
+                            value="{{ request('f_ciudad') }}">
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <select name="f_materiales[]" class="form-select" multiple size="4">
+                            @foreach ($materialesPunto ?? [] as $m)
+                                <option value="{{ $m->id }}" @selected(collect(request('f_materiales'))->contains($m->id))>
+                                    {{ $m->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">Ctrl/⌘ para seleccionar varios</div>
+                    </div>
+
+                    <div class="col-12 d-grid d-md-block">
+                        <button class="btn btn-outline-success">Aplicar filtros</button>
+                    </div>
+                </form>
+
+                <div class="row g-4">
+                    {{-- ===================== LISTADOS ===================== --}}
+                    <div class="col-12 col-lg-8">
+                        {{-- ========== Centros globales ========== --}}
+                        <div class="card card-hover mb-4">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                <strong>Centros globales</strong>
+                                <span class="small text-muted">Catálogo general</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-striped align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Nombre</th>
+                                                <th>Tipo</th>
+                                                <th>Ciudad</th>
+                                                <th>Materiales que recicla</th>
+                                                <th>Contacto</th>
+                                                <th>Teléfono</th>
+                                                <th>Correo</th>
+                                                <th>Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse(($centrosGlobales ?? []) as $c)
+                                                @php $nombresMat = ($c->materiales ?? collect())->pluck('nombre')->all(); @endphp
+                                                <tr>
+                                                    <td>{{ $c->nombre }}</td>
+                                                    <td>{{ $c->tipo }}</td>
+                                                    <td>{{ $c->ciudad ?? '—' }}</td>
+                                                    <td class="text-truncate" style="max-width: 320px;">
+                                                        {{ $nombresMat ? implode(', ', $nombresMat) : '—' }}
+                                                    </td>
+                                                    <td>{{ $c->contacto ?? '—' }}</td>
+                                                    <td>{{ $c->telefono ?? '—' }}</td>
+                                                    <td>{{ $c->correo ?? '—' }}</td>
+                                                    <td>{{ ucfirst($c->estado) }}</td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="8" class="text-center text-muted">Sin resultados.
+                                                    </td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                @if (($centrosGlobales ?? null) instanceof \Illuminate\Contracts\Pagination\Paginator)
+                                    <div class="d-flex justify-content-center">
+                                        {{ $centrosGlobales->onEachSide(1)->links('pagination::bootstrap-5') }}
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- ========== Centros del Punto (propios) ========== --}}
+                        <div class="card card-hover">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                <strong>Centros del Punto</strong>
+                                <span class="small text-muted">Propios del Punto ECA</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-striped align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Nombre</th>
+                                                <th>Tipo</th>
+                                                <th>Ciudad</th>
+                                                <th>Materiales que recicla</th>
+                                                <th>Contacto</th>
+                                                <th>Teléfono</th>
+                                                <th>Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse(($centrosPropios ?? []) as $c)
+                                                @php $nombresMat = ($c->materiales ?? collect())->pluck('nombre')->all(); @endphp
+                                                <tr>
+                                                    <td>{{ $c->nombre }}</td>
+                                                    <td>{{ $c->tipo }}</td>
+                                                    <td>{{ $c->ciudad ?? '—' }}</td>
+                                                    <td class="text-truncate" style="max-width: 320px;">
+                                                        {{ $nombresMat ? implode(', ', $nombresMat) : '—' }}
+                                                    </td>
+                                                    <td>{{ $c->contacto ?? '—' }}</td>
+                                                    <td>{{ $c->telefono ?? '—' }}</td>
+                                                    <td>{{ ucfirst($c->estado) }}</td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="7" class="text-center text-muted">Aún no has
+                                                        creado centros.</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                @if (($centrosPropios ?? null) instanceof \Illuminate\Contracts\Pagination\Paginator)
+                                    <div class="d-flex justify-content-center">
+                                        {{ $centrosPropios->onEachSide(1)->links('pagination::bootstrap-5') }}
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- ===================== FORMULARIO NUEVO CENTRO (propio) ===================== --}}
+                    <div class="col-12 col-lg-4">
+                        <div class="card card-hover h-100">
+                            <div class="card-header bg-white">
+                                <strong>Nuevo centro del punto</strong>
+                            </div>
+                            <div class="card-body">
+                                <form action="{{ route('eca.centros.store') }}" method="post"
+                                    class="vstack gap-3">
+                                    @csrf
+
+                                    <div>
+                                        <label class="form-label">Nombre</label>
+                                        <input type="text" name="cac[nombre]" class="form-control"
+                                            value="{{ old('cac.nombre') }}" required>
+                                        @error('cac.nombre')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Tipo</label>
+                                            <select name="cac[tipo]" class="form-select" required>
+                                                @foreach (['Planta', 'Proveedor', 'Otro'] as $t)
+                                                    <option value="{{ $t }}"
+                                                        @selected(old('cac.tipo') === $t)>{{ $t }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('cac.tipo')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Materiales que recicla</label>
+                                            <select name="cac[materiales][]" class="form-select" multiple
+                                                size="6">
+                                                @foreach ($materialesPunto ?? [] as $m)
+                                                    <option value="{{ $m->id }}"
+                                                        @selected(collect(old('cac.materiales', []))->contains($m->id))>
+                                                        {{ $m->nombre }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <div class="form-text">Selecciona uno o varios.</div>
+                                            @error('cac.materiales')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                            @error('cac.materiales.*')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label">Descripción</label>
+                                        <input type="text" name="cac[descripcion]" class="form-control"
+                                            value="{{ old('cac.descripcion') }}">
+                                        @error('cac.descripcion')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Contacto</label>
+                                            <input type="text" name="cac[contacto]" class="form-control"
+                                                value="{{ old('cac.contacto') }}">
+                                            @error('cac.contacto')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Teléfono</label>
+                                            <input type="text" name="cac[telefono]" class="form-control"
+                                                value="{{ old('cac.telefono') }}">
+                                            @error('cac.telefono')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Correo</label>
+                                            <input type="email" name="cac[correo]" class="form-control"
+                                                value="{{ old('cac.correo') }}">
+                                            @error('cac.correo')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Sitio web</label>
+                                            <input type="url" name="cac[sitio_web]" class="form-control"
+                                                value="{{ old('cac.sitio_web') }}">
+                                            @error('cac.sitio_web')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label">Horario de atención</label>
+                                        <input type="text" name="cac[horario_atencion]" class="form-control"
+                                            value="{{ old('cac.horario_atencion') }}">
+                                        @error('cac.horario_atencion')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Ciudad</label>
+                                            <input type="text" name="cac[ciudad]" class="form-control"
+                                                value="{{ old('cac.ciudad') }}">
+                                            @error('cac.ciudad')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Localidad</label>
+                                            <input type="text" name="cac[localidad]" class="form-control"
+                                                value="{{ old('cac.localidad') }}">
+                                            @error('cac.localidad')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label">Dirección</label>
+                                        <input type="text" name="cac[direccion]" class="form-control"
+                                            value="{{ old('cac.direccion') }}">
+                                        @error('cac.direccion')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="text-end">
+                                        <button class="btn btn-success">Guardar centro</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+
 
             <!-- CONVERSACIONES -->
             <section class="tab-pane fade {{ $seccion === 'conversaciones' ? 'show active' : '' }}"
