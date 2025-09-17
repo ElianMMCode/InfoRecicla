@@ -14,6 +14,8 @@ use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\CompraController;
 use App\Http\Controllers\MovimientosController;
 use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\CentroAcopioController;
+use App\Models\CentroAcopio;
 use App\Models\PuntoEca;
 use App\Models\Compra;
 
@@ -80,6 +82,8 @@ Route::middleware(['auth', 'role:GestorECA,Administrador'])->group(function () {
     Route::get('/eca/movimientos', [MovimientosController::class, 'index'])->name('eca.moviento.index');
     Route::post('/eca/movimientos/compras', [MovimientosController::class, 'storeCompra'])->name('eca.movimientos.compra.store');
     Route::post('/eca/movimientos/ventas', [MovimientosController::class, 'storeVenta'])->name('eca.movimientos.venta.store');
+
+    Route::post('/eca/centros', [CentroAcopioController::class, 'storeCentro'])->name('eca.centros.store');
 });
 
 Route::middleware(['auth', 'role:Ciudadano'])->group(function () {
