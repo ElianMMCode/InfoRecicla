@@ -14,6 +14,7 @@ use App\Models\Venta;
 use App\Models\PuntoEca;
 use App\Models\Compra;
 use Illuminate\Support\Carbon;
+use App\Models\CentroAcopio;
 
 class PuntoEcaController extends Controller
 {
@@ -81,9 +82,9 @@ class PuntoEcaController extends Controller
         // Catálogo de materiales (paginado)
         $materiales = Material::query()
             ->with(['categoria:id,nombre', 'tipo:id,nombre'])
-            ->when($f['categoria'] ?? null, fn ($q, $v) => $q->where('categoria_id', $v))
-            ->when($f['tipo'] ?? null, fn ($q, $v) => $q->where('tipo_id', $v))
-            ->when($f['nombre'] ?? null, fn ($q, $v) => $q->where('nombre', 'like', "%{$v}%"))
+            ->when($f['categoria'] ?? null, fn($q, $v) => $q->where('categoria_id', $v))
+            ->when($f['tipo'] ?? null, fn($q, $v) => $q->where('tipo_id', $v))
+            ->when($f['nombre'] ?? null, fn($q, $v) => $q->where('nombre', 'like', "%{$v}%"))
             ->whereNotIn('id', $materialesYaRegistrados)
             ->orderBy('nombre')
             ->paginate(6)
@@ -104,9 +105,9 @@ class PuntoEcaController extends Controller
                 'material.tipo:id,nombre',
             ])
             ->where('punto_eca_id', $puntoEcaId)
-            ->when($q['q_categoria'] ?? null, fn ($q2, $v) => $q2->whereHas('material', fn ($m) => $m->where('categoria_id', $v)))
-            ->when($q['q_tipo'] ?? null, fn ($q2, $v) => $q2->whereHas('material', fn ($m) => $m->where('tipo_id', $v)))
-            ->when($q['q_nombre'] ?? null, fn ($q2, $v) => $q2->whereHas('material', fn ($m) => $m->where('nombre', 'like', "%{$v}%")))
+            ->when($q['q_categoria'] ?? null, fn($q2, $v) => $q2->whereHas('material', fn($m) => $m->where('categoria_id', $v)))
+            ->when($q['q_tipo'] ?? null, fn($q2, $v) => $q2->whereHas('material', fn($m) => $m->where('tipo_id', $v)))
+            ->when($q['q_nombre'] ?? null, fn($q2, $v) => $q2->whereHas('material', fn($m) => $m->where('nombre', 'like', "%{$v}%")))
             // Si tienes columna personalizada "creado", usa esa; si no, latest():
             ->orderByDesc('creado') // ->latest() si no existe "creado"
             ->paginate(6)
@@ -124,7 +125,7 @@ class PuntoEcaController extends Controller
             // Compras (top 10 por fecha)
             $compras = Compra::query()
                 ->with(['inventario.material:id,nombre'])
-                ->whereHas('inventario', fn ($q2) => $q2->where('punto_eca_id', $puntoEcaId))
+                ->whereHas('inventario', fn($q2) => $q2->where('punto_eca_id', $puntoEcaId))
                 ->latest('fecha') // o ->latest() si usas created_at
                 ->take(10)
                 ->get()
@@ -143,7 +144,7 @@ class PuntoEcaController extends Controller
             // Ventas (top 10 por fecha)
             $ventas = Venta::query()
                 ->with(['inventario.material:id,nombre'])
-                ->whereHas('inventario', fn ($q2) => $q2->where('punto_eca_id', $puntoEcaId))
+                ->whereHas('inventario', fn($q2) => $q2->where('punto_eca_id', $puntoEcaId))
                 ->latest('fecha')
                 ->take(10)
                 ->get()
@@ -188,20 +189,20 @@ class PuntoEcaController extends Controller
 
         $histCompras = \App\Models\Compra::query()
             ->with(['inventario:id,unidad_medida,material_id', 'inventario.material:id,nombre'])
-            ->whereHas('inventario', fn ($q) => $q->where('punto_eca_id', $puntoEcaId))
+            ->whereHas('inventario', fn($q) => $q->where('punto_eca_id', $puntoEcaId))
             ->when(
                 $hc['hc_material'] ?? null,
-                fn ($q, $matId) =>
-                $q->whereHas('inventario', fn ($qi) => $qi->where('material_id', $matId))
+                fn($q, $matId) =>
+                $q->whereHas('inventario', fn($qi) => $qi->where('material_id', $matId))
             )
             ->when(
                 $hc['hc_desde'] ?? null,
-                fn ($q, $desde) =>
+                fn($q, $desde) =>
                 $q->whereDate('fecha', '>=', $desde)
             )
             ->when(
                 $hcHasta,
-                fn ($q) =>
+                fn($q) =>
                 $q->where('fecha', '<=', $hcHasta)
             )
             ->latest('fecha')
@@ -218,20 +219,20 @@ class PuntoEcaController extends Controller
 
         $histVentas = \App\Models\Venta::query()
             ->with(['inventario:id,unidad_medida,material_id', 'inventario.material:id,nombre'])
-            ->whereHas('inventario', fn ($q) => $q->where('punto_eca_id', $puntoEcaId))
+            ->whereHas('inventario', fn($q) => $q->where('punto_eca_id', $puntoEcaId))
             ->when(
                 $hs['hs_material'] ?? null,
-                fn ($q, $matId) =>
-                $q->whereHas('inventario', fn ($qi) => $qi->where('material_id', $matId))
+                fn($q, $matId) =>
+                $q->whereHas('inventario', fn($qi) => $qi->where('material_id', $matId))
             )
             ->when(
                 $hs['hs_desde'] ?? null,
-                fn ($q, $desde) =>
+                fn($q, $desde) =>
                 $q->whereDate('fecha', '>=', $desde)
             )
             ->when(
                 $hsHasta,
-                fn ($q) =>
+                fn($q) =>
                 $q->where('fecha', '<=', $hsHasta)
             )
             ->latest('fecha')
@@ -255,6 +256,61 @@ class PuntoEcaController extends Controller
             'inventario'         => $inventario,
             'ultimosMovimientos' => $ultimosMovimientos,
             'usuarios'           => $usuario,
+        ];
+
+        $materialesPunto = Inventario::query()
+            ->where('punto_eca_id', $puntoEcaId)
+            ->with('material:id,nombre')
+            ->get()
+            ->pluck('material')
+            ->filter()
+            ->unique('id')
+            ->sortBy('nombre')
+            ->values();
+
+        // Filtros (GET): nombre, tipo, ciudad, estado, material
+        $f = $request->validate([
+            'f_nombre'   => ['nullable', 'string', 'max:150'],
+            'f_tipo'     => ['nullable', Rule::in(['Planta', 'Proveedor', 'Otro'])],
+            'f_ciudad'   => ['nullable', 'string', 'max:60'],
+            'f_estado'   => ['nullable', Rule::in(['activo', 'inactivo', 'bloqueado'])],
+            'f_material' => ['nullable', 'uuid', 'exists:materiales,id'],
+        ]);
+
+        // Query helper para aplicar los mismos filtros a globales y propios
+        $applyFilters = function ($q) use ($f) {
+            return $q
+                ->when($f['f_nombre']   ?? null, fn($qq, $v) => $qq->where('nombre', 'like', "%{$v}%"))
+                ->when($f['f_tipo']     ?? null, fn($qq, $v) => $qq->where('tipo', $v))
+                ->when($f['f_ciudad']   ?? null, fn($qq, $v) => $qq->where('ciudad', 'like', "%{$v}%"))
+                ->when($f['f_estado']   ?? null, fn($qq, $v) => $qq->where('estado', $v))
+                ->when($f['f_material'] ?? null, fn($qq, $v) => $qq->where('materiales_centro_acc', $v));
+        };
+
+        // Globales (catálogo)
+        $centrosGlobales = CentroAcopio::query()
+            ->with(['materiales']) // para mostrar solo nombre
+            ->where('alcance', 'global')
+            ->tap($applyFilters)
+            ->orderBy('nombre')
+            ->paginate(10)
+            ->withQueryString();
+
+        // Propios del punto (alcance eca + owner)
+        $centrosPropios = CentroAcopio::query()
+            ->with(['materiales'])
+            ->where('alcance', 'eca')
+            ->where('owner_punto_eca_id', $puntoEcaId)
+            ->tap($applyFilters)
+            ->orderBy('nombre')
+            ->paginate(10)
+            ->withQueryString();
+
+        $payload += [
+            'materialesPunto'  => $materialesPunto,
+            'f'                => $f,
+            'centrosGlobales'  => $centrosGlobales,
+            'centrosPropios'   => $centrosPropios,
         ];
 
         // 4) Render
@@ -282,7 +338,7 @@ class PuntoEcaController extends Controller
                 'uuid',
                 'exists:materiales,id',
                 // unique por material dentro del punto por defecto:
-                Rule::unique('inventario')->where(fn ($q) => $q->where('punto_eca_id', $puntoEcaId)),
+                Rule::unique('inventario')->where(fn($q) => $q->where('punto_eca_id', $puntoEcaId)),
             ],
             'capacidad_max' => ['nullable', 'numeric', 'gte:0'],
             'unidad_medida' => ['nullable', 'in:kg,unidad,t,m3'],
