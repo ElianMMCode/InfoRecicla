@@ -16,12 +16,12 @@
             <div id="nav" class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
                     <!-- Ajusta rutas según tu proyecto -->
-                    <li class="nav-item"><a class="nav-link" href="/publicaciones">Publicaciones</a></li>
                     <li class="nav-item"><a class="nav-link" href="/mapa">Mapa ECA</a></li>
                     <li class="nav-item">
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="btn btn-light text-success fw-semibold px-3">Cerrar sesión</button>
+                            <button type="submit" class="btn btn-light text-success fw-semibold px-3">Cerrar
+                                sesión</button>
                         </form>
                     </li>
                 </ul>
@@ -51,14 +51,6 @@
                 <div class="d-flex gap-3">
                     <!-- Stats rápidas (contadores desde BD) -->
                     <div class="text-center stat">
-                        <div class="fw-bold h5 mb-0" id="statPub">12</div>
-                        <div class="text-muted small">Publicaciones</div>
-                    </div>
-                    <div class="text-center stat">
-                        <div class="fw-bold h5 mb-0" id="statCom">34</div>
-                        <div class="text-muted small">Comentarios</div>
-                    </div>
-                    <div class="text-center stat">
                         <div class="fw-bold h5 mb-0" id="statFav">8</div>
                         <div class="text-muted small">Guardados</div>
                     </div>
@@ -73,12 +65,8 @@
     <!-- ===== TABS ===== -->
     <div class="container mt-4">
         <ul class="nav nav-tabs" id="citizenTabs" role="tablist">
-            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#actividad"
-                    type="button">Actividad</button></li>
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#guardados"
                     type="button">Guardados</button></li>
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#comentarios"
-                    type="button">Comentarios</button></li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-chats" type="button"
                     role="tab">Chats</button>
@@ -88,45 +76,6 @@
         </ul>
 
         <div class="tab-content pt-3">
-
-            <!-- ===== TAB: ACTIVIDAD (últimas acciones del usuario) ===== -->
-            <section class="tab-pane fade show active" id="actividad">
-                <div class="row g-3">
-                    <!-- Card de actividad (ejemplos; luego rellenas desde BD) -->
-                    <div class="col-md-6 col-lg-4">
-                        <div class="card card-hover h-100">
-                            <div class="card-body">
-                                <h6 class="text-muted">Hace 2 h</h6>
-                                <p class="mb-1"><strong>Guardaste</strong> “Guía para separar residuos orgánicos”.</p>
-                                <a href="#" class="small">Ver publicación</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 col-lg-4">
-                        <div class="card card-hover h-100">
-                            <div class="card-body">
-                                <h6 class="text-muted">Ayer</h6>
-                                <p class="mb-1"><strong>Comentaste</strong> en “Punto ECA Suba reabrió”.</p>
-                                <a href="#" class="small">Ver comentario</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 col-lg-4">
-                        <div class="card card-hover h-100">
-                            <div class="card-body">
-                                <h6 class="text-muted">Ayer</h6>
-                                <p class="mb-1"><strong>Guardaste</strong> “Mapa de reciclaje electrónico”.</p>
-                                <a href="#" class="small">Ver guardado</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Placeholder para cuando no haya actividad -->
-                    <!-- <div class="col-12"><div class="alert alert-info">Aún no tienes actividad.</div></div> -->
-                </div>
-            </section>
 
             <!-- ===== TAB: GUARDADOS (dos columnas: Puntos ECA y Publicaciones) ===== -->
             <section class="tab-pane fade" id="guardados">
@@ -148,22 +97,6 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <h5 class="mb-3">Publicaciones Guardadas</h5>
-                        <div class="list-group">
-                            <!-- Items desde BD -->
-                            <a href="#"
-                                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                ¿Cómo reciclar plástico PET?
-                                <span class="badge bg-success rounded-pill">Abrir</span>
-                            </a>
-                            <a href="#"
-                                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                Guía rápida para separar residuos orgánicos e inorgánicos
-                                <span class="badge bg-success rounded-pill">Abrir</span>
-                            </a>
-                        </div>
-                    </div>
                 </div>
             </section>
 
@@ -190,7 +123,8 @@
                     </a>
                     <a class="list-group-item list-group-item-action" href="#">
                         <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-1">Sería útil incluir más publicaciones sobre reciclaje de electrónicos.</h6>
+                            <h6 class="mb-1">Sería útil incluir más publicaciones sobre reciclaje de electrónicos.
+                            </h6>
                             <small class="text-muted">Hace 1 semana</small>
                         </div>
                         <small class="text-muted">En: “Guía para separar residuos orgánicos”</small>
@@ -232,7 +166,8 @@
                                     <small class="text-muted" id="chatSubtitle">Conversación #1</small>
                                 </div>
                                 <!-- (Opcional) botón para ver el perfil del punto -->
-                                <a href="#" id="chatPointLink" class="btn btn-outline-success btn-sm">Ver punto</a>
+                                <a href="#" id="chatPointLink" class="btn btn-outline-success btn-sm">Ver
+                                    punto</a>
                             </div>
                             <div class="card-body">
                                 <div id="chatWindow" class="chat-window">
@@ -304,7 +239,14 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Correo</label>
-                        <input type="email" class="form-control" id="editCorreo" value="juan.rodri@email.com" required>
+                        <input type="email" class="form-control" id="editCorreo" value="juan.rodri@email.com"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nombre_usuario" id="editNombreUsuario" class="form-label">Nombre de
+                            usuario</label>
+                        <input type="text" class="form-control" id="editNombreUsuario" value="juanrodriguez"
+                            required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Localidad</label>
@@ -314,6 +256,14 @@
                         <label class="form-label">Foto de perfil (opcional)</label>
                         <input type="file" class="form-control" id="editAvatar" accept="image/*">
                         <div class="form-text">Formatos aceptados: JPG, PNG, WEBP. Máx. 2 MB.</div>
+                    </div>
+                    <div>
+                        <label for="old_password" class="form-label">Contraseña actual</label><input type="password"
+                            class="form-control" id="old_password"></label>
+                        <label for="password" class="form-label">Contraseña nueva</label><input type="password"
+                            class="form-control" id="password"></label>
+                        <label for="password_confirmation" class="form-label">Confirmar contraseña</label><input
+                            type="password" class="form-control" id="password_confirmation">
                     </div>
                 </div>
                 <div class="modal-footer">
