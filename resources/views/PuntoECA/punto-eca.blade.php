@@ -745,210 +745,222 @@
             <!-- ===== TAB: Entradas y Salidas de Material ===== -->
             <section class="tab-pane fade {{ $seccion === 'movimientos' ? 'show active' : '' }}"
                 id="tab-movimientos">
-                <div class="row g-4">
+                <div class="row gy-4">
+                    <div class="row g-4">
 
-                    <!-- ================== ENTRADA (Compra) ================== -->
-                    <div class="col-12 col-lg-6">
-                        <div class="card h-100">
-                            <div class="card-header bg-white">
-                                <strong>Registrar ENTRADA (Compra)</strong>
-                            </div>
-                            <div class="card-body">
-                                <form action="{{ route('eca.movimientos.compra.store') }}" method="post"
-                                    class="vstack gap-3">
-                                    @csrf
+                        <!-- ================== ENTRADA (Compra) ================== -->
+                        <div class="col-12 col-lg-6">
+                            <div class="card card-hover h-100">
+                                <div class="card-header bg-success text-white">
+                                    <strong>Registrar ENTRADA (Compra)</strong>
+                                </div>
+                                <div class="card-body">
+                                    <form action="{{ route('eca.movimientos.compra.store') }}" method="post"
+                                        class="vstack gap-3">
+                                        @csrf
 
-                                    <label class="form-label">Inventario / Material</label>
-                                    <select name="compra[inventario_id]" class="form-select" required>
-                                        <option value="" disabled selected>— Selecciona —</option>
-                                        @foreach ($inventario as $inv)
-                                            <option value="{{ $inv->id }}" @selected(old('compra.inventario_id') == $inv->id)>
-                                                {{ $inv->material->nombre }} (Stock: {{ $inv->stock_actual ?? 0 }}
-                                                {{ $inv->unidad_medida ?? '' }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('compra.inventario_id')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
+                                        <label class="form-label">Inventario / Material</label>
+                                        <select name="compra[inventario_id]" class="form-select" required>
+                                            <option value="" disabled selected>— Selecciona —</option>
+                                            @foreach ($inventario as $inv)
+                                                <option value="{{ $inv->id }}" @selected(old('compra.inventario_id') == $inv->id)>
+                                                    {{ $inv->material->nombre }} (Stock:
+                                                    {{ $inv->stock_actual ?? 0 }}
+                                                    {{ $inv->unidad_medida ?? '' }} | Precio:
+                                                    {{ $inv->precio_compra }})
 
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Fecha</label>
-                                            <input type="date" name="compra[fecha]" class="form-control"
-                                                value="{{ old('compra.fecha') }}" required>
-                                            @error('compra.fecha')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('compra.inventario_id')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Fecha</label>
+                                                <input type="date" name="compra[fecha]" class="form-control"
+                                                    value="{{ old('compra.fecha') }}" required>
+                                                @error('compra.fecha')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Cantidad</label>
+                                                <input type="number" name="compra[cantidad]" step="0.001"
+                                                    min="0.001" class="form-control"
+                                                    value="{{ old('compra.cantidad') }}" required>
+                                                @error('compra.cantidad')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Cantidad</label>
-                                            <input type="number" name="compra[cantidad]" step="0.001"
-                                                min="0.001" class="form-control"
-                                                value="{{ old('compra.cantidad') }}" required>
-                                            @error('compra.cantidad')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
 
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Precio compra (COP / unidad)</label>
-                                            <input type="number" name="compra[precio_compra]" step="0.01"
-                                                min="0" class="form-control"
-                                                value="{{ old('compra.precio_compra') }}" required>
-                                            @error('compra.precio_compra')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
+                                        <label class="form-label">Observaciones (opcional)</label>
+                                        <textarea name="compra[observaciones]" rows="2" class="form-control">{{ old('compra.observaciones') }}</textarea>
+                                        <div class="text-end">
+                                            <button type="submit" class="btn btn-success">Guardar
+                                                entrada</button>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Unidad (referencial)</label>
-                                            <input type="text" class="form-control"
-                                                value="Se usa la del inventario" disabled>
-                                        </div>
-                                    </div>
-
-                                    <label class="form-label">Observaciones (opcional)</label>
-                                    <textarea name="compra[observaciones]" rows="2" class="form-control">{{ old('compra.observaciones') }}</textarea>
-
-                                    <div class="text-end">
-                                        <button type="submit" class="btn btn-success">Guardar entrada</button>
-                                    </div>
-                                </form>
+                                    </form>
+                                </div>
                             </div>
                         </div>
+
+                        <!-- ================== SALIDA (Despacho) ================== -->
+                        <div class="col-12 col-lg-6">
+                            <div class="card card-hover h-100">
+                                <div class="card-header bg-success text-white">
+                                    <strong>Registrar SALIDA (Despacho)</strong>
+                                </div>
+                                <div class="card-body">
+                                    <form action="{{ route('eca.movimientos.venta.store') }}" method="post"
+                                        class="vstack gap-3">
+                                        @csrf
+
+                                        <label class="form-label">Inventario / Material</label>
+                                        <select name="venta[inventario_id]" class="form-select" required>
+                                            <option value="" disabled selected>— Selecciona —</option>
+                                            @foreach ($inventario as $inv)
+                                                <option value="{{ $inv->id }}" @selected(old('venta.inventario_id') == $inv->id)>
+                                                    {{ $inv->material->nombre }} (Stock:
+                                                    {{ $inv->stock_actual ?? 0 }}
+                                                    {{ $inv->unidad_medida ?? '' }} | Precio:
+                                                    {{ $inv->precio_compra }})
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('venta.inventario_id')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Fecha</label>
+                                                <input type="date" name="venta[fecha]" class="form-control"
+                                                    value="{{ old('venta.fecha') }}" required>
+                                                @error('venta.fecha')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Cantidad</label>
+                                                <input type="number" name="venta[cantidad]" step="0.001"
+                                                    min="0.001" class="form-control"
+                                                    value="{{ old('venta.cantidad') }}" required>
+                                                @error('venta.cantidad')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row g-3">
+                                            <div class="col-md-5">
+                                                <label class="form-label">Centro de acopio (Opcional)</label>
+                                                <select id="centro_global" class="form-select">
+                                                    <option value="">— Selecciona —</option>
+                                                    @foreach ($centrosGlobalesLista as $cag)
+                                                        <option value="{{ $cag->id }}">
+                                                            {{ $cag->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-7">
+                                                <label class="form-label">Centro de acopios personales
+                                                    (Opcional)</label>
+                                                <select id="centro_propio" class="form-select">
+                                                    <option value="">— Selecciona —</option>
+                                                    @foreach ($centrosPropiosLista as $cag)
+                                                        <option value="{{ $cag->id }}">
+                                                            {{ $cag->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Campo oculto que se enviará en el form -->
+                                        <input type="hidden" name="venta[centro_acopio_id]" id="centro_hidden">
+                                        @error('venta.centro_acopio_id')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+
+
+                                        <label class="form-label">Observaciones (opcional)</label>
+                                        <textarea name="venta[observaciones]" rows="2" class="form-control">{{ old('venta.observaciones') }}</textarea>
+
+                                        <div class="text-end">
+                                            <button type="submit" class="btn btn-danger">Guardar salida</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
-                    <!-- ================== SALIDA (Despacho) ================== -->
-                    <div class="col-12 col-lg-6">
-                        <div class="card h-100">
-                            <div class="card-header bg-white">
-                                <strong>Registrar SALIDA (Despacho)</strong>
+
+
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                <strong>Últimos movimientos</strong>
+                                <span class="text-muted small">Compras y ventas recientes</span>
                             </div>
+
                             <div class="card-body">
-                                <form action="{{ route('eca.movimientos.venta.store') }}" method="post"
-                                    class="vstack gap-3">
-                                    @csrf
-
-                                    <label class="form-label">Inventario / Material</label>
-                                    <select name="venta[inventario_id]" class="form-select" required>
-                                        <option value="" disabled selected>— Selecciona —</option>
-                                        @foreach ($inventario as $inv)
-                                            <option value="{{ $inv->id }}" @selected(old('venta.inventario_id') == $inv->id)>
-                                                {{ $inv->material->nombre }} (Stock: {{ $inv->stock_actual ?? 0 }}
-                                                {{ $inv->unidad_medida ?? '' }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('venta.inventario_id')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Cantidad</label>
-                                            <input type="number" name="venta[cantidad]" step="0.001"
-                                                min="0.001" class="form-control"
-                                                value="{{ old('venta.cantidad') }}" required>
-                                            @error('venta.cantidad')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Fecha</label>
-                                            <input type="date" name="venta[fecha]" class="form-control"
-                                                value="{{ old('venta.fecha') }}" required>
-                                            @error('venta.fecha')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Precio venta (COP / unidad)</label>
-                                            <input type="number" name="venta[precio_venta]" step="0.01"
-                                                min="0" class="form-control"
-                                                value="{{ old('venta.precio_venta') }}" required>
-                                            @error('venta.precio_venta')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Unidad (referencial)</label>
-                                            <input type="text" class="form-control"
-                                                value="Se usa la del inventario" disabled>
-                                        </div>
-                                    </div>
-
-                                    <label class="form-label">Observaciones (opcional)</label>
-                                    <textarea name="venta[observaciones]" rows="2" class="form-control">{{ old('venta.observaciones') }}</textarea>
-
-                                    <div class="text-end">
-                                        <button type="submit" class="btn btn-danger">Guardar salida</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                            <strong>Últimos movimientos</strong>
-                            <span class="text-muted small">Compras y ventas recientes</span>
-                        </div>
-
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-sm align-middle">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th style="width: 110px;">Fecha</th>
-                                            <th style="width: 90px;">Tipo</th>
-                                            <th>Material</th>
-                                            <th class="text-end" style="width: 140px;">Cantidad</th>
-                                            <th style="width: 80px;">Unidad</th>
-                                            <th class="text-end" style="width: 160px;">Precio unitario</th>
-                                            <th>Observaciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($ultimosMovimientos as $m)
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle">
+                                        <thead class="table-light">
                                             <tr>
-                                                <td>{{ $m['fecha'] }}</td>
-                                                <td>
-                                                    <span
-                                                        class="badge {{ $m['tipo'] === 'compra' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}">
-                                                        {{ ucfirst($m['tipo']) }}
-                                                    </span>
-                                                </td>
-                                                <td>{{ $m['material'] }}</td>
-                                                <td class="text-end">{{ number_format($m['cantidad'] ?? 0, 3) }}</td>
-                                                <td>{{ $m['unidad'] }}</td>
-                                                <td class="text-end">
-                                                    @if (!is_null($m['precio_unit']))
-                                                        {{ number_format($m['precio_unit'], 2) }}
-                                                    @else
-                                                        —
-                                                    @endif
-                                                </td>
-                                                <td class="text-truncate" style="max-width: 320px;">
-                                                    {{ $m['observ'] ?? '—' }}
-                                                </td>
+                                                <th style="width: 110px;">Fecha</th>
+                                                <th style="width: 90px;">Tipo</th>
+                                                <th>Material</th>
+                                                <th class="text-end" style="width: 140px;">Cantidad</th>
+                                                <th style="width: 80px;">Unidad</th>
+                                                <th class="text-end" style="width: 160px;">Precio</th>
+                                                <th>Observaciones</th>
                                             </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="7" class="text-center text-muted">No hay movimientos
-                                                    recientes.</td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            @forelse($ultimosMovimientos as $m)
+                                                <tr>
+                                                    <td>{{ $m['fecha'] }}</td>
+                                                    <td>
+                                                        <span
+                                                            class="badge {{ $m['tipo'] === 'compra' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}">
+                                                            {{ ucfirst($m['tipo']) }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ $m['material'] }}</td>
+                                                    <td class="text-end">
+                                                        {{ number_format($m['cantidad'] ?? 0, 3) }}
+                                                    </td>
+                                                    <td>{{ $m['unidad'] }}</td>
+                                                    <td class="text-end">
+                                                        @if (!is_null($m['precio_unit']))
+                                                            {{ number_format($m['precio_unit'], 2) }}
+                                                        @else
+                                                            —
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-truncate" style="max-width: 320px;">
+                                                        {{ $m['observ'] ?? '—' }}
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="7" class="text-center text-muted">No hay
+                                                        movimientos
+                                                        recientes.</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1022,14 +1034,10 @@
                                             <td class="text-end">{{ number_format($c->cantidad ?? 0, 3) }}</td>
                                             <td>{{ $c->inventario->unidad_medida ?? '' }}</td>
                                             <td class="text-end">
-                                                {{ is_numeric($c->precio_compra) ? number_format($c->precio_compra, 2) : '—' }}
+                                                {{ is_numeric($c->inventario->precio_compra) ? number_format($c->inventario->precio_compra, 2) : '—' }}
                                             </td>
                                             <td class="text-end">
-                                                @php
-                                                    $total =
-                                                        (float) ($c->cantidad ?? 0) * (float) ($c->precio_compra ?? 0);
-                                                @endphp
-                                                {{ number_format($total, 2) }}
+                                                {{ number_format($c->precio_compra, 2) }}
                                             </td>
                                             <td class="text-truncate" style="max-width: 280px;">
                                                 {{ $c->observaciones ?? '—' }}</td>
@@ -1129,7 +1137,8 @@
             </section>
 
             <!-- CALENDARIO GLOBAL -->
-            <section class="tab-pane fade {{ $seccion === 'calendario' ? 'show active' : '' }}" id="tab-calendario">
+            <section class="tab-pane fade {{ $seccion === 'calendario' ? 'show active' : '' }}"
+                id="tab-calendario">
                 <div class="row g-3">
                     <div class="col-lg-8">
                         <div class="card">
@@ -1137,8 +1146,8 @@
                                 <div class="calendar">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <div class="h5 mb-0" id="calTitulo">—</div>
-                                        <div><button class="btn btn-sm btn-outline-secondary"
-                                                id="calPrev">◀</button>
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-secondary" id="calPrev">◀</button>
                                             <button class="btn btn-sm btn-outline-secondary" id="calNext">▶</button>
                                         </div>
                                     </div>
@@ -1155,399 +1164,587 @@
                                 </div>
                             </div>
                         </div>
+                        {{-- Leyenda simple --}}
+                        <div class="small text-muted mt-2">
+                            <span class="badge bg-success">Salida</span> Despacho programado al centro elegido.
+                        </div>
                     </div>
+
                     <div class="col-lg-4">
                         <div class="card h-100">
                             <div class="card-body">
-                                <h6>Programar nuevo despacho</h6>
-                                <div class="mb-2"><label class="form-label">Material</label><select id="calMat"
-                                        class="form-select"></select></div>
-                                <div class="mb-2"><label class="form-label">Frecuencia</label>
-                                    <select id="calFreq" class="form-select">
-                                        <option value="unico">Único</option>
-                                        <option value="semanal">Semanal</option>
-                                        <option value="quincenal">Cada 15 días</option>
-                                        <option value="mensual">Mensual</option>
-                                    </select>
-                                </div>
-                                <div class="mb-2"><label class="form-label">Fecha inicial</label><input
-                                        id="calFecha" type="date" class="form-control"></div>
-                                <div class="mb-2"><label class="form-label">Hora</label><input id="calHora"
-                                        type="time" class="form-control" value="10:00"></div>
-                                <div class="mb-2"><label class="form-label">Centro de acopio</label><select
-                                        id="calCentro" class="form-select"></select></div>
-                                <button id="calGuardar" class="btn btn-success w-100">Guardar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+                                <h6 class="mb-3">Programar nuevo despacho</h6>
 
-            <section class="tab-pane fade {{ $seccion === 'centros' ? 'show active' : '' }}" id="tab-centros">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0">Centros de acopio</h5>
-                </div>
-
-                {{-- ===================== FILTROS ===================== --}}
-                <form class="row g-2 mb-4" method="get"
-                    action="{{ route('eca.index', ['seccion' => 'centros']) }}">
-                    <div class="col-12 col-md-3">
-                        <input type="text" name="f_nombre" class="form-control" placeholder="Buscar por nombre"
-                            value="{{ request('f_nombre') }}">
-                    </div>
-
-                    <div class="col-6 col-md-2">
-                        <select name="f_tipo" class="form-select">
-                            <option value="">Tipo (todos)</option>
-                            @foreach (['Planta', 'Proveedor', 'Otro'] as $t)
-                                <option value="{{ $t }}" @selected(request('f_tipo') === $t)>
-                                    {{ $t }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="col-6 col-md-2">
-                        <select name="f_estado" class="form-select">
-                            <option value="">Estado (todos)</option>
-                            @foreach (['activo', 'inactivo', 'bloqueado'] as $e)
-                                <option value="{{ $e }}" @selected(request('f_estado') === $e)>
-                                    {{ ucfirst($e) }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="col-6 col-md-2">
-                        <input type="text" name="f_ciudad" class="form-control" placeholder="Ciudad"
-                            value="{{ request('f_ciudad') }}">
-                    </div>
-
-                    <div class="col-6 col-md-3">
-                        <select name="f_materiales[]" class="form-select" multiple size="4">
-                            @foreach ($materialesPunto ?? [] as $m)
-                                <option value="{{ $m->id }}" @selected(collect(request('f_materiales'))->contains($m->id))>
-                                    {{ $m->nombre }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <div class="form-text">Ctrl/⌘ para seleccionar varios</div>
-                    </div>
-
-                    <div class="col-12 d-grid d-md-block">
-                        <button class="btn btn-outline-success">Aplicar filtros</button>
-                    </div>
-                </form>
-
-                <div class="row g-4">
-                    {{-- ===================== LISTADOS ===================== --}}
-                    <div class="col-12 col-lg-8">
-                        {{-- ========== Centros globales ========== --}}
-                        <div class="card card-hover mb-4">
-                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                                <strong>Centros globales</strong>
-                                <span class="small text-muted">Catálogo general</span>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-striped align-middle">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Nombre</th>
-                                                <th>Tipo</th>
-                                                <th>Ciudad</th>
-                                                <th>Materiales que recicla</th>
-                                                <th>Contacto</th>
-                                                <th>Teléfono</th>
-                                                <th>Correo</th>
-                                                <th>Estado</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse(($centrosGlobales ?? []) as $c)
-                                                @php $nombresMat = ($c->materiales ?? collect())->pluck('nombre')->all(); @endphp
-                                                <tr>
-                                                    <td>{{ $c->nombre }}</td>
-                                                    <td>{{ $c->tipo }}</td>
-                                                    <td>{{ $c->ciudad ?? '—' }}</td>
-                                                    <td class="text-truncate" style="max-width: 320px;">
-                                                        {{ $nombresMat ? implode(', ', $nombresMat) : '—' }}
-                                                    </td>
-                                                    <td>{{ $c->contacto ?? '—' }}</td>
-                                                    <td>{{ $c->telefono ?? '—' }}</td>
-                                                    <td>{{ $c->correo ?? '—' }}</td>
-                                                    <td>{{ ucfirst($c->estado) }}</td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="8" class="text-center text-muted">Sin resultados.
-                                                    </td>
-                                                </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                @if (($centrosGlobales ?? null) instanceof \Illuminate\Contracts\Pagination\Paginator)
-                                    <div class="d-flex justify-content-center">
-                                        {{ $centrosGlobales->onEachSide(1)->links('pagination::bootstrap-5') }}
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-
-                        {{-- ========== Centros del Punto (propios) ========== --}}
-                        <div class="card card-hover">
-                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                                <strong>Centros del Punto</strong>
-                                <span class="small text-muted">Propios del Punto ECA</span>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-striped align-middle">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Nombre</th>
-                                                <th>Tipo</th>
-                                                <th>Ciudad</th>
-                                                <th>Materiales que recicla</th>
-                                                <th>Contacto</th>
-                                                <th>Teléfono</th>
-                                                <th>Estado</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse(($centrosPropios ?? []) as $c)
-                                                @php $nombresMat = ($c->materiales ?? collect())->pluck('nombre')->all(); @endphp
-                                                <tr>
-                                                    <td>{{ $c->nombre }}</td>
-                                                    <td>{{ $c->tipo }}</td>
-                                                    <td>{{ $c->ciudad ?? '—' }}</td>
-                                                    <td class="text-truncate" style="max-width: 320px;">
-                                                        {{ $nombresMat ? implode(', ', $nombresMat) : '—' }}
-                                                    </td>
-                                                    <td>{{ $c->contacto ?? '—' }}</td>
-                                                    <td>{{ $c->telefono ?? '—' }}</td>
-                                                    <td>{{ ucfirst($c->estado) }}</td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="7" class="text-center text-muted">Aún no has
-                                                        creado centros.</td>
-                                                </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                @if (($centrosPropios ?? null) instanceof \Illuminate\Contracts\Pagination\Paginator)
-                                    <div class="d-flex justify-content-center">
-                                        {{ $centrosPropios->onEachSide(1)->links('pagination::bootstrap-5') }}
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- ===================== FORMULARIO NUEVO CENTRO (propio) ===================== --}}
-                    <div class="col-12 col-lg-4">
-                        <div class="card card-hover h-100">
-                            <div class="card-header bg-white">
-                                <strong>Nuevo centro del punto</strong>
-                            </div>
-                            <div class="card-body">
-                                <form action="{{ route('eca.centros.store') }}" method="post"
+                                <form action="{{ route('eca.calendario.store') }}" method="post"
                                     class="vstack gap-3">
                                     @csrf
-
+                                    {{-- Material (inventario del punto) --}}
                                     <div>
-                                        <label class="form-label">Nombre</label>
-                                        <input type="text" name="cac[nombre]" class="form-control"
-                                            value="{{ old('cac.nombre') }}" required>
-                                        @error('cac.nombre')
+                                        <label class="form-label">Material</label>
+                                        <select name="inv_material_id" class="form-select" required>
+                                            <option value="" disabled selected>— Selecciona —</option>
+                                            @foreach ($inventario ?? [] as $inv)
+                                                <option value="{{ $inv->id }}" @selected(old('inv_material_id') === $inv->id)>
+                                                    {{ $inv->material->nombre ?? '—' }} (Stock:
+                                                    {{ $inv->stock_actual ?? 0 }} {{ $inv->unidad_medida ?? '' }})
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('inv_material_id')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
                                     </div>
 
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Tipo</label>
-                                            <select name="cac[tipo]" class="form-select" required>
-                                                @foreach (['Planta', 'Proveedor', 'Otro'] as $t)
-                                                    <option value="{{ $t }}"
-                                                        @selected(old('cac.tipo') === $t)>{{ $t }}</option>
+                                    {{-- Centro de acopio destino (globales + propios) --}}
+                                    <div>
+                                        <label class="form-label">Centro de acopio</label>
+                                        <select name="centro_acopio_id" class="form-select" required>
+                                            <option value="" disabled selected>— Selecciona —</option>
+                                            <optgroup label="Propios del Punto">
+                                                @foreach ($centrosPropios ?? [] as $c)
+                                                    <option value="{{ $c->id }}"
+                                                        @selected(old('centro_acopio_id') === $c->id)>{{ $c->nombre }}</option>
                                                 @endforeach
-                                            </select>
-                                            @error('cac.tipo')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-
-                                        <div class="col-md-6">
-                                            <label class="form-label">Materiales que recicla</label>
-                                            <select name="cac[materiales][]" class="form-select" multiple
-                                                size="6">
-                                                @foreach ($materialesPunto ?? [] as $m)
-                                                    <option value="{{ $m->id }}"
-                                                        @selected(collect(old('cac.materiales', []))->contains($m->id))>
-                                                        {{ $m->nombre }}
-                                                    </option>
+                                            </optgroup>
+                                            <optgroup label="Globales">
+                                                @foreach ($centrosGlobales ?? [] as $c)
+                                                    <option value="{{ $c->id }}"
+                                                        @selected(old('centro_acopio_id') === $c->id)>{{ $c->nombre }}</option>
                                                 @endforeach
-                                            </select>
-                                            <div class="form-text">Selecciona uno o varios.</div>
-                                            @error('cac.materiales')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                            @error('cac.materiales.*')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
+                                            </optgroup>
+                                        </select>
+                                        @error('centro_acopio_id')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
                                     </div>
 
+                                    {{-- Frecuencia --}}
                                     <div>
-                                        <label class="form-label">Descripción</label>
-                                        <input type="text" name="cac[descripcion]" class="form-control"
-                                            value="{{ old('cac.descripcion') }}">
-                                        @error('cac.descripcion')
+                                        <label class="form-label">Frecuencia</label>
+                                        <select name="frecuencia" class="form-select" required>
+                                            @foreach (['unico' => 'Único', 'semanal' => 'Semanal', 'quincenal' => 'Cada 15 días', 'mensual' => 'Mensual'] as $v => $t)
+                                                <option value="{{ $v }}" @selected(old('frecuencia') === $v)>
+                                                    {{ $t }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('frecuencia')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
                                     </div>
 
                                     <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Contacto</label>
-                                            <input type="text" name="cac[contacto]" class="form-control"
-                                                value="{{ old('cac.contacto') }}">
-                                            @error('cac.contacto')
+                                        <div class="col-6">
+                                            <label class="form-label">Fecha inicial</label>
+                                            <input type="date" name="fecha" class="form-control"
+                                                value="{{ old('fecha') ?? now()->toDateString() }}" required>
+                                            @error('fecha')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                             @enderror
                                         </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Teléfono</label>
-                                            <input type="text" name="cac[telefono]" class="form-control"
-                                                value="{{ old('cac.telefono') }}">
-                                            @error('cac.telefono')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Correo</label>
-                                            <input type="email" name="cac[correo]" class="form-control"
-                                                value="{{ old('cac.correo') }}">
-                                            @error('cac.correo')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Sitio web</label>
-                                            <input type="url" name="cac[sitio_web]" class="form-control"
-                                                value="{{ old('cac.sitio_web') }}">
-                                            @error('cac.sitio_web')
+                                        <div class="col-6">
+                                            <label class="form-label">Hora</label>
+                                            <input type="time" name="hora" class="form-control"
+                                                value="{{ old('hora') ?? '10:00' }}" required>
+                                            @error('hora')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
 
                                     <div>
-                                        <label class="form-label">Horario de atención</label>
-                                        <input type="text" name="cac[horario_atencion]" class="form-control"
-                                            value="{{ old('cac.horario_atencion') }}">
-                                        @error('cac.horario_atencion')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Ciudad</label>
-                                            <input type="text" name="cac[ciudad]" class="form-control"
-                                                value="{{ old('cac.ciudad') }}">
-                                            @error('cac.ciudad')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Localidad</label>
-                                            <input type="text" name="cac[localidad]" class="form-control"
-                                                value="{{ old('cac.localidad') }}">
-                                            @error('cac.localidad')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label class="form-label">Dirección</label>
-                                        <input type="text" name="cac[direccion]" class="form-control"
-                                            value="{{ old('cac.direccion') }}">
-                                        @error('cac.direccion')
+                                        <label class="form-label">Precio de venta (opcional)</label>
+                                        <input type="number" name="precio_venta" class="form-control"
+                                            step="0.01" min="0" value="{{ old('precio_venta') }}">
+                                        @error('precio_venta')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
                                     </div>
 
                                     <div class="text-end">
-                                        <button class="btn btn-success">Guardar centro</button>
+                                        <button class="btn btn-success w-100">Guardar</button>
                                     </div>
                                 </form>
-                            </div>
-                        </div>
-                    </div>
 
-                </div>
-            </section>
+                                <hr>
 
-
-
-            <!-- CONVERSACIONES -->
-            <section class="tab-pane fade {{ $seccion === 'conversaciones' ? 'show active' : '' }}"
-                id="tab-conversaciones">
-                <div class="row g-3">
-                    <div class="col-lg-4">
-                        <div class="card p-3">
-                            <h6 class="mb-3">Conversaciones</h6>
-                            <div class="list-group sidebar-threads" id="threadList"></div>
-                        </div>
-                    </div>
-                    <div class="col-lg-8 d-flex flex-column">
-                        <div class="chat-window d-flex flex-column mb-3" id="chatWindow"></div>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="chatInput"
-                                placeholder="Escribe un mensaje…">
-                            <button class="btn btn-success" id="chatSend">Enviar</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- CONFIG -->
-            <section class="tab-pane fade {{ $seccion === 'configuracion' ? 'show active' : '' }}" id="tab-config">
-                <div class="card">
-                    <div class="card-body">
-                        <h6 class="mb-3">Preferencias del punto ECA</h6>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Mostrar en mapa público</label>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="cfgMapa">
-                                    <label class="form-check-label" for="cfgMapa">Visible cuando esté
-                                        aprobado</label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Recibir notificaciones</label>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="cfgNoti">
-                                    <label class="form-check-label" for="cfgNoti">Aprobaciones, mensajes,
-                                        comentarios</label>
+                                {{-- Rango mostrado (sólo informativo) --}}
+                                <div class="small text-muted">
+                                    Mostrando: <span id="lblRango">—</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="text-end mt-3"><button class="btn btn-success btn-sm"
-                                id="cfgGuardar">Guardar</button></div>
                     </div>
                 </div>
-            </section>
+
+                {{-- JS mínimo para pintar calendario y pedir eventos --}}
+                <script>
+                    (function() {
+                        const elTitulo = document.getElementById('calTitulo');
+                        const elGrid = document.getElementById('calGrid');
+                        const elPrev = document.getElementById('calPrev');
+                        const elNext = document.getElementById('calNext');
+                        const lblRango = document.getElementById('lblRango');
+
+                        let visible = new Date(); // mes visible
+
+                        function ymd(d) {
+                            return d.toISOString().slice(0, 10);
+                        }
+
+                        function firstDayOfMonth(d) {
+                            return new Date(d.getFullYear(), d.getMonth(), 1);
+                        }
+
+                        function lastDayOfMonth(d) {
+                            return new Date(d.getFullYear(), d.getMonth() + 1, 0);
+                        }
+
+                        function addDays(d, n) {
+                            const x = new Date(d);
+                            x.setDate(x.getDate() + n);
+                            return x;
+                        }
+
+                        async function fetchEventos(from, to) {
+                            const url = new URL(@json(route('eca.calendario.feed')));
+                            url.searchParams.set('from', from);
+                            url.searchParams.set('to', to);
+                            const res = await fetch(url, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            });
+                            if (!res.ok) return [];
+                            return res.json();
+                        }
+
+                        async function render() {
+                            const first = firstDayOfMonth(visible);
+                            const last = lastDayOfMonth(visible);
+
+                            // Semanas: arrancamos en lunes
+                            const start = addDays(first, ((first.getDay() + 6) % 7) * -1);
+                            const end = addDays(last, 6 - ((last.getDay() + 6) % 7));
+
+                            elTitulo.textContent = first.toLocaleString('es-ES', {
+                                month: 'long',
+                                year: 'numeric'
+                            });
+                            lblRango.textContent = `${ymd(start)} a ${ymd(end)}`;
+
+                            const eventos = await fetchEventos(ymd(start), ymd(
+                                end)); // [{fecha:'YYYY-MM-DD', titulo:'...', hora:'HH:MM'}]
+
+                            elGrid.innerHTML = '';
+                            const day = new Date(start);
+                            while (day <= end) {
+                                const cell = document.createElement('div');
+                                cell.className = 'p-2 border small';
+                                const esMesActual = day.getMonth() === visible.getMonth();
+                                cell.style.background = esMesActual ? 'transparent' : '#fafafa';
+
+                                const hd = document.createElement('div');
+                                hd.className = 'fw-semibold mb-1';
+                                hd.textContent = day.getDate();
+                                cell.appendChild(hd);
+
+                                const fechaStr = ymd(day);
+                                (eventos.filter(e => e.fecha === fechaStr)).forEach(e => {
+                                    const tag = document.createElement('div');
+                                    tag.className = 'badge bg-success text-wrap mb-1';
+                                    tag.style.whiteSpace = 'normal';
+                                    tag.textContent = `${e.hora ?? ''} ${e.titulo}`;
+                                    cell.appendChild(tag);
+                                });
+
+                                elGrid.appendChild(cell);
+                                day.setDate(day.getDate() + 1);
+                            }
+                        }
+
+                        elPrev.addEventListener('click', () => {
+                            visible.setMonth(visible.getMonth() - 1);
+                            render();
+                        });
+                        elNext.addEventListener('click', () => {
+                            visible.setMonth(visible.getMonth() + 1);
+                            render();
+                        });
+
+                        render();
+                    })();
+                </script>
+                </section>
+
+
+                <section class="tab-pane fade {{ $seccion === 'centros' ? 'show active' : '' }}" id="tab-centros">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Centros de acopio</h5>
+                    </div>
+
+                    {{-- ===================== FILTROS ===================== --}}
+                    <form class="row g-2 mb-4" method="get"
+                        action="{{ route('eca.index', ['seccion' => 'centros']) }}">
+                        <div class="col-12 col-md-3">
+                            <input type="text" name="f_nombre" class="form-control"
+                                placeholder="Buscar por nombre" value="{{ request('f_nombre') }}">
+                        </div>
+
+                        <div class="col-6 col-md-2">
+                            <select name="f_tipo" class="form-select">
+                                <option value="">Tipo (todos)</option>
+                                @foreach (['Planta', 'Proveedor', 'Otro'] as $t)
+                                    <option value="{{ $t }}" @selected(request('f_tipo') === $t)>
+                                        {{ $t }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-6 col-md-2">
+                            <select name="f_estado" class="form-select">
+                                <option value="">Estado (todos)</option>
+                                @foreach (['activo', 'inactivo', 'bloqueado'] as $e)
+                                    <option value="{{ $e }}" @selected(request('f_estado') === $e)>
+                                        {{ ucfirst($e) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-6 col-md-2">
+                            <input type="text" name="f_ciudad" class="form-control" placeholder="Ciudad"
+                                value="{{ request('f_ciudad') }}">
+                        </div>
+
+                        <div class="col-6 col-md-3">
+                            <select name="f_materiales[]" class="form-select" multiple size="4">
+                                @foreach ($materialesPunto ?? [] as $m)
+                                    <option value="{{ $m->id }}" @selected(collect(request('f_materiales'))->contains($m->id))>
+                                        {{ $m->nombre }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="form-text">Ctrl/⌘ para seleccionar varios</div>
+                        </div>
+
+                        <div class="col-12 d-grid d-md-block">
+                            <button class="btn btn-outline-success">Aplicar filtros</button>
+                        </div>
+                    </form>
+
+                    <div class="row g-4">
+                        {{-- ===================== LISTADOS ===================== --}}
+                        <div class="col-12 col-lg-8">
+                            {{-- ========== Centros globales ========== --}}
+                            <div class="card card-hover mb-4">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                    <strong>Centros globales</strong>
+                                    <span class="small text-muted">Catálogo general</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped align-middle">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Nombre</th>
+                                                    <th>Tipo</th>
+                                                    <th>Ciudad</th>
+                                                    <th>Materiales que recicla</th>
+                                                    <th>Contacto</th>
+                                                    <th>Teléfono</th>
+                                                    <th>Correo</th>
+                                                    <th>Estado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @forelse(($centrosGlobales ?? []) as $c)
+                                                    @php $nombresMat = ($c->materiales ?? collect())->pluck('nombre')->all(); @endphp
+                                                    <tr>
+                                                        <td>{{ $c->nombre }}</td>
+                                                        <td>{{ $c->tipo }}</td>
+                                                        <td>{{ $c->ciudad ?? '—' }}</td>
+                                                        <td class="text-truncate" style="max-width: 320px;">
+                                                            {{ $nombresMat ? implode(', ', $nombresMat) : '—' }}
+                                                        </td>
+                                                        <td>{{ $c->contacto ?? '—' }}</td>
+                                                        <td>{{ $c->telefono ?? '—' }}</td>
+                                                        <td>{{ $c->correo ?? '—' }}</td>
+                                                        <td>{{ ucfirst($c->estado) }}</td>
+                                                    </tr>
+                                                @empty
+                                                    <tr>
+                                                        <td colspan="8" class="text-center text-muted">Sin
+                                                            resultados.
+                                                        </td>
+                                                    </tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    @if (($centrosGlobales ?? null) instanceof \Illuminate\Contracts\Pagination\Paginator)
+                                        <div class="d-flex justify-content-center">
+                                            {{ $centrosGlobales->onEachSide(1)->links('pagination::bootstrap-5') }}
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            {{-- ========== Centros del Punto (propios) ========== --}}
+                            <div class="card card-hover">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                    <strong>Centros del Punto</strong>
+                                    <span class="small text-muted">Propios del Punto ECA</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped align-middle">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Nombre</th>
+                                                    <th>Tipo</th>
+                                                    <th>Ciudad</th>
+                                                    <th>Materiales que recicla</th>
+                                                    <th>Contacto</th>
+                                                    <th>Teléfono</th>
+                                                    <th>Estado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @forelse(($centrosPropios ?? []) as $c)
+                                                    @php $nombresMat = ($c->materiales ?? collect())->pluck('nombre')->all(); @endphp
+                                                    <tr>
+                                                        <td>{{ $c->nombre }}</td>
+                                                        <td>{{ $c->tipo }}</td>
+                                                        <td>{{ $c->ciudad ?? '—' }}</td>
+                                                        <td class="text-truncate" style="max-width: 320px;">
+                                                            {{ $nombresMat ? implode(', ', $nombresMat) : '—' }}
+                                                        </td>
+                                                        <td>{{ $c->contacto ?? '—' }}</td>
+                                                        <td>{{ $c->telefono ?? '—' }}</td>
+                                                        <td>{{ ucfirst($c->estado) }}</td>
+                                                    </tr>
+                                                @empty
+                                                    <tr>
+                                                        <td colspan="7" class="text-center text-muted">Aún no has
+                                                            creado centros.</td>
+                                                    </tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    @if (($centrosPropios ?? null) instanceof \Illuminate\Contracts\Pagination\Paginator)
+                                        <div class="d-flex justify-content-center">
+                                            {{ $centrosPropios->onEachSide(1)->links('pagination::bootstrap-5') }}
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- ===================== FORMULARIO NUEVO CENTRO (propio) ===================== --}}
+                        <div class="col-12 col-lg-4">
+                            <div class="card card-hover h-100">
+                                <div class="card-header bg-white">
+                                    <strong>Nuevo centro del punto</strong>
+                                </div>
+                                <div class="card-body">
+                                    <form action="{{ route('eca.centros.store') }}" method="post"
+                                        class="vstack gap-3">
+                                        @csrf
+
+                                        <div>
+                                            <label class="form-label">Nombre</label>
+                                            <input type="text" name="cac[nombre]" class="form-control"
+                                                value="{{ old('cac.nombre') }}" required>
+                                            @error('cac.nombre')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Tipo</label>
+                                                <select name="cac[tipo]" class="form-select" required>
+                                                    @foreach (['Planta', 'Proveedor', 'Otro'] as $t)
+                                                        <option value="{{ $t }}"
+                                                            @selected(old('cac.tipo') === $t)>
+                                                            {{ $t }}</option>
+                                                    @endforeach
+                                                </select>
+                                                @error('cac.tipo')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label">Materiales que recicla</label>
+                                                <select name="cac[materiales][]" class="form-select" multiple
+                                                    size="6">
+                                                    @foreach ($materialesPunto ?? [] as $m)
+                                                        <option value="{{ $m->id }}"
+                                                            @selected(collect(old('cac.materiales', []))->contains($m->id))>
+                                                            {{ $m->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="form-text">Selecciona uno o varios.</div>
+                                                @error('cac.materiales')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                                @error('cac.materiales.*')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="form-label">Descripción</label>
+                                            <input type="text" name="cac[descripcion]" class="form-control"
+                                                value="{{ old('cac.descripcion') }}">
+                                            @error('cac.descripcion')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Contacto</label>
+                                                <input type="text" name="cac[contacto]" class="form-control"
+                                                    value="{{ old('cac.contacto') }}">
+                                                @error('cac.contacto')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Teléfono</label>
+                                                <input type="text" name="cac[telefono]" class="form-control"
+                                                    value="{{ old('cac.telefono') }}">
+                                                @error('cac.telefono')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Correo</label>
+                                                <input type="email" name="cac[correo]" class="form-control"
+                                                    value="{{ old('cac.correo') }}">
+                                                @error('cac.correo')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Sitio web</label>
+                                                <input type="url" name="cac[sitio_web]" class="form-control"
+                                                    value="{{ old('cac.sitio_web') }}">
+                                                @error('cac.sitio_web')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="form-label">Horario de atención</label>
+                                            <input type="text" name="cac[horario_atencion]" class="form-control"
+                                                value="{{ old('cac.horario_atencion') }}">
+                                            @error('cac.horario_atencion')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Ciudad</label>
+                                                <input type="text" name="cac[ciudad]" class="form-control"
+                                                    value="{{ old('cac.ciudad') }}">
+                                                @error('cac.ciudad')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Localidad</label>
+                                                <input type="text" name="cac[localidad]" class="form-control"
+                                                    value="{{ old('cac.localidad') }}">
+                                                @error('cac.localidad')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="form-label">Dirección</label>
+                                            <input type="text" name="cac[direccion]" class="form-control"
+                                                value="{{ old('cac.direccion') }}">
+                                            @error('cac.direccion')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="text-end">
+                                            <button class="btn btn-success">Guardar centro</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+
+
+                <!-- CONVERSACIONES -->
+                <section class="tab-pane fade {{ $seccion === 'conversaciones' ? 'show active' : '' }}"
+                    id="tab-conversaciones">
+                    <div class="row g-3">
+                        <div class="col-lg-4">
+                            <div class="card p-3">
+                                <h6 class="mb-3">Conversaciones</h6>
+                                <div class="list-group sidebar-threads" id="threadList"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-8 d-flex flex-column">
+                            <div class="chat-window d-flex flex-column mb-3" id="chatWindow"></div>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="chatInput"
+                                    placeholder="Escribe un mensaje…">
+                                <button class="btn btn-success" id="chatSend">Enviar</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CONFIG -->
+                <section class="tab-pane fade {{ $seccion === 'configuracion' ? 'show active' : '' }}"
+                    id="tab-config">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="mb-3">Preferencias del punto ECA</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Mostrar en mapa público</label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="cfgMapa">
+                                        <label class="form-check-label" for="cfgMapa">Visible cuando esté
+                                            aprobado</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Recibir notificaciones</label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="cfgNoti">
+                                        <label class="form-check-label" for="cfgNoti">Aprobaciones, mensajes,
+                                            comentarios</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-end mt-3"><button class="btn btn-success btn-sm"
+                                    id="cfgGuardar">Guardar</button></div>
+                        </div>
+                    </div>
+                </section>
 
         </div>
     </main>
@@ -1597,6 +1794,32 @@
             </div>
         </div>
     </div>
+
+    <script>
+        (function() {
+            const globalSelect = document.getElementById('centro_global');
+            const propioSelect = document.getElementById('centro_propio');
+            const hiddenInput = document.getElementById('centro_hidden');
+
+            function sync(from, other) {
+                const val = from.value || '';
+                hiddenInput.value = val; // ← aquí se copia el UUID al hidden
+                other.disabled = !!val; // si elegí uno, deshabilito el otro
+                if (!val) other.disabled = false;
+            }
+
+            globalSelect.addEventListener('change', () => sync(globalSelect, propioSelect));
+            propioSelect.addEventListener('change', () => sync(propioSelect, globalSelect));
+
+            // Re-sync al volver con "atrás" del navegador
+            window.addEventListener('pageshow', () => {
+                if (globalSelect.value) sync(globalSelect, propioSelect);
+                else if (propioSelect.value) sync(propioSelect, globalSelect);
+                else hiddenInput.value = '';
+            });
+        })();
+    </script>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 

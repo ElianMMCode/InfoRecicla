@@ -188,7 +188,7 @@ class PuntoEcaController extends Controller
         $hcHasta = !empty($hc['hc_hasta']) ? Carbon::parse($hc['hc_hasta'])->endOfDay() : null;
 
         $histCompras = \App\Models\Compra::query()
-            ->with(['inventario:id,unidad_medida,material_id', 'inventario.material:id,nombre'])
+            ->with(['inventario:id,unidad_medida,material_id,precio_compra', 'inventario.material:id,nombre'])
             ->whereHas('inventario', fn($q) => $q->where('punto_eca_id', $puntoEcaId))
             ->when(
                 $hc['hc_material'] ?? null,
@@ -287,6 +287,24 @@ class PuntoEcaController extends Controller
                 ->when($f['f_material'] ?? null, fn($qq, $v) => $qq->where('materiales_centro_acc', $v));
         };
 
+        //Listado Centros de Acopio
+
+        $centrosGlobalesLista = CentroAcopio::query()
+            ->select(['id', 'nombre'])         // ← solo lo necesario para el select
+            ->where('alcance', 'global')
+            ->tap($applyFilters)
+            ->orderBy('nombre')
+            ->get();
+
+        $centrosPropiosLista = CentroAcopio::query()
+            ->select(['id', 'nombre'])
+            ->where('alcance', 'eca')
+            ->where('owner_punto_eca_id', $puntoEcaId)
+            ->tap($applyFilters)
+            ->orderBy('nombre')
+            ->get();
+
+
         // Globales (catálogo)
         $centrosGlobales = CentroAcopio::query()
             ->with(['materiales']) // para mostrar solo nombre
@@ -311,6 +329,8 @@ class PuntoEcaController extends Controller
             'f'                => $f,
             'centrosGlobales'  => $centrosGlobales,
             'centrosPropios'   => $centrosPropios,
+            'centrosGlobalesLista'  => $centrosGlobalesLista,
+            'centrosPropiosLista'   => $centrosPropiosLista,
         ];
 
         // 4) Render
