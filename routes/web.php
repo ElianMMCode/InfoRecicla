@@ -15,9 +15,11 @@ use App\Http\Controllers\CompraController;
 use App\Http\Controllers\MovimientosController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\CentroAcopioController;
+use App\Http\Controllers\ProgramacionRecoleccionController;
 use App\Models\CentroAcopio;
 use App\Models\PuntoEca;
 use App\Models\Compra;
+use App\Models\ProgramacionRecoleccion;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,9 +68,11 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:GestorECA,Administrador'])->group(function () {
 
     // Panel general de Punto ECA (resumen, perfil, materiales, etc.)
-    Route::get('/eca/{seccion?}', [PuntoEcaController::class, 'view_punto_eca'])
-        ->where('seccion', 'resumen|perfil|materiales|movimientos|historial|calendario|centros|conversaciones|configuracion')
-        ->name('eca.index');
+    Route::middleware('auth')->group(function () {
+        Route::get('/eca/{seccion?}', [\App\Http\Controllers\PuntoEcaController::class, 'view_punto_eca'])
+            ->where('seccion', 'resumen|materiales|inventario|historial|centros|calendario|configuracion')
+            ->name('eca.index');
+    });;
     Route::put('/perfil', [UsuarioController::class, 'updatePerfil'])->name('eca.perfil.update');
     // Catálogo de materiales (lista filtrada para agregar al inventario)
     Route::get('/eca/materiales', [MaterialController::class, 'index'])->name('eca.materiales.index');
@@ -84,11 +88,17 @@ Route::middleware(['auth', 'role:GestorECA,Administrador'])->group(function () {
     Route::post('/eca/movimientos/ventas', [MovimientosController::class, 'storeVenta'])->name('eca.movimientos.venta.store');
 
     Route::post('/eca/centros', [CentroAcopioController::class, 'storeCentro'])->name('eca.centros.store');
+
+    //Calendario
+    Route::post('/eca/calendario/', [ProgramacionRecoleccionController::class, 'store'])->name('eca.calendario.store');
 });
 
 Route::middleware(['auth', 'role:Ciudadano'])->group(function () {
     // Ciudadano
     Route::get('/ciudadano', [CiudadanoController::class, 'view_ciudadano'])->name('ciudadano');
+    // 
+    Route::get('/eca', [PuntoEcaController::class, 'view_punto_eca'])
+        ->name('eca.view');
 });
 /*
 |--------------------------------------------------------------------------

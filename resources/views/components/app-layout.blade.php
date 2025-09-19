@@ -7,6 +7,7 @@
     <title>InfoRecicla</title>
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{{ asset('imagenes/logo.png') }}">
 </head>
 
 <body>
@@ -16,7 +17,8 @@
 
 
     <!-- FOOTER -->
-    <footer class="bg-light border-top py-4">
+    <footer class="bg-light
+        border-top py-4">
         <div class="container">
             <ul class="nav justify-content-center gap-3">
                 <li class="nav-item"><a class="nav-link text-muted" href="#">Acerca de</a></li>

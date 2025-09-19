@@ -43,9 +43,14 @@ class MovimientosController extends Controller
             'compra.inventario_id'  => ['required', 'uuid', 'exists:inventario,id'],
             'compra.cantidad'       => ['required', 'numeric', 'gt:0'],
             'compra.fecha'          => ['required', 'date'],
-            'compra.precio_compra'  => ['required', 'numeric', 'gte:0'],
             'compra.observaciones'  => ['nullable', 'string', 'max:500'],
         ]);
+
+        $precio = DB::table('inventario')->where('id', '=', $data['compra']['inventario_id'])->value('precio_compra');
+
+        $precioCompra = $data['compra']['cantidad'] * $precio;
+
+        $data['compra']['precio_compra'] = $precioCompra;
 
         $compra = $data['compra'];
 
@@ -65,8 +70,8 @@ class MovimientosController extends Controller
                 'inventario_id' => $locked->id,
                 'cantidad'      => $compra['cantidad'],
                 'fecha'         => $compra['fecha'],
-                'precio_compra' => $compra['precio_compra'],
                 'observaciones' => $compra['observaciones'] ?? null,
+                'precio_compra' => $compra['precio_compra'],
             ]);
 
             // Sumar stock
@@ -87,6 +92,8 @@ class MovimientosController extends Controller
             'venta.cantidad'      => ['required', 'numeric', 'gt:0'],
             'venta.fecha'         => ['required', 'date'],
             'venta.precio_venta'  => ['required', 'numeric', 'gte:0'],
+            'venta.centro_acopio_id' => ['nullable', 'uuid', 'exists:centros_acopio,id'],
+            'venta.observaciones' => ['nullable', 'string', 'max:500'],
         ]);
 
         $venta = $data['venta'];
@@ -116,6 +123,8 @@ class MovimientosController extends Controller
                 'cantidad'      => $venta['cantidad'],
                 'fecha'         => $venta['fecha'],
                 'precio_venta'  => $venta['precio_venta'],
+                'centro_acopio_id' => $venta['centro_acopio_id'],
+                'observaciones' => $venta['observaciones'] ?? null,
             ]);
 
             // Restar stock
