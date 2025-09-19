@@ -3,7 +3,7 @@
 
 
 
-    <!-- ===== NAVBAR ===== -->
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-success">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2" href="/">
@@ -15,7 +15,7 @@
             </button>
             <div id="nav" class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
-                    <!-- Ajusta rutas según tu proyecto -->
+
                     <li class="nav-item"><a class="nav-link" href="/mapa">Mapa ECA</a></li>
                     <li class="nav-item">
                         <form method="POST" action="{{ route('logout') }}">
@@ -29,29 +29,29 @@
         </div>
     </nav>
 
-    <!-- ===== COVER ===== -->
+
     <div class="cover"></div>
 
-    <!-- ===== PROFILE HEADER ===== -->
+
     <header class="container">
         <div class="profile-card">
             <div class="d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center gap-3">
                     <img src="/imagenes/perfil_default.png" alt="Avatar" class="avatar" id="userAvatar">
                     <div>
-                        <!-- Estos datos vendrán de la BD -->
-                        <h1 class="h4 mb-1" id="userName">Juan Rodríguez</h1>
+
+                        <h1 class="h4 mb-1" id="userName">{{ $usuario->nombre }} {{ $usuario->apellido }}</h1>
                         <div class="text-muted small">
-                            <span id="userEmail">juan.rodri@email.com</span> ·
-                            <span id="userLocalidad">Engativá, Bogotá</span>
+                            <span id="userEmail">{{ $usuario->correo }}</span> ·
+                            <span id="userLocalidad"></span>
                         </div>
                     </div>
                 </div>
 
                 <div class="d-flex gap-3">
-                    <!-- Stats rápidas (contadores desde BD) -->
+
                     <div class="text-center stat">
-                        <div class="fw-bold h5 mb-0" id="statFav">8</div>
+                        <div class="fw-bold h5 mb-0" id="statFav"></div>
                         <div class="text-muted small">Guardados</div>
                     </div>
                     <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
@@ -62,7 +62,7 @@
         </div>
     </header>
 
-    <!-- ===== TABS ===== -->
+
     <div class="container mt-4">
         <ul class="nav nav-tabs" id="citizenTabs" role="tablist">
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#guardados"
@@ -77,13 +77,13 @@
 
         <div class="tab-content pt-3">
 
-            <!-- ===== TAB: GUARDADOS (dos columnas: Puntos ECA y Publicaciones) ===== -->
+
             <section class="tab-pane fade" id="guardados">
                 <div class="row g-4">
                     <div class="col-md-6">
                         <h5 class="mb-3">Puntos ECA Guardados</h5>
                         <div class="list-group">
-                            <!-- Items desde BD -->
+
                             <a href="#"
                                 class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                                 Recicladora y Chatarrería JJ — Cra 7 #109-06 Sur
@@ -100,11 +100,10 @@
                 </div>
             </section>
 
-            <!-- ===== TAB: COMENTARIOS ===== -->
+
             <section class="tab-pane fade" id="comentarios">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5 class="mb-0">Mis Comentarios</h5>
-                    <!-- Filtro ejemplo; a futuro puede venir de la BD -->
                     <select class="form-select form-select-sm" style="width:auto">
                         <option value="todos">Todos</option>
                         <option value="publicaciones">En publicaciones</option>
@@ -113,7 +112,7 @@
                 </div>
 
                 <div class="list-group">
-                    <!-- Items desde BD -->
+
                     <a class="list-group-item list-group-item-action" href="#">
                         <div class="d-flex w-100 justify-content-between">
                             <h6 class="mb-1">Excelente iniciativa en el nuevo punto ECA de Suba.</h6>
@@ -132,10 +131,10 @@
                 </div>
             </section>
 
-            <!-- ====== CHATS ====== -->
+
             <section class="tab-pane fade" id="tab-chats" role="tabpanel">
                 <div class="row g-3">
-                    <!-- Lista de conversaciones con Puntos ECA -->
+
                     <div class="col-lg-4">
                         <div class="card">
                             <div class="card-header bg-success text-white py-2">
@@ -143,7 +142,7 @@
                             </div>
                             <div class="card-body p-2">
                                 <div class="list-group chat-sidebar" id="chatThreads">
-                                    <!-- TODO: Renderizar con datos de BD (GET /api/conversations?role=citizen) -->
+
                                     <button class="list-group-item list-group-item-action active" data-thread-id="1">
                                         <div class="fw-semibold">Punto ECA Suba</div>
                                         <small class="text-muted">Ayer • ¿Aceptan vidrio hoy?</small>
@@ -157,7 +156,7 @@
                         </div>
                     </div>
 
-                    <!-- Ventana de chat -->
+
                     <div class="col-lg-8 d-flex flex-column">
                         <div class="card flex-grow-1">
                             <div class="card-header d-flex justify-content-between align-items-center py-2">
@@ -165,13 +164,13 @@
                                     <strong id="chatTitle">Punto ECA Suba</strong><br>
                                     <small class="text-muted" id="chatSubtitle">Conversación #1</small>
                                 </div>
-                                <!-- (Opcional) botón para ver el perfil del punto -->
+
                                 <a href="#" id="chatPointLink" class="btn btn-outline-success btn-sm">Ver
                                     punto</a>
                             </div>
                             <div class="card-body">
                                 <div id="chatWindow" class="chat-window">
-                                    <!-- TODO: Renderizar mensajes (GET /api/conversations/{id}/messages) -->
+
                                     <div class="msg them">¡Hola! ¿Aceptan vidrio hoy?</div>
                                     <div class="msg me">Hola, sí. Hasta las 5pm.</div>
                                 </div>
@@ -182,36 +181,35 @@
                                         placeholder="Escribe un mensaje…">
                                     <button class="btn btn-success" id="chatSend">Enviar</button>
                                 </div>
-                                <!-- (Opcional) Adjuntos a futuro
-                <div class="form-text">Puedes adjuntar imágenes o documentos (próximamente).</div>
-                -->
+
+
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- ===== TAB: AJUSTES (preferencias del usuario) ===== -->
+
             <section class="tab-pane fade" id="ajustes">
                 <div class="card card-hover">
                     <div class="card-body">
                         <h5 class="card-title mb-3">Preferencias</h5>
 
-                        <!-- Notificaciones (se guarda en citizen_profiles.receive_notifications) -->
+
                         <div class="form-check form-switch mb-3">
                             <input class="form-check-input" type="checkbox" role="switch" id="prefNoti">
                             <label class="form-check-label" for="prefNoti">Recibir notificaciones de publicaciones,
                                 respuestas y novedades</label>
                         </div>
 
-                        <!-- Nombre visible (display_name) -->
+
                         <div class="mb-3">
-                            <label class="form-label" for="displayName">Nombre visible</label>
+                            <label class="form-label" for="displayName">Nombre de Usuario</label>
                             <input type="text" class="form-control" id="displayName"
-                                placeholder="Como aparecerás al comentar">
+                                placeholder="Como aparecerás al comentar" value="{{ $usuario->nombre_usuario }}">
                         </div>
 
-                        <!-- Botón de guardado -->
+
                         <div class="text-end">
                             <button class="btn btn-success" id="btnGuardarAjustes">Guardar preferencias</button>
                         </div>
@@ -222,7 +220,7 @@
         </div>
     </div>
 
-    <!-- ===== MODAL: Editar Perfil ===== -->
+
     <div class="modal fade" id="editarPerfilModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form class="modal-content" id="editarPerfilForm">
@@ -232,25 +230,25 @@
                         aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- A futuro: precargar desde BD -->
+
                     <div class="mb-3">
                         <label class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="editNombre" value="Juan Rodríguez" required>
+                        <input type="text" class="form-control" id="editNombre" value="{{ $usuario->nombre }}" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Correo</label>
-                        <input type="email" class="form-control" id="editCorreo" value="juan.rodri@email.com"
+                        <input type="email" class="form-control" id="editCorreo" value="{{ $usuario->correo }}"
                             required>
                     </div>
                     <div class="mb-3">
                         <label for="nombre_usuario" id="editNombreUsuario" class="form-label">Nombre de
                             usuario</label>
-                        <input type="text" class="form-control" id="editNombreUsuario" value="juanrodriguez"
+                        <input type="text" class="form-control" id="editNombreUsuario" value="{{ $usuario->nombre_usuario }}"
                             required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Localidad</label>
-                        <input type="text" class="form-control" id="editLocalidad" value="Engativá">
+                        <input type="text" class="form-control" id="editLocalidad" value="">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Foto de perfil (opcional)</label>
@@ -274,7 +272,6 @@
         </div>
     </div>
 
-    <!-- ===== TOAST: feedback corto ===== -->
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
         <div id="toastOK" class="toast align-items-center text-white bg-success border-0" role="alert"
             aria-live="assertive" aria-atomic="true">
@@ -286,57 +283,6 @@
         </div>
     </div>
 
-    <!-- ===== Bootstrap + JS mínimo ===== -->
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // ========= Utilidad: toast =========
-        const toast = new bootstrap.Toast(document.getElementById('toastOK'), {
-            delay: 1800
-        });
-        const showToast = (msg) => {
-            document.getElementById('toastText').textContent = msg;
-            toast.show();
-        };
-
-        // ========= Modal: guardar perfil (simulado) =========
-        document.getElementById('editarPerfilForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            // (A futuro) Validaciones + envío a tu API (PATCH /api/citizens/profile)
-            const nombre = document.getElementById('editNombre').value.trim();
-            const correo = document.getElementById('editCorreo').value.trim();
-            const loc = document.getElementById('editLocalidad').value.trim();
-            // const avatarFile = document.getElementById('editAvatar').files[0];
-
-            // Reflejar en encabezado (optimistic UI)
-            document.getElementById('userName').textContent = nombre || '—';
-            document.getElementById('userEmail').textContent = correo || '—';
-            document.getElementById('userLocalidad').textContent = loc ? (loc + ', Bogotá') : '—';
-
-            // Cerrar modal y toast
-            bootstrap.Modal.getInstance(document.getElementById('editarPerfilModal')).hide();
-            showToast('Perfil actualizado');
-        });
-
-        // ========= Ajustes: guardar preferencias (simulado) =========
-        document.getElementById('btnGuardarAjustes').addEventListener('click', () => {
-            const prefs = {
-                receive_notifications: document.getElementById('prefNoti').checked ? 1 : 0,
-                display_name: document.getElementById('displayName').value.trim()
-            };
-            // (A futuro) POST/PATCH /api/citizens/preferences
-            console.log('Preferencias:', prefs);
-            showToast('Preferencias guardadas');
-        });
-
-        // ========= Carga inicial simulada desde "BD" =========
-        // Aquí irían tus fetch reales para rellenar todo con datos del usuario
-        (function seedFromDB() {
-            // Ejemplo: marcar preferencia desde perfil
-            document.getElementById('prefNoti').checked = true;
-            document.getElementById('displayName').value = 'JuanR';
-            // TODO: fetch publicaciones/guardados/comentarios y renderizar
-        })();
-    </script>
-
 </x-app-layout>
