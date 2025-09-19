@@ -14,8 +14,8 @@ class IndexMaterialesRequest extends FormRequest
     {
         return [
             'categoria' => ['nullable', 'uuid', 'exists:categorias_material,id'],
-            'tipo'      => ['nullable', 'uuid', 'exists:tipos_material,id'],
-            'nombre'    => ['nullable', 'string', 'max:120'],
+            'tipo' => ['nullable', 'uuid', 'exists:tipos_material,id'],
+            'nombre' => ['nullable', 'string', 'max:120'],
         ];
     }
 }

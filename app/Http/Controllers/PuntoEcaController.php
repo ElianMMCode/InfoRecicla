@@ -24,32 +24,12 @@ class PuntoEcaController extends Controller
     {
         $usuario = Auth::user();
 
-        // 1) Normaliza sección (pero NO ramificamos luego por secciones)
         if ($seccion === null || !in_array($seccion, $this->permitidas, true)) {
             $seccion = 'resumen';
         }
 
-        // 2) Punto ECA del gestor autenticado
-        $punto = DB::table('puntos_eca')
-            ->select(
-                'id',
-                'gestor_id',
-                'nombre',
-                'mostrar_mapa',
-                'direccion',
-                'ciudad',
-                'localidad',
-                'latitud',
-                'longitud',
-                'nit',
-                'horario_atencion',
-                'sitio_web',
-                'logo_url',
-                'foto_url',
-                'estado'
-            )
-            ->where('gestor_id', Auth::id())
-            ->first();
+        //  Punto ECA del gestor autenticado
+        $punto = DB::table('puntos_eca')->select('id', 'gestor_id', 'nombre', 'mostrar_mapa', 'direccion', 'ciudad', 'localidad', 'latitud', 'longitud', 'nit', 'horario_atencion', 'sitio_web', 'logo_url', 'foto_url', 'estado')->where('gestor_id', Auth::id())->first();
 
         if (!$punto) {
             abort(404, 'No se encontró Punto ECA para este usuario.');
@@ -57,28 +37,25 @@ class PuntoEcaController extends Controller
 
         $puntoEcaId = $punto->id;
 
-        // ===== Variables base
         $payload = [
-            'seccion'    => $seccion,
+            'seccion' => $seccion,
             'puntoEcaId' => $puntoEcaId,
-            'punto'      => $punto,
+            'punto' => $punto,
         ];
 
         // ===== Catálogos para los <select>
         $categorias = CategoriaMaterial::orderBy('nombre')->get(['id', 'nombre']);
-        $tipos      = TipoMaterial::orderBy('nombre')->get(['id', 'nombre']);
+        $tipos = TipoMaterial::orderBy('nombre')->get(['id', 'nombre']);
 
         // ===== Filtros del CATÁLOGO (arriba)
         $f = $request->validate([
             'categoria' => ['nullable', 'uuid', 'exists:categorias_material,id'],
-            'tipo'      => ['nullable', 'uuid', 'exists:tipos_material,id'],
-            'nombre'    => ['nullable', 'string', 'max:120'],
+            'tipo' => ['nullable', 'uuid', 'exists:tipos_material,id'],
+            'nombre' => ['nullable', 'string', 'max:120'],
         ]);
 
         // Excluir materiales ya registrados en inventario del Punto
-        $materialesYaRegistrados = Inventario::query()
-            ->where('punto_eca_id', $puntoEcaId)
-            ->pluck('material_id');
+        $materialesYaRegistrados = Inventario::query()->where('punto_eca_id', $puntoEcaId)->pluck('material_id');
 
         // Catálogo de materiales (paginado)
         $materiales = Material::query()
@@ -94,17 +71,13 @@ class PuntoEcaController extends Controller
         // ===== Filtros del INVENTARIO (abajo)
         $q = $request->validate([
             'q_categoria' => ['nullable', 'uuid', 'exists:categorias_material,id'],
-            'q_tipo'      => ['nullable', 'uuid', 'exists:tipos_material,id'],
-            'q_nombre'    => ['nullable', 'string', 'max:120'],
+            'q_tipo' => ['nullable', 'uuid', 'exists:tipos_material,id'],
+            'q_nombre' => ['nullable', 'string', 'max:120'],
         ]);
 
         // Inventario del Punto (paginado)
         $inventario = Inventario::query()
-            ->with([
-                'material:id,nombre,categoria_id,tipo_id',
-                'material.categoria:id,nombre',
-                'material.tipo:id,nombre',
-            ])
+            ->with(['material:id,nombre,categoria_id,tipo_id', 'material.categoria:id,nombre', 'material.tipo:id,nombre'])
             ->where('punto_eca_id', $puntoEcaId)
             ->when($q['q_categoria'] ?? null, fn($q2, $v) => $q2->whereHas('material', fn($m) => $m->where('categoria_id', $v)))
             ->when($q['q_tipo'] ?? null, fn($q2, $v) => $q2->whereHas('material', fn($m) => $m->where('tipo_id', $v)))
@@ -124,13 +97,13 @@ class PuntoEcaController extends Controller
             ->get()
             ->map(function ($c) {
                 return [
-                    'tipo'        => 'compra',
-                    'fecha'       => $c->fecha instanceof \Illuminate\Support\Carbon ? $c->fecha->format('Y-m-d') : (string) $c->fecha,
-                    'material'    => $c->inventario->material->nombre ?? '—',
-                    'cantidad'    => $c->cantidad,
-                    'unidad'      => $c->inventario->unidad_medida ?? '',
+                    'tipo' => 'compra',
+                    'fecha' => $c->fecha instanceof \Illuminate\Support\Carbon ? $c->fecha->format('Y-m-d') : (string) $c->fecha,
+                    'material' => $c->inventario->material->nombre ?? '—',
+                    'cantidad' => $c->cantidad,
+                    'unidad' => $c->inventario->unidad_medida ?? '',
                     'precio_unit' => $c->precio_compra,
-                    'observ'      => $c->observaciones ?? null,
+                    'observ' => $c->observaciones ?? null,
                 ];
             });
 
@@ -143,37 +116,25 @@ class PuntoEcaController extends Controller
             ->get()
             ->map(function ($v) {
                 return [
-                    'tipo'        => 'venta',
-                    'fecha'       => $v->fecha instanceof \Illuminate\Support\Carbon ? $v->fecha->format('Y-m-d') : (string) $v->fecha,
-                    'material'    => $v->inventario->material->nombre ?? '—',
-                    'cantidad'    => $v->cantidad,
-                    'unidad'      => $v->inventario->unidad_medida ?? '',
+                    'tipo' => 'venta',
+                    'fecha' => $v->fecha instanceof \Illuminate\Support\Carbon ? $v->fecha->format('Y-m-d') : (string) $v->fecha,
+                    'material' => $v->inventario->material->nombre ?? '—',
+                    'cantidad' => $v->cantidad,
+                    'unidad' => $v->inventario->unidad_medida ?? '',
                     'precio_unit' => $v->precio_venta,
-                    'observ'      => $v->observaciones ?? null,
+                    'observ' => $v->observaciones ?? null,
                 ];
             });
 
-        $ultimosMovimientos = $compras
-            ->concat($ventas)
-            ->sortByDesc('fecha')
-            ->take(10)
-            ->values();
+        $ultimosMovimientos = $compras->concat($ventas)->sortByDesc('fecha')->take(10)->values();
 
         // ===== Materiales del Punto (para combos/filtros)
-        $materialesPunto = Inventario::query()
-            ->where('punto_eca_id', $puntoEcaId)
-            ->with('material:id,nombre')
-            ->get()
-            ->pluck('material')
-            ->filter()
-            ->unique('id')
-            ->sortBy('nombre')
-            ->values();
+        $materialesPunto = Inventario::query()->where('punto_eca_id', $puntoEcaId)->with('material:id,nombre')->get()->pluck('material')->filter()->unique('id')->sortBy('nombre')->values();
 
         // ===== Historial Compras (entradas)
         $hc = $request->validate([
-            'hc_desde'    => ['nullable', 'date'],
-            'hc_hasta'    => ['nullable', 'date'],
+            'hc_desde' => ['nullable', 'date'],
+            'hc_hasta' => ['nullable', 'date'],
             'hc_material' => ['nullable', 'uuid', 'exists:materiales,id'],
         ]);
         $hcHasta = !empty($hc['hc_hasta']) ? Carbon::parse($hc['hc_hasta'])->endOfDay() : null;
@@ -190,8 +151,8 @@ class PuntoEcaController extends Controller
 
         // ===== Historial Ventas (salidas)
         $hs = $request->validate([
-            'hs_desde'    => ['nullable', 'date'],
-            'hs_hasta'    => ['nullable', 'date'],
+            'hs_desde' => ['nullable', 'date'],
+            'hs_hasta' => ['nullable', 'date'],
             'hs_material' => ['nullable', 'uuid', 'exists:materiales,id'],
         ]);
         $hsHasta = !empty($hs['hs_hasta']) ? Carbon::parse($hs['hs_hasta'])->endOfDay() : null;
@@ -209,19 +170,19 @@ class PuntoEcaController extends Controller
         // ===== Centros de Acopio (listas + catálogos) — respeta variables en minúscula y camelCase
         // Filtros (GET): nombre, tipo, ciudad, estado, material
         $f2 = $request->validate([
-            'f_nombre'   => ['nullable', 'string', 'max:150'],
-            'f_tipo'     => ['nullable', Rule::in(['Planta', 'Proveedor', 'Otro'])],
-            'f_ciudad'   => ['nullable', 'string', 'max:60'],
-            'f_estado'   => ['nullable', Rule::in(['activo', 'inactivo', 'bloqueado'])],
+            'f_nombre' => ['nullable', 'string', 'max:150'],
+            'f_tipo' => ['nullable', Rule::in(['Planta', 'Proveedor', 'Otro'])],
+            'f_ciudad' => ['nullable', 'string', 'max:60'],
+            'f_estado' => ['nullable', Rule::in(['activo', 'inactivo', 'bloqueado'])],
             'f_material' => ['nullable', 'uuid', 'exists:materiales,id'],
         ]);
 
         $applyFilters = function ($q) use ($f2) {
             return $q
-                ->when($f2['f_nombre']   ?? null, fn($qq, $v) => $qq->where('nombre', 'like', "%{$v}%"))
-                ->when($f2['f_tipo']     ?? null, fn($qq, $v) => $qq->where('tipo', $v))
-                ->when($f2['f_ciudad']   ?? null, fn($qq, $v) => $qq->where('ciudad', 'like', "%{$v}%"))
-                ->when($f2['f_estado']   ?? null, fn($qq, $v) => $qq->where('estado', $v))
+                ->when($f2['f_nombre'] ?? null, fn($qq, $v) => $qq->where('nombre', 'like', "%{$v}%"))
+                ->when($f2['f_tipo'] ?? null, fn($qq, $v) => $qq->where('tipo', $v))
+                ->when($f2['f_ciudad'] ?? null, fn($qq, $v) => $qq->where('ciudad', 'like', "%{$v}%"))
+                ->when($f2['f_estado'] ?? null, fn($qq, $v) => $qq->where('estado', $v))
                 ->when($f2['f_material'] ?? null, fn($qq, $v) => $qq->where('materiales_centro_acc', $v));
         };
 
@@ -260,16 +221,19 @@ class PuntoEcaController extends Controller
             ->withQueryString();
 
         // ===== Calendario SIN JS (grilla 6x7) — usa solo material_id
-        $y   = intval($request->query('y', now()->year));
-        $m   = intval($request->query('m', now()->month));
+        $y = intval($request->query('y', now()->year));
+        $m = intval($request->query('m', now()->month));
         $sel = $request->query('sel'); // YYYY-MM-DD o null
 
         $firstOfMonth = Carbon::create($y, $m, 1)->startOfDay();
-        $dow   = $firstOfMonth->dayOfWeekIso; // 1=Lun..7=Dom
-        $start = $firstOfMonth->copy()->subDays($dow - 1)->startOfDay();  // Lunes
-        $end   = $start->copy()->addDays(41)->endOfDay();                 // 42 días
+        $dow = $firstOfMonth->dayOfWeekIso; // 1=Lun..7=Dom
+        $start = $firstOfMonth
+            ->copy()
+            ->subDays($dow - 1)
+            ->startOfDay(); // Lunes
+        $end = $start->copy()->addDays(41)->endOfDay(); // 42 días
 
-        $baseStart = $start->copy()->subMonthNoOverflow()->startOfDay();  // cubrir mensuales que “caen”
+        $baseStart = $start->copy()->subMonthNoOverflow()->startOfDay(); // cubrir mensuales que “caen”
 
         // SELECT: solo nombres + campos de programación (sin IDs)
         $rows = DB::table('programacion_recoleccion as pr')
@@ -278,15 +242,7 @@ class PuntoEcaController extends Controller
             ->leftJoin('materiales as m3', 'm3.id', '=', 'pr.material_id')
             ->leftJoin('centros_acopio as ca', 'ca.id', '=', 'pr.centro_acopio_id')
             ->orderBy('pr.fecha')
-            ->get([
-                'pr.fecha',
-                'pr.hora',
-                'pr.frecuencia',
-                'pr.notas',
-                DB::raw('COALESCE(pr.creado, NULL) as creado'),
-                'm3.nombre  as material_nombre',
-                'ca.nombre  as centro_nombre',
-            ]);
+            ->get(['pr.fecha', 'pr.hora', 'pr.frecuencia', 'pr.notas', DB::raw('COALESCE(pr.creado, NULL) as creado'), 'm3.nombre  as material_nombre', 'ca.nombre  as centro_nombre']);
 
         // Expandir repeticiones dentro de [start, end] y NORMALIZAR CLAVES
         $eventos = []; // 'YYYY-MM-DD' => [ eventos... ]
@@ -294,35 +250,37 @@ class PuntoEcaController extends Controller
             $c = \Carbon\Carbon::parse($r->fecha)->startOfDay();
 
             $push = function (\Carbon\Carbon $d) use (&$eventos, $r, $start, $end, $punto) {
-                if (!$d->betweenIncluded($start, $end)) return;
+                if (!$d->betweenIncluded($start, $end)) {
+                    return;
+                }
 
                 $key = $d->toDateString();
                 $hhmm = $r->hora ? \Illuminate\Support\Str::of($r->hora)->limit(5, '')->__toString() : null;
 
                 $event = [
                     // nombres “humanos”
-                    'punto'      => $punto->nombre ?? '—',
-                    'material'   => $r->material_nombre,
-                    'centro'     => $r->centro_nombre,
+                    'punto' => $punto->nombre ?? '—',
+                    'material' => $r->material_nombre,
+                    'centro' => $r->centro_nombre,
 
-                    // datos de programación (con alias para compatibilidad)
-                    'fecha'        => $key,            // fecha de esta ocurrencia
-                    'hora'         => $r->hora,        // "HH:MM:SS" o "HH:MM"
-                    'time'         => $hhmm,           // alias usado por la grilla
-                    'frecuencia'   => $r->frecuencia,
-                    'freq'         => $r->frecuencia,  // alias usado antes
-                    'notas'        => $r->notas,
-                    'notes'        => $r->notas,       // alias usado antes
-
-                    // opcionales de auditoría
-                    'creado'       => $r->creado,
+                    // datos de programación
+                    'fecha' => $key,
+                    'hora' => $r->hora,
+                    'time' => $hhmm,
+                    'frecuencia' => $r->frecuencia,
+                    'freq' => $r->frecuencia,
+                    'notas' => $r->notas,
+                    'notes' => $r->notas,
+                    'creado' => $r->creado,
                 ];
 
-                $eventos[$key]   = $eventos[$key] ?? [];
+                // con esto verificamos si hay una programación para el material y el centro, y lo agregamos
+                $eventos[$key] = $eventos[$key] ?? [];
+                // si no hay programación para el material y el centro, lo agregamos
                 $eventos[$key][] = $event;
             };
 
-            // primera ocurrencia
+            // sin repeticiones
             $push($c);
 
             // repeticiones
@@ -342,7 +300,9 @@ class PuntoEcaController extends Controller
                         default:
                             $cursor->addYears(100);
                     }
-                    if ($cursor->gt($end)) break;
+                    if ($cursor->gt($end)) {
+                        break;
+                    }
                     $push($cursor);
                 }
             }
@@ -359,7 +319,7 @@ class PuntoEcaController extends Controller
                 ->all();
 
             $dias[] = [
-                'date'   => $iter->copy(),
+                'date' => $iter->copy(),
                 'events' => $items,
                 'inMonth' => $iter->month === $firstOfMonth->month,
             ];
@@ -372,20 +332,17 @@ class PuntoEcaController extends Controller
 
         $navPrevUrl = $request->fullUrlWithQuery(['seccion' => 'calendario', 'y' => $prev->year, 'm' => $prev->month]);
         $navNextUrl = $request->fullUrlWithQuery(['seccion' => 'calendario', 'y' => $next->year, 'm' => $next->month]);
-        $mesTitulo  = \Illuminate\Support\Str::ucfirst($firstOfMonth->translatedFormat('F Y'));
+        $mesTitulo = \Illuminate\Support\Str::ucfirst($firstOfMonth->translatedFormat('F Y'));
         $rangoLabel = $start->toDateString() . ' → ' . $end->toDateString();
 
         $payload['sel'] = $request->query('sel');
 
-
         // Límites de mes actual (para Entradas/Salidas del mes)
         $inicioMes = Carbon::now()->startOfMonth()->toDateString();
-        $finMes    = Carbon::now()->endOfMonth()->toDateString();
+        $finMes = Carbon::now()->endOfMonth()->toDateString();
 
         // Inventario total (kg) = suma de stock_actual del punto
-        $kpiInventario = (float) \App\Models\Inventario::query()
-            ->where('punto_eca_id', $puntoEcaId)
-            ->sum('stock_actual');
+        $kpiInventario = (float) \App\Models\Inventario::query()->where('punto_eca_id', $puntoEcaId)->sum('stock_actual');
 
         // Entradas del mes (kg) = suma de cantidad en Compras del mes para mi punto
         $kpiEntradasMes = (float) \App\Models\Compra::query()
@@ -411,17 +368,9 @@ class PuntoEcaController extends Controller
                 ->first();
 
             if ($proximo) {
-                $fecha = $proximo->fecha instanceof \Illuminate\Support\Carbon
-                    ? $proximo->fecha->format('Y-m-d')
-                    : (string) $proximo->fecha;
+                $fecha = $proximo->fecha instanceof \Illuminate\Support\Carbon ? $proximo->fecha->format('Y-m-d') : (string) $proximo->fecha;
 
-                $kpiProximoDespacho = sprintf(
-                    '%s %s • %s • %s',
-                    $fecha,
-                    $proximo->hora ?? '',
-                    $proximo->material->nombre ?? '—',
-                    $proximo->centroAcopio->nombre ?? '—'
-                );
+                $kpiProximoDespacho = sprintf('%s %s • %s • %s', $fecha, $proximo->hora ?? '', $proximo->material->nombre ?? '—', $proximo->centroAcopio->nombre ?? '—');
             }
         }
 
@@ -461,98 +410,91 @@ class PuntoEcaController extends Controller
         // Empaquetar resumen
         $payload['resumen'] = [
             'inventario_total' => $kpiInventario,
-            'entradas_mes'     => $kpiEntradasMes,
-            'salidas_mes'      => $kpiSalidasMes,
+            'entradas_mes' => $kpiEntradasMes,
+            'salidas_mes' => $kpiSalidasMes,
             'proximo_despacho' => $kpiProximoDespacho,
-            'alertas'          => $alertas,
+            'alertas' => $alertas,
         ];
 
         // === AJUSTES / CONFIGURACIÓN ===
         // Usa mostrar_mapa del punto y, si existe, el flag de notificaciones del usuario.
         $usuario = Auth::user();
         $payload['config'] = [
-            'mostrar_mapa'            => (bool) ($punto->mostrar_mapa ?? false),
-            'recibir_notificaciones'  => (bool) ($usuario->recibe_notificaciones ?? false),
+            'mostrar_mapa' => (bool) ($punto->mostrar_mapa ?? false),
+            'recibir_notificaciones' => (bool) ($usuario->recibe_notificaciones ?? false),
         ];
         // ===== Mezcla al payload (TODO JUNTO, sin condicionar por sección)
         $payload += [
-            'categorias'         => $categorias,
-            'tipos'              => $tipos,
-            'materiales'         => $materiales,
-            'inventario'         => $inventario,
+            'categorias' => $categorias,
+            'tipos' => $tipos,
+            'materiales' => $materiales,
+            'inventario' => $inventario,
             'ultimosMovimientos' => $ultimosMovimientos,
-            'usuarios'           => $usuario,
+            'usuarios' => $usuario,
 
-            'materialesPunto'    => $materialesPunto,
-            'hc'                 => $hc,
-            'hs'                 => $hs,
-            'histCompras'        => $histCompras,
-            'histVentas'         => $histVentas,
+            'materialesPunto' => $materialesPunto,
+            'hc' => $hc,
+            'hs' => $hs,
+            'histCompras' => $histCompras,
+            'histVentas' => $histVentas,
 
             // Centros (camelCase)
-            'centrosGlobales'        => $centrosGlobales,
-            'centrosPropios'         => $centrosPropios,
-            'centrosGlobalesLista'   => $centrosGlobalesLista,
-            'centrosPropiosLista'    => $centrosPropiosLista,
+            'centrosGlobales' => $centrosGlobales,
+            'centrosPropios' => $centrosPropios,
+            'centrosGlobalesLista' => $centrosGlobalesLista,
+            'centrosPropiosLista' => $centrosPropiosLista,
 
             // Centros (minúsculas para compatibilidad con la vista)
-            'centrosglobaleslista'   => $centrosGlobalesLista,
-            'centrospropioslista'    => $centrosPropiosLista,
+            'centrosglobaleslista' => $centrosGlobalesLista,
+            'centrospropioslista' => $centrosPropiosLista,
 
             // Calendario sin JS
-            'dias'               => $dias,
-            'mesTitulo'          => $mesTitulo,
-            'navPrevUrl'         => $navPrevUrl,
-            'navNextUrl'         => $navNextUrl,
-            'rangoLabel'         => $rangoLabel,
-            // 'sel' lo toma la vista con request('sel'), no hace falta inyectarlo
+            'dias' => $dias,
+            'mesTitulo' => $mesTitulo,
+            'navPrevUrl' => $navPrevUrl,
+            'navNextUrl' => $navNextUrl,
+            'rangoLabel' => $rangoLabel,
         ];
 
-        // 4) Render
         return view('PuntoECA.punto-eca', $payload);
     }
 
-
-
-    /**
-     * POST: Registrar un material en inventario (botón por fila).
-     * Usa validación inline (puedes mover a FormRequest si prefieres).
-     */
     public function storeInventario(Request $request)
     {
         // 1) Forzar el punto por defecto desde config/.env
-        $punto = DB::table('puntos_eca')
-            ->select('id', 'gestor_id')
-            ->where('gestor_id', Auth::id())
-            ->first();
+        $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', Auth::id())->first();
         $puntoEcaId = $punto->id;
         // 2) Validación mínima (sin pedir punto_eca_id al cliente)
-        $data = $request->validate([
-            'material_id'   => [
-                'required',
-                'uuid',
-                'exists:materiales,id',
-                // unique por material dentro del punto por defecto:
-                Rule::unique('inventario')->where(fn($q) => $q->where('punto_eca_id', $puntoEcaId)),
+        $data = $request->validate(
+            [
+                'material_id' => [
+                    'required',
+                    'uuid',
+                    'exists:materiales,id',
+                    // unique por material dentro del punto por defecto:
+                    Rule::unique('inventario')->where(fn($q) => $q->where('punto_eca_id', $puntoEcaId)),
+                ],
+                'capacidad_max' => ['nullable', 'numeric', 'gte:0'],
+                'unidad_medida' => ['nullable', 'in:kg,unidad,t,m3'],
+                'stock_actual' => ['nullable', 'numeric', 'gte:0'],
+                'umbral_alerta' => ['nullable', 'numeric', 'gte:0'],
+                'umbral_critico' => ['nullable', 'numeric', 'gte:0'],
+                'precio_compra' => ['nullable', 'numeric', 'gte:0'],
+                'precio_venta' => ['nullable', 'numeric', 'gte:0'],
+                'nota_material' => ['nullable', 'string', 'max:300'],
+                'activo' => ['required', 'boolean'],
             ],
-            'capacidad_max' => ['nullable', 'numeric', 'gte:0'],
-            'unidad_medida' => ['nullable', 'in:kg,unidad,t,m3'],
-            'stock_actual'  => ['nullable', 'numeric', 'gte:0'],
-            'umbral_alerta' => ['nullable', 'numeric', 'gte:0'],
-            'umbral_critico' => ['nullable', 'numeric', 'gte:0'],
-            'precio_compra' => ['nullable', 'numeric', 'gte:0'],
-            'precio_venta'  => ['nullable', 'numeric', 'gte:0'],
-            'nota_material' => ['nullable', 'string', 'max:300'],
-            'activo'        => ['required', 'boolean'],
-        ], [
-            'material_id.unique' => 'Este material ya está registrado para este Punto ECA.',
-        ]);
+            [
+                'material_id.unique' => 'Este material ya está registrado para este Punto ECA.',
+            ],
+        );
 
-        // 3) Crear el registro MERGEANDO el punto por defecto
         DB::transaction(function () use ($data, $puntoEcaId) {
-            Inventario::create(array_merge($data, [
-                'punto_eca_id' => $puntoEcaId,
-            ]));
+            Inventario::create(
+                array_merge($data, [
+                    'punto_eca_id' => $puntoEcaId,
+                ]),
+            );
         });
 
         return back()->with('ok', 'Material registrado en inventario.');
@@ -560,10 +502,7 @@ class PuntoEcaController extends Controller
     public function updateInventario(Request $request, Inventario $inventario)
     {
         // Punto ECA fijo (no confiar en el form)
-        $punto = DB::table('puntos_eca')
-            ->select('id', 'gestor_id')
-            ->where('gestor_id', Auth::id())
-            ->first();
+        $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', Auth::id())->first();
         $puntoEcaId = $punto->id;
         // Asegurar que el registro pertenece al punto por defecto
         if ($inventario->punto_eca_id !== $puntoEcaId) {
@@ -571,15 +510,15 @@ class PuntoEcaController extends Controller
         }
 
         $data = $request->validate([
-            'capacidad_max'  => ['nullable', 'numeric', 'gte:0'],
-            'unidad_medida'  => ['nullable', 'in:kg,unidad,t,m3'],
-            'stock_actual'   => ['nullable', 'numeric', 'gte:0'],
-            'umbral_alerta'  => ['nullable', 'numeric', 'gte:0'],
+            'capacidad_max' => ['nullable', 'numeric', 'gte:0'],
+            'unidad_medida' => ['nullable', 'in:kg,unidad,t,m3'],
+            'stock_actual' => ['nullable', 'numeric', 'gte:0'],
+            'umbral_alerta' => ['nullable', 'numeric', 'gte:0'],
             'umbral_critico' => ['nullable', 'numeric', 'gte:0'],
-            'precio_compra'  => ['nullable', 'numeric', 'gte:0'],
-            'precio_venta'   => ['nullable', 'numeric', 'gte:0'],
-            'nota_material'  => ['nullable', 'string', 'max:300'],
-            'activo'         => ['required', 'boolean'],
+            'precio_compra' => ['nullable', 'numeric', 'gte:0'],
+            'precio_venta' => ['nullable', 'numeric', 'gte:0'],
+            'nota_material' => ['nullable', 'string', 'max:300'],
+            'activo' => ['required', 'boolean'],
         ]);
 
         $inventario->update($data);
@@ -589,10 +528,7 @@ class PuntoEcaController extends Controller
 
     public function destroyInventario(Request $request, Inventario $inventario)
     {
-        $punto = DB::table('puntos_eca')
-            ->select('id', 'gestor_id')
-            ->where('gestor_id', Auth::id())
-            ->first();
+        $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', Auth::id())->first();
         $puntoEcaId = $punto->id;
         if ($inventario->punto_eca_id !== $puntoEcaId) {
             abort(403, 'No autorizado.');

@@ -14,8 +14,8 @@ class IndexInventarioRequest extends FormRequest
     {
         return [
             'q_categoria' => ['nullable', 'uuid', 'exists:categorias_material,id'],
-            'q_tipo'      => ['nullable', 'uuid', 'exists:tipos_material,id'],
-            'q_nombre'    => ['nullable', 'string', 'max:120'],
+            'q_tipo' => ['nullable', 'uuid', 'exists:tipos_material,id'],
+            'q_nombre' => ['nullable', 'string', 'max:120'],
         ];
     }
 }

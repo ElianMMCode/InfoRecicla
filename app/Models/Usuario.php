@@ -37,7 +37,7 @@ class Usuario extends Authenticatable   // <-- EXTENDER Authenticatable
         'nombre_usuario',
         'genero',
         'estado',
-        'remember_token', // si lo agregaste
+        'remember_token',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -47,10 +47,8 @@ class Usuario extends Authenticatable   // <-- EXTENDER Authenticatable
         'fecha_nacimiento'      => 'date',
         'creado'                => 'datetime',
         'actualizado'           => 'datetime',
-        // Si quieres hash automático al asignar password en claro (Laravel 10+ podrías usar 'password'=>'hashed')
     ];
 
-    // Mutator para hashear si guardas en claro
     public function setPasswordAttribute($value)
     {
         $this->attributes['password'] = Hash::needsRehash($value)
