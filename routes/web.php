@@ -25,6 +25,7 @@ Route::middleware('guest')->group(function () {
 
     // Login
     Route::get('/login', [AuthController::class, 'index'])->name('login');
+    Route::post('/login', [AuthController::class, 'postLogin'])->name('inicio-sesion');
     Route::post('/login', [AuthController::class, 'postLogin'])->name('login.post');
 });
 

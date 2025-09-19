@@ -78,7 +78,7 @@ class MovimientosController extends Controller
             $locked->increment('stock_actual', $compra['cantidad']);
         });
 
-        return back()->with('ok', 'Entrada registrada.');
+        return view('eca.index', ['seccion' => 'movimientos'])->with('ok', 'Entrada registrada.');
     }
 
     public function storeVenta(Request $request)
@@ -129,7 +129,7 @@ class MovimientosController extends Controller
             $locked->decrement('stock_actual', $venta['cantidad']);
         });
 
-        return back()->with('ok', 'Salida registrada.');
+        return view('eca.index', ['seccion' => 'movimientos'])->with('ok', 'Salida registrada.');
     }
 
     /**
