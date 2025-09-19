@@ -1136,78 +1136,119 @@
                 </div>
             </section>
 
-            <!-- CALENDARIO GLOBAL -->
-            <section class="tab-pane fade {{ $seccion === 'calendario' ? 'show active' : '' }}"
-                id="tab-calendario">
+            <section class="tab-pane fade {{ $seccion === 'calendario' ? 'show active' : '' }}" id="tab-calendario">
+                @php
+                    // Fix: tomar la fecha seleccionada desde la URL (?sel=YYYY-MM-DD)
+                    $sel = request('sel'); // string|nullable
+                @endphp
+
                 <div class="row g-3">
                     <div class="col-lg-8">
                         <div class="card">
                             <div class="card-body">
                                 <div class="calendar">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <div class="h5 mb-0" id="calTitulo">—</div>
-                                        <div>
-                                            <button class="btn btn-sm btn-outline-secondary" id="calPrev">◀</button>
-                                            <button class="btn btn-sm btn-outline-secondary" id="calNext">▶</button>
+                                        <div class="h5 mb-0" id="caltitulo">{{ $mesTitulo ?? '—' }}</div>
+                                        <div class="d-flex gap-2">
+                                            <a class="btn btn-sm btn-outline-secondary" id="calprev"
+                                                href="{{ $navPrevUrl ?? '#' }}">◀</a>
+                                            <a class="btn btn-sm btn-outline-secondary" id="calnext"
+                                                href="{{ $navNextUrl ?? '#' }}">▶</a>
                                         </div>
                                     </div>
+
                                     <div class="grid text-center small text-muted mb-1">
-                                        <div>Lun</div>
-                                        <div>Mar</div>
-                                        <div>Mié</div>
-                                        <div>Jue</div>
-                                        <div>Vie</div>
-                                        <div>Sáb</div>
-                                        <div>Dom</div>
+                                        <div>lun</div>
+                                        <div>mar</div>
+                                        <div>mié</div>
+                                        <div>jue</div>
+                                        <div>vie</div>
+                                        <div>sáb</div>
+                                        <div>dom</div>
                                     </div>
-                                    <div class="grid" id="calGrid"></div>
+
+                                    {{-- Grilla 6x7 SIN JS: 42 celdas renderizadas en el servidor --}}
+                                    <div class="grid" id="calgrid">
+                                        @foreach ($dias ?? [] as $d)
+                                            @php
+                                                $dYmd = $d['date']->toDateString();
+                                                $dayUrl = request()->fullUrlWithQuery([
+                                                    'seccion' => 'calendario',
+                                                    'sel' => $dYmd,
+                                                ]);
+                                            @endphp
+                                            <a href="{{ $dayUrl }}" class="text-decoration-none">
+                                                <div class="p-2 border {{ $d['inMonth'] ? 'bg-white' : 'bg-light' }}"
+                                                    title="{{ $dYmd }}">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <strong
+                                                            class="{{ ($sel ?? '') === $dYmd ? 'text-success' : '' }}">{{ $d['date']->day }}</strong>
+                                                    </div>
+                                                    <div class="mt-1 d-flex flex-column gap-1">
+                                                        {{-- Badges del día: "HH:MM · Material" --}}
+                                                        @foreach ($d['events'] as $ev)
+                                                            @php $h = isset($ev['time']) ? \Illuminate\Support\Str::of($ev['time'])->limit(5,'')->__toString() : ''; @endphp
+                                                            <span
+                                                                class="badge bg-success text-wrap">{{ $h }}
+                                                                · {{ $ev['material'] ?? 'Material' }}</span>
+                                                        @endforeach
+                                                        @if (empty($d['events']))
+                                                            <span class="small text-muted">—</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        @endforeach
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        {{-- Leyenda simple --}}
+
                         <div class="small text-muted mt-2">
-                            <span class="badge bg-success">Salida</span> Despacho programado al centro elegido.
+                            <span class="badge bg-success">salida</span> despacho programado al centro elegido.
                         </div>
                     </div>
 
                     <div class="col-lg-4">
                         <div class="card h-100">
                             <div class="card-body">
-                                <h6 class="mb-3">Programar nuevo despacho</h6>
+                                <h6 class="mb-3">programar nuevo despacho</h6>
 
                                 <form action="{{ route('eca.calendario.store') }}" method="post"
                                     class="vstack gap-3">
                                     @csrf
-                                    {{-- Material (inventario del punto) --}}
+
+                                    {{-- material (envía material_id) --}}
                                     <div>
-                                        <label class="form-label">Material</label>
-                                        <select name="inv_material_id" class="form-select" required>
-                                            <option value="" disabled selected>— Selecciona —</option>
+                                        <label class="form-label">material</label>
+                                        <select name="material_id" class="form-select" required>
+                                            <option value="" disabled selected>— selecciona —</option>
                                             @foreach ($inventario ?? [] as $inv)
-                                                <option value="{{ $inv->id }}" @selected(old('inv_material_id') === $inv->id)>
-                                                    {{ $inv->material->nombre ?? '—' }} (Stock:
+                                                <option value="{{ $inv->material_id }}"
+                                                    @selected(old('material_id') === $inv->material_id)>
+                                                    {{ $inv->material->nombre ?? '—' }} (stock:
                                                     {{ $inv->stock_actual ?? 0 }} {{ $inv->unidad_medida ?? '' }})
                                                 </option>
                                             @endforeach
                                         </select>
-                                        @error('inv_material_id')
+                                        @error('material_id')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
                                     </div>
 
-                                    {{-- Centro de acopio destino (globales + propios) --}}
+                                    {{-- centro de acopio --}}
                                     <div>
-                                        <label class="form-label">Centro de acopio</label>
+                                        <label class="form-label">centro de acopio</label>
                                         <select name="centro_acopio_id" class="form-select" required>
-                                            <option value="" disabled selected>— Selecciona —</option>
-                                            <optgroup label="Propios del Punto">
-                                                @foreach ($centrosPropios ?? [] as $c)
+                                            <option value="" disabled selected>— selecciona —</option>
+                                            <optgroup label="propios del punto">
+                                                @foreach ($centrospropioslista ?? [] as $c)
                                                     <option value="{{ $c->id }}"
                                                         @selected(old('centro_acopio_id') === $c->id)>{{ $c->nombre }}</option>
                                                 @endforeach
                                             </optgroup>
-                                            <optgroup label="Globales">
-                                                @foreach ($centrosGlobales ?? [] as $c)
+                                            <optgroup label="globales">
+                                                @foreach ($centrosglobaleslista ?? [] as $c)
                                                     <option value="{{ $c->id }}"
                                                         @selected(old('centro_acopio_id') === $c->id)>{{ $c->nombre }}</option>
                                                 @endforeach
@@ -1218,11 +1259,20 @@
                                         @enderror
                                     </div>
 
-                                    {{-- Frecuencia --}}
+                                    {{-- frecuencia / fecha / hora --}}
                                     <div>
-                                        <label class="form-label">Frecuencia</label>
+                                        <label class="form-label">frecuencia</label>
                                         <select name="frecuencia" class="form-select" required>
-                                            @foreach (['unico' => 'Único', 'semanal' => 'Semanal', 'quincenal' => 'Cada 15 días', 'mensual' => 'Mensual'] as $v => $t)
+                                            @php
+                                                $freqs = [
+                                                    'manual' => 'manual (solo esta fecha)',
+                                                    'semanal' => 'semanal',
+                                                    'quincenal' => 'cada 15 días',
+                                                    'mensual' => 'mensual',
+                                                    'unico' => 'única vez',
+                                                ];
+                                            @endphp
+                                            @foreach ($freqs as $v => $t)
                                                 <option value="{{ $v }}" @selected(old('frecuencia') === $v)>
                                                     {{ $t }}</option>
                                             @endforeach
@@ -1234,517 +1284,601 @@
 
                                     <div class="row g-3">
                                         <div class="col-6">
-                                            <label class="form-label">Fecha inicial</label>
+                                            <label class="form-label">fecha</label>
                                             <input type="date" name="fecha" class="form-control"
                                                 value="{{ old('fecha') ?? now()->toDateString() }}" required>
-                                            @error('fecha')
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label">hora</label>
+                                            <input type="time" name="hora" class="form-control"
+                                                value="{{ old('hora') ?? '10:00' }}" required>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label">notas (opcional)</label>
+                                        <textarea name="notas" class="form-control" rows="2" maxlength="300">{{ old('notas') }}</textarea>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-success w-100">guardar</button>
+
+                                    <hr>
+                                    <div class="small text-muted">
+                                        mostrando: <span id="lblrango">{{ $rangoLabel ?? '—' }}</span>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Listas bajo la grilla: eventos del mes y del día (sin JS) --}}
+                {{-- === Listas bajo la grilla (SIN JS) === --}}
+                <div class="mt-3">
+                    <div class="row g-3">
+                        <div class="col-lg-8">
+
+                            {{-- 1) EVENTOS DEL DÍA (PRIMERO) --}}
+                            <div class="card">
+                                <div class="card-body">
+                                    @php
+                                        $selParam = request('sel');
+                                        $selDate = $selParam ? \Carbon\Carbon::parse($selParam) : null;
+                                        $selKey = $selDate ? $selDate->toDateString() : null;
+                                        $eventosDia = [];
+                                        if ($selKey) {
+                                            foreach ($dias ?? [] as $d) {
+                                                if ($d['date']->toDateString() === $selKey) {
+                                                    $eventosDia = $d['events'] ?? [];
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    @endphp
+
+                                    <h6 class="mb-1">eventos del día <span id="lbldiasel"
+                                            class="text-muted">{{ $selKey ?? '—' }}</span></h6>
+
+                                    <div id="listdia" class="vstack gap-2 mt-2">
+                                        @if (empty($selKey))
+                                            <div class="text-muted">selecciona un día en la grilla.</div>
+                                        @else
+                                            @forelse ($eventosDia as $ev)
+                                                @php $hhmm = isset($ev['hora']) ? \Illuminate\Support\Str::of($ev['hora'])->limit(5,'')->__toString() : ''; @endphp
+                                                <div class="border rounded p-2">
+                                                    <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+                                                        <span class="badge bg-success">{{ $hhmm }}</span>
+                                                        <span
+                                                            class="fw-semibold">{{ $ev['material'] ?? 'material' }}</span>
+                                                        <span class="text-muted">·
+                                                            {{ $ev['centro'] ?? 'centro de acopio' }}</span>
+                                                        <span class="text-muted">·
+                                                            {{ $ev['frecuencia'] ?? '—' }}</span>
+                                                    </div>
+
+                                                    {{-- DETALLE COMPLETO (sin IDs) --}}
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm table-bordered mb-0">
+                                                            <tbody class="small">
+                                                                <tr>
+                                                                    <th class="w-25">Punto</th>
+                                                                    <td>{{ $ev['punto'] ?? '—' }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Material</th>
+                                                                    <td>{{ $ev['material'] ?? '—' }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Centro</th>
+                                                                    <td>{{ $ev['centro'] ?? '—' }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Frecuencia</th>
+                                                                    <td>{{ $ev['frecuencia'] ?? '—' }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Fecha</th>
+                                                                    <td>{{ $ev['fecha'] ?? $selKey }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Hora</th>
+                                                                    <td>{{ $ev['hora'] ?? '—' }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Notas</th>
+                                                                    <td>{{ $ev['notas'] ?? '—' }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Creado</th>
+                                                                    <td>{{ $ev['creado'] ?? '—' }}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            @empty
+                                                <div class="text-muted">sin eventos para este día.</div>
+                                            @endforelse
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- 2) EVENTOS DEL MES (DESPUÉS) --}}
+                            <div class="card mt-3">
+                                <div class="card-body">
+                                    <h6 class="mb-3">eventos del mes</h6>
+
+                                    <div id="listmes" class="vstack gap-2">
+                                        @php
+                                            $byDate = [];
+                                            foreach ($dias ?? [] as $d) {
+                                                $dkey = $d['date']->toDateString();
+                                                if (!empty($d['events'])) {
+                                                    $byDate[$dkey] = $d['events'];
+                                                }
+                                            }
+                                            ksort($byDate);
+                                        @endphp
+
+                                        @forelse ($byDate as $dkey => $events)
+                                            <div class="border rounded p-2">
+                                                <div class="fw-semibold mb-2">{{ $dkey }}</div>
+
+                                                @foreach ($events as $ev)
+                                                    @php $hhmm = isset($ev['hora']) ? \Illuminate\Support\Str::of($ev['hora'])->limit(5,'')->__toString() : ''; @endphp
+
+                                                    <div class="border rounded p-2 mb-2">
+                                                        <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+                                                            <span class="badge bg-success">{{ $hhmm }}</span>
+                                                            <span><strong>{{ $ev['material'] ?? 'material' }}</strong></span>
+                                                            <span class="text-muted">·
+                                                                {{ $ev['centro'] ?? 'centro' }}</span>
+                                                            <span class="text-muted">·
+                                                                {{ $ev['frecuencia'] ?? '—' }}</span>
+                                                        </div>
+
+                                                        {{-- DETALLE COMPLETO (sin IDs) --}}
+                                                        <div class="table-responsive">
+                                                            <table class="table table-sm table-bordered mb-0">
+                                                                <tbody class="small">
+                                                                    <tr>
+                                                                        <th class="w-25">Punto</th>
+                                                                        <td>{{ $ev['punto'] ?? '—' }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Material</th>
+                                                                        <td>{{ $ev['material'] ?? '—' }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Centro</th>
+                                                                        <td>{{ $ev['centro'] ?? '—' }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Frecuencia</th>
+                                                                        <td>{{ $ev['frecuencia'] ?? '—' }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Fecha</th>
+                                                                        <td>{{ $ev['fecha'] ?? $dkey }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Hora</th>
+                                                                        <td>{{ $ev['hora'] ?? '—' }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Notas</th>
+                                                                        <td>{{ $ev['notas'] ?? '—' }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Creado</th>
+                                                                        <td>{{ $ev['creado'] ?? '—' }}</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @empty
+                                            <div class="text-muted">sin eventos en este rango.</div>
+                                        @endforelse
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                {{-- estilos mínimos para la grilla --}}
+                <style>
+                    #tab-calendario .calendar .grid {
+                        display: grid;
+                        grid-template-columns: repeat(7, 1fr);
+                        gap: .5rem;
+                    }
+
+                    #tab-calendario .grid>a>div,
+                    #tab-calendario .grid>div {
+                        min-height: 100px;
+                        border-radius: .5rem;
+                    }
+                </style>
+            </section>
+
+
+
+
+
+            <section class="tab-pane fade {{ $seccion === 'centros' ? 'show active' : '' }}" id="tab-centros">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Centros de acopio</h5>
+                </div>
+
+                {{-- ===================== FILTROS ===================== --}}
+                <form class="row g-2 mb-4" method="get"
+                    action="{{ route('eca.index', ['seccion' => 'centros']) }}">
+                    <div class="col-12 col-md-3">
+                        <input type="text" name="f_nombre" class="form-control" placeholder="Buscar por nombre"
+                            value="{{ request('f_nombre') }}">
+                    </div>
+
+                    <div class="col-6 col-md-2">
+                        <select name="f_tipo" class="form-select">
+                            <option value="">Tipo (todos)</option>
+                            @foreach (['Planta', 'Proveedor', 'Otro'] as $t)
+                                <option value="{{ $t }}" @selected(request('f_tipo') === $t)>
+                                    {{ $t }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-6 col-md-2">
+                        <select name="f_estado" class="form-select">
+                            <option value="">Estado (todos)</option>
+                            @foreach (['activo', 'inactivo', 'bloqueado'] as $e)
+                                <option value="{{ $e }}" @selected(request('f_estado') === $e)>
+                                    {{ ucfirst($e) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-6 col-md-2">
+                        <input type="text" name="f_ciudad" class="form-control" placeholder="Ciudad"
+                            value="{{ request('f_ciudad') }}">
+                    </div>
+
+                    <div class="col-6 col-md-3">
+                        <select name="f_materiales[]" class="form-select" multiple size="4">
+                            @foreach ($materialesPunto ?? [] as $m)
+                                <option value="{{ $m->id }}" @selected(collect(request('f_materiales'))->contains($m->id))>
+                                    {{ $m->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">Ctrl/⌘ para seleccionar varios</div>
+                    </div>
+
+                    <div class="col-12 d-grid d-md-block">
+                        <button class="btn btn-outline-success">Aplicar filtros</button>
+                    </div>
+                </form>
+
+                <div class="row g-4">
+                    {{-- ===================== LISTADOS ===================== --}}
+                    <div class="col-12 col-lg-8">
+                        {{-- ========== Centros globales ========== --}}
+                        <div class="card card-hover mb-4">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                <strong>Centros globales</strong>
+                                <span class="small text-muted">Catálogo general</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-striped align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Nombre</th>
+                                                <th>Tipo</th>
+                                                <th>Ciudad</th>
+                                                <th>Materiales que recicla</th>
+                                                <th>Contacto</th>
+                                                <th>Teléfono</th>
+                                                <th>Correo</th>
+                                                <th>Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse(($centrosGlobales ?? []) as $c)
+                                                @php $nombresMat = ($c->materiales ?? collect())->pluck('nombre')->all(); @endphp
+                                                <tr>
+                                                    <td>{{ $c->nombre }}</td>
+                                                    <td>{{ $c->tipo }}</td>
+                                                    <td>{{ $c->ciudad ?? '—' }}</td>
+                                                    <td class="text-truncate" style="max-width: 320px;">
+                                                        {{ $nombresMat ? implode(', ', $nombresMat) : '—' }}
+                                                    </td>
+                                                    <td>{{ $c->contacto ?? '—' }}</td>
+                                                    <td>{{ $c->telefono ?? '—' }}</td>
+                                                    <td>{{ $c->correo ?? '—' }}</td>
+                                                    <td>{{ ucfirst($c->estado) }}</td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="8" class="text-center text-muted">Sin
+                                                        resultados.
+                                                    </td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                @if (($centrosGlobales ?? null) instanceof \Illuminate\Contracts\Pagination\Paginator)
+                                    <div class="d-flex justify-content-center">
+                                        {{ $centrosGlobales->onEachSide(1)->links('pagination::bootstrap-5') }}
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- ========== Centros del Punto (propios) ========== --}}
+                        <div class="card card-hover">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                <strong>Centros del Punto</strong>
+                                <span class="small text-muted">Propios del Punto ECA</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-striped align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Nombre</th>
+                                                <th>Tipo</th>
+                                                <th>Ciudad</th>
+                                                <th>Materiales que recicla</th>
+                                                <th>Contacto</th>
+                                                <th>Teléfono</th>
+                                                <th>Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse(($centrosPropios ?? []) as $c)
+                                                @php $nombresMat = ($c->materiales ?? collect())->pluck('nombre')->all(); @endphp
+                                                <tr>
+                                                    <td>{{ $c->nombre }}</td>
+                                                    <td>{{ $c->tipo }}</td>
+                                                    <td>{{ $c->ciudad ?? '—' }}</td>
+                                                    <td class="text-truncate" style="max-width: 320px;">
+                                                        {{ $nombresMat ? implode(', ', $nombresMat) : '—' }}
+                                                    </td>
+                                                    <td>{{ $c->contacto ?? '—' }}</td>
+                                                    <td>{{ $c->telefono ?? '—' }}</td>
+                                                    <td>{{ ucfirst($c->estado) }}</td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="7" class="text-center text-muted">Aún no has
+                                                        creado centros.</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                @if (($centrosPropios ?? null) instanceof \Illuminate\Contracts\Pagination\Paginator)
+                                    <div class="d-flex justify-content-center">
+                                        {{ $centrosPropios->onEachSide(1)->links('pagination::bootstrap-5') }}
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- ===================== FORMULARIO NUEVO CENTRO (propio) ===================== --}}
+                    <div class="col-12 col-lg-4">
+                        <div class="card card-hover h-100">
+                            <div class="card-header bg-white">
+                                <strong>Nuevo centro del punto</strong>
+                            </div>
+                            <div class="card-body">
+                                <form action="{{ route('eca.centros.store') }}" method="post"
+                                    class="vstack gap-3">
+                                    @csrf
+
+                                    <div>
+                                        <label class="form-label">Nombre</label>
+                                        <input type="text" name="cac[nombre]" class="form-control"
+                                            value="{{ old('cac.nombre') }}" required>
+                                        @error('cac.nombre')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Tipo</label>
+                                            <select name="cac[tipo]" class="form-select" required>
+                                                @foreach (['Planta', 'Proveedor', 'Otro'] as $t)
+                                                    <option value="{{ $t }}"
+                                                        @selected(old('cac.tipo') === $t)>
+                                                        {{ $t }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('cac.tipo')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                             @enderror
                                         </div>
-                                        <div class="col-6">
-                                            <label class="form-label">Hora</label>
-                                            <input type="time" name="hora" class="form-control"
-                                                value="{{ old('hora') ?? '10:00' }}" required>
-                                            @error('hora')
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Materiales que recicla</label>
+                                            <select name="cac[materiales][]" class="form-select" multiple
+                                                size="6">
+                                                @foreach ($materialesPunto ?? [] as $m)
+                                                    <option value="{{ $m->id }}"
+                                                        @selected(collect(old('cac.materiales', []))->contains($m->id))>
+                                                        {{ $m->nombre }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <div class="form-text">Selecciona uno o varios.</div>
+                                            @error('cac.materiales')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                            @error('cac.materiales.*')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
 
                                     <div>
-                                        <label class="form-label">Precio de venta (opcional)</label>
-                                        <input type="number" name="precio_venta" class="form-control"
-                                            step="0.01" min="0" value="{{ old('precio_venta') }}">
-                                        @error('precio_venta')
+                                        <label class="form-label">Descripción</label>
+                                        <input type="text" name="cac[descripcion]" class="form-control"
+                                            value="{{ old('cac.descripcion') }}">
+                                        @error('cac.descripcion')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Contacto</label>
+                                            <input type="text" name="cac[contacto]" class="form-control"
+                                                value="{{ old('cac.contacto') }}">
+                                            @error('cac.contacto')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Teléfono</label>
+                                            <input type="text" name="cac[telefono]" class="form-control"
+                                                value="{{ old('cac.telefono') }}">
+                                            @error('cac.telefono')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Correo</label>
+                                            <input type="email" name="cac[correo]" class="form-control"
+                                                value="{{ old('cac.correo') }}">
+                                            @error('cac.correo')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Sitio web</label>
+                                            <input type="url" name="cac[sitio_web]" class="form-control"
+                                                value="{{ old('cac.sitio_web') }}">
+                                            @error('cac.sitio_web')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label">Horario de atención</label>
+                                        <input type="text" name="cac[horario_atencion]" class="form-control"
+                                            value="{{ old('cac.horario_atencion') }}">
+                                        @error('cac.horario_atencion')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Ciudad</label>
+                                            <input type="text" name="cac[ciudad]" class="form-control"
+                                                value="{{ old('cac.ciudad') }}">
+                                            @error('cac.ciudad')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Localidad</label>
+                                            <input type="text" name="cac[localidad]" class="form-control"
+                                                value="{{ old('cac.localidad') }}">
+                                            @error('cac.localidad')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label">Dirección</label>
+                                        <input type="text" name="cac[direccion]" class="form-control"
+                                            value="{{ old('cac.direccion') }}">
+                                        @error('cac.direccion')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
                                     </div>
 
                                     <div class="text-end">
-                                        <button class="btn btn-success w-100">Guardar</button>
+                                        <button class="btn btn-success">Guardar centro</button>
                                     </div>
                                 </form>
-
-                                <hr>
-
-                                {{-- Rango mostrado (sólo informativo) --}}
-                                <div class="small text-muted">
-                                    Mostrando: <span id="lblRango">—</span>
-                                </div>
                             </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+
+
+            <!-- CONVERSACIONES -->
+            <section class="tab-pane fade {{ $seccion === 'conversaciones' ? 'show active' : '' }}"
+                id="tab-conversaciones">
+                <div class="row g-3">
+                    <div class="col-lg-4">
+                        <div class="card p-3">
+                            <h6 class="mb-3">Conversaciones</h6>
+                            <div class="list-group sidebar-threads" id="threadList"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-8 d-flex flex-column">
+                        <div class="chat-window d-flex flex-column mb-3" id="chatWindow"></div>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="chatInput"
+                                placeholder="Escribe un mensaje…">
+                            <button class="btn btn-success" id="chatSend">Enviar</button>
                         </div>
                     </div>
                 </div>
+            </section>
 
-                {{-- JS mínimo para pintar calendario y pedir eventos --}}
-                <script>
-                    (function() {
-                        const elTitulo = document.getElementById('calTitulo');
-                        const elGrid = document.getElementById('calGrid');
-                        const elPrev = document.getElementById('calPrev');
-                        const elNext = document.getElementById('calNext');
-                        const lblRango = document.getElementById('lblRango');
-
-                        let visible = new Date(); // mes visible
-
-                        function ymd(d) {
-                            return d.toISOString().slice(0, 10);
-                        }
-
-                        function firstDayOfMonth(d) {
-                            return new Date(d.getFullYear(), d.getMonth(), 1);
-                        }
-
-                        function lastDayOfMonth(d) {
-                            return new Date(d.getFullYear(), d.getMonth() + 1, 0);
-                        }
-
-                        function addDays(d, n) {
-                            const x = new Date(d);
-                            x.setDate(x.getDate() + n);
-                            return x;
-                        }
-
-                        async function fetchEventos(from, to) {
-                            const url = new URL(@json(route('eca.calendario.feed')));
-                            url.searchParams.set('from', from);
-                            url.searchParams.set('to', to);
-                            const res = await fetch(url, {
-                                headers: {
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                }
-                            });
-                            if (!res.ok) return [];
-                            return res.json();
-                        }
-
-                        async function render() {
-                            const first = firstDayOfMonth(visible);
-                            const last = lastDayOfMonth(visible);
-
-                            // Semanas: arrancamos en lunes
-                            const start = addDays(first, ((first.getDay() + 6) % 7) * -1);
-                            const end = addDays(last, 6 - ((last.getDay() + 6) % 7));
-
-                            elTitulo.textContent = first.toLocaleString('es-ES', {
-                                month: 'long',
-                                year: 'numeric'
-                            });
-                            lblRango.textContent = `${ymd(start)} a ${ymd(end)}`;
-
-                            const eventos = await fetchEventos(ymd(start), ymd(
-                                end)); // [{fecha:'YYYY-MM-DD', titulo:'...', hora:'HH:MM'}]
-
-                            elGrid.innerHTML = '';
-                            const day = new Date(start);
-                            while (day <= end) {
-                                const cell = document.createElement('div');
-                                cell.className = 'p-2 border small';
-                                const esMesActual = day.getMonth() === visible.getMonth();
-                                cell.style.background = esMesActual ? 'transparent' : '#fafafa';
-
-                                const hd = document.createElement('div');
-                                hd.className = 'fw-semibold mb-1';
-                                hd.textContent = day.getDate();
-                                cell.appendChild(hd);
-
-                                const fechaStr = ymd(day);
-                                (eventos.filter(e => e.fecha === fechaStr)).forEach(e => {
-                                    const tag = document.createElement('div');
-                                    tag.className = 'badge bg-success text-wrap mb-1';
-                                    tag.style.whiteSpace = 'normal';
-                                    tag.textContent = `${e.hora ?? ''} ${e.titulo}`;
-                                    cell.appendChild(tag);
-                                });
-
-                                elGrid.appendChild(cell);
-                                day.setDate(day.getDate() + 1);
-                            }
-                        }
-
-                        elPrev.addEventListener('click', () => {
-                            visible.setMonth(visible.getMonth() - 1);
-                            render();
-                        });
-                        elNext.addEventListener('click', () => {
-                            visible.setMonth(visible.getMonth() + 1);
-                            render();
-                        });
-
-                        render();
-                    })();
-                </script>
-                </section>
-
-
-                <section class="tab-pane fade {{ $seccion === 'centros' ? 'show active' : '' }}" id="tab-centros">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="mb-0">Centros de acopio</h5>
+            <!-- CONFIG -->
+            <section class="tab-pane fade {{ $seccion === 'configuracion' ? 'show active' : '' }}"
+                id="tab-config">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="mb-3">Preferencias del punto ECA</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Mostrar en mapa público</label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="cfgMapa">
+                                    <label class="form-check-label" for="cfgMapa">Visible cuando esté
+                                        aprobado</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Recibir notificaciones</label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="cfgNoti">
+                                    <label class="form-check-label" for="cfgNoti">Aprobaciones, mensajes,
+                                        comentarios</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end mt-3"><button class="btn btn-success btn-sm"
+                                id="cfgGuardar">Guardar</button></div>
                     </div>
-
-                    {{-- ===================== FILTROS ===================== --}}
-                    <form class="row g-2 mb-4" method="get"
-                        action="{{ route('eca.index', ['seccion' => 'centros']) }}">
-                        <div class="col-12 col-md-3">
-                            <input type="text" name="f_nombre" class="form-control"
-                                placeholder="Buscar por nombre" value="{{ request('f_nombre') }}">
-                        </div>
-
-                        <div class="col-6 col-md-2">
-                            <select name="f_tipo" class="form-select">
-                                <option value="">Tipo (todos)</option>
-                                @foreach (['Planta', 'Proveedor', 'Otro'] as $t)
-                                    <option value="{{ $t }}" @selected(request('f_tipo') === $t)>
-                                        {{ $t }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-6 col-md-2">
-                            <select name="f_estado" class="form-select">
-                                <option value="">Estado (todos)</option>
-                                @foreach (['activo', 'inactivo', 'bloqueado'] as $e)
-                                    <option value="{{ $e }}" @selected(request('f_estado') === $e)>
-                                        {{ ucfirst($e) }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-6 col-md-2">
-                            <input type="text" name="f_ciudad" class="form-control" placeholder="Ciudad"
-                                value="{{ request('f_ciudad') }}">
-                        </div>
-
-                        <div class="col-6 col-md-3">
-                            <select name="f_materiales[]" class="form-select" multiple size="4">
-                                @foreach ($materialesPunto ?? [] as $m)
-                                    <option value="{{ $m->id }}" @selected(collect(request('f_materiales'))->contains($m->id))>
-                                        {{ $m->nombre }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <div class="form-text">Ctrl/⌘ para seleccionar varios</div>
-                        </div>
-
-                        <div class="col-12 d-grid d-md-block">
-                            <button class="btn btn-outline-success">Aplicar filtros</button>
-                        </div>
-                    </form>
-
-                    <div class="row g-4">
-                        {{-- ===================== LISTADOS ===================== --}}
-                        <div class="col-12 col-lg-8">
-                            {{-- ========== Centros globales ========== --}}
-                            <div class="card card-hover mb-4">
-                                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                                    <strong>Centros globales</strong>
-                                    <span class="small text-muted">Catálogo general</span>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-sm table-striped align-middle">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>Nombre</th>
-                                                    <th>Tipo</th>
-                                                    <th>Ciudad</th>
-                                                    <th>Materiales que recicla</th>
-                                                    <th>Contacto</th>
-                                                    <th>Teléfono</th>
-                                                    <th>Correo</th>
-                                                    <th>Estado</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @forelse(($centrosGlobales ?? []) as $c)
-                                                    @php $nombresMat = ($c->materiales ?? collect())->pluck('nombre')->all(); @endphp
-                                                    <tr>
-                                                        <td>{{ $c->nombre }}</td>
-                                                        <td>{{ $c->tipo }}</td>
-                                                        <td>{{ $c->ciudad ?? '—' }}</td>
-                                                        <td class="text-truncate" style="max-width: 320px;">
-                                                            {{ $nombresMat ? implode(', ', $nombresMat) : '—' }}
-                                                        </td>
-                                                        <td>{{ $c->contacto ?? '—' }}</td>
-                                                        <td>{{ $c->telefono ?? '—' }}</td>
-                                                        <td>{{ $c->correo ?? '—' }}</td>
-                                                        <td>{{ ucfirst($c->estado) }}</td>
-                                                    </tr>
-                                                @empty
-                                                    <tr>
-                                                        <td colspan="8" class="text-center text-muted">Sin
-                                                            resultados.
-                                                        </td>
-                                                    </tr>
-                                                @endforelse
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    @if (($centrosGlobales ?? null) instanceof \Illuminate\Contracts\Pagination\Paginator)
-                                        <div class="d-flex justify-content-center">
-                                            {{ $centrosGlobales->onEachSide(1)->links('pagination::bootstrap-5') }}
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-
-                            {{-- ========== Centros del Punto (propios) ========== --}}
-                            <div class="card card-hover">
-                                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                                    <strong>Centros del Punto</strong>
-                                    <span class="small text-muted">Propios del Punto ECA</span>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-sm table-striped align-middle">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>Nombre</th>
-                                                    <th>Tipo</th>
-                                                    <th>Ciudad</th>
-                                                    <th>Materiales que recicla</th>
-                                                    <th>Contacto</th>
-                                                    <th>Teléfono</th>
-                                                    <th>Estado</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @forelse(($centrosPropios ?? []) as $c)
-                                                    @php $nombresMat = ($c->materiales ?? collect())->pluck('nombre')->all(); @endphp
-                                                    <tr>
-                                                        <td>{{ $c->nombre }}</td>
-                                                        <td>{{ $c->tipo }}</td>
-                                                        <td>{{ $c->ciudad ?? '—' }}</td>
-                                                        <td class="text-truncate" style="max-width: 320px;">
-                                                            {{ $nombresMat ? implode(', ', $nombresMat) : '—' }}
-                                                        </td>
-                                                        <td>{{ $c->contacto ?? '—' }}</td>
-                                                        <td>{{ $c->telefono ?? '—' }}</td>
-                                                        <td>{{ ucfirst($c->estado) }}</td>
-                                                    </tr>
-                                                @empty
-                                                    <tr>
-                                                        <td colspan="7" class="text-center text-muted">Aún no has
-                                                            creado centros.</td>
-                                                    </tr>
-                                                @endforelse
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    @if (($centrosPropios ?? null) instanceof \Illuminate\Contracts\Pagination\Paginator)
-                                        <div class="d-flex justify-content-center">
-                                            {{ $centrosPropios->onEachSide(1)->links('pagination::bootstrap-5') }}
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- ===================== FORMULARIO NUEVO CENTRO (propio) ===================== --}}
-                        <div class="col-12 col-lg-4">
-                            <div class="card card-hover h-100">
-                                <div class="card-header bg-white">
-                                    <strong>Nuevo centro del punto</strong>
-                                </div>
-                                <div class="card-body">
-                                    <form action="{{ route('eca.centros.store') }}" method="post"
-                                        class="vstack gap-3">
-                                        @csrf
-
-                                        <div>
-                                            <label class="form-label">Nombre</label>
-                                            <input type="text" name="cac[nombre]" class="form-control"
-                                                value="{{ old('cac.nombre') }}" required>
-                                            @error('cac.nombre')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Tipo</label>
-                                                <select name="cac[tipo]" class="form-select" required>
-                                                    @foreach (['Planta', 'Proveedor', 'Otro'] as $t)
-                                                        <option value="{{ $t }}"
-                                                            @selected(old('cac.tipo') === $t)>
-                                                            {{ $t }}</option>
-                                                    @endforeach
-                                                </select>
-                                                @error('cac.tipo')
-                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <label class="form-label">Materiales que recicla</label>
-                                                <select name="cac[materiales][]" class="form-select" multiple
-                                                    size="6">
-                                                    @foreach ($materialesPunto ?? [] as $m)
-                                                        <option value="{{ $m->id }}"
-                                                            @selected(collect(old('cac.materiales', []))->contains($m->id))>
-                                                            {{ $m->nombre }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                                <div class="form-text">Selecciona uno o varios.</div>
-                                                @error('cac.materiales')
-                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                                @enderror
-                                                @error('cac.materiales.*')
-                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label class="form-label">Descripción</label>
-                                            <input type="text" name="cac[descripcion]" class="form-control"
-                                                value="{{ old('cac.descripcion') }}">
-                                            @error('cac.descripcion')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Contacto</label>
-                                                <input type="text" name="cac[contacto]" class="form-control"
-                                                    value="{{ old('cac.contacto') }}">
-                                                @error('cac.contacto')
-                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">Teléfono</label>
-                                                <input type="text" name="cac[telefono]" class="form-control"
-                                                    value="{{ old('cac.telefono') }}">
-                                                @error('cac.telefono')
-                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Correo</label>
-                                                <input type="email" name="cac[correo]" class="form-control"
-                                                    value="{{ old('cac.correo') }}">
-                                                @error('cac.correo')
-                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">Sitio web</label>
-                                                <input type="url" name="cac[sitio_web]" class="form-control"
-                                                    value="{{ old('cac.sitio_web') }}">
-                                                @error('cac.sitio_web')
-                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label class="form-label">Horario de atención</label>
-                                            <input type="text" name="cac[horario_atencion]" class="form-control"
-                                                value="{{ old('cac.horario_atencion') }}">
-                                            @error('cac.horario_atencion')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-
-                                        <div class="row g-3">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Ciudad</label>
-                                                <input type="text" name="cac[ciudad]" class="form-control"
-                                                    value="{{ old('cac.ciudad') }}">
-                                                @error('cac.ciudad')
-                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">Localidad</label>
-                                                <input type="text" name="cac[localidad]" class="form-control"
-                                                    value="{{ old('cac.localidad') }}">
-                                                @error('cac.localidad')
-                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label class="form-label">Dirección</label>
-                                            <input type="text" name="cac[direccion]" class="form-control"
-                                                value="{{ old('cac.direccion') }}">
-                                            @error('cac.direccion')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-
-                                        <div class="text-end">
-                                            <button class="btn btn-success">Guardar centro</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </section>
-
-
-
-                <!-- CONVERSACIONES -->
-                <section class="tab-pane fade {{ $seccion === 'conversaciones' ? 'show active' : '' }}"
-                    id="tab-conversaciones">
-                    <div class="row g-3">
-                        <div class="col-lg-4">
-                            <div class="card p-3">
-                                <h6 class="mb-3">Conversaciones</h6>
-                                <div class="list-group sidebar-threads" id="threadList"></div>
-                            </div>
-                        </div>
-                        <div class="col-lg-8 d-flex flex-column">
-                            <div class="chat-window d-flex flex-column mb-3" id="chatWindow"></div>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="chatInput"
-                                    placeholder="Escribe un mensaje…">
-                                <button class="btn btn-success" id="chatSend">Enviar</button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- CONFIG -->
-                <section class="tab-pane fade {{ $seccion === 'configuracion' ? 'show active' : '' }}"
-                    id="tab-config">
-                    <div class="card">
-                        <div class="card-body">
-                            <h6 class="mb-3">Preferencias del punto ECA</h6>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Mostrar en mapa público</label>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="cfgMapa">
-                                        <label class="form-check-label" for="cfgMapa">Visible cuando esté
-                                            aprobado</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Recibir notificaciones</label>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="cfgNoti">
-                                        <label class="form-check-label" for="cfgNoti">Aprobaciones, mensajes,
-                                            comentarios</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="text-end mt-3"><button class="btn btn-success btn-sm"
-                                    id="cfgGuardar">Guardar</button></div>
-                        </div>
-                    </div>
-                </section>
+                </div>
+            </section>
 
         </div>
     </main>
@@ -1819,6 +1953,62 @@
             });
         })();
     </script>
+
+    <script>
+(function() {
+  // ===== Resumen =====
+  @if(isset($resumen))
+    const resumen = @json($resumen);
+
+    const fmt = (n) => {
+      try { return (Number(n) || 0).toLocaleString('es-CO'); } catch(e){ return n; }
+    };
+
+    const setText = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    };
+
+    setText('kpiInventario',    fmt(resumen.inventario_total));
+    setText('kpiEntradasMes',   fmt(resumen.entradas_mes));
+    setText('kpiSalidasMes',    fmt(resumen.salidas_mes));
+    setText('kpiProximoDespacho', resumen.proximo_despacho ?? '—');
+
+    const alertList = document.getElementById('alertList');
+    const alertCount = document.getElementById('alertCount');
+    if (alertList && alertCount) {
+      alertList.innerHTML = '';
+      if (Array.isArray(resumen.alertas) && resumen.alertas.length) {
+        alertCount.textContent = resumen.alertas.length.toString();
+        resumen.alertas.forEach(a => {
+          const div = document.createElement('div');
+          const badge = (a.tipo === 'crítico') ? 'danger'
+                      : (a.tipo === 'lleno')   ? 'warning'
+                      : 'secondary';
+          div.innerHTML = `<span class="badge bg-${badge} me-2 text-uppercase">${a.tipo}</span>${a.texto}`;
+          alertList.appendChild(div);
+        });
+      } else {
+        alertCount.textContent = '0';
+        alertList.textContent = 'Sin alertas.';
+      }
+    }
+  @endif
+
+  // ===== Configuración (ajustes) =====
+  @if(isset($config))
+    const cfg = @json($config);
+
+    const chk = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.checked = !!val;
+    };
+
+    chk('cfgMapa',  cfg.mostrar_mapa);
+    chk('cfgNoti',  cfg.recibir_notificaciones);
+  @endif
+})();
+</script>
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
