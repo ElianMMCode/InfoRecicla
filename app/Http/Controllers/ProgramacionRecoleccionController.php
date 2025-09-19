@@ -18,28 +18,26 @@ class ProgramacionRecoleccionController extends Controller
     {
         $gestorId = Auth::id();
 
-        $punto = \App\Models\PuntoEca::query()
-            ->where('gestor_id', $gestorId)
-            ->firstOrFail();
+        $punto = \App\Models\PuntoEca::query()->where('gestor_id', $gestorId)->firstOrFail();
 
         $data = $request->validate([
-            'material_id'      => ['required', 'uuid', 'exists:materiales,id'],
+            'material_id' => ['required', 'uuid', 'exists:materiales,id'],
             'centro_acopio_id' => ['required', 'uuid', 'exists:centros_acopio,id'],
-            'frecuencia'       => ['required', \Illuminate\Validation\Rule::in(['manual', 'semanal', 'quincenal', 'mensual', 'unico'])],
-            'fecha'            => ['required', 'date'],
-            'hora'             => ['required', 'date_format:H:i'],
-            'notas'            => ['nullable', 'string', 'max:300'],
+            'frecuencia' => ['required', \Illuminate\Validation\Rule::in(['manual', 'semanal', 'quincenal', 'mensual', 'unico'])],
+            'fecha' => ['required', 'date'],
+            'hora' => ['required', 'date_format:H:i'],
+            'notas' => ['nullable', 'string', 'max:300'],
         ]);
 
         $prog = new \App\Models\ProgramacionRecoleccion();
-        $prog->id               = (string) \Illuminate\Support\Str::uuid();
-        $prog->punto_eca_id     = $punto->id;
-        $prog->material_id      = $data['material_id'];
+        $prog->id = (string) \Illuminate\Support\Str::uuid();
+        $prog->punto_eca_id = $punto->id;
+        $prog->material_id = $data['material_id'];
         $prog->centro_acopio_id = $data['centro_acopio_id'];
-        $prog->frecuencia       = $data['frecuencia'];
-        $prog->fecha            = $data['fecha'];
-        $prog->hora             = $data['hora'] . ':00';
-        $prog->notas            = $data['notas'] ?? null;
+        $prog->frecuencia = $data['frecuencia'];
+        $prog->fecha = $data['fecha'];
+        $prog->hora = $data['hora'] . ':00';
+        $prog->notas = $data['notas'] ?? null;
 
         if (\Illuminate\Support\Facades\Schema::hasColumn('programacion_recoleccion', 'creado')) {
             $prog->creado = now();
@@ -56,19 +54,19 @@ class ProgramacionRecoleccionController extends Controller
     function vistaCalendarioCards(\Illuminate\Http\Request $request)
     {
         $gestorId = Auth::id();
-        $punto = \App\Models\PuntoEca::query()
-            ->where('gestor_id', $gestorId)
-            ->firstOrFail();
+        $punto = \App\Models\PuntoEca::query()->where('gestor_id', $gestorId)->firstOrFail();
 
         $y = intval($request->query('y', now()->year));
         $m = intval($request->query('m', now()->month));
 
         $firstOfMonth = \Carbon\Carbon::create($y, $m, 1)->startOfDay();
-        $dow = $firstOfMonth->dayOfWeekIso; // 1=Lun
-        $start = $firstOfMonth->copy()->subDays($dow - 1)->startOfDay();
-        $end   = $start->copy()->addDays(41)->endOfDay();
+        $dow = $firstOfMonth->dayOfWeekIso;
+        $start = $firstOfMonth
+            ->copy()
+            ->subDays($dow - 1)
+            ->startOfDay();
+        $end = $start->copy()->addDays(41)->endOfDay();
 
-        // Ampliamos un mes hacia atrás por si hay "mensuales" que caen en el rango
         $baseStart = $start->copy()->subMonthNoOverflow()->startOfDay();
 
         $rows = DB::table('programacion_recoleccion as pr')
@@ -77,26 +75,17 @@ class ProgramacionRecoleccionController extends Controller
             ->leftJoin('materiales as m', 'm.id', '=', 'pr.material_id')
             ->leftJoin('centros_acopio as ca', 'ca.id', '=', 'pr.centro_acopio_id')
             ->orderBy('pr.fecha')
-            ->get([
-                'pr.id',
-                'pr.fecha',
-                'pr.hora',
-                'pr.frecuencia',
-                'pr.notas',
-                'm.nombre  as material_nombre',
-                'ca.nombre as centro_nombre',
-            ]);
+            ->get(['pr.id', 'pr.fecha', 'pr.hora', 'pr.frecuencia', 'pr.notas', 'm.nombre  as material_nombre', 'ca.nombre as centro_nombre']);
 
-        // expandir repeticiones dentro del rango visible
         $eventos = [];
         foreach ($rows as $r) {
             $base = [
-                'id'       => $r->id,
-                'time'     => $r->hora,
-                'freq'     => $r->frecuencia,
-                'notes'    => $r->notas,
+                'id' => $r->id,
+                'time' => $r->hora,
+                'freq' => $r->frecuencia,
+                'notes' => $r->notas,
                 'material' => $r->material_nombre,
-                'centro'   => $r->centro_nombre,
+                'centro' => $r->centro_nombre,
             ];
 
             $c = \Carbon\Carbon::parse($r->fecha)->startOfDay();
@@ -109,10 +98,8 @@ class ProgramacionRecoleccionController extends Controller
                 }
             };
 
-            // primera
             $push($c);
 
-            // repeticiones
             if (!in_array($r->frecuencia, ['manual', 'unico'], true)) {
                 $cursor = $c->copy();
                 while (true) {
@@ -127,22 +114,26 @@ class ProgramacionRecoleccionController extends Controller
                             $cursor->addMonthNoOverflow();
                             break;
                         default:
-                            $cursor->addYears(100); // salir
+                            $cursor->addYears(100);
                     }
-                    if ($cursor->gt($end)) break;
+                    if ($cursor->gt($end)) {
+                        break;
+                    }
                     $push($cursor);
                 }
             }
         }
 
-        // construir 42 “días”
         $dias = [];
         $iter = $start->copy();
         for ($i = 0; $i < 42; $i++) {
             $key = $iter->toDateString();
-            $items = collect($eventos[$key] ?? [])->sortBy(fn($e) => $e['time'] ?? '')->values()->all();
+            $items = collect($eventos[$key] ?? [])
+                ->sortBy(fn($e) => $e['time'] ?? '')
+                ->values()
+                ->all();
             $dias[] = [
-                'date'   => $iter->copy(),
+                'date' => $iter->copy(),
                 'events' => $items,
                 'inMonth' => $iter->month === $firstOfMonth->month,
             ];
@@ -153,9 +144,9 @@ class ProgramacionRecoleccionController extends Controller
         $next = $firstOfMonth->copy()->addMonthNoOverflow();
 
         return view('eca.calendario.eve', [
-            'dias'  => $dias,
-            'y'     => $y,
-            'm'     => $m,
+            'dias' => $dias,
+            'y' => $y,
+            'm' => $m,
             'prevY' => $prev->year,
             'prevM' => $prev->month,
             'nextY' => $next->year,

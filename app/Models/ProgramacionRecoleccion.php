@@ -9,18 +9,18 @@ class ProgramacionRecoleccion extends Model
 {
     protected $table = 'programacion_recoleccion';
     protected $primaryKey = 'id';
-    public $incrementing = false; // UUID
+    public $incrementing = false;
     protected $keyType = 'string';
-    public $timestamps = false;   // si tu tabla no tiene created_at/updated_at
+    public $timestamps = false;
 
     protected $fillable = [
         'id',
         'punto_eca_id',
         'material_id',
         'centro_acopio_id',
-        'frecuencia',    // manual|semanal|quincenal|mensual|unico
-        'fecha',         // DATE
-        'hora',          // TIME
+        'frecuencia',
+        'fecha',
+        'hora',
         'notas',
         'creado',
         'actualizado',

@@ -1,27 +1,7 @@
 <x-app-layout>
 
     <link rel="stylesheet" href="{{ asset('css/PuntoECA/punto-eca.css') }}">
-    <style>
-        /* Pequeño apoyo visual para los “tabs” sin JS via :target */
-        #f_categoria,
-        #f_tipo,
-        #f_nombre,
-        #q_categoria,
-        #q_tipo,
-        #q_nombre {
-            display: none;
-        }
 
-        :target#f_categoria,
-        :target#f_tipo,
-        :target#f_nombre,
-        :target#q_categoria,
-        :target#q_tipo,
-        :target#q_nombre {
-            display: block;
-        }
-    </style>
-    <!-- NAVBAR -->
     <x-navbar-layout>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav"
             aria-expanded="false" aria-label="Alternar navegación">
@@ -45,8 +25,9 @@
     </x-navbar-layout>
 
     <main class="container my-4">
-        <!-- TABS PRINCIPALES -->
+        <!-- TABS DE TODAS LAS SECCIONES-->
         <ul class="nav nav-pills" id="mainTabs" role="tablist">
+            <!-- Dependiendo de la seccion que se ingrese por url esta se vera activa-->
             <li class="nav-item" role="presentation"><button
                     class="nav-link {{ $seccion === 'resumen' ? 'active' : '' }}" data-bs-toggle="tab"
                     data-bs-target="#tab-panel" type="button">Resumen</button></li>
@@ -131,7 +112,7 @@
                     @method('PUT')
 
                     <div class="row g-4">
-                        {{-- ===== Encargado (USUARIO) ===== --}}
+                        {{-- = Encargado = --}}
                         <div class="col-lg-6">
                             <div class="card card-hover h-100">
                                 <div class="card-body">
@@ -139,7 +120,7 @@
 
                                     <div class="d-flex align-items-center gap-3 mb-3">
                                         <img id="previewPerfil"
-                                            src="{{ $usuarios->avatar_url ?? asset('images/perfil_default.png') }}"
+                                            src="{{ $usuarios->avatar_url ?? asset('imagenes/perfil_default.png') }}"
                                             class="rounded-circle img-thumbnail"
                                             style="width:96px;height:96px;object-fit:cover;" alt="Foto encargado">
                                         <div class="flex-grow-1">
@@ -230,7 +211,7 @@
 
                                     <div class="d-flex align-items-center gap-3 mb-3">
                                         <img id="previewPunto"
-                                            src="{{ $punto->foto_url ?? asset('images/eca-default.png') }}"
+                                            src="{{ $punto->foto_url ?? asset('imagenes/eca-default.png') }}"
                                             class="img-thumbnail rounded"
                                             style="width:140px;height:100px;object-fit:cover;" alt="Foto punto">
                                         <div class="flex-grow-1">
@@ -288,25 +269,6 @@
                                             @enderror
                                         </div>
 
-                                        <div class="col-6">
-                                            <label class="form-label">Latitud</label>
-                                            <input type="text" class="form-control" id="puntoLatitud"
-                                                name="punto[latitud]"
-                                                value="{{ old('punto.latitud', $punto->latitud) }}">
-                                            @error('punto.latitud')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="form-label">Longitud</label>
-                                            <input type="text" class="form-control" id="puntoLongitud"
-                                                name="punto[longitud]"
-                                                value="{{ old('punto.longitud', $punto->longitud) }}">
-                                            @error('punto.longitud')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-
                                         <div class="col-12">
                                             <label class="form-label">Horario</label>
                                             <input type="text" class="form-control" id="puntoHorario"
@@ -327,7 +289,6 @@
                             </div>
                         </div>
 
-                        {{-- Botón global --}}
                         <div class="col-12">
                             <div class="text-end mt-2">
                                 <button type="submit" class="btn btn-success">Guardar cambios</button>
@@ -337,7 +298,7 @@
                 </form>
             </section>
 
-            <!-- MATERIALES (UNIFICA INVENTARIO + REGISTRO) -->
+            <!-- MATERIALES -->
             <section class="tab-pane fade {{ $seccion === 'materiales' ? 'show active' : '' }}" id="tab-materiales"
                 role="tabpanel" aria-labelledby="materiales-tab" data-url="{{ url('punto-eca/materiales') }}">
                 <div class="card mb-4">
@@ -350,7 +311,7 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        {{-- ÚNICO formulario contenedor (GET) para los tres filtros --}}
+                        {{-- formulario para los filtros --}}
                         <form id="form-filtros" action="{{ route('eca.materiales.index') }}" method="get">
                         </form>
 
@@ -410,7 +371,6 @@
                             </div>
                         </div>
 
-                        {{-- ¡OJO! No dupliques otro <form id="form-filtros"> aquí. --}}
                     </div>
                 </div>
 
@@ -424,7 +384,6 @@
                                     <th style="min-width: 160px;">Material</th>
                                     <th>Categoría</th>
                                     <th>Tipo</th>
-                                    <!-- Campos de inventario a completar por fila -->
                                     <th title="Capacidad máxima admitida por el punto ECA">Cap. máx</th>
                                     <th title="Unidad de medida (kg, unidad, t, m3)">Unidad</th>
                                     <th>Stock actual</th>
@@ -437,12 +396,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!--
-              Cada fila corresponde a un material disponible.
-              Más adelante, con PHP, iteras tus materiales y rellenas valores iniciales.
-            -->
+                                >
                                 @foreach ($materiales as $material)
-                                    {{-- 1) Form oculto por fila (el único que se envía) --}}
                                     <form id="reg-{{ $material->id }}" action="{{ route('eca.inventario.store') }}"
                                         method="post" style="display:none;">
                                         @csrf
@@ -456,7 +411,6 @@
                                         <td>{{ $material->categoria->nombre }}</td>
                                         <td>{{ $material->tipo->nombre }}</td>
 
-                                        {{-- 2) TODOS los inputs referenciando el form con form="reg-...": --}}
                                         <td>
                                             <input class="form-control form-control-sm" type="number" step="0.001"
                                                 name="capacidad_max" placeholder="0.000"
@@ -505,11 +459,6 @@
                                         </td>
                                     </tr>
                                 @endforeach
-
-
-
-                                <!-- Duplica/itera filas con tus materiales cuando integres PHP -->
-
                             </tbody>
                         </table>
 
@@ -525,9 +474,7 @@
                     </div>
                 </div>
 
-                <!-- ========================================= -->
-                <!-- 2) CONSULTAR / EDITAR / ELIMINAR REGISTRADOS -->
-                <!-- ========================================= -->
+                <!-- CONSULTAR / EDITAR / ELIMINAR REGISTRADOS -->
                 <div class="card">
                     <div class="card-header bg-light">
                         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -542,7 +489,7 @@
 
                     <div class="card-body">
 
-                        {{-- ===== Filtros (inventario) ===== --}}
+                        {{-- Filtros  --}}
                         <form id="form-consulta" action="{{ route('eca.materiales.index') }}" method="get">
                         </form>
 
@@ -620,16 +567,13 @@
                                 </thead>
                                 <tbody>
                                     @forelse($inventario as $inv)
-                                        {{-- Form de UPDATE oculto por fila --}}
                                         <form id="upd-{{ $inv->id }}"
                                             action="{{ route('eca.inventario.update', $inv->id) }}" method="post"
                                             style="display:none;">
                                             @csrf
                                             @method('PUT')
-                                            {{-- No enviamos punto_eca_id: lo fija el controlador con el DEFAULT --}}
                                         </form>
 
-                                        {{-- Form de DELETE oculto por fila --}}
                                         <form id="del-{{ $inv->id }}"
                                             action="{{ route('eca.inventario.destroy', $inv->id) }}" method="post"
                                             style="display:none;">
@@ -742,13 +686,13 @@
                 </div>
             </section>
 
-            <!-- ===== TAB: Entradas y Salidas de Material ===== -->
+            <!-- Entradas y Salidas de Material -->
             <section class="tab-pane fade {{ $seccion === 'movimientos' ? 'show active' : '' }}"
                 id="tab-movimientos">
                 <div class="row gy-4">
                     <div class="row g-4">
 
-                        <!-- ================== ENTRADA (Compra) ================== -->
+                        <!--  ENTRADA  -->
                         <div class="col-12 col-lg-6">
                             <div class="card card-hover h-100">
                                 <div class="card-header bg-success text-white">
@@ -807,7 +751,7 @@
                             </div>
                         </div>
 
-                        <!-- ================== SALIDA (Despacho) ================== -->
+                        <!-- SALIDA -->
                         <div class="col-12 col-lg-6">
                             <div class="card card-hover h-100">
                                 <div class="card-header bg-success text-white">
@@ -882,7 +826,7 @@
                                             </div>
                                         </div>
 
-                                        <!-- Campo oculto que se enviará en el form -->
+                                        <!-- Campo oculto que se enviará en el formulario con la información de los centros -->
                                         <input type="hidden" name="venta[centro_acopio_id]" id="centro_hidden">
                                         @error('venta.centro_acopio_id')
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -986,7 +930,7 @@
                 </ul>
 
                 <div class="tab-content border border-top-0 rounded-bottom p-3">
-                    {{-- ===================== COMPRAS ===================== --}}
+                    {{-- COMPRAS --}}
                     <div class="tab-pane fade show active" id="hist-compras">
                         <form class="row g-2 mb-2" method="get"
                             action="{{ route('eca.index', ['seccion' => 'historial']) }}">
@@ -1058,7 +1002,7 @@
                         @endif
                     </div>
 
-                    {{-- ===================== VENTAS ===================== --}}
+                    {{-- VENTAS --}}
                     <div class="tab-pane fade" id="hist-salidas">
                         <form class="row g-2 mb-2" method="get"
                             action="{{ route('eca.index', ['seccion' => 'historial']) }}">
@@ -1138,8 +1082,8 @@
 
             <section class="tab-pane fade {{ $seccion === 'calendario' ? 'show active' : '' }}" id="tab-calendario">
                 @php
-                    // Fix: tomar la fecha seleccionada desde la URL (?sel=YYYY-MM-DD)
-                    $sel = request('sel'); // string|nullable
+                    // tomar la fecha seleccionada desde la url
+                    $sel = request('sel');
                 @endphp
 
                 <div class="row g-3">
@@ -1167,7 +1111,7 @@
                                         <div>dom</div>
                                     </div>
 
-                                    {{-- Grilla 6x7 SIN JS: 42 celdas renderizadas en el servidor --}}
+                                    {{-- rejilla para el calendario --}}
                                     <div class="grid" id="calgrid">
                                         @foreach ($dias ?? [] as $d)
                                             @php
@@ -1218,7 +1162,6 @@
                                     class="vstack gap-3">
                                     @csrf
 
-                                    {{-- material (envía material_id) --}}
                                     <div>
                                         <label class="form-label">material</label>
                                         <select name="material_id" class="form-select" required>
@@ -1236,7 +1179,6 @@
                                         @enderror
                                     </div>
 
-                                    {{-- centro de acopio --}}
                                     <div>
                                         <label class="form-label">centro de acopio</label>
                                         <select name="centro_acopio_id" class="form-select" required>
@@ -1259,7 +1201,6 @@
                                         @enderror
                                     </div>
 
-                                    {{-- frecuencia / fecha / hora --}}
                                     <div>
                                         <label class="form-label">frecuencia</label>
                                         <select name="frecuencia" class="form-select" required>
@@ -1312,13 +1253,11 @@
                     </div>
                 </div>
 
-                {{-- Listas bajo la grilla: eventos del mes y del día (sin JS) --}}
-                {{-- === Listas bajo la grilla (SIN JS) === --}}
                 <div class="mt-3">
                     <div class="row g-3">
                         <div class="col-lg-8">
 
-                            {{-- 1) EVENTOS DEL DÍA (PRIMERO) --}}
+                            {{-- EVENTOS DEL DÍA --}}
                             <div class="card">
                                 <div class="card-body">
                                     @php
@@ -1356,7 +1295,7 @@
                                                             {{ $ev['frecuencia'] ?? '—' }}</span>
                                                     </div>
 
-                                                    {{-- DETALLE COMPLETO (sin IDs) --}}
+                                                    {{-- DETALLE --}}
                                                     <div class="table-responsive">
                                                         <table class="table table-sm table-bordered mb-0">
                                                             <tbody class="small">
@@ -1404,7 +1343,7 @@
                                 </div>
                             </div>
 
-                            {{-- 2) EVENTOS DEL MES (DESPUÉS) --}}
+                            {{-- EVENTOS DEL MES --}}
                             <div class="card mt-3">
                                 <div class="card-body">
                                     <h6 class="mb-3">eventos del mes</h6>
@@ -1438,7 +1377,6 @@
                                                                 {{ $ev['frecuencia'] ?? '—' }}</span>
                                                         </div>
 
-                                                        {{-- DETALLE COMPLETO (sin IDs) --}}
                                                         <div class="table-responsive">
                                                             <table class="table table-sm table-bordered mb-0">
                                                                 <tbody class="small">
@@ -1491,20 +1429,6 @@
                     </div>
                 </div>
 
-                {{-- estilos mínimos para la grilla --}}
-                <style>
-                    #tab-calendario .calendar .grid {
-                        display: grid;
-                        grid-template-columns: repeat(7, 1fr);
-                        gap: .5rem;
-                    }
-
-                    #tab-calendario .grid>a>div,
-                    #tab-calendario .grid>div {
-                        min-height: 100px;
-                        border-radius: .5rem;
-                    }
-                </style>
             </section>
 
 
@@ -1516,7 +1440,7 @@
                     <h5 class="mb-0">Centros de acopio</h5>
                 </div>
 
-                {{-- ===================== FILTROS ===================== --}}
+                {{-- FILTROS --}}
                 <form class="row g-2 mb-4" method="get"
                     action="{{ route('eca.index', ['seccion' => 'centros']) }}">
                     <div class="col-12 col-md-3">
@@ -1566,9 +1490,8 @@
                 </form>
 
                 <div class="row g-4">
-                    {{-- ===================== LISTADOS ===================== --}}
                     <div class="col-12 col-lg-8">
-                        {{-- ========== Centros globales ========== --}}
+                        {{-- Centros globales --}}
                         <div class="card card-hover mb-4">
                             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                                 <strong>Centros globales</strong>
@@ -1623,7 +1546,6 @@
                             </div>
                         </div>
 
-                        {{-- ========== Centros del Punto (propios) ========== --}}
                         <div class="card card-hover">
                             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                                 <strong>Centros del Punto</strong>
@@ -1676,7 +1598,7 @@
                         </div>
                     </div>
 
-                    {{-- ===================== FORMULARIO NUEVO CENTRO (propio) ===================== --}}
+                    {{-- FORMULARIO NUEVO CENTRO --}}
                     <div class="col-12 col-lg-4">
                         <div class="card card-hover h-100">
                             <div class="card-header bg-white">
@@ -1937,15 +1859,14 @@
 
             function sync(from, other) {
                 const val = from.value || '';
-                hiddenInput.value = val; // ← aquí se copia el UUID al hidden
-                other.disabled = !!val; // si elegí uno, deshabilito el otro
+                hiddenInput.value = val; 
+                other.disabled = !!val; o
                 if (!val) other.disabled = false;
             }
 
             globalSelect.addEventListener('change', () => sync(globalSelect, propioSelect));
             propioSelect.addEventListener('change', () => sync(propioSelect, globalSelect));
 
-            // Re-sync al volver con "atrás" del navegador
             window.addEventListener('pageshow', () => {
                 if (globalSelect.value) sync(globalSelect, propioSelect);
                 else if (propioSelect.value) sync(propioSelect, globalSelect);
@@ -1955,60 +1876,63 @@
     </script>
 
     <script>
-(function() {
-  // ===== Resumen =====
-  @if(isset($resumen))
-    const resumen = @json($resumen);
+        (function() {
+            @if (isset($resumen))
+                const resumen = @json($resumen);
 
-    const fmt = (n) => {
-      try { return (Number(n) || 0).toLocaleString('es-CO'); } catch(e){ return n; }
-    };
+                const fmt = (n) => {
+                    try {
+                        return (Number(n) || 0).toLocaleString('es-CO');
+                    } catch (e) {
+                        return n;
+                    }
+                };
 
-    const setText = (id, val) => {
-      const el = document.getElementById(id);
-      if (el) el.textContent = val;
-    };
+                const setText = (id, val) => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = val;
+                };
 
-    setText('kpiInventario',    fmt(resumen.inventario_total));
-    setText('kpiEntradasMes',   fmt(resumen.entradas_mes));
-    setText('kpiSalidasMes',    fmt(resumen.salidas_mes));
-    setText('kpiProximoDespacho', resumen.proximo_despacho ?? '—');
+                setText('kpiInventario', fmt(resumen.inventario_total));
+                setText('kpiEntradasMes', fmt(resumen.entradas_mes));
+                setText('kpiSalidasMes', fmt(resumen.salidas_mes));
+                setText('kpiProximoDespacho', resumen.proximo_despacho ?? '—');
 
-    const alertList = document.getElementById('alertList');
-    const alertCount = document.getElementById('alertCount');
-    if (alertList && alertCount) {
-      alertList.innerHTML = '';
-      if (Array.isArray(resumen.alertas) && resumen.alertas.length) {
-        alertCount.textContent = resumen.alertas.length.toString();
-        resumen.alertas.forEach(a => {
-          const div = document.createElement('div');
-          const badge = (a.tipo === 'crítico') ? 'danger'
-                      : (a.tipo === 'lleno')   ? 'warning'
-                      : 'secondary';
-          div.innerHTML = `<span class="badge bg-${badge} me-2 text-uppercase">${a.tipo}</span>${a.texto}`;
-          alertList.appendChild(div);
-        });
-      } else {
-        alertCount.textContent = '0';
-        alertList.textContent = 'Sin alertas.';
-      }
-    }
-  @endif
+                const alertList = document.getElementById('alertList');
+                const alertCount = document.getElementById('alertCount');
+                if (alertList && alertCount) {
+                    alertList.innerHTML = '';
+                    if (Array.isArray(resumen.alertas) && resumen.alertas.length) {
+                        alertCount.textContent = resumen.alertas.length.toString();
+                        resumen.alertas.forEach(a => {
+                            const div = document.createElement('div');
+                            const badge = (a.tipo === 'crítico') ? 'danger' :
+                                (a.tipo === 'lleno') ? 'warning' :
+                                'secondary';
+                            div.innerHTML =
+                                `<span class="badge bg-${badge} me-2 text-uppercase">${a.tipo}</span>${a.texto}`;
+                            alertList.appendChild(div);
+                        });
+                    } else {
+                        alertCount.textContent = '0';
+                        alertList.textContent = 'Sin alertas.';
+                    }
+                }
+            @endif
 
-  // ===== Configuración (ajustes) =====
-  @if(isset($config))
-    const cfg = @json($config);
+            @if (isset($config))
+                const cfg = @json($config);
 
-    const chk = (id, val) => {
-      const el = document.getElementById(id);
-      if (el) el.checked = !!val;
-    };
+                const chk = (id, val) => {
+                    const el = document.getElementById(id);
+                    if (el) el.checked = !!val;
+                };
 
-    chk('cfgMapa',  cfg.mostrar_mapa);
-    chk('cfgNoti',  cfg.recibir_notificaciones);
-  @endif
-})();
-</script>
+                chk('cfgMapa', cfg.mostrar_mapa);
+                chk('cfgNoti', cfg.recibir_notificaciones);
+            @endif
+        })();
+    </script>
 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

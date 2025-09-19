@@ -10,7 +10,7 @@ class StoreInventarioRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
-    } // agrega policies luego si deseas
+    }
 
     public function rules(): array
     {
@@ -18,24 +18,16 @@ class StoreInventarioRequest extends FormRequest
 
         return [
             'punto_eca_id' => ['required', 'uuid', 'exists:puntos_eca,id'],
-            'material_id'  => [
-                'required',
-                'uuid',
-                'exists:materiales,id',
-                Rule::unique('inventario')->where(
-                    fn($q) =>
-                    $q->where('punto_eca_id', $punto)
-                ),
-            ],
+            'material_id' => ['required', 'uuid', 'exists:materiales,id', Rule::unique('inventario')->where(fn($q) => $q->where('punto_eca_id', $punto))],
             'capacidad_max' => ['nullable', 'numeric', 'gte:0'],
             'unidad_medida' => ['nullable', 'in:kg,unidad,t,m3'],
-            'stock_actual'  => ['nullable', 'numeric', 'gte:0'],
+            'stock_actual' => ['nullable', 'numeric', 'gte:0'],
             'umbral_alerta' => ['nullable', 'numeric', 'gte:0'],
             'umbral_critico' => ['nullable', 'numeric', 'gte:0'],
             'precio_compra' => ['nullable', 'numeric', 'gte:0'],
-            'precio_venta'  => ['nullable', 'numeric', 'gte:0'],
+            'precio_venta' => ['nullable', 'numeric', 'gte:0'],
             'nota_material' => ['nullable', 'string', 'max:300'],
-            'activo'        => ['required', 'boolean'],
+            'activo' => ['required', 'boolean'],
         ];
     }
 

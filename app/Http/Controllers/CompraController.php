@@ -33,31 +33,33 @@ class CompraController extends Controller
      */
     public function store(Request $request)
     {
-        $punto = DB::table('puntos_eca')
-            ->select('id', 'gestor_id')
-            ->where('gestor_id', Auth::id())
-            ->first();
+        $user = Auth::user();
+        $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', $user->id)->first();
         $puntoEcaId = $punto->id;
 
-        $inv = DB::table('inventario')
-            ->select('id')
-            ->where('punto_eca_id', $puntoEcaId)
-            ->first();
+        // Buscar el inventario del punto asociado al gestor
+        $inv = DB::table('inventario')->select('id')->where('punto_eca_id', $puntoEcaId)->first();
         $inventarioId = $inv->id;
 
         $data = $request->validate([
-            'id'            => (string) Str::uuid(),
+            'id' => (string) Str::uuid(),
             'inventario_id' => ['required', 'exists:inventario,id'],
-            'cantidad'      => ['required', 'numeric', 'gte:0'],
-            'fecha'         => ['required', 'date'],
+            'cantidad' => ['required', 'numeric', 'gte:0'],
+            'fecha' => ['required', 'date'],
             'precio_compra' => ['required', 'numeric', 'gte:0'],
-            'creado'        => now(),
+            'creado' => now(),
         ]);
 
+        // transaction es un helper de DB
+        //  que permite asegurar todas las consultas de la transacción
         DB::transaction(function () use ($data, $inventarioId) {
-            Compra::create(array_merge($data, [
-                'inventario_id' => $inventarioId,
-            ]));
+            //Combinar los arrays de los dos arreglos
+            Compra::create(
+                array_merge($data, [
+                    // asignar el id del inventario
+                    'inventario_id' => $inventarioId,
+                ]),
+            );
         });
 
         return back()->with('ok', 'Compra registrada en el inventario');
