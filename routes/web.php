@@ -73,9 +73,22 @@ Route::middleware(['auth', 'role:Ciudadano'])->group(function () {
         ->name('eca.view');
 });
 
-// RUTAS PUBLICAS
-Route::get('/mapa', [MapaController::class, 'view_mapa'])->name('mapa');
-Route::get('/publicaciones', [PublicacionController::class, 'view_publicaciones'])->name('publicaciones');
-Route::get('/publicacion', [PublicacionController::class, 'view_publicacion'])->name('publicacion');
-Route::get('/admin', [AdminController::class, 'view_admin'])->name('admin');
-Route::post('/admin/usuarios', [AdminController::class, 'createUsuarios'])->name('admin.usuarios.create');
+Route::middleware(['auth', 'role:Administrador'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        // Panel
+        Route::get('/panel', [AdminController::class, 'dashboard'])->name('dashboard');
+
+        // USUARIOS (CRUD)
+        Route::get('/usuarios',            [AdminController::class, 'usuariosIndex'])->name('usuarios.index');
+        Route::post('/usuarios',           [AdminController::class, 'usuariosStore'])->name('usuarios.store');
+        Route::get('/usuarios/{id}/edit',  [AdminController::class, 'usuariosEdit'])->name('usuarios.edit');
+        Route::put('/usuarios/{id}',       [AdminController::class, 'usuariosUpdate'])->name('usuarios.update');
+        Route::delete('/usuarios/{id}',    [AdminController::class, 'usuariosDestroy'])->name('usuarios.destroy');
+
+        // Puntos ECA (CRUD)
+        Route::post('/ecas',               [AdminController::class, 'ecaStore'])->name('ecas.store');
+        Route::put('/ecas/{id}',           [AdminController::class, 'ecaUpdate'])->name('ecas.update');
+        Route::delete('/ecas/{id}',        [AdminController::class, 'ecaDestroy'])->name('ecas.destroy');
+    });

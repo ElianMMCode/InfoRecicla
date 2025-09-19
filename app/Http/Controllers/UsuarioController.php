@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\RedirectResponse;
 use App\Models\PuntoEca;
 use App\Models\Usuario;
 use Illuminate\Http\Request;

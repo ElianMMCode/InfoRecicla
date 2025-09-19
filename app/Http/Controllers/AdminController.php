@@ -2,123 +2,212 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PuntoEca;
 use App\Models\Usuario;
+use App\Models\PuntoEca;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function indexAdmin(Request $request)
     {
-        //
+        $totalUsuarios   = Usuario::count();
+        $totalAdmins     = Usuario::where('rol', 'Administrador')->count();
+        $totalGestores   = Usuario::where('rol', 'GestorECA')->count();
+        $totalCiudadanos = Usuario::where('rol', 'Ciudadano')->count();
+        $totalEcas       = PuntoEca::count();
 
+        $ultimos = Usuario::latest('creado')->limit(10)->get();
+
+        return view('Administracion.administrador', compact(
+            'totalUsuarios',
+            'totalAdmins',
+            'totalGestores',
+            'totalCiudadanos',
+            'totalEcas',
+            'ultimos'
+        ));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function createUsuarios(Request $request)
+    /*USUARIOS: LISTADO*/
+    public function usuariosIndex(Request $request)
     {
-        //
-        $rules = [
-            'rol'                 => ['required', 'in:Ciudadano,GestorECA,Administrador'], // <- lista blanca
-            'correo'               => ['required', 'email', 'max:255', 'unique:usuarios,correo'],
-            'password'             => ['required', 'string', 'min:8'],
-            'nombre'               => ['required', 'string', 'max:100'],
-            'apellido'             => ['required', 'string', 'max:100'],
-            'recibeNotificaciones' => ['nullable'], // checkbox
-            'fechaNacimiento'      => ['nullable', 'date'],
-            'avatar'               => ['nullable', 'url'],
-            'estado'               => ['nullable', 'in:activo,inactivo,bloqueado'], // <- lista blanca
-            'nombre_usuario'       => ['nullable', 'string', 'max:60'],
-            'genero'               => ['nullable', 'in:Masculino,Femenino,Otro'],
-            'localidad'            => ['nullable', 'string', 'max:60'],
-            'tipo_documento'      => ['nullable', 'string', 'max:20'],
-            'numero_documento'    => ['nullable', 'string', 'max:20'],
-        ];
+        $q      = $request->input('q');
+        $rol    = $request->input('rol');
+        $estado = $request->input('estado');
 
-        $data = $request->validate($rules);
+        $usuarios = Usuario::query()
+            ->when($q, fn($q2) => $q2->where(function ($w) use ($q) {
+                $w->where('nombre', 'like', "%$q%")
+                    ->orWhere('apellido', 'like', "%$q%")
+                    ->orWhere('correo', 'like', "%$q%");
+            }))
+            ->when($rol, fn($q2) => $q2->where('rol', $rol))
+            ->when($estado, fn($q2) => $q2->where('estado', $estado))
+            ->orderBy('creado', 'desc')
+            ->paginate(10)
+            ->withQueryString();
 
-        // Mapeo camelCase -> snake_case y hasheo de contraseña
-        $payload = [
-            'id'                    => (string) Str::uuid(),
-            'rol'                   => $data['rol'],                 // <- mapeo clave para que no falle
-            'correo'                => $data['correo'],
-            'password'              => Hash::make($data['password']), // <- hasheo hacia columna 'password'
-            'nombre'                => $data['nombre'],
-            'apellido'              => $data['apellido'],
-            'recibe_notificaciones' => isset($data['recibeNotificaciones']) ? 1 : 0,
-            'fecha_nacimiento'      => $data['fechaNacimiento'] ?? null,
-            'avatar_url'            => $data['avatar'] ?? null,
-            'nombre_usuario'        => $data['nombre_usuario'] ?? null,
-            'genero'                => $data['genero'] ?? null,
-            'localidad'             => $data['localidad'] ?? null,
-            'estado'                => 'activo',
-            'creado'                => now(),
-            'actualizado'           => now(),
-        ];
+        return view('Administracion.administrador', compact('usuarios'));
+    }
 
-        DB::transaction(function () use ($payload) {
-            Usuario::create($payload);
+    /*USUARIOS: CREAR*/
+    public function usuariosStore(Request $request)
+    {
+        $data = $request->validate([
+            'rol'               => ['required', 'in:Administrador,GestorECA,Ciudadano'],
+            'correo'            => ['required', 'email', 'max:255', 'unique:usuarios,correo'],
+            'password'          => ['required', 'string', 'min:8'],
+            'nombre'            => ['required', 'string', 'max:100'],
+            'apellido'          => ['required', 'string', 'max:100'],
+            'estado'            => ['nullable', 'in:activo,inactivo,bloqueado'],
+            'genero'            => ['nullable', 'in:Masculino,Femenino,Otro'],
+            'tipo_documento'    => ['nullable', 'string', 'max:30'],
+            'numero_documento'  => ['nullable', 'string', 'max:30'],
+            'telefono'          => ['nullable', 'string', 'max:30'],
+            'fecha_nacimiento'  => ['nullable', 'date'],
+            'nombre_usuario'    => ['nullable', 'string', 'max:60'],
+            'avatar_url'        => ['nullable', 'url'],
+        ]);
+
+        $payload = array_merge($data, [
+            'id'          => (string) Str::uuid(),
+            'password'    => Hash::make($data['password']),
+            'estado'      => $data['estado'] ?? 'activo',
+            'creado'      => now(),
+            'actualizado' => now(),
+        ]);
+
+        DB::transaction(fn() => Usuario::create($payload));
+
+        return redirect()->route('admin.dashboard')->with('ok', 'Usuario creado correctamente');
+    }
+
+    /*USUARIOS: EDITAR*/
+    public function usuariosEdit(string $id)
+    {
+        $usuario = Usuario::findOrFail($id);
+        // Vista nueva en Administracion/
+        return view('Administracion.usuario_edit', compact('usuario'));
+    }
+
+    /*USUARIOS: ACTUALIZAR*/
+    public function usuariosUpdate(Request $request, string $id)
+    {
+        $usuario = Usuario::findOrFail($id);
+
+        $data = $request->validate([
+            'rol'               => ['required', 'in:Administrador,GestorECA,Ciudadano'],
+            'correo'            => ['required', 'email', 'max:255', Rule::unique('usuarios', 'correo')->ignore($usuario->id)],
+            'password'          => ['nullable', 'string', 'min:8', 'confirmed'],
+            'nombre'            => ['required', 'string', 'max:100'],
+            'apellido'          => ['required', 'string', 'max:100'],
+            'estado'            => ['nullable', 'in:activo,inactivo,bloqueado'],
+            'genero'            => ['nullable', 'in:Masculino,Femenino,Otro'],
+            'tipo_documento'    => ['nullable', 'string', 'max:30'],
+            'numero_documento'  => ['nullable', 'string', 'max:30'],
+            'telefono'          => ['nullable', 'string', 'max:30'],
+            'fecha_nacimiento'  => ['nullable', 'date'],
+            'nombre_usuario'    => ['nullable', 'string', 'max:60'],
+            'avatar_url'        => ['nullable', 'url'],
+        ]);
+
+        DB::transaction(function () use ($usuario, $data) {
+            $usuario->fill($data);
+            if (!empty($data['password'])) {
+                $usuario->password = Hash::make($data['password']);
+            }
+            $usuario->actualizado = now();
+            $usuario->save();
         });
-        return redirect('/registro/exitoso')->with('ok', true);
+
+        return redirect()->route('admin.usuarios.index')->with('ok', 'Usuario actualizado');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    /*USUARIOS: ELIMINAR*/
+    public function usuariosDestroy(string $id)
     {
-        //
+        $usuario = Usuario::findOrFail($id);
+        $usuario->delete();
+        return back()->with('ok', 'Usuario eliminado');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    /* ECAS: formularios */
+    public function ecaStore(Request $request)
     {
-        //
+        $data = $request->validate([
+            'nombre'            => ['required', 'string', 'max:120'],
+            'gestor_id'         => ['nullable', 'exists:usuarios,id'],
+            'descripcion'       => ['nullable', 'string'],
+            'direccion'         => ['nullable', 'string', 'max:200'],
+            'telefonoPunto'     => ['nullable', 'string', 'max:30'],
+            'correoPunto'       => ['nullable', 'email', 'max:255'],
+            'ciudad'            => ['nullable', 'string', 'max:100'],
+            'localidad'         => ['nullable', 'string', 'max:100'],
+            'latitud'           => ['nullable', 'numeric'],
+            'longitud'          => ['nullable', 'numeric'],
+            'nit'               => ['nullable', 'string', 'max:30'],
+            'horario_atencion'  => ['nullable', 'string', 'max:120'],
+            'sitio_web'         => ['nullable', 'url'],
+            'logo_url'          => ['nullable', 'url'],
+            'foto_url'          => ['nullable', 'url'],
+            'estado'            => ['nullable', 'in:activo,inactivo,bloqueado'],
+        ]);
+
+        $data['estado'] = $data['estado'] ?? 'activo';
+
+        DB::transaction(fn() => PuntoEca::create([
+            // mapea campos
+            ...$data,
+            'telefono' => $data['telefonoPunto'] ?? null,
+            'correo'   => $data['correoPunto'] ?? null,
+        ]));
+
+        return back()->with('ok', 'Punto ECA creado');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function ecaUpdate(Request $request, string $id)
     {
-        //
+        $punto = PuntoEca::findOrFail($id);
+
+        $data = $request->validate([
+            'nombre'            => ['required', 'string', 'max:120'],
+            'gestor_id'         => ['nullable', 'exists:usuarios,id'],
+            'descripcion'       => ['nullable', 'string'],
+            'direccion'         => ['nullable', 'string', 'max:200'],
+            'telefonoPunto'     => ['nullable', 'string', 'max:30'],
+            'correoPunto'       => ['nullable', 'email', 'max:255'],
+            'ciudad'            => ['nullable', 'string', 'max:100'],
+            'localidad'         => ['nullable', 'string', 'max:100'],
+            'latitud'           => ['nullable', 'numeric'],
+            'longitud'          => ['nullable', 'numeric'],
+            'nit'               => ['nullable', 'string', 'max:30'],
+            'horario_atencion'  => ['nullable', 'string', 'max:120'],
+            'sitio_web'         => ['nullable', 'url'],
+            'logo_url'          => ['nullable', 'url'],
+            'foto_url'          => ['nullable', 'url'],
+            'estado'            => ['nullable', 'in:activo,inactivo,bloqueado'],
+        ]);
+
+        DB::transaction(function () use ($punto, $data) {
+            $punto->fill([
+                ...$data,
+                'telefono' => $data['telefonoPunto'] ?? null,
+                'correo'   => $data['correoPunto'] ?? null,
+            ]);
+            $punto->save();
+        });
+
+        return back()->with('ok', 'Punto ECA actualizado');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function ecaDestroy(string $id)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-
-    public function view_admin()
-    {
-        //return $this->view('/Admin/', 'admin');
-        return view('Administracion.administrador');
+        $punto = PuntoEca::findOrFail($id);
+        $punto->delete();
+        return back()->with('ok', 'Punto ECA eliminado');
     }
 }
