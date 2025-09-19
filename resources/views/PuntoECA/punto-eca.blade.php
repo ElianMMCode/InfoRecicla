@@ -1,27 +1,7 @@
 <x-app-layout>
 
     <link rel="stylesheet" href="{{ asset('css/PuntoECA/punto-eca.css') }}">
-    <style>
-        /* Pequeño apoyo visual para los “tabs” sin JS via :target */
-        #f_categoria,
-        #f_tipo,
-        #f_nombre,
-        #q_categoria,
-        #q_tipo,
-        #q_nombre {
-            display: none;
-        }
 
-        :target#f_categoria,
-        :target#f_tipo,
-        :target#f_nombre,
-        :target#q_categoria,
-        :target#q_tipo,
-        :target#q_nombre {
-            display: block;
-        }
-    </style>
-    <!-- NAVBAR -->
     <x-navbar-layout>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav"
             aria-expanded="false" aria-label="Alternar navegación">
@@ -45,8 +25,9 @@
     </x-navbar-layout>
 
     <main class="container my-4">
-        <!-- TABS PRINCIPALES -->
+        <!-- TABS DE TODAS LAS SECCIONES-->
         <ul class="nav nav-pills" id="mainTabs" role="tablist">
+            <!-- Dependiendo de la seccion que se ingrese por url esta se vera activa-->
             <li class="nav-item" role="presentation"><button
                     class="nav-link {{ $seccion === 'resumen' ? 'active' : '' }}" data-bs-toggle="tab"
                     data-bs-target="#tab-panel" type="button">Resumen</button></li>
@@ -131,7 +112,7 @@
                     @method('PUT')
 
                     <div class="row g-4">
-                        {{-- ===== Encargado (USUARIO) ===== --}}
+                        {{-- = Encargado = --}}
                         <div class="col-lg-6">
                             <div class="card card-hover h-100">
                                 <div class="card-body">
@@ -139,7 +120,7 @@
 
                                     <div class="d-flex align-items-center gap-3 mb-3">
                                         <img id="previewPerfil"
-                                            src="{{ $usuarios->avatar_url ?? asset('images/perfil_default.png') }}"
+                                            src="{{ $usuarios->avatar_url ?? asset('imagenes/perfil_default.png') }}"
                                             class="rounded-circle img-thumbnail"
                                             style="width:96px;height:96px;object-fit:cover;" alt="Foto encargado">
                                         <div class="flex-grow-1">
@@ -230,7 +211,7 @@
 
                                     <div class="d-flex align-items-center gap-3 mb-3">
                                         <img id="previewPunto"
-                                            src="{{ $punto->foto_url ?? asset('images/eca-default.png') }}"
+                                            src="{{ $punto->foto_url ?? asset('imagenes/eca-default.png') }}"
                                             class="img-thumbnail rounded"
                                             style="width:140px;height:100px;object-fit:cover;" alt="Foto punto">
                                         <div class="flex-grow-1">
@@ -288,25 +269,6 @@
                                             @enderror
                                         </div>
 
-                                        <div class="col-6">
-                                            <label class="form-label">Latitud</label>
-                                            <input type="text" class="form-control" id="puntoLatitud"
-                                                name="punto[latitud]"
-                                                value="{{ old('punto.latitud', $punto->latitud) }}">
-                                            @error('punto.latitud')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="form-label">Longitud</label>
-                                            <input type="text" class="form-control" id="puntoLongitud"
-                                                name="punto[longitud]"
-                                                value="{{ old('punto.longitud', $punto->longitud) }}">
-                                            @error('punto.longitud')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-
                                         <div class="col-12">
                                             <label class="form-label">Horario</label>
                                             <input type="text" class="form-control" id="puntoHorario"
@@ -327,7 +289,6 @@
                             </div>
                         </div>
 
-                        {{-- Botón global --}}
                         <div class="col-12">
                             <div class="text-end mt-2">
                                 <button type="submit" class="btn btn-success">Guardar cambios</button>
@@ -337,7 +298,7 @@
                 </form>
             </section>
 
-            <!-- MATERIALES (UNIFICA INVENTARIO + REGISTRO) -->
+            <!-- MATERIALES -->
             <section class="tab-pane fade {{ $seccion === 'materiales' ? 'show active' : '' }}" id="tab-materiales"
                 role="tabpanel" aria-labelledby="materiales-tab" data-url="{{ url('punto-eca/materiales') }}">
                 <div class="card mb-4">
@@ -350,7 +311,7 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        {{-- ÚNICO formulario contenedor (GET) para los tres filtros --}}
+                        {{-- formulario para los filtros --}}
                         <form id="form-filtros" action="{{ route('eca.materiales.index') }}" method="get">
                         </form>
 
@@ -410,7 +371,6 @@
                             </div>
                         </div>
 
-                        {{-- ¡OJO! No dupliques otro <form id="form-filtros"> aquí. --}}
                     </div>
                 </div>
 
@@ -424,7 +384,6 @@
                                     <th style="min-width: 160px;">Material</th>
                                     <th>Categoría</th>
                                     <th>Tipo</th>
-                                    <!-- Campos de inventario a completar por fila -->
                                     <th title="Capacidad máxima admitida por el punto ECA">Cap. máx</th>
                                     <th title="Unidad de medida (kg, unidad, t, m3)">Unidad</th>
                                     <th>Stock actual</th>
@@ -437,12 +396,8 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!--
-              Cada fila corresponde a un material disponible.
-              Más adelante, con PHP, iteras tus materiales y rellenas valores iniciales.
-            -->
+                                >
                                 @foreach ($materiales as $material)
-                                    {{-- 1) Form oculto por fila (el único que se envía) --}}
                                     <form id="reg-{{ $material->id }}" action="{{ route('eca.inventario.store') }}"
                                         method="post" style="display:none;">
                                         @csrf
@@ -456,7 +411,6 @@
                                         <td>{{ $material->categoria->nombre }}</td>
                                         <td>{{ $material->tipo->nombre }}</td>
 
-                                        {{-- 2) TODOS los inputs referenciando el form con form="reg-...": --}}
                                         <td>
                                             <input class="form-control form-control-sm" type="number" step="0.001"
                                                 name="capacidad_max" placeholder="0.000"
@@ -505,11 +459,6 @@
                                         </td>
                                     </tr>
                                 @endforeach
-
-
-
-                                <!-- Duplica/itera filas con tus materiales cuando integres PHP -->
-
                             </tbody>
                         </table>
 
@@ -525,9 +474,7 @@
                     </div>
                 </div>
 
-                <!-- ========================================= -->
-                <!-- 2) CONSULTAR / EDITAR / ELIMINAR REGISTRADOS -->
-                <!-- ========================================= -->
+                <!-- CONSULTAR / EDITAR / ELIMINAR REGISTRADOS -->
                 <div class="card">
                     <div class="card-header bg-light">
                         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -542,7 +489,7 @@
 
                     <div class="card-body">
 
-                        {{-- ===== Filtros (inventario) ===== --}}
+                        {{-- Filtros  --}}
                         <form id="form-consulta" action="{{ route('eca.materiales.index') }}" method="get">
                         </form>
 
@@ -620,16 +567,13 @@
                                 </thead>
                                 <tbody>
                                     @forelse($inventario as $inv)
-                                        {{-- Form de UPDATE oculto por fila --}}
                                         <form id="upd-{{ $inv->id }}"
                                             action="{{ route('eca.inventario.update', $inv->id) }}" method="post"
                                             style="display:none;">
                                             @csrf
                                             @method('PUT')
-                                            {{-- No enviamos punto_eca_id: lo fija el controlador con el DEFAULT --}}
                                         </form>
 
-                                        {{-- Form de DELETE oculto por fila --}}
                                         <form id="del-{{ $inv->id }}"
                                             action="{{ route('eca.inventario.destroy', $inv->id) }}" method="post"
                                             style="display:none;">
@@ -742,213 +686,225 @@
                 </div>
             </section>
 
-            <!-- ===== TAB: Entradas y Salidas de Material ===== -->
+            <!-- Entradas y Salidas de Material -->
             <section class="tab-pane fade {{ $seccion === 'movimientos' ? 'show active' : '' }}"
                 id="tab-movimientos">
-                <div class="row g-4">
+                <div class="row gy-4">
+                    <div class="row g-4">
 
-                    <!-- ================== ENTRADA (Compra) ================== -->
-                    <div class="col-12 col-lg-6">
-                        <div class="card h-100">
-                            <div class="card-header bg-white">
-                                <strong>Registrar ENTRADA (Compra)</strong>
-                            </div>
-                            <div class="card-body">
-                                <form action="{{ route('eca.movimientos.compra.store') }}" method="post"
-                                    class="vstack gap-3">
-                                    @csrf
+                        <!--  ENTRADA  -->
+                        <div class="col-12 col-lg-6">
+                            <div class="card card-hover h-100">
+                                <div class="card-header bg-success text-white">
+                                    <strong>Registrar ENTRADA (Compra)</strong>
+                                </div>
+                                <div class="card-body">
+                                    <form action="{{ route('eca.movimientos.compra.store') }}" method="post"
+                                        class="vstack gap-3">
+                                        @csrf
 
-                                    <label class="form-label">Inventario / Material</label>
-                                    <select name="compra[inventario_id]" class="form-select" required>
-                                        <option value="" disabled selected>— Selecciona —</option>
-                                        @foreach ($inventario as $inv)
-                                            <option value="{{ $inv->id }}" @selected(old('compra.inventario_id') == $inv->id)>
-                                                {{ $inv->material->nombre }} (Stock: {{ $inv->stock_actual ?? 0 }}
-                                                {{ $inv->unidad_medida ?? '' }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('compra.inventario_id')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
+                                        <label class="form-label">Inventario / Material</label>
+                                        <select name="compra[inventario_id]" class="form-select" required>
+                                            <option value="" disabled selected>— Selecciona —</option>
+                                            @foreach ($inventario as $inv)
+                                                <option value="{{ $inv->id }}" @selected(old('compra.inventario_id') == $inv->id)>
+                                                    {{ $inv->material->nombre }} (Stock:
+                                                    {{ $inv->stock_actual ?? 0 }}
+                                                    {{ $inv->unidad_medida ?? '' }} | Precio:
+                                                    {{ $inv->precio_compra }})
 
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Fecha</label>
-                                            <input type="date" name="compra[fecha]" class="form-control"
-                                                value="{{ old('compra.fecha') }}" required>
-                                            @error('compra.fecha')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('compra.inventario_id')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Fecha</label>
+                                                <input type="date" name="compra[fecha]" class="form-control"
+                                                    value="{{ old('compra.fecha') }}" required>
+                                                @error('compra.fecha')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Cantidad</label>
+                                                <input type="number" name="compra[cantidad]" step="0.001"
+                                                    min="0.001" class="form-control"
+                                                    value="{{ old('compra.cantidad') }}" required>
+                                                @error('compra.cantidad')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Cantidad</label>
-                                            <input type="number" name="compra[cantidad]" step="0.001"
-                                                min="0.001" class="form-control"
-                                                value="{{ old('compra.cantidad') }}" required>
-                                            @error('compra.cantidad')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
 
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Precio compra (COP / unidad)</label>
-                                            <input type="number" name="compra[precio_compra]" step="0.01"
-                                                min="0" class="form-control"
-                                                value="{{ old('compra.precio_compra') }}" required>
-                                            @error('compra.precio_compra')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
+                                        <label class="form-label">Observaciones (opcional)</label>
+                                        <textarea name="compra[observaciones]" rows="2" class="form-control">{{ old('compra.observaciones') }}</textarea>
+                                        <div class="text-end">
+                                            <button type="submit" class="btn btn-success">Guardar
+                                                entrada</button>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Unidad (referencial)</label>
-                                            <input type="text" class="form-control"
-                                                value="Se usa la del inventario" disabled>
-                                        </div>
-                                    </div>
-
-                                    <label class="form-label">Observaciones (opcional)</label>
-                                    <textarea name="compra[observaciones]" rows="2" class="form-control">{{ old('compra.observaciones') }}</textarea>
-
-                                    <div class="text-end">
-                                        <button type="submit" class="btn btn-success">Guardar entrada</button>
-                                    </div>
-                                </form>
+                                    </form>
+                                </div>
                             </div>
                         </div>
+
+                        <!-- SALIDA -->
+                        <div class="col-12 col-lg-6">
+                            <div class="card card-hover h-100">
+                                <div class="card-header bg-success text-white">
+                                    <strong>Registrar SALIDA (Despacho)</strong>
+                                </div>
+                                <div class="card-body">
+                                    <form action="{{ route('eca.movimientos.venta.store') }}" method="post"
+                                        class="vstack gap-3">
+                                        @csrf
+
+                                        <label class="form-label">Inventario / Material</label>
+                                        <select name="venta[inventario_id]" class="form-select" required>
+                                            <option value="" disabled selected>— Selecciona —</option>
+                                            @foreach ($inventario as $inv)
+                                                <option value="{{ $inv->id }}" @selected(old('venta.inventario_id') == $inv->id)>
+                                                    {{ $inv->material->nombre }} (Stock:
+                                                    {{ $inv->stock_actual ?? 0 }}
+                                                    {{ $inv->unidad_medida ?? '' }} | Precio:
+                                                    {{ $inv->precio_compra }})
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('venta.inventario_id')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Fecha</label>
+                                                <input type="date" name="venta[fecha]" class="form-control"
+                                                    value="{{ old('venta.fecha') }}" required>
+                                                @error('venta.fecha')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Cantidad</label>
+                                                <input type="number" name="venta[cantidad]" step="0.001"
+                                                    min="0.001" class="form-control"
+                                                    value="{{ old('venta.cantidad') }}" required>
+                                                @error('venta.cantidad')
+                                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row g-3">
+                                            <div class="col-md-5">
+                                                <label class="form-label">Centro de acopio (Opcional)</label>
+                                                <select id="centro_global" class="form-select">
+                                                    <option value="">— Selecciona —</option>
+                                                    @foreach ($centrosGlobalesLista as $cag)
+                                                        <option value="{{ $cag->id }}">
+                                                            {{ $cag->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-7">
+                                                <label class="form-label">Centro de acopios personales
+                                                    (Opcional)</label>
+                                                <select id="centro_propio" class="form-select">
+                                                    <option value="">— Selecciona —</option>
+                                                    @foreach ($centrosPropiosLista as $cag)
+                                                        <option value="{{ $cag->id }}">
+                                                            {{ $cag->nombre }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Campo oculto que se enviará en el formulario con la información de los centros -->
+                                        <input type="hidden" name="venta[centro_acopio_id]" id="centro_hidden">
+                                        @error('venta.centro_acopio_id')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+
+
+                                        <label class="form-label">Observaciones (opcional)</label>
+                                        <textarea name="venta[observaciones]" rows="2" class="form-control">{{ old('venta.observaciones') }}</textarea>
+
+                                        <div class="text-end">
+                                            <button type="submit" class="btn btn-danger">Guardar salida</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
-                    <!-- ================== SALIDA (Despacho) ================== -->
-                    <div class="col-12 col-lg-6">
-                        <div class="card h-100">
-                            <div class="card-header bg-white">
-                                <strong>Registrar SALIDA (Despacho)</strong>
+
+
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                <strong>Últimos movimientos</strong>
+                                <span class="text-muted small">Compras y ventas recientes</span>
                             </div>
+
                             <div class="card-body">
-                                <form action="{{ route('eca.movimientos.venta.store') }}" method="post"
-                                    class="vstack gap-3">
-                                    @csrf
-
-                                    <label class="form-label">Inventario / Material</label>
-                                    <select name="venta[inventario_id]" class="form-select" required>
-                                        <option value="" disabled selected>— Selecciona —</option>
-                                        @foreach ($inventario as $inv)
-                                            <option value="{{ $inv->id }}" @selected(old('venta.inventario_id') == $inv->id)>
-                                                {{ $inv->material->nombre }} (Stock: {{ $inv->stock_actual ?? 0 }}
-                                                {{ $inv->unidad_medida ?? '' }})
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('venta.inventario_id')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Cantidad</label>
-                                            <input type="number" name="venta[cantidad]" step="0.001"
-                                                min="0.001" class="form-control"
-                                                value="{{ old('venta.cantidad') }}" required>
-                                            @error('venta.cantidad')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Fecha</label>
-                                            <input type="date" name="venta[fecha]" class="form-control"
-                                                value="{{ old('venta.fecha') }}" required>
-                                            @error('venta.fecha')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Precio venta (COP / unidad)</label>
-                                            <input type="number" name="venta[precio_venta]" step="0.01"
-                                                min="0" class="form-control"
-                                                value="{{ old('venta.precio_venta') }}" required>
-                                            @error('venta.precio_venta')
-                                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Unidad (referencial)</label>
-                                            <input type="text" class="form-control"
-                                                value="Se usa la del inventario" disabled>
-                                        </div>
-                                    </div>
-
-                                    <label class="form-label">Observaciones (opcional)</label>
-                                    <textarea name="venta[observaciones]" rows="2" class="form-control">{{ old('venta.observaciones') }}</textarea>
-
-                                    <div class="text-end">
-                                        <button type="submit" class="btn btn-danger">Guardar salida</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                            <strong>Últimos movimientos</strong>
-                            <span class="text-muted small">Compras y ventas recientes</span>
-                        </div>
-
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-sm align-middle">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th style="width: 110px;">Fecha</th>
-                                            <th style="width: 90px;">Tipo</th>
-                                            <th>Material</th>
-                                            <th class="text-end" style="width: 140px;">Cantidad</th>
-                                            <th style="width: 80px;">Unidad</th>
-                                            <th class="text-end" style="width: 160px;">Precio unitario</th>
-                                            <th>Observaciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($ultimosMovimientos as $m)
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle">
+                                        <thead class="table-light">
                                             <tr>
-                                                <td>{{ $m['fecha'] }}</td>
-                                                <td>
-                                                    <span
-                                                        class="badge {{ $m['tipo'] === 'compra' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}">
-                                                        {{ ucfirst($m['tipo']) }}
-                                                    </span>
-                                                </td>
-                                                <td>{{ $m['material'] }}</td>
-                                                <td class="text-end">{{ number_format($m['cantidad'] ?? 0, 3) }}</td>
-                                                <td>{{ $m['unidad'] }}</td>
-                                                <td class="text-end">
-                                                    @if (!is_null($m['precio_unit']))
-                                                        {{ number_format($m['precio_unit'], 2) }}
-                                                    @else
-                                                        —
-                                                    @endif
-                                                </td>
-                                                <td class="text-truncate" style="max-width: 320px;">
-                                                    {{ $m['observ'] ?? '—' }}
-                                                </td>
+                                                <th style="width: 110px;">Fecha</th>
+                                                <th style="width: 90px;">Tipo</th>
+                                                <th>Material</th>
+                                                <th class="text-end" style="width: 140px;">Cantidad</th>
+                                                <th style="width: 80px;">Unidad</th>
+                                                <th class="text-end" style="width: 160px;">Precio</th>
+                                                <th>Observaciones</th>
                                             </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="7" class="text-center text-muted">No hay movimientos
-                                                    recientes.</td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            @forelse($ultimosMovimientos as $m)
+                                                <tr>
+                                                    <td>{{ $m['fecha'] }}</td>
+                                                    <td>
+                                                        <span
+                                                            class="badge {{ $m['tipo'] === 'compra' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}">
+                                                            {{ ucfirst($m['tipo']) }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ $m['material'] }}</td>
+                                                    <td class="text-end">
+                                                        {{ number_format($m['cantidad'] ?? 0, 3) }}
+                                                    </td>
+                                                    <td>{{ $m['unidad'] }}</td>
+                                                    <td class="text-end">
+                                                        @if (!is_null($m['precio_unit']))
+                                                            {{ number_format($m['precio_unit'], 2) }}
+                                                        @else
+                                                            —
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-truncate" style="max-width: 320px;">
+                                                        {{ $m['observ'] ?? '—' }}
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="7" class="text-center text-muted">No hay
+                                                        movimientos
+                                                        recientes.</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -974,7 +930,7 @@
                 </ul>
 
                 <div class="tab-content border border-top-0 rounded-bottom p-3">
-                    {{-- ===================== COMPRAS ===================== --}}
+                    {{-- COMPRAS --}}
                     <div class="tab-pane fade show active" id="hist-compras">
                         <form class="row g-2 mb-2" method="get"
                             action="{{ route('eca.index', ['seccion' => 'historial']) }}">
@@ -1022,14 +978,10 @@
                                             <td class="text-end">{{ number_format($c->cantidad ?? 0, 3) }}</td>
                                             <td>{{ $c->inventario->unidad_medida ?? '' }}</td>
                                             <td class="text-end">
-                                                {{ is_numeric($c->precio_compra) ? number_format($c->precio_compra, 2) : '—' }}
+                                                {{ is_numeric($c->inventario->precio_compra) ? number_format($c->inventario->precio_compra, 2) : '—' }}
                                             </td>
                                             <td class="text-end">
-                                                @php
-                                                    $total =
-                                                        (float) ($c->cantidad ?? 0) * (float) ($c->precio_compra ?? 0);
-                                                @endphp
-                                                {{ number_format($total, 2) }}
+                                                {{ number_format($c->precio_compra, 2) }}
                                             </td>
                                             <td class="text-truncate" style="max-width: 280px;">
                                                 {{ $c->observaciones ?? '—' }}</td>
@@ -1050,7 +1002,7 @@
                         @endif
                     </div>
 
-                    {{-- ===================== VENTAS ===================== --}}
+                    {{-- VENTAS --}}
                     <div class="tab-pane fade" id="hist-salidas">
                         <form class="row g-2 mb-2" method="get"
                             action="{{ route('eca.index', ['seccion' => 'historial']) }}">
@@ -1128,67 +1080,367 @@
                 </div>
             </section>
 
-            <!-- CALENDARIO GLOBAL -->
             <section class="tab-pane fade {{ $seccion === 'calendario' ? 'show active' : '' }}" id="tab-calendario">
+                @php
+                    // tomar la fecha seleccionada desde la url
+                    $sel = request('sel');
+                @endphp
+
                 <div class="row g-3">
                     <div class="col-lg-8">
                         <div class="card">
                             <div class="card-body">
                                 <div class="calendar">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <div class="h5 mb-0" id="calTitulo">—</div>
-                                        <div><button class="btn btn-sm btn-outline-secondary"
-                                                id="calPrev">◀</button>
-                                            <button class="btn btn-sm btn-outline-secondary" id="calNext">▶</button>
+                                        <div class="h5 mb-0" id="caltitulo">{{ $mesTitulo ?? '—' }}</div>
+                                        <div class="d-flex gap-2">
+                                            <a class="btn btn-sm btn-outline-secondary" id="calprev"
+                                                href="{{ $navPrevUrl ?? '#' }}">◀</a>
+                                            <a class="btn btn-sm btn-outline-secondary" id="calnext"
+                                                href="{{ $navNextUrl ?? '#' }}">▶</a>
                                         </div>
                                     </div>
+
                                     <div class="grid text-center small text-muted mb-1">
-                                        <div>Lun</div>
-                                        <div>Mar</div>
-                                        <div>Mié</div>
-                                        <div>Jue</div>
-                                        <div>Vie</div>
-                                        <div>Sáb</div>
-                                        <div>Dom</div>
+                                        <div>lun</div>
+                                        <div>mar</div>
+                                        <div>mié</div>
+                                        <div>jue</div>
+                                        <div>vie</div>
+                                        <div>sáb</div>
+                                        <div>dom</div>
                                     </div>
-                                    <div class="grid" id="calGrid"></div>
+
+                                    {{-- rejilla para el calendario --}}
+                                    <div class="grid" id="calgrid">
+                                        @foreach ($dias ?? [] as $d)
+                                            @php
+                                                $dYmd = $d['date']->toDateString();
+                                                $dayUrl = request()->fullUrlWithQuery([
+                                                    'seccion' => 'calendario',
+                                                    'sel' => $dYmd,
+                                                ]);
+                                            @endphp
+                                            <a href="{{ $dayUrl }}" class="text-decoration-none">
+                                                <div class="p-2 border {{ $d['inMonth'] ? 'bg-white' : 'bg-light' }}"
+                                                    title="{{ $dYmd }}">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <strong
+                                                            class="{{ ($sel ?? '') === $dYmd ? 'text-success' : '' }}">{{ $d['date']->day }}</strong>
+                                                    </div>
+                                                    <div class="mt-1 d-flex flex-column gap-1">
+                                                        {{-- Badges del día: "HH:MM · Material" --}}
+                                                        @foreach ($d['events'] as $ev)
+                                                            @php $h = isset($ev['time']) ? \Illuminate\Support\Str::of($ev['time'])->limit(5,'')->__toString() : ''; @endphp
+                                                            <span
+                                                                class="badge bg-success text-wrap">{{ $h }}
+                                                                · {{ $ev['material'] ?? 'Material' }}</span>
+                                                        @endforeach
+                                                        @if (empty($d['events']))
+                                                            <span class="small text-muted">—</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        @endforeach
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        <div class="small text-muted mt-2">
+                            <span class="badge bg-success">salida</span> despacho programado al centro elegido.
+                        </div>
                     </div>
+
                     <div class="col-lg-4">
                         <div class="card h-100">
                             <div class="card-body">
-                                <h6>Programar nuevo despacho</h6>
-                                <div class="mb-2"><label class="form-label">Material</label><select id="calMat"
-                                        class="form-select"></select></div>
-                                <div class="mb-2"><label class="form-label">Frecuencia</label>
-                                    <select id="calFreq" class="form-select">
-                                        <option value="unico">Único</option>
-                                        <option value="semanal">Semanal</option>
-                                        <option value="quincenal">Cada 15 días</option>
-                                        <option value="mensual">Mensual</option>
-                                    </select>
-                                </div>
-                                <div class="mb-2"><label class="form-label">Fecha inicial</label><input
-                                        id="calFecha" type="date" class="form-control"></div>
-                                <div class="mb-2"><label class="form-label">Hora</label><input id="calHora"
-                                        type="time" class="form-control" value="10:00"></div>
-                                <div class="mb-2"><label class="form-label">Centro de acopio</label><select
-                                        id="calCentro" class="form-select"></select></div>
-                                <button id="calGuardar" class="btn btn-success w-100">Guardar</button>
+                                <h6 class="mb-3">programar nuevo despacho</h6>
+
+                                <form action="{{ route('eca.calendario.store') }}" method="post"
+                                    class="vstack gap-3">
+                                    @csrf
+
+                                    <div>
+                                        <label class="form-label">material</label>
+                                        <select name="material_id" class="form-select" required>
+                                            <option value="" disabled selected>— selecciona —</option>
+                                            @foreach ($inventario ?? [] as $inv)
+                                                <option value="{{ $inv->material_id }}"
+                                                    @selected(old('material_id') === $inv->material_id)>
+                                                    {{ $inv->material->nombre ?? '—' }} (stock:
+                                                    {{ $inv->stock_actual ?? 0 }} {{ $inv->unidad_medida ?? '' }})
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('material_id')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label">centro de acopio</label>
+                                        <select name="centro_acopio_id" class="form-select" required>
+                                            <option value="" disabled selected>— selecciona —</option>
+                                            <optgroup label="propios del punto">
+                                                @foreach ($centrospropioslista ?? [] as $c)
+                                                    <option value="{{ $c->id }}"
+                                                        @selected(old('centro_acopio_id') === $c->id)>{{ $c->nombre }}</option>
+                                                @endforeach
+                                            </optgroup>
+                                            <optgroup label="globales">
+                                                @foreach ($centrosglobaleslista ?? [] as $c)
+                                                    <option value="{{ $c->id }}"
+                                                        @selected(old('centro_acopio_id') === $c->id)>{{ $c->nombre }}</option>
+                                                @endforeach
+                                            </optgroup>
+                                        </select>
+                                        @error('centro_acopio_id')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label">frecuencia</label>
+                                        <select name="frecuencia" class="form-select" required>
+                                            @php
+                                                $freqs = [
+                                                    'manual' => 'manual (solo esta fecha)',
+                                                    'semanal' => 'semanal',
+                                                    'quincenal' => 'cada 15 días',
+                                                    'mensual' => 'mensual',
+                                                    'unico' => 'única vez',
+                                                ];
+                                            @endphp
+                                            @foreach ($freqs as $v => $t)
+                                                <option value="{{ $v }}" @selected(old('frecuencia') === $v)>
+                                                    {{ $t }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('frecuencia')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <div class="col-6">
+                                            <label class="form-label">fecha</label>
+                                            <input type="date" name="fecha" class="form-control"
+                                                value="{{ old('fecha') ?? now()->toDateString() }}" required>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label">hora</label>
+                                            <input type="time" name="hora" class="form-control"
+                                                value="{{ old('hora') ?? '10:00' }}" required>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="form-label">notas (opcional)</label>
+                                        <textarea name="notas" class="form-control" rows="2" maxlength="300">{{ old('notas') }}</textarea>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-success w-100">guardar</button>
+
+                                    <hr>
+                                    <div class="small text-muted">
+                                        mostrando: <span id="lblrango">{{ $rangoLabel ?? '—' }}</span>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <div class="mt-3">
+                    <div class="row g-3">
+                        <div class="col-lg-8">
+
+                            {{-- EVENTOS DEL DÍA --}}
+                            <div class="card">
+                                <div class="card-body">
+                                    @php
+                                        $selParam = request('sel');
+                                        $selDate = $selParam ? \Carbon\Carbon::parse($selParam) : null;
+                                        $selKey = $selDate ? $selDate->toDateString() : null;
+                                        $eventosDia = [];
+                                        if ($selKey) {
+                                            foreach ($dias ?? [] as $d) {
+                                                if ($d['date']->toDateString() === $selKey) {
+                                                    $eventosDia = $d['events'] ?? [];
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    @endphp
+
+                                    <h6 class="mb-1">eventos del día <span id="lbldiasel"
+                                            class="text-muted">{{ $selKey ?? '—' }}</span></h6>
+
+                                    <div id="listdia" class="vstack gap-2 mt-2">
+                                        @if (empty($selKey))
+                                            <div class="text-muted">selecciona un día en la grilla.</div>
+                                        @else
+                                            @forelse ($eventosDia as $ev)
+                                                @php $hhmm = isset($ev['hora']) ? \Illuminate\Support\Str::of($ev['hora'])->limit(5,'')->__toString() : ''; @endphp
+                                                <div class="border rounded p-2">
+                                                    <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+                                                        <span class="badge bg-success">{{ $hhmm }}</span>
+                                                        <span
+                                                            class="fw-semibold">{{ $ev['material'] ?? 'material' }}</span>
+                                                        <span class="text-muted">·
+                                                            {{ $ev['centro'] ?? 'centro de acopio' }}</span>
+                                                        <span class="text-muted">·
+                                                            {{ $ev['frecuencia'] ?? '—' }}</span>
+                                                    </div>
+
+                                                    {{-- DETALLE --}}
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm table-bordered mb-0">
+                                                            <tbody class="small">
+                                                                <tr>
+                                                                    <th class="w-25">Punto</th>
+                                                                    <td>{{ $ev['punto'] ?? '—' }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Material</th>
+                                                                    <td>{{ $ev['material'] ?? '—' }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Centro</th>
+                                                                    <td>{{ $ev['centro'] ?? '—' }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Frecuencia</th>
+                                                                    <td>{{ $ev['frecuencia'] ?? '—' }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Fecha</th>
+                                                                    <td>{{ $ev['fecha'] ?? $selKey }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Hora</th>
+                                                                    <td>{{ $ev['hora'] ?? '—' }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Notas</th>
+                                                                    <td>{{ $ev['notas'] ?? '—' }}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>Creado</th>
+                                                                    <td>{{ $ev['creado'] ?? '—' }}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            @empty
+                                                <div class="text-muted">sin eventos para este día.</div>
+                                            @endforelse
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- EVENTOS DEL MES --}}
+                            <div class="card mt-3">
+                                <div class="card-body">
+                                    <h6 class="mb-3">eventos del mes</h6>
+
+                                    <div id="listmes" class="vstack gap-2">
+                                        @php
+                                            $byDate = [];
+                                            foreach ($dias ?? [] as $d) {
+                                                $dkey = $d['date']->toDateString();
+                                                if (!empty($d['events'])) {
+                                                    $byDate[$dkey] = $d['events'];
+                                                }
+                                            }
+                                            ksort($byDate);
+                                        @endphp
+
+                                        @forelse ($byDate as $dkey => $events)
+                                            <div class="border rounded p-2">
+                                                <div class="fw-semibold mb-2">{{ $dkey }}</div>
+
+                                                @foreach ($events as $ev)
+                                                    @php $hhmm = isset($ev['hora']) ? \Illuminate\Support\Str::of($ev['hora'])->limit(5,'')->__toString() : ''; @endphp
+
+                                                    <div class="border rounded p-2 mb-2">
+                                                        <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+                                                            <span class="badge bg-success">{{ $hhmm }}</span>
+                                                            <span><strong>{{ $ev['material'] ?? 'material' }}</strong></span>
+                                                            <span class="text-muted">·
+                                                                {{ $ev['centro'] ?? 'centro' }}</span>
+                                                            <span class="text-muted">·
+                                                                {{ $ev['frecuencia'] ?? '—' }}</span>
+                                                        </div>
+
+                                                        <div class="table-responsive">
+                                                            <table class="table table-sm table-bordered mb-0">
+                                                                <tbody class="small">
+                                                                    <tr>
+                                                                        <th class="w-25">Punto</th>
+                                                                        <td>{{ $ev['punto'] ?? '—' }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Material</th>
+                                                                        <td>{{ $ev['material'] ?? '—' }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Centro</th>
+                                                                        <td>{{ $ev['centro'] ?? '—' }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Frecuencia</th>
+                                                                        <td>{{ $ev['frecuencia'] ?? '—' }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Fecha</th>
+                                                                        <td>{{ $ev['fecha'] ?? $dkey }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Hora</th>
+                                                                        <td>{{ $ev['hora'] ?? '—' }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Notas</th>
+                                                                        <td>{{ $ev['notas'] ?? '—' }}</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>Creado</th>
+                                                                        <td>{{ $ev['creado'] ?? '—' }}</td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @empty
+                                            <div class="text-muted">sin eventos en este rango.</div>
+                                        @endforelse
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
             </section>
+
+
+
+
 
             <section class="tab-pane fade {{ $seccion === 'centros' ? 'show active' : '' }}" id="tab-centros">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="mb-0">Centros de acopio</h5>
                 </div>
 
-                {{-- ===================== FILTROS ===================== --}}
+                {{-- FILTROS --}}
                 <form class="row g-2 mb-4" method="get"
                     action="{{ route('eca.index', ['seccion' => 'centros']) }}">
                     <div class="col-12 col-md-3">
@@ -1238,9 +1490,8 @@
                 </form>
 
                 <div class="row g-4">
-                    {{-- ===================== LISTADOS ===================== --}}
                     <div class="col-12 col-lg-8">
-                        {{-- ========== Centros globales ========== --}}
+                        {{-- Centros globales --}}
                         <div class="card card-hover mb-4">
                             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                                 <strong>Centros globales</strong>
@@ -1278,7 +1529,8 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="8" class="text-center text-muted">Sin resultados.
+                                                    <td colspan="8" class="text-center text-muted">Sin
+                                                        resultados.
                                                     </td>
                                                 </tr>
                                             @endforelse
@@ -1294,7 +1546,6 @@
                             </div>
                         </div>
 
-                        {{-- ========== Centros del Punto (propios) ========== --}}
                         <div class="card card-hover">
                             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                                 <strong>Centros del Punto</strong>
@@ -1347,7 +1598,7 @@
                         </div>
                     </div>
 
-                    {{-- ===================== FORMULARIO NUEVO CENTRO (propio) ===================== --}}
+                    {{-- FORMULARIO NUEVO CENTRO --}}
                     <div class="col-12 col-lg-4">
                         <div class="card card-hover h-100">
                             <div class="card-header bg-white">
@@ -1373,7 +1624,8 @@
                                             <select name="cac[tipo]" class="form-select" required>
                                                 @foreach (['Planta', 'Proveedor', 'Otro'] as $t)
                                                     <option value="{{ $t }}"
-                                                        @selected(old('cac.tipo') === $t)>{{ $t }}</option>
+                                                        @selected(old('cac.tipo') === $t)>
+                                                        {{ $t }}</option>
                                                 @endforeach
                                             </select>
                                             @error('cac.tipo')
@@ -1521,7 +1773,8 @@
             </section>
 
             <!-- CONFIG -->
-            <section class="tab-pane fade {{ $seccion === 'configuracion' ? 'show active' : '' }}" id="tab-config">
+            <section class="tab-pane fade {{ $seccion === 'configuracion' ? 'show active' : '' }}"
+                id="tab-config">
                 <div class="card">
                     <div class="card-body">
                         <h6 class="mb-3">Preferencias del punto ECA</h6>
@@ -1597,6 +1850,90 @@
             </div>
         </div>
     </div>
+
+    <script>
+        (function() {
+            const globalSelect = document.getElementById('centro_global');
+            const propioSelect = document.getElementById('centro_propio');
+            const hiddenInput = document.getElementById('centro_hidden');
+
+            function sync(from, other) {
+                const val = from.value || '';
+                hiddenInput.value = val; 
+                other.disabled = !!val; o
+                if (!val) other.disabled = false;
+            }
+
+            globalSelect.addEventListener('change', () => sync(globalSelect, propioSelect));
+            propioSelect.addEventListener('change', () => sync(propioSelect, globalSelect));
+
+            window.addEventListener('pageshow', () => {
+                if (globalSelect.value) sync(globalSelect, propioSelect);
+                else if (propioSelect.value) sync(propioSelect, globalSelect);
+                else hiddenInput.value = '';
+            });
+        })();
+    </script>
+
+    <script>
+        (function() {
+            @if (isset($resumen))
+                const resumen = @json($resumen);
+
+                const fmt = (n) => {
+                    try {
+                        return (Number(n) || 0).toLocaleString('es-CO');
+                    } catch (e) {
+                        return n;
+                    }
+                };
+
+                const setText = (id, val) => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = val;
+                };
+
+                setText('kpiInventario', fmt(resumen.inventario_total));
+                setText('kpiEntradasMes', fmt(resumen.entradas_mes));
+                setText('kpiSalidasMes', fmt(resumen.salidas_mes));
+                setText('kpiProximoDespacho', resumen.proximo_despacho ?? '—');
+
+                const alertList = document.getElementById('alertList');
+                const alertCount = document.getElementById('alertCount');
+                if (alertList && alertCount) {
+                    alertList.innerHTML = '';
+                    if (Array.isArray(resumen.alertas) && resumen.alertas.length) {
+                        alertCount.textContent = resumen.alertas.length.toString();
+                        resumen.alertas.forEach(a => {
+                            const div = document.createElement('div');
+                            const badge = (a.tipo === 'crítico') ? 'danger' :
+                                (a.tipo === 'lleno') ? 'warning' :
+                                'secondary';
+                            div.innerHTML =
+                                `<span class="badge bg-${badge} me-2 text-uppercase">${a.tipo}</span>${a.texto}`;
+                            alertList.appendChild(div);
+                        });
+                    } else {
+                        alertCount.textContent = '0';
+                        alertList.textContent = 'Sin alertas.';
+                    }
+                }
+            @endif
+
+            @if (isset($config))
+                const cfg = @json($config);
+
+                const chk = (id, val) => {
+                    const el = document.getElementById(id);
+                    if (el) el.checked = !!val;
+                };
+
+                chk('cfgMapa', cfg.mostrar_mapa);
+                chk('cfgNoti', cfg.recibir_notificaciones);
+            @endif
+        })();
+    </script>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 

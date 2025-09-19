@@ -10,24 +10,25 @@ class AuthController extends Controller
 {
     public function index()
     {
-        return view('Registro.inicioSesion'); // usa tu Blade existente
-
-
+        return redirect()->route('eca.index', ['seccion' => 'perfil']);
     }
 
     public function postLogin(Request $request)
     {
+        //valida los campos ingresados desde el login
         $request->validate([
             'correo'   => 'required|email',
             'password' => 'required|string',
         ]);
 
-        $ok = Auth::attempt(
+        //valida las credenciales
+        $autenticado = Auth::attempt(
             ['correo' => $request->correo, 'password' => $request->password],
             $request->boolean('remember')
         );
 
-        if ($ok) {
+        if ($autenticado) {
+            // Regenera la sesión
             $request->session()->regenerate();
 
             $usuario = Auth::user();
@@ -49,13 +50,15 @@ class AuthController extends Controller
 
     public function dashboard()
     {
-        return view('Inicio.inicio'); // crea/ajusta tu vista
     }
 
     public function logout(Request $request)
     {
+        // Cierra la sesión
         Auth::logout();
+        // Regenera el token
         $request->session()->invalidate();
+        // Genera un nuevo token
         $request->session()->regenerateToken();
         return redirect(route('login'))->with('success', 'Saliendo...');
     }

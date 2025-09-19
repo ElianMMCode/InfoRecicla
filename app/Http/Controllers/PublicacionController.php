@@ -9,7 +9,6 @@ class PublicacionController extends Controller
     //
     public function view_publicaciones()
     {
-        //return $this->view('/Publicaciones/', 'publicaciones');
         return view('Publicaciones.publicaciones');
     }
 

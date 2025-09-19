@@ -13,10 +13,8 @@ class Usuario extends Authenticatable
 
     protected $table = 'usuarios';
     protected $primaryKey = 'id';
-    public $incrementing = false;   // UUID (char 36)
     protected $keyType = 'string';
 
-    // Tus timestamps personalizados:
     const CREATED_AT = 'creado';
     const UPDATED_AT = 'actualizado';
 

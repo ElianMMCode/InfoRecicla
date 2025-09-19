@@ -10,7 +10,7 @@ class PuntoEca extends Model
     use HasFactory;
 
     protected $table = 'puntos_eca';
-    public $timestamps = false;        // la tabla usa creado / actualizado
+    public $timestamps = false;
     protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
