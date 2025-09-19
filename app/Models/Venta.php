@@ -3,20 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use \Illuminate\Database\Eloquent\Concerns\HasUuids;
 
-// app/Models/Venta.php
 class Venta extends Model
 {
-    use \Illuminate\Database\Eloquent\Concerns\HasUuids;
 
     protected $table = 'ventas';
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     protected $fillable = [
         'inventario_id',
         'cantidad',
         'fecha',
+        'centro_acopio_id',
         'precio_venta',
+        'observaciones',
     ];
 
     protected $casts = [

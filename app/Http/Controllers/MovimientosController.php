@@ -40,18 +40,23 @@ class MovimientosController extends Controller
 
         // 1) Validación con namespacing "compra.*"
         $data = $request->validate([
-            'compra.inventario_id'  => ['required', 'uuid', 'exists:inventario,id'],
-            'compra.cantidad'       => ['required', 'numeric', 'gt:0'],
-            'compra.fecha'          => ['required', 'date'],
-            'compra.precio_compra'  => ['required', 'numeric', 'gte:0'],
-            'compra.observaciones'  => ['nullable', 'string', 'max:500'],
+            'compra.inventario_id' => ['required', 'uuid', 'exists:inventario,id'],
+            'compra.cantidad' => ['required', 'numeric', 'gt:0'],
+            'compra.fecha' => ['required', 'date'],
+            'compra.observaciones' => ['nullable', 'string', 'max:500'],
         ]);
+
+        $precio = DB::table('inventario')->where('id', '=', $data['compra']['inventario_id'])->value('precio_compra');
+
+        $precioCompra = $data['compra']['cantidad'] * $precio;
+
+        $data['compra']['precio_compra'] = $precioCompra;
 
         $compra = $data['compra'];
 
         // 2) Verificar pertenencia del inventario al Punto del gestor autenticado
         $inv = Inventario::with('puntoEca:id,gestor_id')->findOrFail($compra['inventario_id']);
-        if (($inv->puntoEca?->gestor_id) !== $userId) {
+        if ($inv->puntoEca?->gestor_id !== $userId) {
             abort(403, 'No autorizado.');
         }
 
@@ -63,10 +68,10 @@ class MovimientosController extends Controller
             // Crear la compra (entrada)
             Compra::create([
                 'inventario_id' => $locked->id,
-                'cantidad'      => $compra['cantidad'],
-                'fecha'         => $compra['fecha'],
-                'precio_compra' => $compra['precio_compra'],
+                'cantidad' => $compra['cantidad'],
+                'fecha' => $compra['fecha'],
                 'observaciones' => $compra['observaciones'] ?? null,
+                'precio_compra' => $compra['precio_compra'],
             ]);
 
             // Sumar stock
@@ -76,7 +81,6 @@ class MovimientosController extends Controller
         return back()->with('ok', 'Entrada registrada.');
     }
 
-
     public function storeVenta(Request $request)
     {
         $userId = Auth::id();
@@ -84,27 +88,28 @@ class MovimientosController extends Controller
         // 1) Validación con namespacing "venta.*"
         $data = $request->validate([
             'venta.inventario_id' => ['required', 'uuid', 'exists:inventario,id'],
-            'venta.cantidad'      => ['required', 'numeric', 'gt:0'],
-            'venta.fecha'         => ['required', 'date'],
-            'venta.precio_venta'  => ['required', 'numeric', 'gte:0'],
+            'venta.cantidad' => ['required', 'numeric', 'gt:0'],
+            'venta.fecha' => ['required', 'date'],
+            'venta.precio_venta' => ['required', 'numeric', 'gte:0'],
+            'venta.centro_acopio_id' => ['nullable', 'uuid', 'exists:centros_acopio,id'],
+            'venta.observaciones' => ['nullable', 'string', 'max:500'],
         ]);
 
         $venta = $data['venta'];
 
-        // 2) Verificar pertenencia del inventario al Punto del gestor autenticado
+        // Verificar pertenencia del inventario al Punto del gestor autenticado
         $inv = Inventario::with('puntoEca:id,gestor_id')->findOrFail($venta['inventario_id']);
-        if (($inv->puntoEca?->gestor_id) !== $userId) {
+        if ($inv->puntoEca?->gestor_id !== $userId) {
             abort(403, 'No autorizado.');
         }
 
-        // 3) Transacción con bloqueo de fila y verificación de stock suficiente
+        // Transacción con bloqueo de fila y verificación de stock suficiente
         DB::transaction(function () use ($venta) {
             // Bloquear la fila del inventario para esta operación
             $locked = Inventario::whereKey($venta['inventario_id'])->lockForUpdate()->firstOrFail();
 
             // Stock suficiente
             if (($locked->stock_actual ?? 0) < $venta['cantidad']) {
-                // Nota: la clave del error incluye el namespace "venta.cantidad" para que Blade lo muestre en el form correcto
                 throw ValidationException::withMessages([
                     'venta.cantidad' => 'Stock insuficiente para la salida.',
                 ]);
@@ -113,9 +118,11 @@ class MovimientosController extends Controller
             // Crear la venta (salida)
             Venta::create([
                 'inventario_id' => $locked->id,
-                'cantidad'      => $venta['cantidad'],
-                'fecha'         => $venta['fecha'],
-                'precio_venta'  => $venta['precio_venta'],
+                'cantidad' => $venta['cantidad'],
+                'fecha' => $venta['fecha'],
+                'precio_venta' => $venta['precio_venta'],
+                'centro_acopio_id' => $venta['centro_acopio_id'],
+                'observaciones' => $venta['observaciones'] ?? null,
             ]);
 
             // Restar stock
@@ -124,7 +131,6 @@ class MovimientosController extends Controller
 
         return back()->with('ok', 'Salida registrada.');
     }
-
 
     /**
      * Display the specified resource.

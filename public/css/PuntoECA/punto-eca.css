@@ -141,3 +141,36 @@ body {
     /* verde Bootstrap */
     border-color: #198754;
 }
+
+/* Pequeño apoyo visual para los “tabs” sin JS via :target */
+#f_categoria,
+#f_tipo,
+#f_nombre,
+#q_categoria,
+#q_tipo,
+#q_nombre {
+    display: none;
+}
+
+:target#f_categoria,
+:target#f_tipo,
+:target#f_nombre,
+:target#q_categoria,
+:target#q_tipo,
+:target#q_nombre {
+    display: block;
+}
+
+
+
+#tab-calendario .calendar .grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: .5rem;
+}
+
+#tab-calendario .grid>a>div,
+#tab-calendario .grid>div {
+    min-height: 100px;
+    border-radius: .5rem;
+}

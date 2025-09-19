@@ -11,7 +11,7 @@ class Compra extends Model
     use HasUuids;
     protected $table = 'compras';
     protected $keyType = 'string';
-    protected $fillable = ['inventario_id', 'cantidad', 'unidad_medida', 'fecha', 'precio_compra'];
+    protected $fillable = ['inventario_id', 'cantidad', 'unidad_medida', 'fecha', 'precio_compra', 'observaciones'];
 
     protected $casts = [
         'fecha' => 'date',
