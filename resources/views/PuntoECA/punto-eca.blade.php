@@ -1469,8 +1469,8 @@
                     </div>
 
                     <div class="col-6 col-md-2">
-                        <input type="text" name="f_ciudad" class="form-control" placeholder="Ciudad"
-                            value="{{ request('f_ciudad') }}">
+                        <input type="text" name="f_localidad" class="form-control" placeholder="Localidad"
+                            value="{{ request('f_localidad') }}">
                     </div>
 
                     <div class="col-6 col-md-3">
@@ -1481,7 +1481,7 @@
                                 </option>
                             @endforeach
                         </select>
-                        <div class="form-text">Ctrl/⌘ para seleccionar varios</div>
+                        <div class="form-text">Manten Ctrl para seleccionar varios con el mouse</div>
                     </div>
 
                     <div class="col-12 d-grid d-md-block">
@@ -1859,8 +1859,9 @@
 
             function sync(from, other) {
                 const val = from.value || '';
-                hiddenInput.value = val; 
-                other.disabled = !!val; o
+                hiddenInput.value = val;
+                other.disabled = !!val;
+                o
                 if (!val) other.disabled = false;
             }
 

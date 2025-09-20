@@ -11,10 +11,11 @@ use App\Models\CategoriaMaterial;
 use App\Models\Material;
 use App\Models\Inventario;
 use App\Models\Venta;
-use App\Models\PuntoEca;
 use App\Models\Compra;
+use App\Models\ProgramacionRecoleccion;
 use Illuminate\Support\Carbon;
 use App\Models\CentroAcopio;
+use Illuminate\Support\Str;
 
 class PuntoEcaController extends Controller
 {
@@ -22,6 +23,7 @@ class PuntoEcaController extends Controller
 
     public function view_punto_eca(Request $request, $seccion = null)
     {
+        //  Usuario autenticado
         $usuario = Auth::user();
 
         if ($seccion === null || !in_array($seccion, $this->permitidas, true)) {
@@ -43,11 +45,12 @@ class PuntoEcaController extends Controller
             'punto' => $punto,
         ];
 
-        // ===== Catálogos para los <select>
+        // Opciones para las selecciones
         $categorias = CategoriaMaterial::orderBy('nombre')->get(['id', 'nombre']);
+        // Treer la categoria y tipo de los materiales ordenados por nombre, con la infomacion del id para el valor y el nombre para la seleccion
         $tipos = TipoMaterial::orderBy('nombre')->get(['id', 'nombre']);
 
-        // ===== Filtros del CATÁLOGO (arriba)
+        // Filtros del CATÁLOGO
         $f = $request->validate([
             'categoria' => ['nullable', 'uuid', 'exists:categorias_material,id'],
             'tipo' => ['nullable', 'uuid', 'exists:tipos_material,id'],
@@ -56,19 +59,29 @@ class PuntoEcaController extends Controller
 
         // Excluir materiales ya registrados en inventario del Punto
         $materialesYaRegistrados = Inventario::query()->where('punto_eca_id', $puntoEcaId)->pluck('material_id');
+        // pluck() devuelve un array con los id de los materiales registrados
 
         // Catálogo de materiales (paginado)
         $materiales = Material::query()
+            //hacemos una consulta de todos los materiales, con su categoria y tipo
             ->with(['categoria:id,nombre', 'tipo:id,nombre'])
+            //para esto nos apoyamos en las relaciones de la tabla materiales construidas en la migración y el modelo
             ->when($f['categoria'] ?? null, fn($q, $v) => $q->where('categoria_id', $v))
+            //filtro condicional, si la categoria es nula, no se aplica el filtro
+            //fn es una funcion anonima que recibe un query y un valor, que en este caso $v es el id de la categoria
             ->when($f['tipo'] ?? null, fn($q, $v) => $q->where('tipo_id', $v))
             ->when($f['nombre'] ?? null, fn($q, $v) => $q->where('nombre', 'like', "%{$v}%"))
+            //para este caso usamos like para buscar el nombre de los materiales y con % para que busque en cualquier parte del string
             ->whereNotIn('id', $materialesYaRegistrados)
+            //nos aseguramos de que no se repitan los materiales
             ->orderBy('nombre')
+            //ordenamos por el nombre
             ->paginate(6)
+            //paginamos por 6 materiales en la tabla
             ->withQueryString();
+        //con withQueryString() agregamos la paginación a la url
 
-        // ===== Filtros del INVENTARIO (abajo)
+        // Filtros del INVENTARIO
         $q = $request->validate([
             'q_categoria' => ['nullable', 'uuid', 'exists:categorias_material,id'],
             'q_tipo' => ['nullable', 'uuid', 'exists:tipos_material,id'],
@@ -82,32 +95,39 @@ class PuntoEcaController extends Controller
             ->when($q['q_categoria'] ?? null, fn($q2, $v) => $q2->whereHas('material', fn($m) => $m->where('categoria_id', $v)))
             ->when($q['q_tipo'] ?? null, fn($q2, $v) => $q2->whereHas('material', fn($m) => $m->where('tipo_id', $v)))
             ->when($q['q_nombre'] ?? null, fn($q2, $v) => $q2->whereHas('material', fn($m) => $m->where('nombre', 'like', "%{$v}%")))
-            // Si tienes columna personalizada "creado", usa esa; si no, latest():
-            ->orderByDesc('creado') // ->latest() si no existe "creado"
+            //esta vez lo ordenamos por la fecha de creacion del registro en el inventario
+            ->orderByDesc('creado')
             ->paginate(6)
             ->withQueryString();
 
-        // ===== Últimos movimientos (siempre cargados)
-        // Compras (top 10 por fecha)
+        // ultimos movimientos
+        // ulitmas 10 compras
         $compras = Compra::query()
             ->with(['inventario.material:id,nombre'])
+            //filtramos el inventario para que solo traiga los de este punto
             ->whereHas('inventario', fn($q2) => $q2->where('punto_eca_id', $puntoEcaId))
-            ->latest('fecha') // o ->latest()
+            ->latest('fecha')
+            //traemos las ultimas 10 compras
             ->take(10)
             ->get()
+            //ejecutamos la consulta y traemos los resultados
             ->map(function ($c) {
+                //con map() iteramos los resultados y creamos un array con los datos que queremos mostrar
                 return [
+                    // le definimos un tipo para que en la tabla sepa que es una compra
                     'tipo' => 'compra',
-                    'fecha' => $c->fecha instanceof \Illuminate\Support\Carbon ? $c->fecha->format('Y-m-d') : (string) $c->fecha,
+                    'fecha' => $c->fecha instanceof Carbon ? $c->fecha->format('Y-m-d') : (string) $c->fecha,
+                    //si la fecha es una instancia de Carbon, la formateamos, si no, la convertimos a string
                     'material' => $c->inventario->material->nombre ?? '—',
-                    'cantidad' => $c->cantidad,
+                    'cantidad' => $c->cantidad ?? 0,
                     'unidad' => $c->inventario->unidad_medida ?? '',
-                    'precio_unit' => $c->precio_compra,
+                    'precio_unit' => $c->precio_compra ?? 0,
                     'observ' => $c->observaciones ?? null,
                 ];
+                //con esto ya tenemos un array con los datos de las compras
             });
 
-        // Ventas (top 10 por fecha)
+        // ultimas 10 ventas
         $ventas = Venta::query()
             ->with(['inventario.material:id,nombre'])
             ->whereHas('inventario', fn($q2) => $q2->where('punto_eca_id', $puntoEcaId))
@@ -119,32 +139,42 @@ class PuntoEcaController extends Controller
                     'tipo' => 'venta',
                     'fecha' => $v->fecha instanceof \Illuminate\Support\Carbon ? $v->fecha->format('Y-m-d') : (string) $v->fecha,
                     'material' => $v->inventario->material->nombre ?? '—',
-                    'cantidad' => $v->cantidad,
+                    'cantidad' => $v->cantidad ?? 0,
                     'unidad' => $v->inventario->unidad_medida ?? '',
-                    'precio_unit' => $v->precio_venta,
+                    'precio_unit' => $v->precio_venta ?? 0,
                     'observ' => $v->observaciones ?? null,
                 ];
             });
 
+        // ahora almacenamos todos los movimientos en un array
         $ultimosMovimientos = $compras->concat($ventas)->sortByDesc('fecha')->take(10)->values();
+        //con cancat() concatenamos los arrays y con sortByDesc() los ordenamos por fecha de forma descendente y con take(10) los limitamos a 10 ya con values() lo pasamos a array
 
-        // ===== Materiales del Punto (para combos/filtros)
+        // Crear un array con los materiales que el Punto ECA tiene
         $materialesPunto = Inventario::query()->where('punto_eca_id', $puntoEcaId)->with('material:id,nombre')->get()->pluck('material')->filter()->unique('id')->sortBy('nombre')->values();
+        // con pluck() obtenemos los materiales que el Punto ECA tiene y con unique() eliminamos los duplicados y con sortBy() los ordenamos por nombre y con values() lo pasamos a array
 
-        // ===== Historial Compras (entradas)
+        // Filtros para el Historial Compras
         $hc = $request->validate([
             'hc_desde' => ['nullable', 'date'],
             'hc_hasta' => ['nullable', 'date'],
             'hc_material' => ['nullable', 'uuid', 'exists:materiales,id'],
         ]);
         $hcHasta = !empty($hc['hc_hasta']) ? Carbon::parse($hc['hc_hasta'])->endOfDay() : null;
+        //verificamos que dentro del array hc, la fecha hasta no este vacia, y con la clase Carbon lo pasamos a una fecha
+        // con endOfDay() le agregamos la hora 23:59:59 para que a la hora de comparar con la fecha hasta, se incluya el dia completo
 
-        $histCompras = \App\Models\Compra::query()
+        //contruimos la consulta para el Historial Compras utilizando los filtros
+        $histCompras = Compra::query()
+            //seleccionamos los campos que queremos mostrar
             ->with(['inventario:id,unidad_medida,material_id,precio_compra', 'inventario.material:id,nombre'])
             ->whereHas('inventario', fn($q) => $q->where('punto_eca_id', $puntoEcaId))
             ->when($hc['hc_material'] ?? null, fn($q, $matId) => $q->whereHas('inventario', fn($qi) => $qi->where('material_id', $matId)))
+            //con fn($q, matId) le pasamos la consulta y el id del material, luego con $q whereHas() le decimos que busque en el inventario el material con el id que le pasamos y con where('material_id', $matId) le decimos que busque el material con el id que le pasamos
             ->when($hc['hc_desde'] ?? null, fn($q, $desde) => $q->whereDate('fecha', '>=', $desde))
+            //con when() le decimos que si el filtro desde no esta vacio, entonces le decimos que busque la fecha que le pasamos y con whereDate() le decimos que busque la fecha que le pasamos
             ->when($hcHasta, fn($q) => $q->where('fecha', '<=', $hcHasta))
+            // con when() le decimos que si la fecha hasta no esta vacia, entonces le decimos que busque la fecha hasta y con where() le decimos que busque la fecha hasta
             ->latest('fecha')
             ->paginate(10)
             ->withQueryString();
@@ -157,7 +187,7 @@ class PuntoEcaController extends Controller
         ]);
         $hsHasta = !empty($hs['hs_hasta']) ? Carbon::parse($hs['hs_hasta'])->endOfDay() : null;
 
-        $histVentas = \App\Models\Venta::query()
+        $histVentas = Venta::query()
             ->with(['inventario:id,unidad_medida,material_id', 'inventario.material:id,nombre'])
             ->whereHas('inventario', fn($q) => $q->where('punto_eca_id', $puntoEcaId))
             ->when($hs['hs_material'] ?? null, fn($q, $matId) => $q->whereHas('inventario', fn($qi) => $qi->where('material_id', $matId)))
@@ -167,29 +197,30 @@ class PuntoEcaController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        // ===== Centros de Acopio (listas + catálogos) — respeta variables en minúscula y camelCase
-        // Filtros (GET): nombre, tipo, ciudad, estado, material
+        // Filtros nombre, tipo, localidad, estado, material
         $f2 = $request->validate([
             'f_nombre' => ['nullable', 'string', 'max:150'],
             'f_tipo' => ['nullable', Rule::in(['Planta', 'Proveedor', 'Otro'])],
-            'f_ciudad' => ['nullable', 'string', 'max:60'],
-            'f_estado' => ['nullable', Rule::in(['activo', 'inactivo', 'bloqueado'])],
+            'f_localidad' => ['nullable', 'string', 'max:60'],
             'f_material' => ['nullable', 'uuid', 'exists:materiales,id'],
         ]);
 
+        //filtros para los centros
+        //Esta vez se construye la consulta con los filtros para aplicarlo a la consulta de los centros tanto globales como propios
         $applyFilters = function ($q) use ($f2) {
             return $q
                 ->when($f2['f_nombre'] ?? null, fn($qq, $v) => $qq->where('nombre', 'like', "%{$v}%"))
                 ->when($f2['f_tipo'] ?? null, fn($qq, $v) => $qq->where('tipo', $v))
-                ->when($f2['f_ciudad'] ?? null, fn($qq, $v) => $qq->where('ciudad', 'like', "%{$v}%"))
+                ->when($f2['f_localidad'] ?? null, fn($qq, $v) => $qq->where('localidad', 'like', "%{$v}%"))
                 ->when($f2['f_estado'] ?? null, fn($qq, $v) => $qq->where('estado', $v))
                 ->when($f2['f_material'] ?? null, fn($qq, $v) => $qq->where('materiales_centro_acc', $v));
         };
 
-        // Listas para selects
+        // Listas para selecionar
         $centrosGlobalesLista = CentroAcopio::query()
             ->select(['id', 'nombre'])
             ->where('alcance', 'global')
+            // con tap() le decimos que ejecute la consulta que le pasamos
             ->tap($applyFilters)
             ->orderBy('nombre')
             ->get();
@@ -220,50 +251,67 @@ class PuntoEcaController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        // ===== Calendario SIN JS (grilla 6x7) — usa solo material_id
+        //Calendario
+
+        //traemmos el año y mes actual y lo convertimos a entero
         $y = intval($request->query('y', now()->year));
         $m = intval($request->query('m', now()->month));
-        $sel = $request->query('sel'); // YYYY-MM-DD o null
 
+        //calculamos el primer dia del mes
         $firstOfMonth = Carbon::create($y, $m, 1)->startOfDay();
-        $dow = $firstOfMonth->dayOfWeekIso; // 1=Lun..7=Dom
+        //calculamos el dia de la semana del primer dia del mes
+        $dow = $firstOfMonth->dayOfWeekIso;
+        //calculamos la fecha del lunes
         $start = $firstOfMonth
+            //copiamos la fecha
             ->copy()
+            //le restamos el dia de la semana para llegar al lunes
             ->subDays($dow - 1)
+            //le ponemos la hora
             ->startOfDay(); // Lunes
+        //calculamos la fecha del domingo
         $end = $start->copy()->addDays(41)->endOfDay(); // 42 días
+        //calculamos el ultimo dia del mes
 
+        //traemos el mes anterior y le sumamos 1 mes para cubrir los dias que se puedan en el mes
         $baseStart = $start->copy()->subMonthNoOverflow()->startOfDay(); // cubrir mensuales que “caen”
 
-        // SELECT: solo nombres + campos de programación (sin IDs)
+        //Construimos la consulta de la programación y treemmos los datos
         $rows = DB::table('programacion_recoleccion as pr')
+            //filtramos por punto eca
             ->where('pr.punto_eca_id', $puntoEcaId)
+            //filtramos por fechas desde el mes anterior hasta el ultimo dia que muestra el calendario
             ->whereBetween('pr.fecha', [$baseStart->toDateString(), $end->toDateString()])
             ->leftJoin('materiales as m3', 'm3.id', '=', 'pr.material_id')
             ->leftJoin('centros_acopio as ca', 'ca.id', '=', 'pr.centro_acopio_id')
             ->orderBy('pr.fecha')
             ->get(['pr.fecha', 'pr.hora', 'pr.frecuencia', 'pr.notas', DB::raw('COALESCE(pr.creado, NULL) as creado'), 'm3.nombre  as material_nombre', 'ca.nombre  as centro_nombre']);
+        //Con raw() le indicamos que el campo creado se llame creado
 
-        // Expandir repeticiones dentro de [start, end] y NORMALIZAR CLAVES
-        $eventos = []; // 'YYYY-MM-DD' => [ eventos... ]
+        //creamos un array donde la clave sera la fecha y tremos los eventos asociados a ese dia
+        $eventos = [];
+        //recorremos la consulta
         foreach ($rows as $r) {
-            $c = \Carbon\Carbon::parse($r->fecha)->startOfDay();
+            //convertimos la fecha y la inicializamos con la hora
+            $c = Carbon::parse($r->fecha)->startOfDay();
 
-            $push = function (\Carbon\Carbon $d) use (&$eventos, $r, $start, $end, $punto) {
+            $push = function (Carbon $d) use (&$eventos, $r, $start, $end, $punto) {
+                // verificamos si la fecha esta dentro del rango de la
                 if (!$d->betweenIncluded($start, $end)) {
+                    //si no esta no agrega nada y se sale
                     return;
                 }
 
+                //formato de la fecha de la programación en el calendario para usarla como clave en el evento
                 $key = $d->toDateString();
-                $hhmm = $r->hora ? \Illuminate\Support\Str::of($r->hora)->limit(5, '')->__toString() : null;
+                //si la fecha tiene hora le sacamos los segundos y si no la dejamos null
+                $hhmm = $r->hora ? Str::of($r->hora)->limit(5, '')->__toString() : null;
 
                 $event = [
-                    // nombres “humanos”
+                    //traemos los datos de la programación con el material y el centro
                     'punto' => $punto->nombre ?? '—',
                     'material' => $r->material_nombre,
                     'centro' => $r->centro_nombre,
-
-                    // datos de programación
                     'fecha' => $key,
                     'hora' => $r->hora,
                     'time' => $hhmm,
@@ -274,17 +322,19 @@ class PuntoEcaController extends Controller
                     'creado' => $r->creado,
                 ];
 
-                // con esto verificamos si hay una programación para el material y el centro, y lo agregamos
+                //si no hay eventos para la fecha lo dejamos vacio
                 $eventos[$key] = $eventos[$key] ?? [];
-                // si no hay programación para el material y el centro, lo agregamos
+                //agregamos el evento con la fecha
                 $eventos[$key][] = $event;
             };
 
-            // sin repeticiones
+            //ejecutamos la funcion
             $push($c);
 
             // repeticiones
+            // si la frecuencia no es manual ni unico tenemos que hacer las repeticiones
             if (!in_array($r->frecuencia, ['manual', 'unico'], true)) {
+                // un cursor para ir sumando periodos
                 $cursor = $c->copy();
                 while (true) {
                     switch ($r->frecuencia) {
@@ -292,7 +342,7 @@ class PuntoEcaController extends Controller
                             $cursor->addWeek();
                             break;
                         case 'quincenal':
-                            $cursor->addDays(15);
+                            $cursor->addDays(14);
                             break;
                         case 'mensual':
                             $cursor->addMonthNoOverflow();
@@ -300,41 +350,55 @@ class PuntoEcaController extends Controller
                         default:
                             $cursor->addYears(100);
                     }
+                    //con gt() verificamos si el cursor es mayor al final
                     if ($cursor->gt($end)) {
                         break;
                     }
+                    //si no es mayor lo agregamos
                     $push($cursor);
                 }
             }
         }
 
-        // Construir 42 días para la grilla
+        // Construir 42 días para el calendario
         $dias = [];
         $iter = $start->copy();
+        //recorremos 42 dias que son los que muestra el calendario
         for ($i = 0; $i < 42; $i++) {
             $key = $iter->toDateString();
+            //convertimos la fecha de la programación en el calendario para usarla como clave en el evento
+            //creamos un array con los eventos de la fecha
             $items = collect($eventos[$key] ?? [])
+                //ordenamos los eventos por hora
                 ->sortBy(fn($e) => $e['time'] ?? '')
+                //obtenemos los eventos de la fecha
                 ->values()
                 ->all();
 
             $dias[] = [
+                //creamos un array con la fecha y los eventos
                 'date' => $iter->copy(),
                 'events' => $items,
+                //verificamos si la fecha es de este mes
                 'inMonth' => $iter->month === $firstOfMonth->month,
             ];
             $iter->addDay();
         }
 
-        // Navegación y labels
+        // Navegación del calendario
+        // Prev/Next mes
         $prev = $firstOfMonth->copy()->subMonthNoOverflow();
         $next = $firstOfMonth->copy()->addMonthNoOverflow();
 
+        //construimos la url para la navegación
         $navPrevUrl = $request->fullUrlWithQuery(['seccion' => 'calendario', 'y' => $prev->year, 'm' => $prev->month]);
         $navNextUrl = $request->fullUrlWithQuery(['seccion' => 'calendario', 'y' => $next->year, 'm' => $next->month]);
-        $mesTitulo = \Illuminate\Support\Str::ucfirst($firstOfMonth->translatedFormat('F Y'));
+        //Volvemos la fecha en en texto para el título y hacemos la primera letra en mayúscula
+        $mesTitulo = Str::ucfirst($firstOfMonth->translatedFormat('F Y'));
+        //Rango de fechas
         $rangoLabel = $start->toDateString() . ' → ' . $end->toDateString();
 
+        // sel = fecha seleccionada
         $payload['sel'] = $request->query('sel');
 
         // Límites de mes actual (para Entradas/Salidas del mes)
@@ -342,36 +406,37 @@ class PuntoEcaController extends Controller
         $finMes = Carbon::now()->endOfMonth()->toDateString();
 
         // Inventario total (kg) = suma de stock_actual del punto
-        $kpiInventario = (float) \App\Models\Inventario::query()->where('punto_eca_id', $puntoEcaId)->sum('stock_actual');
+        $kpiInventario = (float) Inventario::query()->where('punto_eca_id', $puntoEcaId)->sum('stock_actual');
 
-        // Entradas del mes (kg) = suma de cantidad en Compras del mes para mi punto
-        $kpiEntradasMes = (float) \App\Models\Compra::query()
+        // Entradas del mes (kg) = suma de cantidad en Compras del mes el punto
+        $kpiEntradasMes = (float) Compra::query()
             ->whereHas('inventario', fn($q) => $q->where('punto_eca_id', $puntoEcaId))
             ->whereBetween('fecha', [$inicioMes, $finMes])
             ->sum('cantidad');
 
-        // Salidas del mes (kg) = suma de cantidad en Ventas del mes para mi punto
-        $kpiSalidasMes = (float) \App\Models\Venta::query()
+        // Salidas del mes (kg) = suma de cantidad en Ventas para el punto
+        $kpiSalidasMes = (float) Venta::query()
             ->whereHas('inventario', fn($q) => $q->where('punto_eca_id', $puntoEcaId))
             ->whereBetween('fecha', [$inicioMes, $finMes])
             ->sum('cantidad');
 
-        // Próximo despacho (si tienes ProgramacionRecoleccion; si no existe el modelo, queda null)
+        // Próximo despacho (si tiene ProgramacionRecoleccion)
         $kpiProximoDespacho = null;
-        if (class_exists(\App\Models\ProgramacionRecoleccion::class)) {
-            $proximo = \App\Models\ProgramacionRecoleccion::query()
-                ->with(['material:id,nombre', 'centroAcopio:id,nombre'])
-                ->where('punto_eca_id', $puntoEcaId)
-                ->whereDate('fecha', '>=', Carbon::today()->toDateString())
-                ->orderBy('fecha')
-                ->orderBy('hora')
-                ->first();
+        $proximo = ProgramacionRecoleccion::query()
+            ->with(['material:id,nombre', 'centroAcopio:id,nombre'])
+            ->where('punto_eca_id', $puntoEcaId)
+            ->whereDate('fecha', '>=', Carbon::today()->toDateString())
+            ->orderBy('fecha')
+            ->orderBy('hora')
+            ->first();
 
-            if ($proximo) {
-                $fecha = $proximo->fecha instanceof \Illuminate\Support\Carbon ? $proximo->fecha->format('Y-m-d') : (string) $proximo->fecha;
+        // Si hay un próximo despacho
+        if ($proximo) {
+            // Formateamos la fecha
+            $fecha = $proximo->fecha instanceof Carbon ? $proximo->fecha->format('Y-m-d') : (string) $proximo->fecha;
 
-                $kpiProximoDespacho = sprintf('%s %s • %s • %s', $fecha, $proximo->hora ?? '', $proximo->material->nombre ?? '—', $proximo->centroAcopio->nombre ?? '—');
-            }
+            // Formateamos el próximo despacho
+            $kpiProximoDespacho = sprintf('%s %s • %s • %s', $fecha, $proximo->hora ?? '', $proximo->material->nombre ?? '—', $proximo->centroAcopio->nombre ?? '—');
         }
 
         // Alertas por umbrales/capacidad según columnas del inventario
@@ -384,12 +449,14 @@ class PuntoEcaController extends Controller
         foreach ($invParaAlertas as $it) {
             $nombre = $it->material->nombre ?? '—';
             // Crítico: stock <= umbral_critico
+            // si hay umbral critico
             if (!is_null($it->umbral_critico) && $it->stock_actual <= $it->umbral_critico) {
+                // si el stock es menor o igual al umbral critico
                 $alertas[] = [
                     'tipo' => 'crítico',
                     'texto' => "Stock CRÍTICO de {$nombre}: {$it->stock_actual} {$it->unidad_medida} (≤ {$it->umbral_critico})",
                 ];
-                continue; // ya es crítico, no señalamos 'bajo' a la vez
+                continue;
             }
             // Bajo: stock <= umbral_alerta
             if (!is_null($it->umbral_alerta) && $it->stock_actual <= $it->umbral_alerta) {
@@ -416,14 +483,13 @@ class PuntoEcaController extends Controller
             'alertas' => $alertas,
         ];
 
-        // === AJUSTES / CONFIGURACIÓN ===
-        // Usa mostrar_mapa del punto y, si existe, el flag de notificaciones del usuario.
+        // AJUSTES / CONFIGURACIÓN ===
         $usuario = Auth::user();
         $payload['config'] = [
             'mostrar_mapa' => (bool) ($punto->mostrar_mapa ?? false),
             'recibir_notificaciones' => (bool) ($usuario->recibe_notificaciones ?? false),
         ];
-        // ===== Mezcla al payload (TODO JUNTO, sin condicionar por sección)
+        // Mezcla al payload
         $payload += [
             'categorias' => $categorias,
             'tipos' => $tipos,
@@ -438,17 +504,14 @@ class PuntoEcaController extends Controller
             'histCompras' => $histCompras,
             'histVentas' => $histVentas,
 
-            // Centros (camelCase)
             'centrosGlobales' => $centrosGlobales,
             'centrosPropios' => $centrosPropios,
             'centrosGlobalesLista' => $centrosGlobalesLista,
             'centrosPropiosLista' => $centrosPropiosLista,
 
-            // Centros (minúsculas para compatibilidad con la vista)
             'centrosglobaleslista' => $centrosGlobalesLista,
             'centrospropioslista' => $centrosPropiosLista,
 
-            // Calendario sin JS
             'dias' => $dias,
             'mesTitulo' => $mesTitulo,
             'navPrevUrl' => $navPrevUrl,
@@ -461,10 +524,9 @@ class PuntoEcaController extends Controller
 
     public function storeInventario(Request $request)
     {
-        // 1) Forzar el punto por defecto desde config/.env
         $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', Auth::id())->first();
         $puntoEcaId = $punto->id;
-        // 2) Validación mínima (sin pedir punto_eca_id al cliente)
+
         $data = $request->validate(
             [
                 'material_id' => [
@@ -497,7 +559,7 @@ class PuntoEcaController extends Controller
             );
         });
 
-        return back()->with('ok', 'Material registrado en inventario.');
+        return view('eca.index', ['seccion' => 'materiales'])->with('ok', 'Material registrado en inventario.');
     }
     public function updateInventario(Request $request, Inventario $inventario)
     {
@@ -523,10 +585,10 @@ class PuntoEcaController extends Controller
 
         $inventario->update($data);
 
-        return back()->with('ok', 'Inventario actualizado.');
+        return view('eca.index', ['seccion' => 'materiales'])->with('ok', 'Inventario actualizado.');
     }
 
-    public function destroyInventario(Request $request, Inventario $inventario)
+    public function destroyInventario(Inventario $inventario)
     {
         $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', Auth::id())->first();
         $puntoEcaId = $punto->id;
