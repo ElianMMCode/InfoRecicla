@@ -10,7 +10,7 @@ class AuthController extends Controller
 {
     public function index()
     {
-        return redirect()->route('eca.index', ['seccion' => 'perfil']);
+        return view('Registro.inicioSesion');
     }
 
     public function postLogin(Request $request)
@@ -48,9 +48,6 @@ class AuthController extends Controller
     }
 
 
-    public function dashboard()
-    {
-    }
 
     public function logout(Request $request)
     {

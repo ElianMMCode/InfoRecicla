@@ -36,7 +36,7 @@
     <!-- NAVBAR -->
     <nav class=" navbar navbar-expand-lg navbar-dark bg-success">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="{{route('inicio')}}">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('inicio') }}">
                 <img src="/imagenes/logo.png" alt="Logo InfoRecicla" width="90" height="90" class="rounded">
                 <span class="fs-1 fw-semibold">InfoRecicla</span>
             </a>
@@ -47,20 +47,22 @@
 
             <div id="nav" class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto align-items-lg-center align-items-center gap-2">
-                    <li class="nav-item"><a class="nav-link" href="{{route('publicaciones')}}">Publicaciones</a></li>
-                    <li class="nav-item"><a class="nav-link" href={{route('mapa')}}>Mapa ECA</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ route('publicaciones') }}">Publicaciones</a></li>
+                    <li class="nav-item"><a class="nav-link" href={{ route('mapa') }}>Mapa ECA</a></li>
 
                     <li class="nav-item dropdown">
                         <a class="btn btn-light text-success fw-semibold px-3 dropdown-toggle" href="#"
                             data-bs-toggle="dropdown" aria-expanded="true">Acceder</a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{{route('inicio-sesion')}}">Iniciar sesión</a></li>
+                            <li><a class="dropdown-item" href="{{ route('login') }}">Iniciar sesión</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="{{route('registro', 'ciudadano')}}">Registrarse (Ciudadano)</a>
+                            <li><a class="dropdown-item" href="{{ route('registro', 'ciudadano') }}">Registrarse
+                                    (Ciudadano)</a>
                             </li>
-                            <li><a class="dropdown-item" href="{{route('registro', 'eca')}}">Registrar Punto ECA</a></li>
+                            <li><a class="dropdown-item" href="{{ route('registro', 'eca') }}">Registrar Punto ECA</a>
+                            </li>
                         </ul>
                     </li>
                 </ul>
@@ -75,19 +77,20 @@
 
                 <!-- ALERTAS (reservado para tu script futuro) -->
                 <div id="formAlert" class="alert d-none" role="alert"></div>
-               
-                <form method="POST" action="{{ route('registro.eca') }}" id="ecaForm" class="needs-validation" novalidate enctype="multipart/form-data">
-                     @csrf
-                <input type="hidden" name="tipo" value="GestorECA">
-                <!-- FORMULARIO -->
+
+                <form method="POST" action="{{ route('registro.eca') }}" id="ecaForm" class="needs-validation"
+                    novalidate enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" name="tipo" value="GestorECA">
+                    <!-- FORMULARIO -->
                     <!-- ======= 1) Datos de cuenta (users) ======= -->
                     <p class="section-title">Datos de cuenta</p>
                     <input type="hidden" name="account_type" value="eca">
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label for="correo" class="form-label">Correo electrónico (acceso)</label>
-                            <input type="email" class="form-control" id="correo" name="correo" autocomplete="email"
-                                required>
+                            <input type="email" class="form-control" id="correo" name="correo"
+                                autocomplete="email" required>
                             <div class="invalid-feedback">Ingresa un correo válido.</div>
                         </div>
                         <div class="col-md-3">
@@ -98,20 +101,24 @@
                         </div>
                         <div class="col-md-3">
                             <label for="pass_confirmation" class="form-label">Confirmar</label>
-                            <input type="password" class="form-control" id="pass_confirmation" name="password_confirmation"
-                                required>
+                            <input type="password" class="form-control" id="pass_confirmation"
+                                name="password_confirmation" required>
                             <div class="invalid-feedback">Las contraseñas no coinciden.</div>
                         </div>
                     </div>
 
-                    @if(session('error'))
-  <div class="alert alert-danger">{{ session('error') }}</div>
-@endif
-@if($errors->any())
-  <div class="alert alert-danger">
-    <ul>@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
-  </div>
-@endif
+                    @if (session('error'))
+                        <div class="alert alert-danger">{{ session('error') }}</div>
+                    @endif
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $e)
+                                    <li>{{ $e }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
                     <hr class="my-4">
 
@@ -146,28 +153,29 @@
                             <div class="invalid-feedback">Ingresa un número válido.</div>
                         </div>
 
-                       <hr class="my-4">
+                        <hr class="my-4">
 
                         <!-- ======= 3) Datos del Punto ECA (eca_points) ======= -->
                         <p class="section-title">Información de la estación</p>
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="nombrePunto" class="form-label">Nombre del Punto ECA</label>
-                                <input type="text" class="form-control" id="nombrePunto" name="nombrePunto" required>
+                                <input type="text" class="form-control" id="nombrePunto" name="nombrePunto"
+                                    required>
                                 <div class="invalid-feedback">Campo obligatorio.</div>
                             </div>
                             <div class="col-md-3">
                                 <label for="nit" class="form-label">NIT (opcional)</label>
-                                <input type="text" class="form-control" id="nit" name="nit" maxlength="20"
-                                    placeholder="Si aplica">
+                                <input type="text" class="form-control" id="nit" name="nit"
+                                    maxlength="20" placeholder="Si aplica">
                             </div>
                         </div>
 
                         <div class="row g-3 mt-1">
                             <div class="col-md-6">
                                 <label for="horarioAtencion" class="form-label">Horario de atención (opcional)</label>
-                                <input type="text" class="form-control" id="horarioAtencion" name="horarioAtencion"
-                                    placeholder="Lun-Vie 8:00–17:00, Sáb 9:00–13:00">
+                                <input type="text" class="form-control" id="horarioAtencion"
+                                    name="horarioAtencion" placeholder="Lun-Vie 8:00–17:00, Sáb 9:00–13:00">
                             </div>
                         </div>
 
@@ -189,7 +197,8 @@
                         <div class="row g-3 mt-1">
                             <div class="col-md-6">
                                 <label for="direccionPunto" class="form-label">Dirección del punto</label>
-                                <input type="text" class="form-control" id="direccionPunto" name="direccionPunto" required>
+                                <input type="text" class="form-control" id="direccionPunto" name="direccionPunto"
+                                    required>
                                 <div class="invalid-feedback">Campo obligatorio.</div>
                             </div>
                             <div class="col-md-3">
@@ -232,7 +241,8 @@
                         <div class="mt-3">
                             <button type="button" id="geoBtn" class="btn btn-outline-secondary">Obtener mi
                                 ubicación</button>
-                            <div id="locationDisplay" class="form-text mt-2">Presiona para otorgar permiso de ubicación.
+                            <div id="locationDisplay" class="form-text mt-2">Presiona para otorgar permiso de
+                                ubicación.
                             </div>
                             <!-- Campos lat/lng (para tu script de geoloc) -->
                             <input type="hidden" id="latitud" name="latitud">
@@ -240,14 +250,16 @@
                         </div>
 
                         <div class="row g-3 mt-1">
-                            
+
                             <div class="col-md-6">
                                 <label for="logo" class="form-label">Logo del punto (opcional)</label>
-                                <input type="file" class="form-control" id="logo" name="logo" accept="image/*">
+                                <input type="file" class="form-control" id="logo" name="logo"
+                                    accept="image/*">
                             </div>
                             <div class="col-md-6">
                                 <label for="foto" class="form-label">Foto del punto (opcional)</label>
-                                <input type="file" class="form-control" id="foto" name="foto" accept="image/*">
+                                <input type="file" class="form-control" id="foto" name="foto"
+                                    accept="image/*">
                             </div>
                             <div class="col-md-6">
                                 <label for="sitioWeb" class="form-label">Sitio web (opcional)</label>
@@ -287,7 +299,7 @@
                         </div>
 
                         <p class="text-center mt-3 mb-0">
-                            <small>¿Ya tienes cuenta? <a href="{{route('inicio-sesion')}}">Inicia sesión</a></small>
+                            <small>¿Ya tienes cuenta? <a href="{{ route('login') }}">Inicia sesión</a></small>
                         </p>
                 </form>
             </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PuntoEca;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -14,22 +15,22 @@ use App\Models\ProgramacionRecoleccion;
 class ProgramacionRecoleccionController extends Controller
 {
     //
-    public function store(\Illuminate\Http\Request $request)
+    public function store(Request $request)
     {
         $gestorId = Auth::id();
 
-        $punto = \App\Models\PuntoEca::query()->where('gestor_id', $gestorId)->firstOrFail();
+        $punto = PuntoEca::query()->where('gestor_id', $gestorId)->firstOrFail();
 
         $data = $request->validate([
             'material_id' => ['required', 'uuid', 'exists:materiales,id'],
             'centro_acopio_id' => ['required', 'uuid', 'exists:centros_acopio,id'],
-            'frecuencia' => ['required', \Illuminate\Validation\Rule::in(['manual', 'semanal', 'quincenal', 'mensual', 'unico'])],
+            'frecuencia' => ['required', Rule::in(['manual', 'semanal', 'quincenal', 'mensual', 'unico'])],
             'fecha' => ['required', 'date'],
             'hora' => ['required', 'date_format:H:i'],
             'notas' => ['nullable', 'string', 'max:300'],
         ]);
 
-        $prog = new \App\Models\ProgramacionRecoleccion();
+        $prog = new ProgramacionRecoleccion();
         $prog->id = (string) \Illuminate\Support\Str::uuid();
         $prog->punto_eca_id = $punto->id;
         $prog->material_id = $data['material_id'];
@@ -48,10 +49,12 @@ class ProgramacionRecoleccionController extends Controller
 
         $prog->save();
 
-        return back()->with('ok', true);
+        return redirect()
+            ->route('eca.index', ['seccion' => 'calendario'])
+            ->with('ok', 'Perfil actualizado correctamente.');
     }
 
-    function vistaCalendarioCards(\Illuminate\Http\Request $request)
+    function vistaCalendarioCards(Request $request)
     {
         $gestorId = Auth::id();
         $punto = \App\Models\PuntoEca::query()->where('gestor_id', $gestorId)->firstOrFail();
