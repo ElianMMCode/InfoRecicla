@@ -78,6 +78,7 @@ class UsuarioController extends Controller
                 'tipo_documento' => $data['tipoDocumento'] ?? null,
                 'numero_documento' => $data['numeroDocumento'] ?? null,
                 'nombre_usuario' => $data['nombrePunto'] ?? null,
+                'localidad' => $data['localidad'],
                 'estado' => 'activo',
                 'creado' => now(),
                 'actualizado' => now(),
