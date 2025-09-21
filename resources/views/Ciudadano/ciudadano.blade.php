@@ -16,7 +16,11 @@
                     <img src="/imagenes/perfil_default.png" alt="Avatar" class="avatar" id="userAvatar">
                     <div>
                         <h1 class="h4 mb-1" id="userName">{{ $usuario->nombre_usuario }}</h1>
+                        <h1 class="h4 mb-1" id="userName">{{ $usuario->nombre_usuario }}</h1>
                         <div class="text-muted small">
+                            <span id="userNameAndLastname">{{ $usuario->nombre }} {{ $usuario->apellido }}</span>
+                            <br>
+                            <span id="userEmail">{{ $usuario->correo }}</span>
                             <span id="userNameAndLastname">{{ $usuario->nombre }} {{ $usuario->apellido }}</span>
                             <br>
                             <span id="userEmail">{{ $usuario->correo }}</span>
@@ -62,6 +66,7 @@
             </section>
 
             <!-- ===== COMENTARIOS ===== -->
+            <!-- ===== COMENTARIOS ===== -->
             <section class="tab-pane fade" id="comentarios">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5 class="mb-0">Mis Comentarios</h5>
@@ -93,6 +98,7 @@
             </section>
 
             <!-- ===== CHATS ===== -->
+            <!-- ===== CHATS ===== -->
             <section class="tab-pane fade" id="tab-chats" role="tabpanel">
                 <div class="row g-3">
                     <div class="col-lg-4">
@@ -122,8 +128,7 @@
                                     <strong id="chatTitle">Punto ECA Suba</strong><br>
                                     <small class="text-muted" id="chatSubtitle">Conversación #1</small>
                                 </div>
-                                <a href="#" id="chatPointLink" class="btn btn-outline-success btn-sm">Ver
-                                    punto</a>
+                                <a href="#" id="chatPointLink" class="btn btn-outline-success btn-sm">Ver punto</a>
                             </div>
                             <div class="card-body">
                                 <div id="chatWindow" class="chat-window">
@@ -144,68 +149,75 @@
             </section>
 
             <!-- ===== AJUSTES (FORM REAL) ===== -->
+            <!-- ===== AJUSTES (FORM REAL) ===== -->
             <section class="tab-pane fade" id="ajustes">
                 <div class="card card-hover">
                     <div class="card-body">
                         <h5 class="card-title mb-3">Preferencias</h5>
 
-                        <form method="POST" action="{{ route('ciudadano.perfil.update') }}">
+                        <form method="POST"
+                            action="{{ route('ciudadano.perfil.update') }}">
                             @csrf
                             @method('PATCH')
-                        <form method="POST" action="{{ route('ciudadano.perfil.update') }}">
-                            @csrf
-                            @method('PATCH')
 
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" role="switch" id="prefNoti">
-                                <label class="form-check-label" for="prefNoti">Recibir notificaciones de
-                                    publicaciones,
-                                    respuestas y novedades</label>
-                            </div>
+                        <!-- Notificaciones (opcional; si no las guardas, quita el name) -->
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" role="switch" id="prefNoti"
+                                name="recibe_notificaciones" value="1"
+                                {{ $usuario->recibe_notificaciones ? 'checked' : '' }}>
+                            <label class="form-check-label" for="prefNoti">
+                                Recibir notificaciones de publicaciones, respuestas y novedades
+                            </label>
+                        </div>
+                        <h5 class="card-title mb-3">Actualizacion de Datos</h5>
 
+                        <div class="mb-3">
+                            <label class="form-label" for="nombre_usuario">Nombre de Usuario</label>
+                            <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario"
+                                value="{{ $usuario->nombre_usuario }}" required>
+                        </div>
 
-                            <div class="mb-3">
-                                <label class="form-label" for="nombre_usuario">Nombre de Usuario</label>
-                                <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario"
-                                    value="{{ $usuario->nombre_usuario }}" required>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="editNombre" name="nombre"
+                                value="{{ $usuario->nombre }}" required>
+                        </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Nombre</label>
-                                <input type="text" class="form-control" id="editNombre"
-                                    value="{{ $usuario->nombre }}" required>
+                        <div class="mb-3">
+                            <label class="form-label">Correo</label>
+                            <input type="email" class="form-control" id="editCorreo" name="correo"
+                                value="{{ $usuario->correo }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Localidad</label>
+                            <input type="text" class="form-control" id="editLocalidad" name="localidad"
+                                value="{{ $usuario->localidad }}">
+                        </div>
+                        <div>
+                            <label for="old_password" class="form-label">Contraseña actual</label>
+                            <input type="password" class="form-control" id="old_password" name="old_password">
+
+                            <label for="password" class="form-label">Contraseña nueva</label>
+                            <input type="password" class="form-control" id="password" name="password">
+
+                            <label for="password_confirmation" class="form-label">Confirmar contraseña</label>
+                            <input type="password" class="form-control" id="password_confirmation"
+                                name="password_confirmation">
+                            <br>
+                            <div class="d-flex justify-content-end gap-2">
+                                <button class="btn btn-outline-secondary" type="button">Cancelar</button>
+                                <button class="btn btn-success" type="submit">Guardar</button>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Correo</label>
-                                <input type="email" class="form-control" id="editCorreo"
-                                    value="{{ $usuario->correo }}" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="nombre_usuario" id="editNombreUsuario" class="form-label">Nombre de
-                                    usuario</label>
-                                <input type="text" class="form-control" id="editNombreUsuario"
-                                    value="{{ $usuario->nombre_usuario }}" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Localidad</label>
-                                <input type="text" class="form-control" id="editLocalidad" value="">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Foto de perfil (opcional)</label>
-                                <input type="file" class="form-control" id="editAvatar" accept="image/*">
-                                <div class="form-text">Formatos aceptados: JPG, PNG, WEBP. Máx. 2 MB.</div>
-                            </div>
-                            <div>
-                                <label for="old_password" class="form-label">Contraseña actual</label><input
-                                    type="password" class="form-control" id="old_password"></label>
-                                <label for="password" class="form-label">Contraseña nueva</label><input
-                                    type="password" class="form-control" id="password"></label>
-                                <label for="password_confirmation" class="form-label">Confirmar
-                                    contraseña</label><input type="password" class="form-control"
-                                    id="password_confirmation">
-                            </div>
+                        </div>
+                        </form>
+
                     </div>
-            </section>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-success" type="submit">Guardar</button>
+                </div>
+                </form>
         </div>
     </div>
 
@@ -220,5 +232,7 @@
         </div>
     </div>
     {{-- comentario --}}
+    {{-- comentario --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </x-app-layout>
+
