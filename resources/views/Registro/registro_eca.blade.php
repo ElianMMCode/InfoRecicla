@@ -121,13 +121,6 @@
                                 </div>
 
                                 <p class="small text-success fw-bold mb-1 mt-2">Información de la estación</p>
-                                function insecureHelp(){
-                                return 'El contexto no es seguro. Usa https:// o http://localhost para que el navegador
-                                permita geolocalización.';
-                                }
-                                function debugLog(obj){
-                                if(window && window.console){ console.log('[GeolocDebug]', obj); }
-                                }
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label for="nombrePunto" class="form-label small fw-semibold">Nombre del Punto
@@ -141,25 +134,15 @@
                                         @enderror
                                     </div>
                                     <div class="col-md-3">
-                                        if(!window.isSecureContext){
-                                        feedback(insecureHelp(),'danger');
-                                        debugLog({secure:false, protocol:location.protocol});
-                                        return;
-                                        }
-                                        // Siempre re-consulta antes de cada intento (por si el usuario cambió el
-                                        permiso sin recargar)
-                                        const perm = await checkPermission();
-                                        debugLog({perm});
-                                        if(perm === 'denied'){
-                                        feedback(blockedHelp() + ' <br><span class="text-muted">Tras permitir, pulsa
-                                            nuevamente GPS.</span>','danger');
-                                        return;
-                                        }
                                         <label for="nit" class="form-label small fw-semibold">NIT
+                                            (opcional)</label>
+                                        <input type="text"
+                                            class="form-control form-control-sm @error('nit') is-invalid @enderror"
+                                            id="nit" name="nit" value="{{ old('nit') }}"
                                             maxlength="20" placeholder="Si aplica">
-                                            @error('nit')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
+                                        @error('nit')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
                                 <div class="row g-3 mt-1">
@@ -168,11 +151,8 @@
                                             atención (opcional)</label>
                                         <input type="text"
                                             class="form-control form-control-sm @error('horarioAtencion') is-invalid @enderror"
-                                            id="horarioAtencion" name="horarioAtencion" debugLog({error:err.code,
-                                            message:err.message}); // Si fue permiso denegado pero el usuario cree haber
-                                            cambiado, sugerir recargar. if(err.code===1){ feedback(blockedHelp()
-                                            + ' <br><span class="text-muted">Si ya cambiaste el permiso, recarga la página e inténtalo de nuevo.</span>'
-                                            ,'danger'); } value="{{ old('horarioAtencion') }}"
+                                            id="horarioAtencion" name="horarioAtencion"
+                                            value="{{ old('horarioAtencion') }}"
                                             placeholder="Lun-Vie 8:00–17:00, Sáb 9:00–13:00">
                                         @error('horarioAtencion')
                                             <div class="invalid-feedback">{{ $message }}</div>
