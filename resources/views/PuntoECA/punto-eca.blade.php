@@ -250,8 +250,15 @@
                                             <div class="col-12 col-md-6">
                                                 <label class="form-label">Latitud</label>
                                                 <div class="input-group">
-                                                    <input type="text" inputmode="decimal" pattern="^-?\\d{1,3}\\.\\d+" class="form-control @error('punto.latitud') is-invalid @enderror" name="punto[latitud]" id="puntoLatitud" value="{{ old('punto.latitud', $punto->latitud) }}" placeholder="Ej: 4.609710">
-                                                    <button type="button" class="btn btn-outline-success" id="btnGetUbicacion" title="Obtener ubicación actual">GPS</button>
+                                                    <input type="text" inputmode="decimal"
+                                                        pattern="^-?\\d{1,3}\\.\\d+"
+                                                        class="form-control @error('punto.latitud') is-invalid @enderror"
+                                                        name="punto[latitud]" id="puntoLatitud"
+                                                        value="{{ old('punto.latitud', $punto->latitud) }}"
+                                                        placeholder="Ej: 4.609710">
+                                                    <button type="button" class="btn btn-outline-success"
+                                                        id="btnGetUbicacion"
+                                                        title="Obtener ubicación actual">GPS</button>
                                                 </div>
                                                 <div class="form-text">Usa el botón GPS o ingresa manualmente.</div>
                                                 @error('punto.latitud')
@@ -260,7 +267,12 @@
                                             </div>
                                             <div class="col-12 col-md-6">
                                                 <label class="form-label">Longitud</label>
-                                                <input type="text" inputmode="decimal" pattern="^-?\\d{1,3}\\.\\d+" class="form-control @error('punto.longitud') is-invalid @enderror" name="punto[longitud]" id="puntoLongitud" value="{{ old('punto.longitud', $punto->longitud) }}" placeholder="Ej: -74.081749">
+                                                <input type="text" inputmode="decimal"
+                                                    pattern="^-?\\d{1,3}\\.\\d+"
+                                                    class="form-control @error('punto.longitud') is-invalid @enderror"
+                                                    name="punto[longitud]" id="puntoLongitud"
+                                                    value="{{ old('punto.longitud', $punto->longitud) }}"
+                                                    placeholder="Ej: -74.081749">
                                                 @error('punto.longitud')
                                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                                 @enderror
@@ -2453,67 +2465,76 @@
 
 </x-app-layout>
 @push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const btn = document.getElementById('btnGetUbicacion');
-    if(!btn) return;
-    const latInput = document.getElementById('puntoLatitud');
-    const lngInput = document.getElementById('puntoLongitud');
-    let busy = false;
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('btnGetUbicacion');
+            if (!btn) return;
+            const latInput = document.getElementById('puntoLatitud');
+            const lngInput = document.getElementById('puntoLongitud');
+            let busy = false;
 
-    function setLoading(state){
-        busy = state;
-        btn.disabled = state;
-        btn.innerHTML = state ? 'GPS…' : 'GPS';
-    }
-
-    function showToast(msg, type='info') {
-        if(window.bootstrap){
-            let el = document.getElementById('toastGeo');
-            if(!el){
-                const container = document.createElement('div');
-                container.className = 'position-fixed bottom-0 end-0 p-3';
-                container.style.zIndex = 1080;
-                container.innerHTML = `<div id="toastGeo" class="toast align-items-center text-bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true"><div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button></div></div>`;
-                document.body.appendChild(container);
-                el = document.getElementById('toastGeo');
-            } else {
-                el.querySelector('.toast-body').textContent = msg;
-                el.className = `toast align-items-center text-bg-${type} border-0`;
+            function setLoading(state) {
+                busy = state;
+                btn.disabled = state;
+                btn.innerHTML = state ? 'GPS…' : 'GPS';
             }
-            new bootstrap.Toast(el, { delay: 2500 }).show();
-        } else {
-            console.log(msg);
-        }
-    }
 
-    btn.addEventListener('click', () => {
-        if(busy) return;
-        if(!navigator.geolocation){
-            showToast('Geolocalización no soportada en este navegador', 'danger');
-            return;
-        }
-        setLoading(true);
-        navigator.geolocation.getCurrentPosition(
-            pos => {
-                const { latitude, longitude } = pos.coords;
-                latInput.value = latitude.toFixed(6);
-                lngInput.value = longitude.toFixed(6);
-                showToast('Ubicación obtenida', 'success');
-                setLoading(false);
-            },
-            err => {
-                const mapErrors = {
-                    1: 'Permiso de geolocalización denegado',
-                    2: 'Posición no disponible',
-                    3: 'Tiempo de espera agotado'
-                };
-                showToast(mapErrors[err.code] || 'Error obteniendo ubicación', 'danger');
-                setLoading(false);
-            },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
-    });
-});
-</script>
+            function showToast(msg, type = 'info') {
+                if (window.bootstrap) {
+                    let el = document.getElementById('toastGeo');
+                    if (!el) {
+                        const container = document.createElement('div');
+                        container.className = 'position-fixed bottom-0 end-0 p-3';
+                        container.style.zIndex = 1080;
+                        container.innerHTML =
+                            `<div id="toastGeo" class="toast align-items-center text-bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true"><div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button></div></div>`;
+                        document.body.appendChild(container);
+                        el = document.getElementById('toastGeo');
+                    } else {
+                        el.querySelector('.toast-body').textContent = msg;
+                        el.className = `toast align-items-center text-bg-${type} border-0`;
+                    }
+                    new bootstrap.Toast(el, {
+                        delay: 2500
+                    }).show();
+                } else {
+                    console.log(msg);
+                }
+            }
+
+            btn.addEventListener('click', () => {
+                if (busy) return;
+                if (!navigator.geolocation) {
+                    showToast('Geolocalización no soportada en este navegador', 'danger');
+                    return;
+                }
+                setLoading(true);
+                navigator.geolocation.getCurrentPosition(
+                    pos => {
+                        const {
+                            latitude,
+                            longitude
+                        } = pos.coords;
+                        latInput.value = latitude.toFixed(6);
+                        lngInput.value = longitude.toFixed(6);
+                        showToast('Ubicación obtenida', 'success');
+                        setLoading(false);
+                    },
+                    err => {
+                        const mapErrors = {
+                            1: 'Permiso de geolocalización denegado',
+                            2: 'Posición no disponible',
+                            3: 'Tiempo de espera agotado'
+                        };
+                        showToast(mapErrors[err.code] || 'Error obteniendo ubicación', 'danger');
+                        setLoading(false);
+                    }, {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            });
+        });
+    </script>
 @endpush
