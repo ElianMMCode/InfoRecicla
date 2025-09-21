@@ -28,6 +28,7 @@ class Usuario extends Authenticatable
         'tipo_documento',
         'numero_documento',
         'telefono',
+        'localidad',
         'recibe_notificaciones',
         'fecha_nacimiento',
         'avatar_url',

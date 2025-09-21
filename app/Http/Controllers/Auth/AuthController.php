@@ -47,8 +47,6 @@ class AuthController extends Controller
         ])->onlyInput('correo');
     }
 
-
-
     public function logout(Request $request)
     {
         // Cierra la sesión
@@ -58,5 +56,24 @@ class AuthController extends Controller
         // Genera un nuevo token
         $request->session()->regenerateToken();
         return redirect(route('login'))->with('success', 'Saliendo...');
+    }
+    public function dashboard()
+    {
+        $usuario = Auth::user();
+        if (! $usuario) {
+            return redirect()->route('login');
+        }
+
+        // Redirige según rol (mismo criterio que en postLogin)
+        if ($usuario->rol === 'GestorECA' || $usuario->rol === 'Administrador') {
+            return redirect()->route('eca.index', ['seccion' => 'resumen']);
+        }
+
+        if ($usuario->rol === 'Ciudadano') {
+            return redirect()->route('ciudadano');
+        }
+
+        // Fallback: si no encaja en nada, a inicio
+        return redirect()->route('inicio');
     }
 }

@@ -15,6 +15,7 @@ use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\CentroAcopioController;
 use App\Http\Controllers\ProgramacionRecoleccionController;;
 
+
 Route::get('/', InicioController::class)->name('inicio');
 
 Route::middleware('guest')->group(function () {
@@ -44,6 +45,7 @@ Route::middleware(['auth', 'role:GestorECA,Administrador'])->group(function () {
             ->name('eca.index');
     });;
     Route::put('/perfil', [UsuarioController::class, 'updatePerfil'])->name('eca.perfil.update');
+
     // Catálogo de materiales 
     Route::get('/eca/materiales', [MaterialController::class, 'index'])->name('eca.materiales.index');
 
@@ -57,7 +59,6 @@ Route::middleware(['auth', 'role:GestorECA,Administrador'])->group(function () {
     Route::post('/eca/movimientos/ventas', [MovimientosController::class, 'storeVenta'])->name('eca.movimientos.venta.store');
 
     //Centros
-
     Route::post('/eca/centros', [CentroAcopioController::class, 'storeCentro'])->name('eca.centros.store');
     Route::put('/eca/centros/{centro}', [CentroAcopioController::class, 'updateCentroAcopio'])->name('eca.centros.update');
     Route::delete('/eca/centros/{centro}', [CentroAcopioController::class, 'destroyCentro'])->name('eca.centros.destroy');
@@ -70,7 +71,12 @@ Route::middleware(['auth', 'role:GestorECA,Administrador'])->group(function () {
 Route::middleware(['auth', 'role:Ciudadano'])->group(function () {
     // Ciudadano
     Route::get('/ciudadano', [CiudadanoController::class, 'view_ciudadano'])->name('ciudadano');
-    // 
+
+    // NUEVO: Guardar cambios del perfil del ciudadano (nombre, correo, nombre_usuario y cambio de contraseña)
+    Route::patch('/ciudadano/perfil', [CiudadanoController::class, 'updatePerfil'])
+        ->name('ciudadano.perfil.update');
+
+    // Vista ECA (si el ciudadano la necesita)
     Route::get('/eca', [PuntoEcaController::class, 'view_punto_eca'])
         ->name('eca.view');
 });

@@ -33,6 +33,7 @@ class Usuario extends Authenticatable   // <-- EXTENDER Authenticatable
         'telefono',
         'recibe_notificaciones',
         'fecha_nacimiento',
+        'localidad',
         'avatar_url',
         'nombre_usuario',
         'genero',
