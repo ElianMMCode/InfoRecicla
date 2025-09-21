@@ -155,7 +155,7 @@ class PuntoEcaController extends Controller
                 $inventarioList = Inventario::query()
                     ->with('material:id,nombre')
                     ->where('punto_eca_id', $puntoEcaId)
-                    ->orderBy('created_at', 'desc')
+                    ->orderBy('creado', 'desc')
                     ->get();
 
                 $viewData = array_merge($viewData, $calData, [

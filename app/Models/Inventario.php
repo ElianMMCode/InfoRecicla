@@ -60,4 +60,12 @@ class Inventario extends Model
     {
         return $q->where('punto_eca_id', $puntoId);
     }
+
+    public function getCapacidadDisponibleAttribute(): float
+    {
+        $cap = (float) ($this->capacidad_max ?? 0);
+        $stock = (float) ($this->stock_actual ?? 0);
+        $restante = $cap - $stock;
+        return $restante > 0 ? round($restante, 2) : 0.0;
+    }
 }

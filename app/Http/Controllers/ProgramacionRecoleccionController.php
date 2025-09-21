@@ -50,6 +50,7 @@ class ProgramacionRecoleccionController extends Controller
             ->leftJoin('centros_acopio as ca', 'ca.id', '=', 'pr.centro_acopio_id')
             ->orderBy('pr.fecha')
             ->get([
+                'pr.id',
                 'pr.fecha',
                 'pr.hora',
                 'pr.frecuencia',
@@ -93,6 +94,7 @@ class ProgramacionRecoleccionController extends Controller
                 $eventos[$key] = [];
             }
             $eventos[$key][] = [
+                'id' => $r->id,
                 'hora' => $r->hora, // clave nueva usada internamente
                 'time' => $r->hora, // alias para compatibilidad con la blade existente
                 'material' => $r->material_nombre,
@@ -194,6 +196,30 @@ class ProgramacionRecoleccionController extends Controller
         return redirect()
             ->route('eca.index', ['seccion' => 'calendario'])
             ->with('ok', 'Perfil actualizado correctamente.');
+    }
+
+    /**
+     * Elimina una programación concreta
+     */
+    public function destroy(string $id)
+    {
+        $gestorId = Auth::id();
+        $punto = PuntoEca::query()->where('gestor_id', $gestorId)->firstOrFail();
+
+        $prog = ProgramacionRecoleccion::query()
+            ->where('punto_eca_id', $punto->id)
+            ->where('id', $id)
+            ->first();
+
+        if (!$prog) {
+            return redirect()->route('eca.index', ['seccion' => 'calendario'])
+                ->with('error', 'Evento no encontrado.');
+        }
+
+        $prog->delete();
+
+        return redirect()->route('eca.index', ['seccion' => 'calendario', 'sel' => $prog->fecha])
+            ->with('ok', 'Evento eliminado.');
     }
 
     function vistaCalendarioCards(Request $request)

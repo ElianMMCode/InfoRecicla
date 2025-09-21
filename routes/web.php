@@ -60,9 +60,12 @@ Route::middleware(['auth', 'role:GestorECA,Administrador'])->group(function () {
     //Centros
 
     Route::post('/eca/centros', [CentroAcopioController::class, 'storeCentro'])->name('eca.centros.store');
+    Route::put('/eca/centros/{centro}', [CentroAcopioController::class, 'updateCentroAcopio'])->name('eca.centros.update');
+    Route::delete('/eca/centros/{centro}', [CentroAcopioController::class, 'destroyCentro'])->name('eca.centros.destroy');
 
     //Calendario
     Route::post('/eca/calendario/', [ProgramacionRecoleccionController::class, 'store'])->name('eca.calendario.store');
+    Route::delete('/eca/calendario/{id}', [ProgramacionRecoleccionController::class, 'destroy'])->name('eca.calendario.destroy');
 });
 
 Route::middleware(['auth', 'role:Ciudadano'])->group(function () {

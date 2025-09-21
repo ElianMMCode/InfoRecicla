@@ -10,15 +10,15 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('imagenes/logo.png') }}">
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
 
     {{-- Contenido principal --}}
-    {{ $slot }}
-
+    <main class="flex-grow-1 d-flex flex-column">
+        {{ $slot }}
+    </main>
 
     <!-- FOOTER -->
-    <footer class="bg-light
-        border-top py-4">
+    <footer class="bg-light border-top py-4 mt-auto">
         <div class="container">
             <ul class="nav justify-content-center gap-3">
                 <li class="nav-item"><a class="nav-link text-muted" href="#">Acerca de</a></li>

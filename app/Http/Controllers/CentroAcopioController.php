@@ -80,10 +80,8 @@ class CentroAcopioController extends Controller
 
         $data = $request->validate([
             'cac.nombre' => ['required', 'string', 'max:150'],
-            // se indica que es necesario que el valor se uno de las posibilidades del enum
             'cac.tipo' => ['required', Rule::in(['Planta', 'Proveedor', 'Otro'])],
             'cac.descripcion' => ['nullable', 'string', 'max:255'],
-            'cac.contacto' => ['nullable', 'string', 'max:100'],
             'cac.telefono' => ['nullable', 'string', 'max:20'],
             'cac.correo' => ['nullable', 'email', 'max:120'],
             'cac.sitio_web' => ['nullable', 'url', 'max:200'],
@@ -91,11 +89,11 @@ class CentroAcopioController extends Controller
             'cac.materiales' => ['nullable', 'array'],
             'cac.materiales.*' => ['uuid', 'exists:materiales,id'],
             'cac.direccion' => ['nullable', 'string', 'max:200'],
-            'cac.ciudad' => ['nullable', 'string', 'max:60'],
             'cac.localidad' => ['nullable', 'string', 'max:60'],
             'cac.latitud' => ['nullable', 'numeric', 'between:-90,90'],
             'cac.longitud' => ['nullable', 'numeric', 'between:-180,180'],
             'cac.notas' => ['nullable', 'string', 'max:300'],
+            'cac.estado' => ['nullable', Rule::in(['activo', 'inactivo'])],
         ]);
 
         $cac = $data['cac'];
@@ -107,18 +105,18 @@ class CentroAcopioController extends Controller
             'alcance' => 'eca',
             'owner_punto_eca_id' => $puntoEcaId,
             // si no llega nada se deja null
-            'contacto' => $cac['contacto'] ?? null,
+            'contacto' => null,
             'telefono' => $cac['telefono'] ?? null,
             'correo' => $cac['correo'] ?? null,
             'sitio_web' => $cac['sitio_web'] ?? null,
             'horario_atencion' => $cac['horario_atencion'] ?? null,
             'direccion' => $cac['direccion'] ?? null,
-            'ciudad' => $cac['ciudad'] ?? null,
+            'ciudad' => null,
             'localidad' => $cac['localidad'] ?? null,
             'latitud' => $cac['latitud'] ?? null,
             'longitud' => $cac['longitud'] ?? null,
             // se deja activo
-            'estado' => 'activo',
+            'estado' => $cac['estado'] ?? 'activo',
             'notas' => $cac['notas'] ?? null,
             'descripcion' => $cac['descripcion'] ?? null,
         ]);
@@ -134,26 +132,27 @@ class CentroAcopioController extends Controller
             'cac.nombre' => ['required', 'string', 'max:150'],
             'cac.tipo' => ['required', Rule::in(['Planta', 'Proveedor', 'Otro'])],
             'cac.descripcion' => ['nullable', 'string', 'max:255'],
-            'cac.contacto' => ['nullable', 'string', 'max:100'],
             'cac.telefono' => ['nullable', 'string', 'max:20'],
             'cac.correo' => ['nullable', 'email', 'max:120'],
             'cac.sitio_web' => ['nullable', 'url', 'max:200'],
             'cac.horario_atencion' => ['nullable', 'string', 'max:150'],
             'cac.direccion' => ['nullable', 'string', 'max:200'],
-            'cac.ciudad' => ['nullable', 'string', 'max:60'],
             'cac.localidad' => ['nullable', 'string', 'max:60'],
             'cac.latitud' => ['nullable', 'numeric', 'between:-90,90'],
             'cac.longitud' => ['nullable', 'numeric', 'between:-180,180'],
             'cac.notas' => ['nullable', 'string', 'max:300'],
-            'cac.materiales' => ['nullable', 'array'],
-            'cac.materiales.*' => ['uuid', 'exists:materiales,id'],
+            'cac.estado' => ['nullable', Rule::in(['activo', 'inactivo'])],
         ]);
 
         // valida que el punto logueado sea el dueño del centro de acopio
         abort_if($centro->owner_punto_eca_id !== $punto->id, 403);
 
         // actualiza el centro
-        $centro->fill($data['cac']);
+        $payload = $data['cac'];
+        // aseguramos que contacto y ciudad se mantengan null si antes tenían algo
+        $payload['contacto'] = null;
+        $payload['ciudad'] = null;
+        $centro->fill($payload);
         $centro->save();
 
         // ✅ sincroniza si vino el campo
@@ -161,7 +160,8 @@ class CentroAcopioController extends Controller
             $centro->materiales()->sync($data['cac']['materiales'] ?? []);
         }
 
-        return back()->with('ok', 'Centro de acopio creado.');
+        return redirect()->route('eca.index', ['seccion' => 'centros'])
+            ->with('ok', 'Centro de acopio creado.');
     }
     public function updateCentroAcopio(Request $request, CentroAcopio $centro)
     {
@@ -190,6 +190,31 @@ class CentroAcopioController extends Controller
         // se guardan los cambios
         $centro->save();
 
-        return back()->with('ok', 'Centro de acopio actualizado.');
+        return redirect()->route('eca.index', ['seccion' => 'centros'])
+            ->with('ok', 'Centro de acopio actualizado.');
+    }
+
+    public function destroyCentro(CentroAcopio $centro)
+    {
+        $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', Auth::id())->first();
+        abort_if(!$punto, 404);
+        // Solo permitir borrar centros propios (alcance eca)
+        if ($centro->alcance !== 'eca' || $centro->owner_punto_eca_id !== $punto->id) {
+            return redirect()->route('eca.index', ['seccion' => 'centros'])
+                ->with('error', 'No autorizado para eliminar este centro.');
+        }
+
+        // Si tiene relaciones (materiales pivot) se limpian
+        try {
+            DB::transaction(function () use ($centro) {
+                $centro->materiales()->detach();
+                $centro->delete();
+            });
+            return redirect()->route('eca.index', ['seccion' => 'centros'])
+                ->with('ok', 'Centro eliminado.');
+        } catch (\Throwable $e) {
+            return redirect()->route('eca.index', ['seccion' => 'centros'])
+                ->with('error', 'No se pudo eliminar.');
+        }
     }
 }
