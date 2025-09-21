@@ -237,22 +237,28 @@
                                         <div class="col-12 col-md-4">
                                             <div class="input-group input-group-sm">
                                                 <span class="input-group-text">Lat</span>
-                                                <input type="text" class="form-control" id="latitudVisible" placeholder="Ej: 4.609710" value="{{ old('latitud') }}">
+                                                <input type="text" class="form-control" id="latitudVisible"
+                                                    placeholder="Ej: 4.609710" value="{{ old('latitud') }}">
                                             </div>
                                         </div>
                                         <div class="col-12 col-md-4">
                                             <div class="input-group input-group-sm">
                                                 <span class="input-group-text">Lng</span>
-                                                <input type="text" class="form-control" id="longitudVisible" placeholder="Ej: -74.081749" value="{{ old('longitud') }}">
+                                                <input type="text" class="form-control" id="longitudVisible"
+                                                    placeholder="Ej: -74.081749" value="{{ old('longitud') }}">
                                             </div>
                                         </div>
                                         <div class="col-12 col-md-4 d-grid d-md-block">
-                                            <button type="button" id="geoBtn" class="btn btn-outline-success btn-sm w-100">GPS</button>
+                                            <button type="button" id="geoBtn"
+                                                class="btn btn-outline-success btn-sm w-100">GPS</button>
                                         </div>
                                     </div>
-                                    <div id="locationDisplay" class="form-text mt-1">Pulsa GPS para rellenar automáticamente (se solicitará permiso).</div>
-                                    <input type="hidden" id="latitud" name="latitud" value="{{ old('latitud') }}">
-                                    <input type="hidden" id="longitud" name="longitud" value="{{ old('longitud') }}">
+                                    <div id="locationDisplay" class="form-text mt-1">Pulsa GPS para rellenar
+                                        automáticamente (se solicitará permiso).</div>
+                                    <input type="hidden" id="latitud" name="latitud"
+                                        value="{{ old('latitud') }}">
+                                    <input type="hidden" id="longitud" name="longitud"
+                                        value="{{ old('longitud') }}">
                                 </div>
                                 <div class="row g-3 mt-1">
                                     <div class="col-md-6">
@@ -324,9 +330,9 @@
     @push('scripts')
         <script>
             // Geolocalización registro ECA
-            (function(){
+            (function() {
                 const btn = document.getElementById('geoBtn');
-                if(!btn) return;
+                if (!btn) return;
                 const latHidden = document.getElementById('latitud');
                 const lngHidden = document.getElementById('longitud');
                 const latVis = document.getElementById('latitudVisible');
@@ -335,12 +341,13 @@
                 let busy = false;
                 let lastPermissionState = null; // 'granted' | 'prompt' | 'denied'
 
-                function setState(loading){
+                function setState(loading) {
                     busy = loading;
                     btn.disabled = loading;
                     btn.textContent = loading ? 'Obteniendo…' : 'GPS';
                 }
-                function write(lat,lng){
+
+                function write(lat, lng) {
                     lat = Number(lat).toFixed(6);
                     lng = Number(lng).toFixed(6);
                     latHidden.value = lat;
@@ -348,56 +355,81 @@
                     latVis.value = lat;
                     lngVis.value = lng;
                 }
-                function feedback(msg,type='muted'){ display.className = `form-text mt-1 text-${type}`; display.textContent = msg; }
-                function blockedHelp(){
+
+                function feedback(msg, type = 'muted') {
+                    display.className = `form-text mt-1 text-${type}`;
+                    display.textContent = msg;
+                }
+
+                function blockedHelp() {
                     return 'Acceso denegado. Revisa permisos del navegador: icono candado > Permisos > Ubicación (habilita y recarga).';
                 }
 
-                async function checkPermission(){
-                    if(!('permissions' in navigator)) return null; // API no soportada
+                async function checkPermission() {
+                    if (!('permissions' in navigator)) return null; // API no soportada
                     try {
-                        const status = await navigator.permissions.query({ name:'geolocation' });
+                        const status = await navigator.permissions.query({
+                            name: 'geolocation'
+                        });
                         lastPermissionState = status.state; // granted | prompt | denied
-                        status.onchange = () => { lastPermissionState = status.state; };
+                        status.onchange = () => {
+                            lastPermissionState = status.state;
+                        };
                         return status.state;
-                    } catch { return null; }
+                    } catch {
+                        return null;
+                    }
                 }
 
-                async function requestPosition(){
-                    if(!navigator.geolocation){ feedback('Geolocalización no soportada en este navegador','danger'); return; }
+                async function requestPosition() {
+                    if (!navigator.geolocation) {
+                        feedback('Geolocalización no soportada en este navegador', 'danger');
+                        return;
+                    }
                     const perm = await checkPermission();
-                    if(perm === 'denied'){
-                        feedback(blockedHelp(),'danger');
+                    if (perm === 'denied') {
+                        feedback(blockedHelp(), 'danger');
                         return;
                     }
                     setState(true);
                     feedback(perm === 'granted' ? 'Obteniendo posición…' : 'Solicitando permiso y posición…');
                     navigator.geolocation.getCurrentPosition(
                         pos => {
-                            const { latitude, longitude } = pos.coords;
+                            const {
+                                latitude,
+                                longitude
+                            } = pos.coords;
                             write(latitude, longitude);
-                            feedback('Ubicación capturada correctamente.','success');
+                            feedback('Ubicación capturada correctamente.', 'success');
                             setState(false);
                         },
                         err => {
-                            const map = {1:blockedHelp(),2:'Posición no disponible',3:'Tiempo de espera agotado'};
-                            feedback(map[err.code] || 'Error al obtener ubicación','danger');
+                            const map = {
+                                1: blockedHelp(),
+                                2: 'Posición no disponible',
+                                3: 'Tiempo de espera agotado'
+                            };
+                            feedback(map[err.code] || 'Error al obtener ubicación', 'danger');
                             setState(false);
-                        },
-                        { enableHighAccuracy:true, timeout:10000, maximumAge:0 }
+                        }, {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0
+                        }
                     );
                 }
 
-                btn.addEventListener('click', ()=>{
-                    if(busy) return;
+                btn.addEventListener('click', () => {
+                    if (busy) return;
                     requestPosition();
                 });
 
                 // Sync manual edits
-                [latVis,lngVis].forEach(inp => inp.addEventListener('blur', ()=>{
+                [latVis, lngVis].forEach(inp => inp.addEventListener('blur', () => {
                     const v = inp.value.trim();
-                    if(/^[-]?\d{1,3}\.\d+$/ .test(v)){
-                        if(inp===latVis) latHidden.value = v; else lngHidden.value = v;
+                    if (/^[-]?\d{1,3}\.\d+$/.test(v)) {
+                        if (inp === latVis) latHidden.value = v;
+                        else lngHidden.value = v;
                     }
                 }));
             })();
