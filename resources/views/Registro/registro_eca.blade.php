@@ -121,13 +121,6 @@
                                 </div>
 
                                 <p class="small text-success fw-bold mb-1 mt-2">Información de la estación</p>
-                                function insecureHelp(){
-                                return 'El contexto no es seguro. Usa https:// o http://localhost para que el navegador
-                                permita geolocalización.';
-                                }
-                                function debugLog(obj){
-                                if(window && window.console){ console.log('[GeolocDebug]', obj); }
-                                }
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label for="nombrePunto" class="form-label small fw-semibold">Nombre del Punto
@@ -141,25 +134,15 @@
                                         @enderror
                                     </div>
                                     <div class="col-md-3">
-                                        if(!window.isSecureContext){
-                                        feedback(insecureHelp(),'danger');
-                                        debugLog({secure:false, protocol:location.protocol});
-                                        return;
-                                        }
-                                        // Siempre re-consulta antes de cada intento (por si el usuario cambió el
-                                        permiso sin recargar)
-                                        const perm = await checkPermission();
-                                        debugLog({perm});
-                                        if(perm === 'denied'){
-                                        feedback(blockedHelp() + ' <br><span class="text-muted">Tras permitir, pulsa
-                                            nuevamente GPS.</span>','danger');
-                                        return;
-                                        }
                                         <label for="nit" class="form-label small fw-semibold">NIT
+                                            (opcional)</label>
+                                        <input type="text"
+                                            class="form-control form-control-sm @error('nit') is-invalid @enderror"
+                                            id="nit" name="nit" value="{{ old('nit') }}"
                                             maxlength="20" placeholder="Si aplica">
-                                            @error('nit')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
+                                        @error('nit')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
                                 <div class="row g-3 mt-1">
@@ -168,11 +151,8 @@
                                             atención (opcional)</label>
                                         <input type="text"
                                             class="form-control form-control-sm @error('horarioAtencion') is-invalid @enderror"
-                                            id="horarioAtencion" name="horarioAtencion" debugLog({error:err.code,
-                                            message:err.message}); // Si fue permiso denegado pero el usuario cree haber
-                                            cambiado, sugerir recargar. if(err.code===1){ feedback(blockedHelp()
-                                            + ' <br><span class="text-muted">Si ya cambiaste el permiso, recarga la página e inténtalo de nuevo.</span>'
-                                            ,'danger'); } value="{{ old('horarioAtencion') }}"
+                                            id="horarioAtencion" name="horarioAtencion"
+                                            value="{{ old('horarioAtencion') }}"
                                             placeholder="Lun-Vie 8:00–17:00, Sáb 9:00–13:00">
                                         @error('horarioAtencion')
                                             <div class="invalid-feedback">{{ $message }}</div>
@@ -257,28 +237,22 @@
                                         <div class="col-12 col-md-4">
                                             <div class="input-group input-group-sm">
                                                 <span class="input-group-text">Lat</span>
-                                                <input type="text" class="form-control" id="latitudVisible"
-                                                    placeholder="Ej: 4.609710" value="{{ old('latitud') }}">
+                                                <input type="text" class="form-control" id="latitudVisible" placeholder="Ej: 4.609710" value="{{ old('latitud') }}">
                                             </div>
                                         </div>
                                         <div class="col-12 col-md-4">
                                             <div class="input-group input-group-sm">
                                                 <span class="input-group-text">Lng</span>
-                                                <input type="text" class="form-control" id="longitudVisible"
-                                                    placeholder="Ej: -74.081749" value="{{ old('longitud') }}">
+                                                <input type="text" class="form-control" id="longitudVisible" placeholder="Ej: -74.081749" value="{{ old('longitud') }}">
                                             </div>
                                         </div>
                                         <div class="col-12 col-md-4 d-grid d-md-block">
-                                            <button type="button" id="geoBtn"
-                                                class="btn btn-outline-success btn-sm w-100">GPS</button>
+                                            <button type="button" id="geoBtn" class="btn btn-outline-success btn-sm w-100">GPS</button>
                                         </div>
                                     </div>
-                                    <div id="locationDisplay" class="form-text mt-1">Pulsa GPS para rellenar
-                                        automáticamente (se solicitará permiso).</div>
-                                    <input type="hidden" id="latitud" name="latitud"
-                                        value="{{ old('latitud') }}">
-                                    <input type="hidden" id="longitud" name="longitud"
-                                        value="{{ old('longitud') }}">
+                                    <div id="locationDisplay" class="form-text mt-1">Pulsa GPS para rellenar automáticamente (se solicitará permiso).</div>
+                                    <input type="hidden" id="latitud" name="latitud" value="{{ old('latitud') }}">
+                                    <input type="hidden" id="longitud" name="longitud" value="{{ old('longitud') }}">
                                 </div>
                                 <div class="row g-3 mt-1">
                                     <div class="col-md-6">
@@ -350,9 +324,9 @@
     @push('scripts')
         <script>
             // Geolocalización registro ECA
-            (function() {
+            (function(){
                 const btn = document.getElementById('geoBtn');
-                if (!btn) return;
+                if(!btn) return;
                 const latHidden = document.getElementById('latitud');
                 const lngHidden = document.getElementById('longitud');
                 const latVis = document.getElementById('latitudVisible');
@@ -361,13 +335,12 @@
                 let busy = false;
                 let lastPermissionState = null; // 'granted' | 'prompt' | 'denied'
 
-                function setState(loading) {
+                function setState(loading){
                     busy = loading;
                     btn.disabled = loading;
                     btn.textContent = loading ? 'Obteniendo…' : 'GPS';
                 }
-
-                function write(lat, lng) {
+                function write(lat,lng){
                     lat = Number(lat).toFixed(6);
                     lng = Number(lng).toFixed(6);
                     latHidden.value = lat;
@@ -375,81 +348,56 @@
                     latVis.value = lat;
                     lngVis.value = lng;
                 }
-
-                function feedback(msg, type = 'muted') {
-                    display.className = `form-text mt-1 text-${type}`;
-                    display.textContent = msg;
-                }
-
-                function blockedHelp() {
+                function feedback(msg,type='muted'){ display.className = `form-text mt-1 text-${type}`; display.textContent = msg; }
+                function blockedHelp(){
                     return 'Acceso denegado. Revisa permisos del navegador: icono candado > Permisos > Ubicación (habilita y recarga).';
                 }
 
-                async function checkPermission() {
-                    if (!('permissions' in navigator)) return null; // API no soportada
+                async function checkPermission(){
+                    if(!('permissions' in navigator)) return null; // API no soportada
                     try {
-                        const status = await navigator.permissions.query({
-                            name: 'geolocation'
-                        });
+                        const status = await navigator.permissions.query({ name:'geolocation' });
                         lastPermissionState = status.state; // granted | prompt | denied
-                        status.onchange = () => {
-                            lastPermissionState = status.state;
-                        };
+                        status.onchange = () => { lastPermissionState = status.state; };
                         return status.state;
-                    } catch {
-                        return null;
-                    }
+                    } catch { return null; }
                 }
 
-                async function requestPosition() {
-                    if (!navigator.geolocation) {
-                        feedback('Geolocalización no soportada en este navegador', 'danger');
-                        return;
-                    }
+                async function requestPosition(){
+                    if(!navigator.geolocation){ feedback('Geolocalización no soportada en este navegador','danger'); return; }
                     const perm = await checkPermission();
-                    if (perm === 'denied') {
-                        feedback(blockedHelp(), 'danger');
+                    if(perm === 'denied'){
+                        feedback(blockedHelp(),'danger');
                         return;
                     }
                     setState(true);
                     feedback(perm === 'granted' ? 'Obteniendo posición…' : 'Solicitando permiso y posición…');
                     navigator.geolocation.getCurrentPosition(
                         pos => {
-                            const {
-                                latitude,
-                                longitude
-                            } = pos.coords;
+                            const { latitude, longitude } = pos.coords;
                             write(latitude, longitude);
-                            feedback('Ubicación capturada correctamente.', 'success');
+                            feedback('Ubicación capturada correctamente.','success');
                             setState(false);
                         },
                         err => {
-                            const map = {
-                                1: blockedHelp(),
-                                2: 'Posición no disponible',
-                                3: 'Tiempo de espera agotado'
-                            };
-                            feedback(map[err.code] || 'Error al obtener ubicación', 'danger');
+                            const map = {1:blockedHelp(),2:'Posición no disponible',3:'Tiempo de espera agotado'};
+                            feedback(map[err.code] || 'Error al obtener ubicación','danger');
                             setState(false);
-                        }, {
-                            enableHighAccuracy: true,
-                            timeout: 10000,
-                            maximumAge: 0
-                        }
+                        },
+                        { enableHighAccuracy:true, timeout:10000, maximumAge:0 }
                     );
                 }
 
-                btn.addEventListener('click', () => {
-                    if (busy) return;
+                btn.addEventListener('click', ()=>{
+                    if(busy) return;
                     requestPosition();
                 });
 
                 // Sync manual edits
-                [latVis, lngVis].forEach(inp => inp.addEventListener('blur', () => {
+                [latVis,lngVis].forEach(inp => inp.addEventListener('blur', ()=>{
                     const v = inp.value.trim();
-                    if (/^[-]?\d{1,3}\.\d+$/.test(v)) {
-                        if (inp === latVis) latHidden.value = v;
-                        else lngHidden.value = v;
+                    if(/^[-]?\d{1,3}\.\d+$/ .test(v)){
+                        if(inp===latVis) latHidden.value = v; else lngHidden.value = v;
                     }
                 }));
             })();
