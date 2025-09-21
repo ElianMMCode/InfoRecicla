@@ -15,7 +15,8 @@ class Compra extends Model
 
     protected $casts = [
         'fecha' => 'date',
-        'cantidad' => 'decimal:3',
+        // Cantidad manejada y expuesta con 2 decimales máximo
+        'cantidad' => 'decimal:2',
         'precio_compra' => 'decimal:2',
     ];
 

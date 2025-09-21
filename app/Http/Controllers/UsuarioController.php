@@ -2,21 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PuntoEca;
+use App\Http\Requests\StoreUsuarioRequest;
+use App\Http\Requests\StoreEcaRequest;
+use App\Http\Requests\UpdatePerfilRequest;
 use App\Models\Usuario;
+use App\Models\PuntoEca;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
 class UsuarioController extends Controller
 {
+    /**
+     * Vista del Gestor ECA
+     */
     public function indexEca(Request $request)
     {
         $user = Auth::user();
@@ -25,22 +29,14 @@ class UsuarioController extends Controller
 
         return view('users.indexEca', compact('gestor'));
     }
-    //
-    public function store(Request $request)
+
+    /**
+     * Registro de usuario (Ciudadano / GestorECA / Administrador)
+     * Usa StoreUsuarioRequest con validaciones estrictas.
+     */
+    public function store(StoreUsuarioRequest $request)
     {
-        $data = $request->validate([
-            'tipo' => ['required', 'in:Ciudadano,GestorECA,Administrador'],
-            'correo' => ['required', 'email', 'max:255', 'unique:usuarios,correo'],
-            'password' => ['required', 'string', 'min:8'],
-            'nombre' => ['required', 'string', 'max:100'],
-            'apellido' => ['required', 'string', 'max:100'],
-            'recibeNotificaciones' => ['nullable'],
-            'fechaNacimiento' => ['nullable', 'date'],
-            'avatar' => ['nullable', 'url'],
-            'nombre_usuario' => ['nullable', 'string', 'max:60'],
-            'genero' => ['nullable', 'string', 'max:20'],
-            'localidad' => ['nullable', 'string', 'max:60'],
-        ]);
+        $data = $request->validated();
 
         $carga = [
             'id' => (string) Str::uuid(),
@@ -48,7 +44,7 @@ class UsuarioController extends Controller
             'password' => Hash::make($data['password']),
             'nombre' => $data['nombre'],
             'apellido' => $data['apellido'],
-            'recibe_notificaciones' => isset($data['recibeNotificaciones']) ? 1 : 0,
+            'recibe_notificaciones' => isset($data['recibeNotificaciones']) ? (int) (bool) $data['recibeNotificaciones'] : 0,
             'fecha_nacimiento' => $data['fechaNacimiento'] ?? null,
             'avatar_url' => $data['avatar'] ?? null,
             'nombre_usuario' => $data['nombre_usuario'] ?? null,
@@ -57,53 +53,39 @@ class UsuarioController extends Controller
             'estado' => 'activo',
             'creado' => now(),
             'actualizado' => now(),
+            // Si en tu tabla guardas el tipo/rol, respétalo:
+            'tipo' => $data['tipo'] ?? null,
+            // 'rol' => $data['tipo'] ?? null, // usa este si tu columna es 'rol' en vez de 'tipo'
         ];
 
         DB::transaction(function () use ($carga) {
             Usuario::create($carga);
         });
+
         return redirect('/registro/exitoso')->with('ok', true);
     }
 
-    public function storeEca(Request $request)
+    /**
+     * Registro de Gestor ECA + creación de Punto ECA
+     * Usa StoreEcaRequest con validaciones estrictas por contexto.
+     */
+    public function storeEca(StoreEcaRequest $request)
     {
-        $rules = [
-            'tipo' => ['required', 'in:Ciudadano,GestorECA,Administrador'],
-            'correo' => ['required', 'email', 'max:255', 'unique:usuarios,correo'],
-            'password' => ['required', 'string', 'min:8'],
-            'nombre' => ['required', 'string', 'max:50'],
-            'apellido' => ['required', 'string', 'max:50'],
-            'tipoDocumento' => ['nullable', 'string', 'max:30'],
-            'numeroDocumento' => ['nullable', 'string', 'max:30'],
-            'recibeNotificaciones' => ['required'],
-            'nombrePunto' => ['required', 'string', 'max:100'],
-            'direccionPunto' => ['required', 'string', 'max:100'],
-            'telefonoPunto' => ['required', 'string', 'max:100'],
-            'correoPunto' => ['required', 'string', 'max:100'],
-            'ciudad' => ['required', 'string', 'max:100'],
-            'localidadPunto' => ['required', 'string', 'max:100'],
-            'latitud' => ['nullable', 'string', 'max:100'],
-            'longitud' => ['nullable', 'string', 'max:100'],
-            'nit' => ['nullable', 'string', 'max:100'],
-            'horarioAtencion' => ['nullable', 'string', 'max:100'],
-            'sitioWeb' => ['nullable', 'string', 'max:100'],
-            'logo' => ['nullable', 'string', 'max:100'],
-            'foto' => ['nullable', 'string', 'max:100'],
-            'mostrarMapa' => ['required'],
-        ];
-
-        $data = $request->validate($rules);
+        $data = $request->validated();
 
         DB::transaction(function () use ($data) {
             $usuarioId = (string) Str::uuid();
+
             $usuario = Usuario::create([
                 'id' => $usuarioId,
+                // En tu código usas 'rol' aquí; si en tu tabla realmente se llama 'tipo', cambia a 'tipo' y no dupliques.
                 'rol' => $data['tipo'],
+                'tipo' => $data['tipo'] ?? null, // déjalo si tu tabla también guarda 'tipo'
                 'correo' => $data['correo'],
                 'password' => Hash::make($data['password']),
                 'nombre' => $data['nombre'],
                 'apellido' => $data['apellido'],
-                'recibe_notificaciones' => isset($data['recibeNotificaciones']) ? 1 : 0,
+                'recibe_notificaciones' => isset($data['recibeNotificaciones']) ? (int) (bool) $data['recibeNotificaciones'] : 0,
                 'tipo_documento' => $data['tipoDocumento'] ?? null,
                 'numero_documento' => $data['numeroDocumento'] ?? null,
                 'nombre_usuario' => $data['nombrePunto'] ?? null,
@@ -111,6 +93,7 @@ class UsuarioController extends Controller
                 'creado' => now(),
                 'actualizado' => now(),
             ]);
+
             if ($usuario->rol === 'GestorECA') {
                 PuntoEca::create([
                     'id' => (string) Str::uuid(),
@@ -121,83 +104,70 @@ class UsuarioController extends Controller
                     'correoPunto' => $data['correoPunto'],
                     'ciudad' => $data['ciudad'],
                     'localidad' => $data['localidadPunto'],
-                    'latitud' => $data['latitud'],
-                    'longitud' => $data['longitud'],
-                    'nit' => $data['nit'],
-                    'horario_atencion' => $data['horarioAtencion'],
-                    'sitio_web' => $data['sitioWeb'],
+                    'latitud' => $data['latitud'] ?? null,
+                    'longitud' => $data['longitud'] ?? null,
+                    'nit' => $data['nit'] ?? null,
+                    'horario_atencion' => $data['horarioAtencion'] ?? null,
+                    'sitio_web' => $data['sitioWeb'] ?? null,
                     'logo_url' => $data['logo'] ?? null,
                     'foto_url' => $data['foto'] ?? null,
-                    'mostrar_mapa' => isset($data['mostrarMapa']) ? 1 : 0,
+                    'mostrar_mapa' => isset($data['mostrarMapa']) ? (int) (bool) $data['mostrarMapa'] : 0,
                     'creado' => now(),
                     'actualizado' => now(),
                 ]);
             }
         });
+
         return redirect('/registro/exitoso')->with('ok', true);
     }
 
-    public function updatePerfil(Request $request)
+    /**
+     * Actualización de perfil (usuario + punto)
+     * Usa UpdatePerfilRequest con validaciones estrictas y normalización.
+     */
+    public function updatePerfil(UpdatePerfilRequest $request)
     {
         $authUser = Usuario::findOrFail(Auth::user()->id);
-
-        //obtener el id del punto
         $punto = PuntoEca::where('gestor_id', $authUser->id)->firstOrFail();
 
-        // Validación combinada (usuario + punto)
-        $rules = [
-            // encargado
-            'usuarios.nombre' => ['required', 'string', 'max:120'],
-            'usuarios.apellido' => ['required', 'string', 'max:120'],
-            'usuarios.telefono' => ['nullable', 'string', 'max:30'],
-            'usuarios.correo' => ['required', 'email', 'max:255', Rule::unique('usuarios', 'correo')->ignore($authUser->id)],
-            'usario.avatar' => ['nullable', 'image', 'max:2048'],
-            'usuarios.current_password' => ['nullable:usuario:password', 'current_password:web'],
-            'usuarios.password' => ['nullable', 'min:8', 'confirmed'],
-            'usuarios.password_confirmation' => ['nullable'],
-            'punto.nombre' => ['required', 'string', 'max:120'],
-            'punto.direccion' => ['nullable', 'string', 'max:200'],
-            'punto.ciudad' => ['nullable', 'string', 'max:100'],
-            'punto.localidad' => ['nullable', 'string', 'max:100'],
-            'punto.latitud' => ['nullable', 'numeric'],
-            'punto.longitud' => ['nullable', 'numeric'],
-            'punto.horario_atencion' => ['nullable', 'string', 'max:120'],
-            'punto.foto' => ['nullable', 'image', 'max:4096'],
-            'punto.logo' => ['nullable', 'image', 'max:2048'],
-        ];
+        $data = $request->validated();
 
-        $data = $request->validate($rules);
-
-        // Validación de la contraseña
-        if (!empty($data['usuarios']['current_password']) && empty($data['usuarios']['password'])) {
+        // Si el usuario envía contraseña actual pero no nueva → error controlado
+        if (!empty(data_get($data, 'usuarios.current_password')) && empty(data_get($data, 'usuarios.password'))) {
             throw ValidationException::withMessages([
                 'usuarios.password' => 'Debes indicar la nueva contraseña.',
             ]);
         }
+
         DB::transaction(function () use ($data, $authUser, $punto, $request) {
+            // ==== USUARIO ====
             $authUser->nombre = $data['usuarios']['nombre'];
+            $authUser->apellido = $data['usuarios']['apellido'];
             $authUser->correo = $data['usuarios']['correo'];
-            // si no viene nueva no se hace nada
-            $nueva = $data['usuarios']['password'] ?? null;
-            if (!filled($nueva)) {
-                // nada que hacer con password
-            } else {
-                $authUser->password = $nueva;
-                $authUser->save();
+
+            // Teléfono (puede venir null/nullable)
+            if (array_key_exists('telefono', $data['usuarios'])) {
+                $authUser->telefono = $data['usuarios']['telefono'];
             }
 
+            // Password (si viene y pasó validación)
+            $nueva = $data['usuarios']['password'] ?? null;
+            if (filled($nueva)) {
+                $authUser->password = Hash::make($nueva);
+            }
+
+            // Avatar (input file con name="usuarios[avatar]")
             if ($request->hasFile('usuarios.avatar')) {
                 $path = $request->file('usuarios.avatar')->store('avatars', 'public');
                 $authUser->avatar_url = Storage::url($path);
             }
 
-            if (!empty($data['usario']['password'])) {
-                $authUser->password = Hash::make($data['usuarios']['password']);
-            }
-
+            $authUser->actualizado = now();
             $authUser->save();
 
+            // ==== PUNTO ====
             $punto->nombre = $data['punto']['nombre'];
+            $punto->telefonoPunto = $data['punto']['telefono'] ?? null; // ← nombre que ya usas en tu asignación
             $punto->direccion = $data['punto']['direccion'] ?? null;
             $punto->ciudad = $data['punto']['ciudad'] ?? null;
             $punto->localidad = $data['punto']['localidad'] ?? null;
@@ -205,6 +175,7 @@ class UsuarioController extends Controller
             $punto->longitud = $data['punto']['longitud'] ?? null;
             $punto->horario_atencion = $data['punto']['horario_atencion'] ?? null;
 
+            // Archivos anidados (name="punto[foto]" y "punto[logo]")
             if ($request->hasFile('punto.foto')) {
                 $path = $request->file('punto.foto')->store('puntos', 'public');
                 $punto->foto_url = Storage::url($path);
@@ -214,6 +185,7 @@ class UsuarioController extends Controller
                 $punto->logo_url = Storage::url($path);
             }
 
+            $punto->actualizado = now();
             $punto->save();
         });
 
@@ -222,6 +194,9 @@ class UsuarioController extends Controller
             ->with('ok', 'Perfil actualizado correctamente.');
     }
 
+    /**
+     * Vistas de registro por tipo
+     */
     public function view_registro($tipo = null)
     {
         switch ($tipo) {

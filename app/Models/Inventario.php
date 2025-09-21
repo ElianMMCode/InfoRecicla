@@ -31,10 +31,10 @@ class Inventario extends Model
     ];
 
     protected $casts = [
-        'capacidad_max' => 'decimal:3',
-        'stock_actual'  => 'decimal:3',
-        'umbral_alerta' => 'decimal:3',
-        'umbral_critico' => 'decimal:3',
+        'capacidad_max' => 'decimal:2',
+        'stock_actual'  => 'decimal:2',
+        'umbral_alerta' => 'decimal:2',
+        'umbral_critico' => 'decimal:2',
         'precio_compra' => 'decimal:2',
         'precio_venta'  => 'decimal:2',
         'activo'        => 'boolean',
@@ -47,6 +47,8 @@ class Inventario extends Model
     {
         return $this->belongsTo(Material::class, 'material_id');
     }
+
+
 
     public function unidadMedida()
     {

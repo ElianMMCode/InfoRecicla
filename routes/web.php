@@ -37,8 +37,9 @@ Route::middleware('auth')->group(function () {
 // RUTAS SOLO PARA USUARIOS AUTENTICADOS COMO GESTOR ECA O ADMINISTRADOR
 Route::middleware(['auth', 'role:GestorECA,Administrador'])->group(function () {
 
-    // Panel general de Punto ECA 
+    // Rutas de Punto ECA
     Route::middleware('auth')->group(function () {
+        // Ruta principal y resumen
         Route::get('/eca/{seccion?}', [PuntoEcaController::class, 'view_punto_eca'])
             ->where('seccion', 'resumen|perfil|materiales|movimientos|historial|centros|calendario|configuracion')
             ->name('eca.index');

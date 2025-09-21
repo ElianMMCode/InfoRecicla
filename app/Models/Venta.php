@@ -23,7 +23,7 @@ class Venta extends Model
 
     protected $casts = [
         'fecha' => 'date',
-        'cantidad' => 'decimal:3',
+        'cantidad' => 'decimal:2',
         'precio_venta' => 'decimal:2',
     ];
 

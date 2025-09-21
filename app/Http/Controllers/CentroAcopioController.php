@@ -11,6 +11,64 @@ use Illuminate\Support\Str;
 
 class CentroAcopioController extends Controller
 {
+    /**
+     * Devuelve listados filtrados de centros globales y propios con paginación.
+     */
+    public function data(Request $request): array
+    {
+        $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', Auth::id())->first();
+        $puntoEcaId = $punto->id;
+
+        $f = $request->validate([
+            'f_nombre' => ['nullable', 'string', 'max:150'],
+            'f_tipo' => ['nullable', Rule::in(['Planta', 'Proveedor', 'Otro'])],
+            'f_estado' => ['nullable', Rule::in(['activo', 'inactivo', 'bloqueado'])],
+            'f_localidad' => ['nullable', 'string', 'max:60'],
+            'f_materiales' => ['nullable', 'array'],
+            'f_materiales.*' => ['uuid', 'exists:materiales,id'],
+        ]);
+
+        $apply = function ($q) use ($f) {
+            return $q
+                ->when($f['f_nombre'] ?? null, fn($qq, $v) => $qq->where('nombre', 'like', "%{$v}%"))
+                ->when($f['f_tipo'] ?? null, fn($qq, $v) => $qq->where('tipo', $v))
+                ->when($f['f_estado'] ?? null, fn($qq, $v) => $qq->where('estado', $v))
+                ->when($f['f_localidad'] ?? null, fn($qq, $v) => $qq->where('localidad', 'like', "%{$v}%"))
+                ->when(!empty($f['f_materiales']), function ($qq) use ($f) {
+                    $qq->whereHas('materiales', fn($qm) => $qm->whereIn('materiales.id', $f['f_materiales']));
+                });
+        };
+
+        $centrosGlobales = CentroAcopio::with(['materiales:id,nombre'])
+            ->where('alcance', 'global')
+            ->tap($apply)
+            ->orderBy('nombre')
+            ->paginate(10, ['*'], 'page_cg')
+            ->withQueryString();
+
+        $centrosPropios = CentroAcopio::with(['materiales:id,nombre'])
+            ->where('alcance', 'eca')
+            ->where('owner_punto_eca_id', $puntoEcaId)
+            ->tap($apply)
+            ->orderBy('nombre')
+            ->paginate(10, ['*'], 'page_cp')
+            ->withQueryString();
+
+        // Materiales disponibles del punto para filtros multi-select
+        $materialesPunto = DB::table('inventario as i')
+            ->join('materiales as m', 'm.id', '=', 'i.material_id')
+            ->where('i.punto_eca_id', $puntoEcaId)
+            ->select('m.id', 'm.nombre')
+            ->distinct()
+            ->orderBy('m.nombre')
+            ->get();
+
+        return [
+            'centrosGlobales' => $centrosGlobales,
+            'centrosPropios' => $centrosPropios,
+            'materialesPunto' => $materialesPunto,
+        ];
+    }
     public function storeCentro(Request $request)
     {
         $user = Auth::user();

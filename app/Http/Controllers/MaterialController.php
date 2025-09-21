@@ -15,15 +15,29 @@ class MaterialController extends Controller
     /**
      * Display a listing of the resource.
      */
+    /**
+     * Muestra el catálogo de materiales y el inventario del punto ECA
+     * 
+     * @param Request $request
+     * @return \Illuminate\View\View
+     */
     public function index(Request $request)
+    {
+        $data = $this->data($request);
+        return view('PuntoECA.punto-eca', $data + ['seccion' => 'materiales']);
+    }
+
+    /**
+     * Proveedor de datos para materiales e inventario sin renderizar vista.
+     * Usado por PuntoEcaController (refactor coordinador) y reutilizable en index().
+     */
+    public function data(Request $request): array
     {
         $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', Auth::id())->first();
         $puntoEcaId = $punto->id;
 
-        $categorias = CategoriaMaterial::orderBy('nombre')->get('id', 'nombre');
-        $tipos = TipoMaterial::orderBy('nombre')->get('id', 'nombre');
-
-        //Filtros
+        $categorias = CategoriaMaterial::orderBy('nombre')->get(['id', 'nombre']);
+        $tipos = TipoMaterial::orderBy('nombre')->get(['id', 'nombre']);
 
         $f = $request->validate([
             'categoria' => ['nullable', 'uuid', 'exists:categorias_material,id'],
@@ -31,20 +45,34 @@ class MaterialController extends Controller
             'nombre' => ['nullable', 'string', 'max:120'],
         ]);
 
-        $materialesYaRegistrados = Inventario::query()->when($puntoEcaId, fn($q) => $q->where('punto_eca_id', $puntoEcaId))->pluck('material_id');
+        $inventario = Inventario::query()
+            ->where('punto_eca_id', $puntoEcaId)
+            ->with(['material.categoria:id,nombre', 'material.tipo:id,nombre'])
+            ->orderBy('creado')
+            ->paginate(6)
+            ->withQueryString();
 
-        //Todos los materiales
+        $materialesYaRegistrados = Inventario::query()
+            ->when($puntoEcaId, fn($q) => $q->where('punto_eca_id', $puntoEcaId))
+            ->pluck('material_id');
+
         $materiales = Material::query()
             ->with(['categoria:id,nombre', 'tipo:id,nombre'])
-            ->when($f['categoria'] ?? null, fn($q, $v) => $q->where('categoria_id', $v))
-            ->when($f['tipo'] ?? null, fn($q, $v) => $q->where('tipo_id', $v))
-            ->when($f['nombre'] ?? null, fn($q, $v) => $q->where('nombre', 'like', "%{$v}%"))
+            ->when(($f['categoria'] ?? null), fn($q, $v) => $q->where('categoria_id', $v))
+            ->when(($f['tipo'] ?? null), fn($q, $v) => $q->where('tipo_id', $v))
+            ->when(($f['nombre'] ?? null), fn($q, $v) => $q->where('nombre', 'like', "%{$v}%"))
             ->when($puntoEcaId, fn($q) => $q->whereNotIn('id', $materialesYaRegistrados))
             ->orderBy('nombre')
             ->paginate(6)
             ->withQueryString();
 
-        return view('PuntoECA.punto-eca', compact('materiales', 'categorias', 'tipos', 'puntoEcaId'));
+        return [
+            'inventario' => $inventario,
+            'materiales' => $materiales,
+            'categorias' => $categorias,
+            'tipos' => $tipos,
+            'puntoEcaId' => $puntoEcaId,
+        ];
     }
 
     /**
