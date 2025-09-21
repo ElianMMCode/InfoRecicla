@@ -58,4 +58,10 @@ class Usuario extends Authenticatable
     {
         return $this->password;
     }
+
+    /**
+     * Verifica si el usuario posee uno o varios roles.
+     * @param string|array $roles Un rol o lista de roles a comparar
+     * @return bool
+     */
 }

@@ -4,20 +4,7 @@
     <link rel="stylesheet" href="css/Mapa/styleMapa.css">
 
     <!-- NAVBAR -->
-    <x-navbar-layout>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div id="nav" class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
-                <li class="nav-item"><a class="nav-link"
-                        href="../Publicaciones/publicaciones/publicaciones.html">Publicaciones</a></li>
-                <li class="nav-item"><a class="nav-link active" href="#">Mapa ECA</a></li>
-                <li class="nav-item"><a class="btn btn-light text-success" href="../Inicio/index.html">Inicio</a>
-                </li>
-            </ul>
-        </div>
-    </x-navbar-layout>
+    <x-navbar-layout />
 
     <!-- CONTENIDO -->
     <div class="container-fluid py-3">
@@ -32,7 +19,8 @@
                 <!-- Buscador simple (cliente) -->
                 <div class="input-group mb-3">
                     <span class="input-group-text">🔎</span>
-                    <input type="search" id="filtro" class="form-control" placeholder="Buscar por nombre/localidad…">
+                    <input type="search" id="filtro" class="form-control"
+                        placeholder="Buscar por nombre/localidad…">
                 </div>
 
                 <div id="lista" class="vstack gap-2">
@@ -81,7 +69,8 @@
                                 <dt class="col-sm-4">Materiales</dt>
                                 <dd class="col-sm-8" id="modalMateriales">—</dd>
                                 <dt class="col-sm-4">Web</dt>
-                                <dd class="col-sm-8"><a id="modalWeb" href="#" target="_blank" rel="noopener">—</a></dd>
+                                <dd class="col-sm-8"><a id="modalWeb" href="#" target="_blank"
+                                        rel="noopener">—</a></dd>
                             </dl>
                         </div>
                     </div>
@@ -100,8 +89,7 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Mensaje</label>
-                                <textarea class="form-control" id="msgTexto" rows="3" required
-                                    placeholder="Hola, ¿aceptan vidrio hoy?"></textarea>
+                                <textarea class="form-control" id="msgTexto" rows="3" required placeholder="Hola, ¿aceptan vidrio hoy?"></textarea>
                             </div>
                         </div>
                         <div class="text-end mt-3">

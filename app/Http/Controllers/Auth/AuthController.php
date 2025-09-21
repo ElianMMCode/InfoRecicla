@@ -39,7 +39,7 @@ class AuthController extends Controller
             } elseif ($usuario->rol === 'Ciudadano') {
                 return redirect()->intended(route('ciudadano'));
             }
-            return redirect()->intended(route('dashboard'));
+            return redirect()->intended(route('inicio'));
         }
 
         return back()->withErrors([

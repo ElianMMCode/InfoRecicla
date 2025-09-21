@@ -2,22 +2,7 @@
 
     <link rel="stylesheet" href="css/Publicaciones/stylePublicaciones.css">
     <!--=========NAVBAR=========-->
-    <x-navbar-layout>
-
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div id="nav" class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
-                <li class="nav-item"><a class="nav-link active" href="#">Publicaciones</a></li>
-                <li class="nav-item"><a class="nav-link" href="/mapa">Puntos ECA</a></li>
-                <li class="nav-item">
-                    <a class="btn btn-light text-success" href="/">Inicio</a>
-                </li>
-            </ul>
-        </div>
-    </x-navbar-layout>
+    <x-navbar-layout />
 
     <!-- ========= HERO: Carrusel de principales noticias ========= -->
     <header class="container my-4">
@@ -161,7 +146,8 @@
                         <img src="/imagenes/cards/ma1.jpg" class="card-img-top" alt="MA 1">
                         <div class="card-body">
                             <h6 class="card-title">Ríos urbanos: proyectos de limpieza</h6>
-                            <p class="card-text clamp-3">Iniciativas comunitarias que están recuperando quebradas y ríos
+                            <p class="card-text clamp-3">Iniciativas comunitarias que están recuperando quebradas y
+                                ríos
                                 con
                                 voluntariado y educación ambiental…</p>
                             <a href="#" class="stretched-link">Leer más</a>
@@ -221,7 +207,8 @@
                         <img src="/imagenes/cards/tec1.jpg" class="card-img-top" alt="Tec 1">
                         <div class="card-body">
                             <h6 class="card-title">Sensores para rutas de recolección</h6>
-                            <p class="card-text clamp-3">Optimización de rutas con IoT para reducir tiempos y emisiones…
+                            <p class="card-text clamp-3">Optimización de rutas con IoT para reducir tiempos y
+                                emisiones…
                             </p>
                             <a href="#" class="stretched-link">Leer más</a>
                         </div>

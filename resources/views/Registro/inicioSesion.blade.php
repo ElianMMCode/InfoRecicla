@@ -1,9 +1,5 @@
 <x-app-layout>
-    <x-navbar-layout>
-        <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="btn btn-light" href="{{ route('registro') }}">Registro</a></li>
-        </ul>
-    </x-navbar-layout>
+    <x-navbar-layout />
 
     <div class="bg-success d-flex flex-column justify-content-center flex-grow-1 py-5">
         <div class="row justify-content-center">

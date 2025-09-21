@@ -1,23 +1,32 @@
-<!doctype html>
-<html lang="es">
+<x-app-layout>
+    <x-navbar-layout></x-navbar-layout>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Registro Exitoso</title>
-    <link rel="icon" type="image/x-icon" href="/imagenes/favicon.ico">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-</head>
-
-<body class="bg-success">
-    <div class="container mt-5">
-        <div class="bg-light alert alert-success text-center">
-            <h1 class="display-4">¡Registro Exitoso!</h1>
-            <p class="lead">Tu cuenta ha sido creada exitosamente.</p>
-            <a href="/login" class="btn btn-primary">Iniciar Sesión</a>
+    <div class="bg-success d-flex flex-column justify-content-center flex-grow-1 py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+                    <div class="card shadow border-0">
+                        <div class="card-header bg-success text-white text-center">
+                            <h5 class="mb-0">Registro exitoso</h5>
+                        </div>
+                        <div class="card-body text-center vstack gap-3">
+                            <div>
+                                <h1 class="h4 fw-semibold text-success mb-1">¡Bienvenido a InfoRecicla!</h1>
+                                <p class="text-muted small mb-0">Tu cuenta se creó correctamente.</p>
+                            </div>
+                            <div class="alert alert-success py-2 small mb-0">
+                                Ya puedes iniciar sesión y completar tu perfil.
+                            </div>
+                            <div class="d-grid mt-2">
+                                <a href="{{ route('login') }}" class="btn btn-success">Iniciar sesión</a>
+                            </div>
+                        </div>
+                        <div class="card-footer text-center small text-muted">
+                            InfoRecicla · Plataforma de reciclaje colaborativo
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</body>
-
-</html>
+</x-app-layout>

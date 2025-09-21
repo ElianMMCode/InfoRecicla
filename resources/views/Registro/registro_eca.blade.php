@@ -1,327 +1,512 @@
-<!DOCTYPE html>
-<html lang="es">
+<x-app-layout>
+    <x-navbar-layout />
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>InfoRecicla — Registro Punto ECA</title>
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .card {
-            max-width: 960px;
-            margin: 3rem auto;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 .75rem 1rem rgba(0, 0, 0, .08);
-        }
-
-        .card {
-            transition: transform .2s ease, box-shadow .2s ease;
-        }
-
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #198754;
-            margin-bottom: .5rem;
-        }
-    </style>
-</head>
-
-<body class="bg-success">
-
-    <!-- NAVBAR -->
-    <nav class=" navbar navbar-expand-lg navbar-dark bg-success">
+    <div class="bg-success d-flex flex-column justify-content-center flex-grow-1 py-5">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('inicio') }}">
-                <img src="/imagenes/logo.png" alt="Logo InfoRecicla" width="90" height="90" class="rounded">
-                <span class="fs-1 fw-semibold">InfoRecicla</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"
-                aria-controls="nav" aria-expanded="false" aria-label="Alternar navegación">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div id="nav" class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto align-items-lg-center align-items-center gap-2">
-                    <li class="nav-item"><a class="nav-link" href="{{ route('publicaciones') }}">Publicaciones</a></li>
-                    <li class="nav-item"><a class="nav-link" href={{ route('mapa') }}>Mapa ECA</a></li>
-
-                    <li class="nav-item dropdown">
-                        <a class="btn btn-light text-success fw-semibold px-3 dropdown-toggle" href="#"
-                            data-bs-toggle="dropdown" aria-expanded="true">Acceder</a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{{ route('login') }}">Iniciar sesión</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="{{ route('registro', 'ciudadano') }}">Registrarse
-                                    (Ciudadano)</a>
-                            </li>
-                            <li><a class="dropdown-item" href="{{ route('registro', 'eca') }}">Registrar Punto ECA</a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <main class="container">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h1 class="h3 text-center mb-4">Registrar Punto ECA</h1>
-
-                <!-- ALERTAS (reservado para tu script futuro) -->
-                <div id="formAlert" class="alert d-none" role="alert"></div>
-
-                <form method="POST" action="{{ route('registro.eca') }}" id="ecaForm" class="needs-validation"
-                    novalidate enctype="multipart/form-data">
-                    @csrf
-                    <input type="hidden" name="tipo" value="GestorECA">
-                    <!-- FORMULARIO -->
-                    <!-- ======= 1) Datos de cuenta (users) ======= -->
-                    <p class="section-title">Datos de cuenta</p>
-                    <input type="hidden" name="account_type" value="eca">
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label for="correo" class="form-label">Correo electrónico (acceso)</label>
-                            <input type="email" class="form-control" id="correo" name="correo"
-                                autocomplete="email" required>
-                            <div class="invalid-feedback">Ingresa un correo válido.</div>
+            <div class="row justify-content-center">
+                <div class="col-12 col-xl-10">
+                    <div class="card shadow">
+                        <div class="card-header bg-success text-white text-center">
+                            <h5 class="mb-0">Registrar Punto ECA</h5>
                         </div>
-                        <div class="col-md-3">
-                            <label for="password" class="form-label">Contraseña</label>
-                            <input type="password" class="form-control" id="password" name="password" minlength="8"
-                                maxlength="64" required>
-                            <div class="invalid-feedback">Mínimo 8 caracteres.</div>
+                        <div class="card-body">
+                            @if (session('success'))
+                                <div class="alert alert-success small mb-3">{{ session('success') }}</div>
+                            @endif
+                            @if (session('error'))
+                                <div class="alert alert-danger small mb-3">{{ session('error') }}</div>
+                            @endif
+                            @if ($errors->any())
+                                <div class="alert alert-danger small mb-3">
+                                    <ul class="mb-0 ps-3">
+                                        @foreach ($errors->all() as $e)
+                                            <li>{{ $e }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            <form method="POST" action="{{ route('registro.eca') }}" id="ecaForm" novalidate
+                                enctype="multipart/form-data" class="vstack gap-4">
+                                @csrf
+                                <input type="hidden" name="tipo" value="GestorECA">
+                                <input type="hidden" name="account_type" value="eca">
+
+                                <p class="small text-success fw-bold mb-1">Datos de cuenta</p>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="correo" class="form-label small fw-semibold">Correo electrónico
+                                            (acceso)</label>
+                                        <input type="email"
+                                            class="form-control form-control-sm @error('correo') is-invalid @enderror"
+                                            id="correo" name="correo" value="{{ old('correo') }}"
+                                            autocomplete="email" required>
+                                        @error('correo')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="password" class="form-label small fw-semibold">Contraseña</label>
+                                        <input type="password"
+                                            class="form-control form-control-sm @error('password') is-invalid @enderror"
+                                            id="password" name="password" minlength="8" maxlength="64" required>
+                                        @error('password')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="password_confirmation"
+                                            class="form-label small fw-semibold">Confirmar</label>
+                                        <input type="password"
+                                            class="form-control form-control-sm @error('password_confirmation') is-invalid @enderror"
+                                            id="password_confirmation" name="password_confirmation" required>
+                                        @error('password_confirmation')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <p class="small text-success fw-bold mb-1 mt-2">Datos del gestor (propietario del punto)
+                                </p>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="nombre" class="form-label small fw-semibold">Nombres</label>
+                                        <input type="text"
+                                            class="form-control form-control-sm @error('nombre') is-invalid @enderror"
+                                            id="nombre" name="nombre" value="{{ old('nombre') }}" required>
+                                        @error('nombre')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="apellido" class="form-label small fw-semibold">Apellidos</label>
+                                        <input type="text"
+                                            class="form-control form-control-sm @error('apellido') is-invalid @enderror"
+                                            id="apellido" name="apellido" value="{{ old('apellido') }}" required>
+                                        @error('apellido')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="tipoDocumento" class="form-label small fw-semibold">Tipo de
+                                            documento</label>
+                                        <select id="tipoDocumento" name="tipoDocumento"
+                                            class="form-select form-select-sm @error('tipoDocumento') is-invalid @enderror"
+                                            required>
+                                            <option value="" disabled
+                                                {{ old('tipoDocumento') ? '' : 'selected' }}>Selecciona...</option>
+                                            @php($docs = ['Cédula de Ciudadanía', 'Cédula de Extranjería', 'Tarjeta de Identidad', 'Pasaporte'])
+                                            @foreach ($docs as $doc)
+                                                <option value="{{ $doc }}"
+                                                    {{ old('tipoDocumento') === $doc ? 'selected' : '' }}>
+                                                    {{ $doc }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('tipoDocumento')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="numeroDocumento" class="form-label small fw-semibold">Número de
+                                            documento</label>
+                                        <input type="text"
+                                            class="form-control form-control-sm @error('numeroDocumento') is-invalid @enderror"
+                                            id="numeroDocumento" name="numeroDocumento"
+                                            value="{{ old('numeroDocumento') }}" minlength="5" maxlength="20"
+                                            required>
+                                        @error('numeroDocumento')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <p class="small text-success fw-bold mb-1 mt-2">Información de la estación</p>
+                                                function insecureHelp(){
+                                                    return 'El contexto no es seguro. Usa https:// o http://localhost para que el navegador permita geolocalización.';
+                                                }
+                                                function debugLog(obj){
+                                                    if(window && window.console){ console.log('[GeolocDebug]', obj); }
+                                                }
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="nombrePunto" class="form-label small fw-semibold">Nombre del Punto
+                                            ECA</label>
+                                        <input type="text"
+                                            class="form-control form-control-sm @error('nombrePunto') is-invalid @enderror"
+                                            id="nombrePunto" name="nombrePunto" value="{{ old('nombrePunto') }}"
+                                            required>
+                                        @error('nombrePunto')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-3">
+                                                    if(!window.isSecureContext){
+                                                        feedback(insecureHelp(),'danger');
+                                                        debugLog({secure:false, protocol:location.protocol});
+                                                        return;
+                                                    }
+                                                    // Siempre re-consulta antes de cada intento (por si el usuario cambió el permiso sin recargar)
+                                                    const perm = await checkPermission();
+                                                    debugLog({perm});
+                                                    if(perm === 'denied'){
+                                                        feedback(blockedHelp() + ' <br><span class="text-muted">Tras permitir, pulsa nuevamente GPS.</span>','danger');
+                                                        return;
+                                                    }
+                                        <label for="nit" class="form-label small fw-semibold">NIT
+                                            maxlength="20" placeholder="Si aplica">
+                                        @error('nit')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="row g-3 mt-1">
+                                    <div class="col-md-6">
+                                        <label for="horarioAtencion" class="form-label small fw-semibold">Horario de
+                                            atención (opcional)</label>
+                                        <input type="text"
+                                            class="form-control form-control-sm @error('horarioAtencion') is-invalid @enderror"
+                                            id="horarioAtencion" name="horarioAtencion"
+                                                            debugLog({error:err.code, message:err.message});
+                                                            // Si fue permiso denegado pero el usuario cree haber cambiado, sugerir recargar.
+                                                            if(err.code === 1){
+                                                                feedback(blockedHelp() + ' <br><span class="text-muted">Si ya cambiaste el permiso, recarga la página e inténtalo de nuevo.</span>','danger');
+                                                            }
+                                            value="{{ old('horarioAtencion') }}"
+                                            placeholder="Lun-Vie 8:00–17:00, Sáb 9:00–13:00">
+                                        @error('horarioAtencion')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="row g-3 mt-1">
+                                    <div class="col-md-6">
+                                        <label for="correoPunto" class="form-label small fw-semibold">Correo de
+                                            contacto del punto</label>
+                                        <input type="email"
+                                            class="form-control form-control-sm @error('correoPunto') is-invalid @enderror"
+                                            id="correoPunto" name="correoPunto" value="{{ old('correoPunto') }}"
+                                            placeholder="Puede ser distinto al de acceso" required>
+                                        @error('correoPunto')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="telefonoPunto" class="form-label small fw-semibold">Teléfono de
+                                            contacto del punto</label>
+                                        <input type="tel"
+                                            class="form-control form-control-sm @error('telefonoPunto') is-invalid @enderror"
+                                            id="telefonoPunto" name="telefonoPunto"
+                                            value="{{ old('telefonoPunto') }}" inputmode="tel"
+                                            pattern="^[0-9\s()+-]{7,20}$" required>
+                                        @error('telefonoPunto')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="row g-3 mt-1">
+                                    <div class="col-md-6">
+                                        <label for="direccionPunto" class="form-label small fw-semibold">Dirección del
+                                            punto</label>
+                                        <input type="text"
+                                            class="form-control form-control-sm @error('direccionPunto') is-invalid @enderror"
+                                            id="direccionPunto" name="direccionPunto"
+                                            value="{{ old('direccionPunto') }}" required>
+                                        @error('direccionPunto')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="ciudad" class="form-label small fw-semibold">Ciudad</label>
+                                        <select id="ciudad" name="ciudad"
+                                            class="form-select form-select-sm @error('ciudad') is-invalid @enderror"
+                                            required>
+                                            <option value="" disabled {{ old('ciudad') ? '' : 'selected' }}>
+                                                Selecciona...</option>
+                                            <option value="Bogotá" {{ old('ciudad') === 'Bogotá' ? 'selected' : '' }}>
+                                                Bogotá</option>
+                                        </select>
+                                        @error('ciudad')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="localidadPunto"
+                                            class="form-label small fw-semibold">Localidad</label>
+                                        <select id="localidadPunto" name="localidadPunto"
+                                            class="form-select form-select-sm @error('localidadPunto') is-invalid @enderror"
+                                            required>
+                                            <option value="" disabled
+                                                {{ old('localidadPunto') ? '' : 'selected' }}>Selecciona localidad...
+                                            </option>
+                                            @php($locs = ['Usaquén', 'Chapinero', 'Santa Fe', 'San Cristóbal', 'Usme', 'Tunjuelito', 'Bosa', 'Kennedy', 'Fontibón', 'Engativá', 'Suba', 'Barrios Unidos', 'Teusaquillo', 'Los Mártires', 'Antonio Nariño', 'Puente Aranda', 'La Candelaria', 'Rafael Uribe', 'Ciudad Bolívar', 'Sumapaz'])
+                                            @foreach ($locs as $l)
+                                                <option value="{{ $l }}"
+                                                    {{ old('localidadPunto') === $l ? 'selected' : '' }}>
+                                                    {{ $l }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('localidadPunto')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <label class="form-label small fw-semibold mb-1">Ubicación (opcional)</label>
+                                    <div class="row g-2 align-items-start">
+                                        <div class="col-12 col-md-4">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text">Lat</span>
+                                                <input type="text" class="form-control" id="latitudVisible" placeholder="Ej: 4.609710" value="{{ old('latitud') }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <div class="input-group input-group-sm">
+                                                <span class="input-group-text">Lng</span>
+                                                <input type="text" class="form-control" id="longitudVisible" placeholder="Ej: -74.081749" value="{{ old('longitud') }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-4 d-grid d-md-block">
+                                            <button type="button" id="geoBtn" class="btn btn-outline-success btn-sm w-100">GPS</button>
+                                        </div>
+                                    </div>
+                                    <div id="locationDisplay" class="form-text mt-1">Pulsa GPS para rellenar automáticamente (se solicitará permiso).</div>
+                                    <input type="hidden" id="latitud" name="latitud" value="{{ old('latitud') }}">
+                                    <input type="hidden" id="longitud" name="longitud" value="{{ old('longitud') }}">
+                                </div>
+                                <div class="row g-3 mt-1">
+                                    <div class="col-md-6">
+                                        <label for="logo" class="form-label small fw-semibold">Logo del punto
+                                            (opcional)</label>
+                                        <input type="file"
+                                            class="form-control form-control-sm @error('logo') is-invalid @enderror"
+                                            id="logo" name="logo" accept="image/*">
+                                        @error('logo')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="foto" class="form-label small fw-semibold">Foto del punto
+                                            (opcional)</label>
+                                        <input type="file"
+                                            class="form-control form-control-sm @error('foto') is-invalid @enderror"
+                                            id="foto" name="foto" accept="image/*">
+                                        @error('foto')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="sitioWeb" class="form-label small fw-semibold">Sitio web
+                                            (opcional)</label>
+                                        <input type="url"
+                                            class="form-control form-control-sm @error('sitioWeb') is-invalid @enderror"
+                                            id="sitioWeb" name="sitioWeb" value="{{ old('sitioWeb') }}"
+                                            placeholder="https://">
+                                        @error('sitioWeb')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input" type="checkbox" value="1" id="mostrarMapa"
+                                        name="mostrarMapa" {{ old('mostrarMapa') ? 'checked' : '' }} required>
+                                    <label class="form-check-label small" for="mostrarMapa">Mostrar el punto en el
+                                        mapa público cuando sea aprobado.</label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" value="1"
+                                        id="recibeNotificaciones" name="recibeNotificaciones"
+                                        {{ old('recibeNotificaciones') ? 'checked' : '' }} required>
+                                    <label class="form-check-label small" for="recibeNotificaciones">Deseo recibir
+                                        notificaciones (aprobaciones, comentarios, etc.).</label>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" value="1" id="terms"
+                                        required>
+                                    <label class="form-check-label small" for="terms">Acepto los términos y
+                                        condiciones y el tratamiento de datos.</label>
+                                    <div class="invalid-feedback">Debes aceptar los términos para continuar.</div>
+                                </div>
+                                <div class="d-grid mt-3">
+                                    <button type="submit" class="btn btn-success">Registrar Punto ECA</button>
+                                </div>
+                                <p class="text-center mt-3 mb-0 small">¿Ya tienes cuenta? <a
+                                        href="{{ route('login') }}">Inicia sesión</a></p>
+                            </form>
                         </div>
-                        <div class="col-md-3">
-                            <label for="pass_confirmation" class="form-label">Confirmar</label>
-                            <input type="password" class="form-control" id="pass_confirmation"
-                                name="password_confirmation" required>
-                            <div class="invalid-feedback">Las contraseñas no coinciden.</div>
-                        </div>
+                        <div class="card-footer text-center small text-muted">InfoRecicla · Registro Punto ECA</div>
                     </div>
-
-                    @if (session('error'))
-                        <div class="alert alert-danger">{{ session('error') }}</div>
-                    @endif
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul>
-                                @foreach ($errors->all() as $e)
-                                    <li>{{ $e }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-
-                    <hr class="my-4">
-
-                    <!-- ======= 2) Datos del gestor (user profile / eca_staff.owner) ======= -->
-                    <p class="section-title">Datos del gestor (propietario del punto)</p>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="nombre" class="form-label">Nombres</label>
-                            <input type="text" class="form-control" id="nombre" name="nombre" required>
-                            <div class="invalid-feedback">Campo obligatorio.</div>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="apellido" class="form-label">Apellidos</label>
-                            <input type="text" class="form-control" id="apellido" name="apellido" required>
-                            <div class="invalid-feedback">Campo obligatorio.</div>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="tipoDocumento" class="form-label">Tipo de documento</label>
-                            <select id="tipoDocumento" name="tipoDocumento" class="form-select" required>
-                                <option value="" selected disabled>Selecciona...</option>
-                                <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
-                                <option value="Cédula de Extranjería">Cédula de Extranjería</option>
-                                <option value="Tarjeta de Identidad">Tarjeta de Identidad</option>
-                                <option value="Pasaporte">Pasaporte</option>
-                            </select>
-                            <div class="invalid-feedback">Selecciona un tipo de documento.</div>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="numeroDocumento" class="form-label">Número de documento</label>
-                            <input type="text" class="form-control" id="numeroDocumento" name="numeroDocumento"
-                                minlength="5" maxlength="20" required>
-                            <div class="invalid-feedback">Ingresa un número válido.</div>
-                        </div>
-
-                        <hr class="my-4">
-
-                        <!-- ======= 3) Datos del Punto ECA (eca_points) ======= -->
-                        <p class="section-title">Información de la estación</p>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="nombrePunto" class="form-label">Nombre del Punto ECA</label>
-                                <input type="text" class="form-control" id="nombrePunto" name="nombrePunto"
-                                    required>
-                                <div class="invalid-feedback">Campo obligatorio.</div>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="nit" class="form-label">NIT (opcional)</label>
-                                <input type="text" class="form-control" id="nit" name="nit"
-                                    maxlength="20" placeholder="Si aplica">
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mt-1">
-                            <div class="col-md-6">
-                                <label for="horarioAtencion" class="form-label">Horario de atención (opcional)</label>
-                                <input type="text" class="form-control" id="horarioAtencion"
-                                    name="horarioAtencion" placeholder="Lun-Vie 8:00–17:00, Sáb 9:00–13:00">
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mt-1">
-                            <div class="col-md-6">
-                                <label for="correoPunto" class="form-label">Correo de contacto del punto</label>
-                                <input type="email" class="form-control" id="correoPunto" name="correoPunto"
-                                    placeholder="Puede ser distinto al de acceso" required>
-                                <div class="invalid-feedback">Ingresa un correo válido.</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="telefonoPunto" class="form-label">Teléfono de contacto del punto</label>
-                                <input type="tel" class="form-control" id="telefonoPunto" name="telefonoPunto"
-                                    inputmode="tel" pattern="^[0-9\s()+-]{7,20}$" required>
-                                <div class="invalid-feedback">Ingresa un teléfono válido.</div>
-                            </div>
-                        </div>
-
-                        <div class="row g-3 mt-1">
-                            <div class="col-md-6">
-                                <label for="direccionPunto" class="form-label">Dirección del punto</label>
-                                <input type="text" class="form-control" id="direccionPunto" name="direccionPunto"
-                                    required>
-                                <div class="invalid-feedback">Campo obligatorio.</div>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="ciudad" class="form-label">Ciudad</label>
-                                <select id="ciudad" name="ciudad" class="form-select" required>
-                                    <option value="" disabled selected>Selecciona...</option>
-                                    <option value="Bogotá">Bogotá</option>
-                                </select>
-                                <div class="invalid-feedback">Selecciona una ciudad.</div>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="localidadPunto" class="form-label">Localidad</label>
-                                <select id="localidadPunto" name="localidadPunto" class="form-select" required>
-                                    <option value="" disabled selected>Selecciona localidad...</option>
-                                    <option value="Usaquén">Usaquén</option>
-                                    <option value="Chapinero">Chapinero</option>
-                                    <option value="Santa Fe">Santa Fe</option>
-                                    <option value="San Cristóbal">San Cristóbal</option>
-                                    <option value="Usme">Usme</option>
-                                    <option value="Tunjuelito">Tunjuelito</option>
-                                    <option value="Bosa">Bosa</option>
-                                    <option value="Kennedy">Kennedy</option>
-                                    <option value="Fontibón">Fontibón</option>
-                                    <option value="Engativá">Engativá</option>
-                                    <option value="Suba">Suba</option>
-                                    <option value="Barrios Unidos">Barrios Unidos</option>
-                                    <option value="Teusaquillo">Teusaquillo</option>
-                                    <option value="Los Mártires">Los Mártires</option>
-                                    <option value="Antonio Nariño">Antonio Nariño</option>
-                                    <option value="Puente Aranda">Puente Aranda</option>
-                                    <option value="La Candelaria">La Candelaria</option>
-                                    <option value="Rafael Uribe">Rafael Uribe</option>
-                                    <option value="Ciudad Bolívar">Ciudad Bolívar</option>
-                                    <option value="Sumapaz">Sumapaz</option>
-                                </select>
-                                <div class="invalid-feedback">Selecciona una localidad.</div>
-                            </div>
-                        </div>
-
-                        <div class="mt-3">
-                            <button type="button" id="geoBtn" class="btn btn-outline-secondary">Obtener mi
-                                ubicación</button>
-                            <div id="locationDisplay" class="form-text mt-2">Presiona para otorgar permiso de
-                                ubicación.
-                            </div>
-                            <!-- Campos lat/lng (para tu script de geoloc) -->
-                            <input type="hidden" id="latitud" name="latitud">
-                            <input type="hidden" id="longitud" name="longitud">
-                        </div>
-
-                        <div class="row g-3 mt-1">
-
-                            <div class="col-md-6">
-                                <label for="logo" class="form-label">Logo del punto (opcional)</label>
-                                <input type="file" class="form-control" id="logo" name="logo"
-                                    accept="image/*">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="foto" class="form-label">Foto del punto (opcional)</label>
-                                <input type="file" class="form-control" id="foto" name="foto"
-                                    accept="image/*">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="sitioWeb" class="form-label">Sitio web (opcional)</label>
-                                <input type="url" class="form-control" id="sitioWeb" name="sitioWeb"
-                                    placeholder="https://">
-                            </div>
-
-                        </div>
-
-                        <div class="form-check mt-4">
-                            <input class="form-check-input" type="checkbox" value="1" id="mostrarMapa"
-                                name="mostrarMapa" required>
-                            <label class="form-check-label" for="mostrarMapa">
-                                Mostrar el punto en el mapa público cuando sea aprobado.
-                            </label>
-                        </div>
-
-                        <div class="form-check mt-2">
-                            <input class="form-check-input" type="checkbox" value="1" id="recibeNotificaciones"
-                                name="recibeNotificaciones" required>
-                            <label class="form-check-label" for="recibeNotificaciones">
-                                Deseo recibir notificaciones (aprobaciones, comentarios en publicaciones del punto,
-                                etc.).
-                            </label>
-                        </div>
-
-                        <div class="form-check mt-4">
-                            <input class="form-check-input" type="checkbox" value="1" id="terms" required>
-                            <label class="form-check-label" for="terms">
-                                Acepto los términos y condiciones y el tratamiento de datos.
-                            </label>
-                            <div class="invalid-feedback">Debes aceptar los términos para continuar.</div>
-                        </div>
-
-                        <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-success btn-lg">Registrar Punto ECA</button>
-                        </div>
-
-                        <p class="text-center mt-3 mb-0">
-                            <small>¿Ya tienes cuenta? <a href="{{ route('login') }}">Inicia sesión</a></small>
-                        </p>
-                </form>
+                </div>
             </div>
         </div>
-    </main>
+    </div>
 
-    <footer class="bg-light border-top py-4">
-        <div class="container">
-            <ul class="nav justify-content-center gap-3">
-                <li class="nav-item"><a class="nav-link text-muted" href="#">Acerca de</a></li>
-                <li class="nav-item"><a class="nav-link text-muted" href="#">Soporte</a></li>
-                <li class="nav-item"><a class="nav-link text-muted" href="#">Contacto</a></li>
-            </ul>
-            <p class="text-center text-muted mb-0 mt-2 small">&copy; <span id="year"></span> InfoRecicla</p>
-        </div>
-    </footer>
+    @push('scripts')
+        <script>
+            // Geolocalización registro ECA
+            (function(){
+                const btn = document.getElementById('geoBtn');
+                if(!btn) return;
+                const latHidden = document.getElementById('latitud');
+                const lngHidden = document.getElementById('longitud');
+                const latVis = document.getElementById('latitudVisible');
+                const lngVis = document.getElementById('longitudVisible');
+                const display = document.getElementById('locationDisplay');
+                let busy = false;
+                let lastPermissionState = null; // 'granted' | 'prompt' | 'denied'
 
-    <!-- Bootstrap Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.getElementById('year').textContent = new Date().getFullYear();
-    </script>
-</body>
+                function setState(loading){
+                    busy = loading;
+                    btn.disabled = loading;
+                    btn.textContent = loading ? 'Obteniendo…' : 'GPS';
+                }
+                function write(lat,lng){
+                    lat = Number(lat).toFixed(6);
+                    lng = Number(lng).toFixed(6);
+                    latHidden.value = lat;
+                    lngHidden.value = lng;
+                    latVis.value = lat;
+                    lngVis.value = lng;
+                }
+                function feedback(msg,type='muted'){ display.className = `form-text mt-1 text-${type}`; display.textContent = msg; }
+                function blockedHelp(){
+                    return 'Acceso denegado. Revisa permisos del navegador: icono candado > Permisos > Ubicación (habilita y recarga).';
+                }
 
-</html>
+                async function checkPermission(){
+                    if(!('permissions' in navigator)) return null; // API no soportada
+                    try {
+                        const status = await navigator.permissions.query({ name:'geolocation' });
+                        lastPermissionState = status.state; // granted | prompt | denied
+                        status.onchange = () => { lastPermissionState = status.state; };
+                        return status.state;
+                    } catch { return null; }
+                }
+
+                async function requestPosition(){
+                    if(!navigator.geolocation){ feedback('Geolocalización no soportada en este navegador','danger'); return; }
+                    const perm = await checkPermission();
+                    if(perm === 'denied'){
+                        feedback(blockedHelp(),'danger');
+                        return;
+                    }
+                    setState(true);
+                    feedback(perm === 'granted' ? 'Obteniendo posición…' : 'Solicitando permiso y posición…');
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            const { latitude, longitude } = pos.coords;
+                            write(latitude, longitude);
+                            feedback('Ubicación capturada correctamente.','success');
+                            setState(false);
+                        },
+                        err => {
+                            const map = {1:blockedHelp(),2:'Posición no disponible',3:'Tiempo de espera agotado'};
+                            feedback(map[err.code] || 'Error al obtener ubicación','danger');
+                            setState(false);
+                        },
+                        { enableHighAccuracy:true, timeout:10000, maximumAge:0 }
+                    );
+                }
+
+                btn.addEventListener('click', ()=>{
+                    if(busy) return;
+                    requestPosition();
+                });
+
+                // Sync manual edits
+                [latVis,lngVis].forEach(inp => inp.addEventListener('blur', ()=>{
+                    const v = inp.value.trim();
+                    if(/^[-]?\d{1,3}\.\d+$/ .test(v)){
+                        if(inp===latVis) latHidden.value = v; else lngHidden.value = v;
+                    }
+                }));
+            })();
+
+            // Validación ligera similar a otras vistas
+            (function() {
+                const form = document.getElementById('ecaForm');
+                if (!form) return;
+                const correo = document.getElementById('correo');
+                const pwd = document.getElementById('password');
+                const pwd2 = document.getElementById('password_confirmation');
+                const terms = document.getElementById('terms');
+                const tel = document.getElementById('telefonoPunto');
+
+                function invalidate(field, msg) {
+                    field.classList.add('is-invalid');
+                    let fb = field.parentElement.querySelector('.invalid-feedback');
+                    if (!fb) {
+                        fb = document.createElement('div');
+                        fb.className = 'invalid-feedback';
+                        field.parentElement.appendChild(fb);
+                    }
+                    if (msg) fb.textContent = msg;
+                }
+
+                function clear(field) {
+                    field.classList.remove('is-invalid');
+                }
+
+                function validEmail() {
+                    clear(correo);
+                    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo.value)) {
+                        invalidate(correo, 'Correo no válido.');
+                        return false;
+                    }
+                    return true;
+                }
+
+                function validPwd() {
+                    clear(pwd);
+                    clear(pwd2);
+                    if (pwd.value.length < 8) {
+                        invalidate(pwd, 'Mínimo 8 caracteres.');
+                        return false;
+                    }
+                    if (pwd.value !== pwd2.value) {
+                        invalidate(pwd2, 'No coincide.');
+                        return false;
+                    }
+                    return true;
+                }
+
+                function validTel() {
+                    if (!tel.value) return true;
+                    clear(tel);
+                    if (!/^[0-9\s()+-]{7,20}$/.test(tel.value)) {
+                        invalidate(tel, 'Teléfono inválido.');
+                        return false;
+                    }
+                    return true;
+                }
+
+                function validTerms() {
+                    terms.classList.remove('is-invalid');
+                    if (!terms.checked) {
+                        terms.classList.add('is-invalid');
+                        return false;
+                    }
+                    return true;
+                }
+
+                correo.addEventListener('blur', validEmail);
+                pwd.addEventListener('input', validPwd);
+                pwd2.addEventListener('input', validPwd);
+                tel.addEventListener('blur', validTel);
+                terms.addEventListener('change', validTerms);
+
+                form.addEventListener('submit', e => {
+                    let ok = form.checkValidity();
+                    if (!validEmail()) ok = false;
+                    if (!validPwd()) ok = false;
+                    if (!validTel()) ok = false;
+                    if (!validTerms()) ok = false;
+                    if (!ok) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                });
+            })();
+        </script>
+    @endpush
+</x-app-layout>
