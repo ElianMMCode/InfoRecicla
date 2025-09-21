@@ -29,15 +29,15 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', [AuthController::class, 'dashboard'])->name('dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
 // RUTAS SOLO PARA USUARIOS AUTENTICADOS COMO GESTOR ECA O ADMINISTRADOR
 Route::middleware(['auth', 'role:GestorECA,Administrador'])->group(function () {
 
-    // Panel general de Punto ECA 
+    // Rutas de Punto ECA
     Route::middleware('auth')->group(function () {
+        // Ruta principal y resumen
         Route::get('/eca/{seccion?}', [PuntoEcaController::class, 'view_punto_eca'])
             ->where('seccion', 'resumen|perfil|materiales|movimientos|historial|centros|calendario|configuracion')
             ->name('eca.index');
@@ -58,9 +58,12 @@ Route::middleware(['auth', 'role:GestorECA,Administrador'])->group(function () {
 
     // Centros
     Route::post('/eca/centros', [CentroAcopioController::class, 'storeCentro'])->name('eca.centros.store');
+    Route::put('/eca/centros/{centro}', [CentroAcopioController::class, 'updateCentroAcopio'])->name('eca.centros.update');
+    Route::delete('/eca/centros/{centro}', [CentroAcopioController::class, 'destroyCentro'])->name('eca.centros.destroy');
 
     // Calendario
     Route::post('/eca/calendario/', [ProgramacionRecoleccionController::class, 'store'])->name('eca.calendario.store');
+    Route::delete('/eca/calendario/{id}', [ProgramacionRecoleccionController::class, 'destroy'])->name('eca.calendario.destroy');
 });
 
 // CIUDADANO

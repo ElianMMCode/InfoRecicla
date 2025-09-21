@@ -2,25 +2,7 @@
 
     <link rel="stylesheet" href="/css/Publicaciones/stylePublicacion.css">
     <!-- ========= NAVBAR ========= -->
-    <nav class=" navbar navbar-expand-lg navbar-dark bg-success">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
-                <img src="/imagenes/logo.png" alt="Logo" width="90" height="90" class="rounded">
-                <span class="fs-1 fw-semibold">InfoRecicla</span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div id="nav" class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
-                    <li class="nav-item"><a class="nav-link" href="/publicaciones">Listado</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/mapa">Puntos ECA</a></li>
-                    <li class="nav-item"><a class="btn btn-light text-success" href="/">Inicio</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <x-navbar-layout />
 
     <main class="container my-4">
         <div class="row g-4">
@@ -112,15 +94,18 @@
                                         <!-- En producción: href al archivo real -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Protocolo de separación (PDF)
-                                            <a class="btn btn-outline-success btn-sm" href="#" download>Descargar</a>
+                                            <a class="btn btn-outline-success btn-sm" href="#"
+                                                download>Descargar</a>
                                         </li>
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Guía rápida (DOCX)
-                                            <a class="btn btn-outline-success btn-sm" href="#" download>Descargar</a>
+                                            <a class="btn btn-outline-success btn-sm" href="#"
+                                                download>Descargar</a>
                                         </li>
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Infografía (PNG)
-                                            <a class="btn btn-outline-success btn-sm" href="#" download>Descargar</a>
+                                            <a class="btn btn-outline-success btn-sm" href="#"
+                                                download>Descargar</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -132,13 +117,16 @@
                                 <div class="card-body">
                                     <h6 class="card-title">Enlaces útiles</h6>
                                     <div class="list-group">
-                                        <a class="list-group-item list-group-item-action" href="#" target="_blank">
+                                        <a class="list-group-item list-group-item-action" href="#"
+                                            target="_blank">
                                             Localiza tu Punto ECA más cercano
                                         </a>
-                                        <a class="list-group-item list-group-item-action" href="#" target="_blank">
+                                        <a class="list-group-item list-group-item-action" href="#"
+                                            target="_blank">
                                             Calendario de recolección por localidad
                                         </a>
-                                        <a class="list-group-item list-group-item-action" href="#" target="_blank">
+                                        <a class="list-group-item list-group-item-action" href="#"
+                                            target="_blank">
                                             Normativa local de residuos aprovechables
                                         </a>
                                     </div>
@@ -189,8 +177,7 @@
                             <form id="commentForm">
                                 <div class="mb-3">
                                     <label for="commentText" class="form-label">Agregar un comentario</label>
-                                    <textarea id="commentText" class="form-control" rows="3" required
-                                        placeholder="Escribe tu comentario…"></textarea>
+                                    <textarea id="commentText" class="form-control" rows="3" required placeholder="Escribe tu comentario…"></textarea>
                                     <div class="form-text">Sé respetuoso y evita compartir datos personales.</div>
                                 </div>
                                 <div class="d-flex justify-content-end">
@@ -243,8 +230,9 @@
                             <!-- item relacionado -->
                             <a class="d-flex gap-3 align-items-center text-decoration-none p-2 rounded-3 card-hover"
                                 href="publicacion.html?id=200" title="Separar residuos en oficinas">
-                                <img src="/imagenes/cards/reciclaje2.jpg" alt="" class="rounded flex-shrink-0"
-                                    width="96" height="64" style="object-fit:cover;">
+                                <img src="/imagenes/cards/reciclaje2.jpg" alt=""
+                                    class="rounded flex-shrink-0" width="96" height="64"
+                                    style="object-fit:cover;">
                                 <div>
                                     <div class="fw-semibold clamp-2">Separar residuos en oficinas</div>
                                     <small class="text-muted">Reciclaje</small>
@@ -253,8 +241,9 @@
 
                             <a class="d-flex gap-3 align-items-center text-decoration-none p-2 rounded-3 card-hover"
                                 href="publicacion.html?id=201" title="Reciclaje de vidrio: mitos y verdades">
-                                <img src="/imagenes/cards/reciclaje3.jpg" alt="" class="rounded flex-shrink-0"
-                                    width="96" height="64" style="object-fit:cover;">
+                                <img src="/imagenes/cards/reciclaje3.jpg" alt=""
+                                    class="rounded flex-shrink-0" width="96" height="64"
+                                    style="object-fit:cover;">
                                 <div>
                                     <div class="fw-semibold clamp-2">Reciclaje de vidrio: mitos y verdades</div>
                                     <small class="text-muted">Reciclaje</small>
@@ -263,8 +252,8 @@
 
                             <a class="d-flex gap-3 align-items-center text-decoration-none p-2 rounded-3 card-hover"
                                 href="publicacion.html?id=202" title="Guía de compostaje en casa">
-                                <img src="/imagenes/cards/ma2.jpg" alt="" class="rounded flex-shrink-0" width="96"
-                                    height="64" style="object-fit:cover;">
+                                <img src="/imagenes/cards/ma2.jpg" alt="" class="rounded flex-shrink-0"
+                                    width="96" height="64" style="object-fit:cover;">
                                 <div>
                                     <div class="fw-semibold clamp-2">Guía de compostaje en casa</div>
                                     <small class="text-muted">Medio Ambiente</small>

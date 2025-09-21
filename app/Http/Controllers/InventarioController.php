@@ -86,7 +86,8 @@ class InventarioController extends Controller
 
         $seccion = 'materiales';
 
-        return view('eca.index', ['seccion' => 'materiales'])->with('ok', 'Material creado correctamente');
+        return redirect()->route('eca.index', ['seccion' => 'materiales'])
+            ->with('ok', 'Material creado correctamente');
     }
 
     /**
@@ -132,7 +133,8 @@ class InventarioController extends Controller
 
         $inventario->update($data);
 
-        return back()->with('ok', 'Inventario actualizado.');
+        return redirect()->route('eca.index', ['seccion' => 'materiales'])
+            ->with('ok', 'Inventario actualizado.');
     }
 
     /**
@@ -148,6 +150,7 @@ class InventarioController extends Controller
         }
 
         $inventario->delete();
-        return view('PuntoECA.punto-eca', ['seccion' => 'materiales'])->with('ok', 'Material eliminado correctamente');
+        return redirect()->route('eca.index', ['seccion' => 'materiales'])
+            ->with('ok', 'Material eliminado correctamente');
     }
 }
