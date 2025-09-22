@@ -98,13 +98,15 @@
                         </div>
                         <small class="text-muted">En: “Punto ECA Suba reabrió”</small>
                     </a>
-                    {{-- Publicaciones off --}}
+                    {{-- Bloque de comentario relacionado con publicaciones oculto temporalmente --}}
                     {{-- <a class="list-group-item list-group-item-action" href="#">
                         <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-1">Sería útil incluir más publicaciones sobre reciclaje de electrónicos.</h6>
+                            <h6 class="mb-1">Sería útil incluir más publicaciones sobre reciclaje de electrónicos.
+                            </h6>
                             <small class="text-muted">Hace 1 semana</small>
                         </div>
                         <small class="text-muted">En: “Guía para separar residuos orgánicos”</small>
+                    </a> --}}
                     </a> --}}
                 </div>
             </section>
