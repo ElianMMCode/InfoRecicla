@@ -51,7 +51,7 @@
                             <div class="card border-success h-100">
                                 <div class="card-body">
                                     <div class="text-success">Usuarios</div>
-                                    <div class="display-6 fw-semibold text-success">0</div>
+                                    <div class="display-6 fw-semibold text-success">{{ $totalUsuarios }}</div>
                                     <div class="small text-success-50">Admins / Gestores / Ciudadanos</div>
                                 </div>
                             </div>
@@ -60,29 +60,13 @@
                             <div class="card border-success h-100">
                                 <div class="card-body">
                                     <div class="text-success">Puntos ECA activos</div>
-                                    <div class="display-6 fw-semibold text-success">0</div>
+                                    <div class="display-6 fw-semibold text-success">{{ $totalPuntosECAactivos }}</div>
                                     <div class="small text-success-50">Con inventario</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-sm-6 col-xl-3">
-                            <div class="card border-success h-100">
-                                <div class="card-body">
-                                    <div class="text-success">Publicaciones</div>
-                                    <div class="display-6 fw-semibold text-success">0</div>
-                                    <div class="small text-success-50">Últimos 30 días</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-xl-3">
-                            <div class="card border-success h-100">
-                                <div class="card-body">
-                                    <div class="text-success">Alertas</div>
-                                    <div class="display-6 fw-semibold text-success">0</div>
-                                    <span class="badge text-bg-success">OK</span>
-                                </div>
-                            </div>
-                        </div>
+
+
                     </div>
                     <div class="row g-3">
                         <div class="col-12 col-xl-7">
