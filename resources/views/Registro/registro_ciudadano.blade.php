@@ -186,7 +186,7 @@
     </div>
 
     @push('scripts')
-        <script src="{{ asset('js/Registro/ciudadano.js') }}"></script>
+        <!-- Eliminado ciudadano.js antiguo: interceptaba el submit con IDs que ya no existen y prevenía el envío real -->
         <script>
             // Enfocar primer campo inválido si existe
             const invalid = document.querySelector('.is-invalid');
@@ -198,7 +198,7 @@
                 const form = document.getElementById('citizenForm');
                 if (!form) return;
                 const pwd = document.getElementById('password');
-                const pwd2 = document.getElementById('password_confirmation');
+                const pwd2 = document.getElementById('password_confirmation'); // confirmación
                 const terms = document.getElementById('terms');
                 const correo = document.getElementById('correo');
 

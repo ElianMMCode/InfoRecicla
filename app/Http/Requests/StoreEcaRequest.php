@@ -41,14 +41,16 @@ class StoreEcaRequest extends FormRequest
         if (isset($clean['correo']))     $clean['correo']     = mb_strtolower($clean['correo']);
         if (isset($clean['correoPunto'])) $clean['correoPunto'] = mb_strtolower($clean['correoPunto']);
 
-        // Normalizar teléfono del punto a E.164 (+ solo al inicio; resto dígitos)
+        // Normalizar teléfono del punto a solo dígitos (10) eliminando símbolos, espacios y prefijo +57 si viene
         if ($this->filled('telefonoPunto')) {
             $raw = (string) $this->input('telefonoPunto');
-            $normalized = preg_replace('/(?!^\+)[^\d]/', '', $raw) ?? '';
-            if ($normalized && !str_starts_with($normalized, '+') && preg_match('/^\d{10}$/', $normalized)) {
-                $normalized = '+57' . $normalized;
+            // Quitar todo lo que no sea dígito
+            $digits = preg_replace('/[^\d]/', '', $raw) ?? '';
+            // Si viene con 57 + 10 dígitos (total 12) asumimos que los últimos 10 son el número nacional
+            if (strlen($digits) === 12 && str_starts_with($digits, '57')) {
+                $digits = substr($digits, -10);
             }
-            $clean['telefonoPunto'] = $normalized;
+            $clean['telefonoPunto'] = $digits; // se validará size:10 + solo dígitos en rules
         }
 
         // Coords a números si llegan en string
@@ -77,7 +79,7 @@ class StoreEcaRequest extends FormRequest
             ],
             'nombre'               => ['bail', 'required', 'string', 'min:2', 'max:50', 'regex:/^[\pL\pM\s\.\'\-]+$/u'],
             'apellido'             => ['bail', 'required', 'string', 'min:2', 'max:50', 'regex:/^[\pL\pM\s\.\'\-]+$/u'],
-            'tipoDocumento'        => ['sometimes', 'nullable', 'in:CC,CE,NIT,TI'],
+            'tipoDocumento'        => ['sometimes', 'nullable', 'in:Cédula de Ciudadanía,Cédula de Extranjería,Tarjeta de Identidad,Pasaporte', 'required_with:numeroDocumento'],
             'numeroDocumento'      => ['sometimes', 'nullable', 'string', 'max:30', 'required_with:tipoDocumento'],
 
             'recibeNotificaciones' => ['bail', 'required', 'boolean'],
