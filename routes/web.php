@@ -81,7 +81,9 @@ Route::middleware(['auth', 'role:Ciudadano'])->group(function () {
 });
 
 // RUTAS PÚBLICAS
-Route::get('/mapa', [MapaController::class, 'view_mapa'])->name('mapa');
+Route::get('/mapa', [MapaController::class, 'index'])->name('mapa');
+
+Route::get('/api/eca/puntos', [MapaController::class, 'puntos'])->name('api.eca.puntos');
 Route::get('/publicaciones', [PublicacionController::class, 'view_publicaciones'])->name('publicaciones');
 Route::get('/publicacion', [PublicacionController::class, 'view_publicacion'])->name('publicacion');
 Route::get('/admin', [AdminController::class, 'view_admin'])->name('admin');
