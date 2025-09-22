@@ -51,8 +51,7 @@
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#guardados"
                     type="button">Guardados</button></li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-chats" type="button"
-                    role="tab">Chats</button>
+
             </li>
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#ajustes"
                     type="button">Ajustes</button></li>
@@ -106,55 +105,6 @@
                         </div>
                         <small class="text-muted">En: “Guía para separar residuos orgánicos”</small>
                     </a>
-                </div>
-            </section>
-
-            <!-- ===== CHATS ===== -->
-            <section class="tab-pane fade" id="tab-chats" role="tabpanel">
-                <div class="row g-3">
-                    <div class="col-lg-4">
-                        <div class="card">
-                            <div class="card-header bg-success text-white py-2">
-                                Conversaciones
-                            </div>
-                            <div class="card-body p-2">
-                                <div class="list-group chat-sidebar" id="chatThreads">
-                                    <button class="list-group-item list-group-item-action active" data-thread-id="1">
-                                        <div class="fw-semibold">Punto ECA Suba</div>
-                                        <small class="text-muted">Ayer • ¿Aceptan vidrio hoy?</small>
-                                    </button>
-                                    <button class="list-group-item list-group-item-action" data-thread-id="2">
-                                        <div class="fw-semibold">Ecopunto Norte</div>
-                                        <small class="text-muted">Hace 3 días • Horarios de atención</small>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-8 d-flex flex-column">
-                        <div class="card flex-grow-1">
-                            <div class="card-header d-flex justify-content-between align-items-center py-2">
-                                <div>
-                                    <strong id="chatTitle">Punto ECA Suba</strong><br>
-                                    <small class="text-muted" id="chatSubtitle">Conversación #1</small>
-                                </div>
-                                <a href="#" id="chatPointLink" class="btn btn-outline-success btn-sm">Ver punto</a>
-                            </div>
-                            <div class="card-body">
-                                <div id="chatWindow" class="chat-window">
-                                    <div class="msg them">¡Hola! ¿Aceptan vidrio hoy?</div>
-                                    <div class="msg me">Hola, sí. Hasta las 5pm.</div>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <div class="input-group">
-                                    <input type="text" id="chatInput" class="form-control" placeholder="Escribe un mensaje…">
-                                    <button class="btn btn-success" id="chatSend">Enviar</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </section>
 
