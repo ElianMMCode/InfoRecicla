@@ -83,9 +83,9 @@ Route::middleware(['auth', 'role:Ciudadano'])->group(function () {
 
 // RUTAS PÚBLICAS
 Route::get('/mapa', [MapaController::class, 'index'])->name('mapa');
-// 
-Route::get('/api/eca/puntos', [MapaController::class, 'puntos'])->name('api.eca.puntos');
-//Route::get('/publicaciones', [PublicacionController::class, 'view_publicaciones'])->name('publicaciones'); // módulo publicaciones OFF
-// Route::get('/publicacion', [PublicacionController::class, 'view_publicacion'])->name('publicacion'); // módulo publicaciones OFF
+Route::get('/puntos.geojson', [\App\Http\Controllers\PuntosGeoController::class, 'index'])->name('puntos.geojson');
+
+Route::get('/publicaciones', [PublicacionController::class, 'view_publicaciones'])->name('publicaciones');
+Route::get('/publicacion', [PublicacionController::class, 'view_publicacion'])->name('publicacion');
 Route::get('/admin', [AdminController::class, 'view_admin'])->name('admin');
 Route::post('/admin/usuarios', [AdminController::class, 'createUsuarios'])->name('admin.usuarios.create');
