@@ -48,4 +48,9 @@ class PuntoEca extends Model
     {
         return $this->hasMany(Inventario::class, 'punto_eca_id');
     }
+    public function seguidores()
+    {
+        return $this->belongsToMany(\App\Models\Usuario::class, 'punto_eca_usuario', 'punto_eca_id', 'usuario_id')
+            ->withTimestamps();
+    }
 }
