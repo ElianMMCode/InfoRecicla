@@ -1,11 +1,29 @@
 <x-app-layout>
     <link rel="stylesheet" href="css/Ciudadano/styleCiudadano.css">
 
-
-
-    <!-- ===== NAVBAR ===== -->
-    <x-navbar-layout />
-
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <img src="/imagenes/logo.png" alt="Logo InfoRecicla" width="90" height="90" class="rounded">
+                <span class="fs-1 fw-semibold">InfoRecicla</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div id="nav" class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
+                    <li class="nav-item"><a class="nav-link" href="/mapa">Mapa ECA</a></li>
+                    <li class="nav-item">
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="btn btn-light text-success fw-semibold px-3">Cerrar
+                                sesión</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
     <div class="cover"></div>
 
@@ -16,11 +34,7 @@
                     <img src="/imagenes/perfil_default.png" alt="Avatar" class="avatar" id="userAvatar">
                     <div>
                         <h1 class="h4 mb-1" id="userName">{{ $usuario->nombre_usuario }}</h1>
-                        <h1 class="h4 mb-1" id="userName">{{ $usuario->nombre_usuario }}</h1>
                         <div class="text-muted small">
-                            <span id="userNameAndLastname">{{ $usuario->nombre }} {{ $usuario->apellido }}</span>
-                            <br>
-                            <span id="userEmail">{{ $usuario->correo }}</span>
                             <span id="userNameAndLastname">{{ $usuario->nombre }} {{ $usuario->apellido }}</span>
                             <br>
                             <span id="userEmail">{{ $usuario->correo }}</span>
@@ -37,7 +51,6 @@
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#guardados"
                     type="button">Guardados</button></li>
             <li class="nav-item" role="presentation">
-
 
             </li>
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#ajustes"
@@ -67,7 +80,6 @@
             </section>
 
             <!-- ===== COMENTARIOS ===== -->
-            <!-- ===== COMENTARIOS ===== -->
             <section class="tab-pane fade" id="comentarios">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5 class="mb-0">Mis Comentarios</h5>
@@ -94,57 +106,6 @@
                         </div>
                         <small class="text-muted">En: “Guía para separar residuos orgánicos”</small>
                     </a> --}}
-                </div>
-            </section>
-
-            <!-- ===== CHATS ===== -->
-            <section class="tab-pane fade" id="tab-chats" role="tabpanel">
-                <div class="row g-3">
-                    <div class="col-lg-4">
-                        <div class="card">
-                            <div class="card-header bg-success text-white py-2">
-                                Conversaciones
-                            </div>
-                            <div class="card-body p-2">
-                                <div class="list-group chat-sidebar" id="chatThreads">
-                                    <button class="list-group-item list-group-item-action active" data-thread-id="1">
-                                        <div class="fw-semibold">Punto ECA Suba</div>
-                                        <small class="text-muted">Ayer • ¿Aceptan vidrio hoy?</small>
-                                    </button>
-                                    <button class="list-group-item list-group-item-action" data-thread-id="2">
-                                        <div class="fw-semibold">Ecopunto Norte</div>
-                                        <small class="text-muted">Hace 3 días • Horarios de atención</small>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-8 d-flex flex-column">
-                        <div class="card flex-grow-1">
-                            <div class="card-header d-flex justify-content-between align-items-center py-2">
-                                <div>
-                                    <strong id="chatTitle">Punto ECA Suba</strong><br>
-                                    <small class="text-muted" id="chatSubtitle">Conversación #1</small>
-                                </div>
-                                <a href="#" id="chatPointLink" class="btn btn-outline-success btn-sm">Ver
-                                    punto</a>
-                            </div>
-                            <div class="card-body">
-                                <div id="chatWindow" class="chat-window">
-                                    <div class="msg them">¡Hola! ¿Aceptan vidrio hoy?</div>
-                                    <div class="msg me">Hola, sí. Hasta las 5pm.</div>
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <div class="input-group">
-                                    <input type="text" id="chatInput" class="form-control"
-                                        placeholder="Escribe un mensaje…">
-                                    <button class="btn btn-success" id="chatSend">Enviar</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </section>
 
@@ -211,11 +172,7 @@
 
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button class="btn btn-success" type="submit">Guardar</button>
-                </div>
-                </form>
+            </section>
         </div>
     </div>
 

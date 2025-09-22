@@ -44,7 +44,6 @@ Route::middleware(['auth', 'role:GestorECA,Administrador'])->group(function () {
     });
     Route::put('/perfil', [UsuarioController::class, 'updatePerfil'])->name('eca.perfil.update');
 
-
     // Catálogo de materiales 
     Route::get('/eca/materiales', [MaterialController::class, 'index'])->name('eca.materiales.index');
 

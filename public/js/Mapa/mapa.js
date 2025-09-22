@@ -57,7 +57,6 @@ function renderLista(items) {
     });
   });
 }
-renderLista(PUNTOS);
 
 fetch('/puntos.geojson')
   .then(r => r.json())
