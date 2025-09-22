@@ -86,5 +86,5 @@ Route::get('/puntos.geojson', [\App\Http\Controllers\PuntosGeoController::class,
 
 Route::get('/publicaciones', [PublicacionController::class, 'view_publicaciones'])->name('publicaciones');
 Route::get('/publicacion', [PublicacionController::class, 'view_publicacion'])->name('publicacion');
-Route::get('/admin', [AdminController::class, 'view_admin'])->name('admin');
+Route::get('/admin', [AdminController::class, 'indexAdmin'])->name('admin');
 Route::post('/admin/usuarios', [AdminController::class, 'createUsuarios'])->name('admin.usuarios.create');
