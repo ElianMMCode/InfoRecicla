@@ -6,7 +6,7 @@ use App\Http\Controllers\InicioController;
 use App\Http\Controllers\CiudadanoController;
 use App\Http\Controllers\PuntoEcaController;
 use App\Http\Controllers\MapaController;
-use App\Http\Controllers\PublicacionController;
+// use App\Http\Controllers\PublicacionController; // (Publicaciones desactivado temporalmente)
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\InventarioController;
@@ -77,7 +77,7 @@ Route::middleware(['auth', 'role:Ciudadano'])->group(function () {
 
 // RUTAS PUBLICAS
 Route::get('/mapa', [MapaController::class, 'view_mapa'])->name('mapa');
-Route::get('/publicaciones', [PublicacionController::class, 'view_publicaciones'])->name('publicaciones');
-Route::get('/publicacion', [PublicacionController::class, 'view_publicacion'])->name('publicacion');
-Route::get('/admin', [AdminController::class, 'indexAdmin'])->name('admin');
+// Route::get('/publicaciones', [PublicacionController::class, 'view_publicaciones'])->name('publicaciones'); // módulo publicaciones OFF
+// Route::get('/publicacion', [PublicacionController::class, 'view_publicacion'])->name('publicacion'); // módulo publicaciones OFF
+Route::get('/admin', [AdminController::class, 'view_admin'])->name('admin');
 Route::post('/admin/usuarios', [AdminController::class, 'createUsuarios'])->name('admin.usuarios.create');

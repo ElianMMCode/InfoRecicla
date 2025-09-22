@@ -28,7 +28,7 @@
                     <a href="#mod-usuarios" class="list-group-item list-group-item-action">Usuarios</a>
                     <a href="#mod-ecas" class="list-group-item list-group-item-action">Puntos ECA</a>
                     <a href="#mod-materiales" class="list-group-item list-group-item-action">Materiales & Catálogos</a>
-                    <a href="#mod-contenido" class="list-group-item list-group-item-action">Contenido</a>
+                    {{-- <a href="#mod-contenido" class="list-group-item list-group-item-action">Contenido</a>  Oculto temporalmente módulo Publicaciones --}}
                     <a href="#mod-mensajeria" class="list-group-item list-group-item-action">Mensajería</a>
                     <a href="#mod-reportes" class="list-group-item list-group-item-action">Reportes & Auditoría</a>
                     <a href="#mod-sistema" class="list-group-item list-group-item-action">Sistema</a>
@@ -65,8 +65,26 @@
                                 </div>
                             </div>
                         </div>
-
-
+                        {{--
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card border-success h-100">
+                                <div class="card-body">
+                                    <div class="text-success">Publicaciones</div>
+                                    <div class="display-6 fw-semibold text-success">0</div>
+                                    <div class="small text-success-50">Últimos 30 días</div>
+                                </div>
+                            </div>
+                        </div>
+                        --}}{{-- Tarjeta de publicaciones ocultada temporalmente --}}
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card border-success h-100">
+                                <div class="card-body">
+                                    <div class="text-success">Alertas</div>
+                                    <div class="display-6 fw-semibold text-success">0</div>
+                                    <span class="badge text-bg-success">OK</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="row g-3">
                         <div class="col-12 col-xl-7">
@@ -110,8 +128,8 @@
                                                 class="btn btn-success w-100">Nuevo ECA</a></div>
                                         <div class="col-6 col-md-4"><a href="#materiales-crear"
                                                 class="btn btn-success w-100">Nuevo material</a></div>
-                                        <div class="col-6 col-md-4"><a href="#publicaciones-crear"
-                                                class="btn btn-success w-100">Nueva publicación</a></div>
+                                        {{-- <div class="col-6 col-md-4"><a href="#publicaciones-crear"
+                        class="btn btn-success w-100">Nueva publicación</a></div> Oculto temporalmente --}}
                                         <div class="col-6 col-md-4"><a href="#programaciones"
                                                 class="btn btn-outline-success w-100">Programar recolección</a></div>
                                         <div class="col-6 col-md-4"><a href="#mod-reportes"
@@ -129,8 +147,8 @@
                         <h2 class="h5 text-success m-0">Usuarios</h2>
                     </div>
                     <ul class="nav nav-pills mb-3">
-                        <li class="nav-item"><a href="#usuarios-resumen"
-                                class="nav-link active bg-success">Resumen</a></li>
+                        <li class="nav-item"><a href="#usuarios-resumen" class="nav-link active bg-success">Resumen</a>
+                        </li>
                         <li class="nav-item"><a href="#usuarios-listado" class="nav-link">Listado</a></li>
                         <li class="nav-item"><a href="#usuarios-crear" class="nav-link">Crear</a></li>
                     </ul>
@@ -718,182 +736,11 @@
                     </div>
                 </section>
 
-                <!-- ====== MÓDULO: CONTENIDO ====== -->
+                {{-- ====== MÓDULO: CONTENIDO (Publicaciones) ocultado temporalmente ======
                 <section id="mod-contenido" class="mb-5">
-                    <h2 class="h5 text-success mb-2">Contenido</h2>
-                    <ul class="nav nav-pills mb-3">
-                        <li class="nav-item"><a href="#publicaciones-resumen"
-                                class="nav-link active bg-success">Resumen</a></li>
-                        <li class="nav-item"><a href="#publicaciones-listado" class="nav-link">Publicaciones</a></li>
-                        <li class="nav-item"><a href="#publicaciones-crear" class="nav-link">Crear</a></li>
-                        <li class="nav-item"><a href="#multimedia" class="nav-link">Multimedia</a></li>
-                        <li class="nav-item"><a href="#comentarios" class="nav-link">Comentarios</a></li>
-                    </ul>
-
-                    <div id="publicaciones-resumen" class="row g-3 mb-3">
-                        <div class="col-md-4">
-                            <div class="card border-success h-100">
-                                <div class="card-body">
-                                    <div class="text-success">Publicadas</div>
-                                    <div class="display-6 text-success">0</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card border-success h-100">
-                                <div class="card-body">
-                                    <div class="text-success">Borradores</div>
-                                    <div class="display-6 text-success">0</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card border-success h-100">
-                                <div class="card-body">
-                                    <div class="text-success">Comentarios pendientes</div>
-                                    <div class="display-6 text-success">0</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="publicaciones-listado" class="card border-success mb-3">
-                        <div class="card-body">
-                            <form class="row g-2">
-                                <div class="col-12 col-md"><label class="form-label text-success">Buscar</label><input
-                                        class="form-control" placeholder="título, autor…"></div>
-                                <div class="col-6 col-md-3"><label
-                                        class="form-label text-success">Categoría</label><select class="form-select">
-                                        <option value="">Todas</option>
-                                    </select></div>
-                                <div class="col-6 col-md-3"><label
-                                        class="form-label text-success">Estado</label><select class="form-select">
-                                        <option value="">Todos</option>
-                                        <option>publicado</option>
-                                        <option>borrador</option>
-                                        <option>archivado</option>
-                                    </select></div>
-                                <div class="col-12 col-md-auto d-flex align-items-end"><a
-                                        class="btn btn-outline-success" href="#">Aplicar</a></div>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="card border-success mb-3">
-                        <div class="table-responsive">
-                            <table class="table table-hover m-0">
-                                <thead class="table-success">
-                                    <tr>
-                                        <th>Título</th>
-                                        <th>Categoría</th>
-                                        <th>Estado</th>
-                                        <th>Vistas</th>
-                                        <th class="text-end">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>—</td>
-                                        <td>—</td>
-                                        <td><span class="badge text-bg-secondary">borrador</span></td>
-                                        <td>0</td>
-                                        <td class="text-end"><a class="btn btn-sm btn-outline-success"
-                                                href="#publicaciones-crear">Editar</a> <a
-                                                class="btn btn-sm btn-outline-danger" href="#">Eliminar</a></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div id="publicaciones-crear" class="card border-success mb-3">
-                        <div class="card-body">
-                            <form id="formPublicacion" name="formPublicacion" class="row g-3">
-                                <div class="col-md-6"><label for="usuario_id"
-                                        class="form-label text-success">Autor</label><select id="usuario_id"
-                                        name="usuario_id" class="form-select"></select></div>
-                                <div class="col-md-6"><label for="categoria_id"
-                                        class="form-label text-success">Categoría</label><select id="categoria_id"
-                                        name="categoria_id" class="form-select"></select></div>
-                                <div class="col-12"><label for="titulo"
-                                        class="form-label text-success">Título</label><input id="titulo"
-                                        name="titulo" class="form-control" required></div>
-                                <div class="col-12"><label for="contenido"
-                                        class="form-label text-success">Contenido</label>
-                                    <textarea id="contenido" name="contenido" class="form-control" rows="6" required></textarea>
-                                </div>
-                                <div class="col-md-6"><label for="estado"
-                                        class="form-label text-success">Estado</label><select id="estado"
-                                        name="estado" class="form-select">
-                                        <option value="publicado">publicado</option>
-                                        <option value="borrador">borrador</option>
-                                        <option value="archivado">archivado</option>
-                                    </select></div>
-                                <div class="col-12"><button class="btn btn-success" type="submit">Guardar</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Multimedia -->
-                    <div id="multimedia" class="card border-success mb-3">
-                        <div class="card-header bg-success-subtle border-success"><span
-                                class="fw-semibold text-success">Multimedia</span></div>
-                        <div class="table-responsive">
-                            <table class="table table-hover m-0">
-                                <thead class="table-success">
-                                    <tr>
-                                        <th>Archivo</th>
-                                        <th>Tipo</th>
-                                        <th>Tamaño</th>
-                                        <th>Publicación</th>
-                                        <th class="text-end">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>—</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                        <td class="text-end"><a class="btn btn-sm btn-outline-danger"
-                                                href="#">Eliminar</a></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Comentarios -->
-                    <div id="comentarios" class="card border-success">
-                        <div class="card-header bg-success-subtle border-success"><span
-                                class="fw-semibold text-success">Comentarios</span></div>
-                        <div class="table-responsive">
-                            <table class="table table-hover m-0">
-                                <thead class="table-success">
-                                    <tr>
-                                        <th>Publicación</th>
-                                        <th>Usuario</th>
-                                        <th>Comentario</th>
-                                        <th>Estado</th>
-                                        <th class="text-end">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>—</td>
-                                        <td>—</td>
-                                        <td class="text-muted">—</td>
-                                        <td><span class="badge text-bg-secondary">pendiente</span></td>
-                                        <td class="text-end"><a class="btn btn-sm btn-outline-success"
-                                                href="#">Aprobar</a> <a class="btn btn-sm btn-outline-warning"
-                                                href="#">Ocultar</a> <a class="btn btn-sm btn-outline-danger"
-                                                href="#">Eliminar</a></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    ... contenido original del módulo de Publicaciones comentado para desactivar temporalmente ...
                 </section>
+                --}}
 
                 <!-- ====== MÓDULO: MENSAJERÍA ====== -->
                 <section id="mod-mensajeria" class="mb-5">

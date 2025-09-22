@@ -1,4 +1,5 @@
-<x-app-layout>
+{{-- Módulo de Publicaciones ocultado temporalmente. Conservamos el contenido para futura reactivación. --}}
+{{-- <x-app-layout>
 
     <link rel="stylesheet" href="css/Publicaciones/stylePublicaciones.css">
     <!--=========NAVBAR=========-->
@@ -313,4 +314,4 @@
     </main>
     <script src="js/Publicaciones/publicaciones.js"></script>
 
-</x-app-layout>
+ </x-app-layout> --}}

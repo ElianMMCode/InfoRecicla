@@ -54,7 +54,7 @@
 
         <div class="tab-content pt-3">
 
-            <!-- ===== TAB: GUARDADOS (dos columnas: Puntos ECA y Publicaciones) ===== -->
+            <!-- ===== TAB: GUARDADOS (Publicaciones ocultas temporalmente) ===== -->
             <section class="tab-pane fade" id="guardados">
                 <div class="row g-4">
                     <div class="col-md-6">
@@ -77,14 +77,14 @@
                 </div>
             </section>
 
-            <!-- ===== TAB: COMENTARIOS ===== -->
+            <!-- ===== TAB: COMENTARIOS (referencias a publicaciones ocultas) ===== -->
             <section class="tab-pane fade" id="comentarios">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5 class="mb-0">Mis Comentarios</h5>
                     <!-- Filtro ejemplo; a futuro puede venir de la BD -->
                     <select class="form-select form-select-sm" style="width:auto">
                         <option value="todos">Todos</option>
-                        <option value="publicaciones">En publicaciones</option>
+                        {{-- <option value="publicaciones">En publicaciones</option> --}}
                         <option value="puntos">En puntos ECA</option>
                     </select>
                 </div>
@@ -98,14 +98,14 @@
                         </div>
                         <small class="text-muted">En: “Punto ECA Suba reabrió”</small>
                     </a>
-                    <a class="list-group-item list-group-item-action" href="#">
+                    {{-- Bloque de comentario relacionado con publicaciones oculto temporalmente --}}
+                    {{-- <a class="list-group-item list-group-item-action" href="#">
                         <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-1">Sería útil incluir más publicaciones sobre reciclaje de electrónicos.
-                            </h6>
+                            <h6 class="mb-1">Sería útil incluir más publicaciones sobre reciclaje de electrónicos.</h6>
                             <small class="text-muted">Hace 1 semana</small>
                         </div>
                         <small class="text-muted">En: “Guía para separar residuos orgánicos”</small>
-                    </a>
+                    </a> --}}
                 </div>
             </section>
 
@@ -177,8 +177,8 @@
                         <!-- Notificaciones (se guarda en citizen_profiles.receive_notifications) -->
                         <div class="form-check form-switch mb-3">
                             <input class="form-check-input" type="checkbox" role="switch" id="prefNoti">
-                            <label class="form-check-label" for="prefNoti">Recibir notificaciones de publicaciones,
-                                respuestas y novedades</label>
+                            <label class="form-check-label" for="prefNoti">Recibir notificaciones de respuestas y
+                                novedades</label>
                         </div>
 
                         <!-- Nombre visible (display_name) -->

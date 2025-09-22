@@ -177,8 +177,8 @@
                                         <input type="tel"
                                             class="form-control form-control-sm @error('telefonoPunto') is-invalid @enderror"
                                             id="telefonoPunto" name="telefonoPunto"
-                                            value="{{ old('telefonoPunto') }}" inputmode="tel"
-                                            pattern="^[0-9\s()+-]{7,20}$" required>
+                                            value="{{ old('telefonoPunto') }}" inputmode="tel" pattern="^\d{10}$"
+                                            maxlength="10" placeholder="Ej: 3XXXXXXXXX" required>
                                         @error('telefonoPunto')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -253,8 +253,8 @@
                                                 class="btn btn-outline-success btn-sm w-100">GPS</button>
                                         </div>
                                     </div>
-                                    <div id="locationDisplay" class="form-text mt-1">Pulsa GPS para rellenar
-                                        automáticamente (se solicitará permiso).</div>
+                                    <div id="locationDisplay" class="form-text mt-1">Pulsa GPS para solicitar permiso
+                                        al navegador y capturar tu ubicación precisa.</div>
                                     <input type="hidden" id="latitud" name="latitud"
                                         value="{{ old('latitud') }}">
                                     <input type="hidden" id="longitud" name="longitud"
@@ -329,107 +329,176 @@
 
     @push('scripts')
         <script>
-            // Geolocalización registro ECA
+            // Geolocalización precisa (sin aproximaciones): getCurrentPosition + watchPosition fallback
             (function() {
                 const btn = document.getElementById('geoBtn');
                 if (!btn) return;
-                const latHidden = document.getElementById('latitud');
-                const lngHidden = document.getElementById('longitud');
-                const latVis = document.getElementById('latitudVisible');
-                const lngVis = document.getElementById('longitudVisible');
+                const latH = document.getElementById('latitud');
+                const lngH = document.getElementById('longitud');
+                const latV = document.getElementById('latitudVisible');
+                const lngV = document.getElementById('longitudVisible');
                 const display = document.getElementById('locationDisplay');
                 let busy = false;
-                let lastPermissionState = null; // 'granted' | 'prompt' | 'denied'
-
-                function setState(loading) {
-                    busy = loading;
-                    btn.disabled = loading;
-                    btn.textContent = loading ? 'Obteniendo…' : 'GPS';
-                }
-
-                function write(lat, lng) {
-                    lat = Number(lat).toFixed(6);
-                    lng = Number(lng).toFixed(6);
-                    latHidden.value = lat;
-                    lngHidden.value = lng;
-                    latVis.value = lat;
-                    lngVis.value = lng;
-                }
+                let watchId = null;
+                let attempt = 0;
 
                 function feedback(msg, type = 'muted') {
                     display.className = `form-text mt-1 text-${type}`;
                     display.textContent = msg;
                 }
 
-                function blockedHelp() {
-                    return 'Acceso denegado. Revisa permisos del navegador: icono candado > Permisos > Ubicación (habilita y recarga).';
+                function setBusy(s) {
+                    busy = s;
+                    btn.disabled = s;
+                    btn.textContent = s ? 'Obteniendo…' : 'GPS';
                 }
 
-                async function checkPermission() {
-                    if (!('permissions' in navigator)) return null; // API no soportada
+                function write(lat, lng) {
+                    if (lat == null || lng == null) return;
+                    lat = Number(lat);
+                    lng = Number(lng);
+                    if (isNaN(lat) || isNaN(lng)) return;
+                    latH.value = lat.toFixed(6);
+                    lngH.value = lng.toFixed(6);
+                    latV.value = latH.value;
+                    lngV.value = lngH.value;
+                }
+                async function permissionState() {
+                    if (!('permissions' in navigator)) return null;
                     try {
-                        const status = await navigator.permissions.query({
+                        const s = await navigator.permissions.query({
                             name: 'geolocation'
                         });
-                        lastPermissionState = status.state; // granted | prompt | denied
-                        status.onchange = () => {
-                            lastPermissionState = status.state;
-                        };
-                        return status.state;
+                        return s.state;
                     } catch {
                         return null;
                     }
                 }
 
-                async function requestPosition() {
-                    if (!navigator.geolocation) {
-                        feedback('Geolocalización no soportada en este navegador', 'danger');
-                        return;
+                function secureCheck() {
+                    if (isSecureContext) return true;
+                    const host = location.hostname;
+                    if (host === 'localhost' || host === '127.0.0.1') return true;
+                    feedback('El navegador exige HTTPS para geolocalización. Usa https:// o localhost.', 'danger');
+                    return false;
+                }
+
+                function clearWatch() {
+                    if (watchId != null) {
+                        navigator.geolocation.clearWatch(watchId);
+                        watchId = null;
                     }
-                    const perm = await checkPermission();
-                    if (perm === 'denied') {
-                        feedback(blockedHelp(), 'danger');
-                        return;
-                    }
-                    setState(true);
-                    feedback(perm === 'granted' ? 'Obteniendo posición…' : 'Solicitando permiso y posición…');
-                    navigator.geolocation.getCurrentPosition(
+                }
+
+                function startWatchFallback() {
+                    if (!('geolocation' in navigator)) return;
+                    feedback('Intentando actualización continua (watchPosition)…', 'warning');
+                    let gotFirst = false;
+                    watchId = navigator.geolocation.watchPosition(
                         pos => {
                             const {
                                 latitude,
-                                longitude
+                                longitude,
+                                accuracy
                             } = pos.coords;
-                            write(latitude, longitude);
-                            feedback('Ubicación capturada correctamente.', 'success');
-                            setState(false);
+                            if (!gotFirst) {
+                                gotFirst = true;
+                                write(latitude, longitude);
+                                feedback('Ubicación obtenida (watch). Precisión ~' + Math.round(accuracy) + 'm.',
+                                    'success');
+                                setBusy(false);
+                                // Dejamos unos segundos más por si mejora la precisión
+                                setTimeout(() => clearWatch(), 5000);
+                            } else if (accuracy < 25) { // mejora significativa
+                                write(latitude, longitude);
+                                feedback('Precisión refinada (' + Math.round(accuracy) + 'm).', 'success');
+                            }
                         },
                         err => {
+                            feedback('No fue posible obtener ubicación con watch (' + err.code + ').', 'danger');
+                            setBusy(false);
+                            clearWatch();
+                        }, {
+                            enableHighAccuracy: true,
+                            maximumAge: 0,
+                            timeout: 15000
+                        }
+                    );
+                }
+
+                function attemptPrecise() {
+                    attempt++;
+                    if (!('geolocation' in navigator)) {
+                        feedback('Este navegador no soporta geolocalización.', 'danger');
+                        return;
+                    }
+                    if (!secureCheck()) return;
+                    setBusy(true);
+                    feedback('Solicitando permiso al navegador…');
+                    let finished = false;
+                    const timeoutMs = 10000;
+                    const timer = setTimeout(() => {
+                        if (finished) return;
+                        feedback('Sin respuesta rápida, escalando a modo continuo…', 'warning');
+                        startWatchFallback();
+                    }, 4000);
+                    navigator.geolocation.getCurrentPosition(
+                        pos => {
+                            if (finished) return;
+                            finished = true;
+                            clearTimeout(timer);
+                            const {
+                                latitude,
+                                longitude,
+                                accuracy
+                            } = pos.coords;
+                            write(latitude, longitude);
+                            feedback('Ubicación capturada (±' + Math.round(accuracy) + 'm).', 'success');
+                            setBusy(false);
+                        },
+                        err => {
+                            if (finished) return;
+                            finished = true;
+                            clearTimeout(timer);
                             const map = {
-                                1: blockedHelp(),
+                                1: 'Permiso denegado por el usuario',
                                 2: 'Posición no disponible',
                                 3: 'Tiempo de espera agotado'
                             };
-                            feedback(map[err.code] || 'Error al obtener ubicación', 'danger');
-                            setState(false);
+                            feedback((map[err.code] || 'Error desconocido') + (err.code === 1 ?
+                                ' (ajusta permisos del sitio y reintenta)' : ''), 'danger');
+                            if (err.code !== 1) { // si no es permiso denegado probamos watch
+                                startWatchFallback();
+                            } else {
+                                setBusy(false);
+                            }
                         }, {
                             enableHighAccuracy: true,
-                            timeout: 10000,
+                            timeout: timeoutMs,
                             maximumAge: 0
                         }
                     );
                 }
 
-                btn.addEventListener('click', () => {
+                btn.addEventListener('click', async () => {
                     if (busy) return;
-                    requestPosition();
+                    const state = await permissionState();
+                    if (state === 'denied') {
+                        feedback(
+                            'Permiso previamente denegado. Ve al candado del navegador y permite "Ubicación" para este sitio, luego reintenta.',
+                            'danger');
+                        return;
+                    }
+                    attemptPrecise();
                 });
 
-                // Sync manual edits
-                [latVis, lngVis].forEach(inp => inp.addEventListener('blur', () => {
+                // Permitir edición manual conservando precisión formateada
+                [latV, lngV].forEach(inp => inp.addEventListener('blur', () => {
                     const v = inp.value.trim();
                     if (/^[-]?\d{1,3}\.\d+$/.test(v)) {
-                        if (inp === latVis) latHidden.value = v;
-                        else lngHidden.value = v;
+                        if (inp === latV) latH.value = v;
+                        else lngH.value = v;
+                        feedback('Coordenadas manuales establecidas.', 'info');
                     }
                 }));
             })();
