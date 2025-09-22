@@ -1,37 +1,14 @@
-body {
-    background: #f7faf8;
-}
-
-.layout {
-    height: calc(100vh - 70px);
-}
-
-/* ocupa alto de ventana quitando navbar */
-.list-col {
-    max-height: 100%;
-    overflow: auto;
-}
-
-.map-col {
-    height: 100%;
-}
-
 #map {
-    width: 100%;
-    height: 100%;
-    border-radius: .75rem;
-}
-
-.card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 .75rem 1rem rgba(0, 0, 0, .08);
+    height: calc(100vh - 140px);
+    min-height: 420px;
+    border-radius: 0.75rem;
 }
 
 .card-hover {
-    transition: transform .2s ease, box-shadow .2s ease;
     cursor: pointer;
+    transition: transform .08s ease;
 }
 
-.tag {
-    font-size: .75rem;
+.card-hover:hover {
+    transform: translateY(-1px);
 }
