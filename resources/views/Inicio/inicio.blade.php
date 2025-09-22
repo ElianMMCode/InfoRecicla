@@ -18,8 +18,8 @@
                                 ECA.
                             </p>
                             <div class="d-flex gap-3 mt-4">
-                                <a href="/publicaciones" class="btn btn-success btn-lg">Ver publicaciones</a>
-                                <a href="/mapa" class="btn btn-outline-success btn-lg">Mapa de Puntos ECA</a>
+                                {{-- <a href="/publicaciones" class="btn btn-success btn-lg">Ver publicaciones</a> --}}
+                                {{-- <a href="/mapa" class="btn btn-outline-success btn-lg">Mapa de Puntos ECA</a> --}}
                             </div>
                         </div>
                         <div class="col-lg-6 text-center">
@@ -34,8 +34,8 @@
             <section class="bg-success text-white py-5">
                 <div class="container">
                     <div class="row g-4">
-                        <!-- Publicaciones -->
-                        <div class="col-md-6">
+                        {{-- Módulo Publicaciones temporalmente oculto --}}
+                        {{-- <div class="col-md-6">
                             <a href="/publicaciones" class="text-decoration-none text-white">
                                 <div class="card h-100 bg-transparent shadow-lg border-white">
                                     <div class="card-body text-center text-white">
@@ -48,24 +48,25 @@
                                     </div>
                                 </div>
                             </a>
-                        </div>
+                        </div> --}}
                         <!-- Mapa ECA -->
-                        <div class="col-md-6">
-                            <a href="/mapa" class="text-decoration-none text-white">
-                                <div class="card h-100 bg-transparent shadow-lg border-white">
-                                    <div class="card-body text-center text-white">
-                                        <h2 class="h2 fw-semibold mb-3">Mapa de Puntos ECA</h2>
-                                        <img src="/imagenes/mapaECA.png" alt="Mapa de estaciones de reciclaje"
-                                            class="img-fluid mb-3" style="max-width:210px;">
-                                        <p class="mb-0">
-                                            Visualiza estaciones en Bogotá, filtra por proximidad y consulta contacto y
-                                            capacidad.
-                                        </p>
-                                    </div>
+                        {{-- <div class="col-md-6"> --}}
+                        <div class="col-md-12"></div>
+                        <a href="/mapa" class="text-decoration-none text-white">
+                            <div class="card h-100 bg-transparent shadow-lg border-white">
+                                <div class="card-body text-center text-white">
+                                    <h2 class="h2 fw-semibold mb-3">Mapa de Puntos ECA</h2>
+                                    <img src="/imagenes/mapaECA.png" alt="Mapa de estaciones de reciclaje"
+                                        class="img-fluid mb-3" style="max-width:210px;">
+                                    <p class="mb-0">
+                                        Visualiza estaciones en Bogotá, filtra por proximidad y consulta contacto y
+                                        capacidad.
+                                    </p>
                                 </div>
-                            </a>
-                        </div>
+                            </div>
+                        </a>
                     </div>
+                </div>
                 </div>
             </section>
 
@@ -86,8 +87,9 @@
                                         <h3 class="h5 mb-0">Cuenta para Publicar y Comentar</h3>
                                     </div>
                                     <ul class="mb-4 small text-muted ps-3">
-                                        <li>Guarda publicaciones y comenta artículos.</li>
-                                        <li>Sigue temas y recibe notificaciones.</li>
+                                        {{-- <li>Guarda publicaciones y comenta artículos.</li> --}}
+                                        {{-- <li>Sigue temas y recibe notificaciones.</li> --}}
+                                        <li>Busca y guarda puntos ECA.</li>
                                         <li>Participa con buenas prácticas de reciclaje.</li>
                                     </ul>
                                     <div class="mt-auto">

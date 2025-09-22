@@ -1,4 +1,5 @@
-<x-app-layout>
+{{-- Vista individual de Publicación ocultada temporalmente --}}
+{{-- <x-app-layout>
 
     <link rel="stylesheet" href="/css/Publicaciones/stylePublicacion.css">
     <!-- ========= NAVBAR ========= -->
@@ -270,4 +271,4 @@
     <script src="/js/Publicaciones/publicacion.js"></script>
 
 
-</x-app-layout>
+ </x-app-layout> --}}

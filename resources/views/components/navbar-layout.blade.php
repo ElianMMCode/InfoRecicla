@@ -15,7 +15,7 @@
             {{ $slot }}
 
             <ul class="navbar-nav ms-auto align-items-lg-center gap-2">
-                <li class="nav-item"><a class="nav-link" href="{{ route('publicaciones') }}">Publicaciones</a></li>
+                {{-- <li class="nav-item"><a class="nav-link" href="{{ route('publicaciones') }}">Publicaciones</a></li> --}}
                 <li class="nav-item"><a class="nav-link" href="{{ route('mapa') }}">Mapa ECA</a></li>
 
                 @guest
