@@ -38,6 +38,7 @@
                     type="button">Guardados</button></li>
             <li class="nav-item" role="presentation">
 
+
             </li>
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#ajustes"
                     type="button">Ajustes</button></li>
@@ -97,7 +98,6 @@
             </section>
 
             <!-- ===== CHATS ===== -->
-            <!-- ===== CHATS ===== -->
             <section class="tab-pane fade" id="tab-chats" role="tabpanel">
                 <div class="row g-3">
                     <div class="col-lg-4">
@@ -127,7 +127,8 @@
                                     <strong id="chatTitle">Punto ECA Suba</strong><br>
                                     <small class="text-muted" id="chatSubtitle">Conversación #1</small>
                                 </div>
-                                <a href="#" id="chatPointLink" class="btn btn-outline-success btn-sm">Ver punto</a>
+                                <a href="#" id="chatPointLink" class="btn btn-outline-success btn-sm">Ver
+                                    punto</a>
                             </div>
                             <div class="card-body">
                                 <div id="chatWindow" class="chat-window">
@@ -153,60 +154,59 @@
                     <div class="card-body">
                         <h5 class="card-title mb-3">Preferencias</h5>
 
-                        <form method="POST"
-                            action="{{ route('ciudadano.perfil.update') }}">
+                        <form method="POST" action="{{ route('ciudadano.perfil.update') }}">
                             @csrf
                             @method('PATCH')
 
-                        <!-- Notificaciones (opcional; si no las guardas, quita el name) -->
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" role="switch" id="prefNoti"
-                                name="recibe_notificaciones" value="1"
-                                {{ $usuario->recibe_notificaciones ? 'checked' : '' }}>
-                            <label class="form-check-label" for="prefNoti">
-                                Recibir notificaciones de publicaciones, respuestas y novedades
-                            </label>
-                        </div>
-                        <h5 class="card-title mb-3">Actualizacion de Datos</h5>
-
-                        <div class="mb-3">
-                            <label class="form-label" for="nombre_usuario">Nombre de Usuario</label>
-                            <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario"
-                                value="{{ $usuario->nombre_usuario }}" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Nombre</label>
-                            <input type="text" class="form-control" id="editNombre" name="nombre"
-                                value="{{ $usuario->nombre }}" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Correo</label>
-                            <input type="email" class="form-control" id="editCorreo" name="correo"
-                                value="{{ $usuario->correo }}" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Localidad</label>
-                            <input type="text" class="form-control" id="editLocalidad" name="localidad"
-                                value="{{ $usuario->localidad }}">
-                        </div>
-                        <div>
-                            <label for="old_password" class="form-label">Contraseña actual</label>
-                            <input type="password" class="form-control" id="old_password" name="old_password">
-
-                            <label for="password" class="form-label">Contraseña nueva</label>
-                            <input type="password" class="form-control" id="password" name="password">
-
-                            <label for="password_confirmation" class="form-label">Confirmar contraseña</label>
-                            <input type="password" class="form-control" id="password_confirmation"
-                                name="password_confirmation">
-                            <br>
-                            <div class="d-flex justify-content-end gap-2">
-                                <button class="btn btn-outline-secondary" type="button">Cancelar</button>
-                                <button class="btn btn-success" type="submit">Guardar</button>
+                            <!-- Notificaciones (opcional; si no las guardas, quita el name) -->
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="prefNoti"
+                                    name="recibe_notificaciones" value="1"
+                                    {{ $usuario->recibe_notificaciones ? 'checked' : '' }}>
+                                <label class="form-check-label" for="prefNoti">
+                                    Recibir notificaciones de publicaciones, respuestas y novedades
+                                </label>
                             </div>
-                        </div>
+                            <h5 class="card-title mb-3">Actualizacion de Datos</h5>
+
+                            <div class="mb-3">
+                                <label class="form-label" for="nombre_usuario">Nombre de Usuario</label>
+                                <input type="text" class="form-control" id="nombre_usuario" name="nombre_usuario"
+                                    value="{{ $usuario->nombre_usuario }}" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Nombre</label>
+                                <input type="text" class="form-control" id="editNombre" name="nombre"
+                                    value="{{ $usuario->nombre }}" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Correo</label>
+                                <input type="email" class="form-control" id="editCorreo" name="correo"
+                                    value="{{ $usuario->correo }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Localidad</label>
+                                <input type="text" class="form-control" id="editLocalidad" name="localidad"
+                                    value="{{ $usuario->localidad }}">
+                            </div>
+                            <div>
+                                <label for="old_password" class="form-label">Contraseña actual</label>
+                                <input type="password" class="form-control" id="old_password" name="old_password">
+
+                                <label for="password" class="form-label">Contraseña nueva</label>
+                                <input type="password" class="form-control" id="password" name="password">
+
+                                <label for="password_confirmation" class="form-label">Confirmar contraseña</label>
+                                <input type="password" class="form-control" id="password_confirmation"
+                                    name="password_confirmation">
+                                <br>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn btn-outline-secondary" type="button">Cancelar</button>
+                                    <button class="btn btn-success" type="submit">Guardar</button>
+                                </div>
+                            </div>
                         </form>
 
                     </div>
