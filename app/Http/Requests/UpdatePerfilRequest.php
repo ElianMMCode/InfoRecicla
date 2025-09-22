@@ -52,6 +52,20 @@ class UpdatePerfilRequest extends FormRequest
                 data_set($this->request, $k, (float) $v);
             }
         }
+
+        // Normalizar teléfonos (usuario y punto) a 10 dígitos nacionales si vienen con +57 o caracteres extra
+        foreach (['usuarios.telefono', 'punto.telefono'] as $k) {
+            $v = data_get($this->all(), $k);
+            if (is_string($v) && $v !== '') {
+                $digits = preg_replace('/[^\d]/', '', $v) ?? '';
+                if (strlen($digits) === 12 && str_starts_with($digits, '57')) {
+                    $digits = substr($digits, -10);
+                }
+                if ($digits !== '') {
+                    data_set($this->request, $k, $digits);
+                }
+            }
+        }
     }
 
     public function rules(): array
