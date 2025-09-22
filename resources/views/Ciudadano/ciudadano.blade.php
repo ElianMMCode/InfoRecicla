@@ -33,8 +33,7 @@
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#guardados"
                     type="button">Guardados</button></li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-chats" type="button"
-                    role="tab">Chats</button>
+
             </li>
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#ajustes"
                     type="button">Ajustes</button></li>
