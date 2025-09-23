@@ -1,7 +1,7 @@
 {{-- resources/views/Mapa/mapa.blade.php --}}
 <x-app-layout>
 
-    {{-- NAVBAR de InfoRecicla (restaurado) --}}
+    {{-- NAVBAR de InfoRecicla --}}
     <x-navbar-layout />
 
     {{-- Estilos del mapa --}}
@@ -19,7 +19,10 @@
 
                 <div class="input-group mb-3">
                     <span class="input-group-text">🔎</span>
-                    <input type="search" id="filtro" class="form-control"
+                    <input
+                        type="search"
+                        id="filtro"
+                        class="form-control"
                         placeholder="Buscar por nombre, localidad o dirección…">
                 </div>
 
@@ -28,7 +31,11 @@
 
             {{-- Columna derecha: mapa --}}
             <section class="col-lg-9 col-md-8">
-                <div id="map" class="shadow-sm" {{-- Pasamos los puntos al JS externo SIN script inline --}} data-puntos='@json($list ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)'>
+                <div
+                    id="map"
+                    class="shadow-sm"
+                    {{-- Pasamos los puntos al JS externo SIN script inline --}}
+                    data-puntos='@json(($list ?? []), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)'>
                 </div>
             </section>
         </div>
@@ -45,8 +52,7 @@
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-5">
-                            <img id="modalImg" src="{{ asset('images/eca-default.png') }}" class="img-fluid rounded"
-                                alt="">
+                            <img id="modalImg" src="{{ asset('images/eca-default.png') }}" class="img-fluid rounded" alt="">
                             <div class="mt-2">
                                 <span class="badge text-bg-light border" id="modalCategoria">—</span>
                                 <span class="badge text-bg-light border" id="modalLocalidad">—</span>
@@ -65,8 +71,7 @@
                                 <dt class="col-sm-4">Teléfono</dt>
                                 <dd class="col-sm-8" id="modalTelefono">—</dd>
                                 <dt class="col-sm-4">Web</dt>
-                                <dd class="col-sm-8"><a id="modalWeb" href="#" target="_blank"
-                                        rel="noopener">—</a></dd>
+                                <dd class="col-sm-8"><a id="modalWeb" href="#" target="_blank" rel="noopener">—</a></dd>
                             </dl>
                         </div>
                     </div>
