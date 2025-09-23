@@ -48,9 +48,9 @@
 
     <div class="container mt-4">
         <ul class="nav nav-tabs" id="citizenTabs" role="tablist">
-            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#guardados"
+            {{-- <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#guardados"
                     type="button">Guardados</button></li>
-            <li class="nav-item" role="presentation">
+            <li class="nav-item" role="presentation"> --}}
 
             </li>
             <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#ajustes"
