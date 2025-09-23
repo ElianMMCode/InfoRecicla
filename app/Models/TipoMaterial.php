@@ -11,7 +11,8 @@ class TipoMaterial extends Model
     protected $table = 'tipos_material';
     public $incrementing = false;
     protected $keyType = 'string';
-    protected $fillable = ['nombre'];
+    protected $fillable = ['nombre', 'descripcion'];
+    public $timestamps = false;
     public function materiales()
     {
         return $this->hasMany(Material::class, 'tipo_id');

@@ -9,6 +9,12 @@ class PuntoEca extends Model
 {
     use HasFactory;
 
+    public function gestor()
+    {
+        return $this->belongsTo(\App\Models\Admin::class, 'gestor_id');
+    }
+    use HasFactory;
+
     protected $table = 'puntos_eca';
     public $timestamps = false;
     protected $primaryKey = 'id';

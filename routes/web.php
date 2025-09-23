@@ -23,6 +23,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/registro/ciudadano', [UsuarioController::class, 'store'])->name('registro.ciudadano');
     Route::post('/registro/eca', [UsuarioController::class, 'storeEca'])->name('registro.eca');
 
+
     // Login
     Route::get('/login', [AuthController::class, 'index'])->name('login');
     Route::post('/login', [AuthController::class, 'postLogin'])->name('inicio-sesion');
@@ -34,7 +35,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // RUTAS SOLO PARA USUARIOS AUTENTICADOS COMO GESTOR ECA O ADMINISTRADOR
-Route::middleware(['auth', 'role:GestorECA,Administrador'])->group(function () {
+Route::middleware(['auth', 'role:GestorECA'])->group(function () {
 
     // Rutas de Punto ECA
     Route::middleware('auth')->group(function () {
@@ -79,5 +80,22 @@ Route::middleware(['auth', 'role:Ciudadano'])->group(function () {
 Route::get('/mapa', [MapaController::class, 'view_mapa'])->name('mapa');
 // Route::get('/publicaciones', [PublicacionController::class, 'view_publicaciones'])->name('publicaciones'); // módulo publicaciones OFF
 // Route::get('/publicacion', [PublicacionController::class, 'view_publicacion'])->name('publicacion'); // módulo publicaciones OFF
-Route::get('/admin', [AdminController::class, 'view_admin'])->name('admin');
+Route::get('/admin', [AdminController::class, 'indexAdmin'])->name('admin');
 Route::post('/admin/usuarios', [AdminController::class, 'createUsuarios'])->name('admin.usuarios.create');
+
+
+Route::post('/admin/eca', [AdminController::class, 'storeEca'])->name('admin.eca.store');
+Route::post('/admin/eca/update', [AdminController::class, 'updateOrDeleteEca'])->name('admin.eca.update');
+
+//RUTAS MATERIALES
+Route::middleware(['auth', 'role:Administrador'])->group(function () {
+    Route::post('/admin/materiales', [MaterialController::class, 'storeMateriales'])->name('materiales.store');
+    Route::post('/materiales/update/{id}', [MaterialController::class, 'materialesUpdate'])->name('materiales.update');
+    Route::post('/materiales/delete/{id}', [MaterialController::class, 'materialesDestroy'])->name('materiales.delete');
+    Route::post('/tipos/store', [MaterialController::class, 'createTiposMateriales'])->name('tipos.store');
+    Route::post('/tipos/update/{id}', [MaterialController::class, 'tiposUpdate'])->name('tipos.update');
+    Route::post('/tipos/delete/{id}', [MaterialController::class, 'tiposDestroy'])->name('tipos.delete');
+    Route::post('/categorias/store', [MaterialController::class, 'createCategorias'])->name('categorias.store');
+    Route::post('/categorias/update/{id}', [MaterialController::class, 'categoriasUpdate'])->name('categorias.update');
+    Route::post('/categorias/delete/{id}', [MaterialController::class, 'categoriasDestroy'])->name('categorias.delete');
+});

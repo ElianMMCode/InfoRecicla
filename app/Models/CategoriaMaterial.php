@@ -11,7 +11,8 @@ class CategoriaMaterial extends Model
     protected $table = 'categorias_material';
     public $incrementing = false;
     protected $keyType = 'string';
-    protected $fillable = ['nombre'];
+    protected $fillable = ['nombre', 'descripcion'];
+    public $timestamps = false;
     public function materiales()
     {
         return $this->hasMany(Material::class, 'categoria_id');
