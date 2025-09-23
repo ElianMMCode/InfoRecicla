@@ -921,38 +921,31 @@
                     </div>
                 </div>
 
-                <div id="materiales-crear" class="card border-success mb-3">
-                    <div class="card-body">
-                        <form id="formMaterial" name="formMaterial" class="row g-3" method="POST"
-                            action="{{ route('materiales.store') }}">
-                            @csrf
-                            <div class="col-md-6"><label for="nombre_material"
-                                    class="form-label text-success">Nombre</label><input id="nombre_material"
-                                    name="nombre" class="form-control" required></div>
-                            <div class="col-md-6"><label for="descripcion_material"
-                                    class="form-label text-success">Descripción</label>
-                                <textarea id="descripcion_material" name="descripcion" class="form-control"></textarea>
-                            </div>
-                            <div class="col-md-6"><label for="tipo_id"
-                                    class="form-label text-success">Tipo</label><select class="form-select"
-                                    name="tipo" form="form-filtros">
-                                    <option value="">Todos</option>
-                                    @foreach ($tipos as $t)
-                                        <option value="{{ $t->id }}" @selected(request('tipo') === $t->id)>
-                                            {{ $t->nombre }}
-                                        </option>
-                                    @endforeach
-                                </select></div>
-                            <div class="col-md-6"><label for="categoria_id"
-                                    class="form-label text-success">Categoría</label><select class="form-select"
-                                    name="categoria" form="form-filtros">
-                                    <option value="">Todas</option>
-                                    @foreach ($categorias as $c)
-                                        <option value="{{ $c->id }}" @selected(request('categoria') === $c->id)>
-                                            {{ $c->nombre }}
-                                        </option>
-                                    @endforeach
-                                </select></div>
+                    <div id="materiales-crear" class="card border-success mb-3">
+                        <div class="card-body">
+                            <form id="formMaterial" name="formMaterial" class="row g-3" method="POST" action="{{ route('materiales.store') }}">
+                                @csrf
+                                <div class="col-md-6"><label for="nombre_material"
+                                        class="form-label text-success">Nombre</label><input id="nombre_material"
+                                        name="nombre" class="form-control" required></div>
+                                <div class="col-md-6"><label for="descripcion_material"
+                                        class="form-label text-success">Descripción</label>
+                                    <textarea id="descripcion_material" name="descripcion" class="form-control"></textarea>
+                                </div>
+                                <div class="col-md-6"><label for="tipo_id"
+                                        class="form-label text-success">Tipo</label><select id="tipo_id" class="form-select" name="tipo_id" required>
+                                        <option value="" disabled selected>Selecciona…</option>
+                                        @foreach ($tipos as $t)
+                                        <option value="{{ $t->id }}">{{ $t->nombre }}</option>
+                                        @endforeach
+                                    </select></div>
+                                <div class="col-md-6"><label for="categoria_id"
+                                        class="form-label text-success">Categoría</label><select id="categoria_id" class="form-select" name="categoria_id" required>
+                                        <option value="" disabled selected>Selecciona…</option>
+                                        @foreach ($categorias as $c)
+                                        <option value="{{ $c->id }}">{{ $c->nombre }}</option>
+                                        @endforeach
+                                    </select></div>
 
                             <div class="col-md-6"><label for="imagen_url" class="form-label text-success">Imagen
                                     URL</label><input id="imagen_url" name="imagen_url" type="url"

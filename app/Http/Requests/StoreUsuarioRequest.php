@@ -22,13 +22,20 @@ class StoreUsuarioRequest extends FormRequest
             }
         }
         if (isset($clean['correo'])) $clean['correo'] = mb_strtolower($clean['correo']);
+        // si viene 'rol' pero no 'tipo', normalizar a 'tipo'
+        if (!$this->filled('tipo') && $this->filled('rol')) {
+            $clean['tipo'] = $this->input('rol');
+        }
         $this->merge($clean);
     }
 
     public function rules(): array
     {
         return [
-            'tipo'               => ['bail', 'required', 'in:Ciudadano,GestorECA,Administrador'],
+            // usar nombre de columna real 'rol'
+            'tipo'               => ['bail', 'required', 'in:Ciudadano,GestorECA,Administrador'], // input
+            // validación espejo para rol (para permitir migración suave si front ya envía 'rol')
+            'rol'                => ['sometimes', 'in:Ciudadano,GestorECA,Administrador'],
             'correo'             => ['bail', 'required', 'email:rfc,dns', 'max:255', 'unique:usuarios,correo'],
             'password'           => [
                 'bail',

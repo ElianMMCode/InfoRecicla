@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Usuario;
 
 class CiudadanoController extends Controller
 {
@@ -18,6 +19,7 @@ class CiudadanoController extends Controller
     public function updatePerfil(Request $request)
     {
         // usuario auth
+        /** @var Usuario $user */
         $user = Auth::user();
 
         // 1) Validación de campos básicos + reglas de unicidad

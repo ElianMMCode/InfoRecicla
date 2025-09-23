@@ -9,6 +9,7 @@ use App\Models\TipoMaterial;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class MaterialController extends Controller
@@ -81,27 +82,31 @@ class MaterialController extends Controller
     // store material
     public function storeMateriales(Request $request)
     {
-        $materials = [
+        $rules = [
             'nombre'        => 'required|string|max:120|unique:materiales,nombre',
             'descripcion'   => 'required|string',
+            'tipo_id'       => 'required|uuid|exists:tipos_material,id',
+            'categoria_id'  => 'required|uuid|exists:categorias_material,id',
             'imagen_url'    => 'nullable|url',
         ];
 
-        $dataMateriales = $request->validate($materials);
-
-        $payloadMateriales = [
-            'id'           => (string)Str::uuid(),
-            'nombre'       => $dataMateriales['nombre'],
-            'descripcion'  => $dataMateriales['descripcion'],
-            'tipo_id'      => $dataMateriales['tipo_id'],
-            'categoria_id' => $dataMateriales['categoria_id'],
-            'imagen_url'   => $dataMateriales['imagen_url'] ?? null,
-
-        ];
-
-        DB::transaction(function () use ($payloadMateriales) {
-            Material::create($payloadMateriales);
-        });
+        $data = $request->validate($rules);
+        try {
+            DB::transaction(function () use ($data) {
+                Log::info('Creando material', $data);
+                Material::create([
+                    'id'           => (string)Str::uuid(),
+                    'nombre'       => $data['nombre'],
+                    'descripcion'  => $data['descripcion'],
+                    'tipo_id'      => $data['tipo_id'],
+                    'categoria_id' => $data['categoria_id'],
+                    'imagen_url'   => $data['imagen_url'] ?? null,
+                ]);
+            });
+        } catch (\Throwable $e) {
+            Log::error('Error creando material: '.$e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return back()->withErrors(['material' => 'Error al crear material: '.$e->getMessage()])->withInput();
+        }
         return back()->with('ok', 'Material creado');
 
 

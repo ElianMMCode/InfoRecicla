@@ -48,9 +48,8 @@ class UsuarioController extends Controller
             'estado' => 'activo',
             'creado' => now(),
             'actualizado' => now(),
-            // tipo
-            'tipo' => $data['tipo'] ?? null,
-            // 'rol' => $data['tipo'] ?? null
+            // mapear tipo -> rol (columna existente y requerida)
+            'rol' => $data['tipo'],
         ];
 
         DB::transaction(function () use ($carga) {
@@ -70,9 +69,7 @@ class UsuarioController extends Controller
 
             $usuario = Usuario::create([
                 'id' => $usuarioId,
-                // rol
                 'rol' => $data['tipo'],
-                'tipo' => $data['tipo'] ?? null,
                 'correo' => $data['correo'],
                 'password' => Hash::make($data['password']),
                 'nombre' => $data['nombre'],

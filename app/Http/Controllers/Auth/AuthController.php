@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Usuario;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -21,19 +23,23 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        // Si es el usuario admin predeterminado, simula login
+        // admin predefinido: crea (si no existe) y autentica usando el guard
         if ($request->correo === 'admin@gmail.com' && $request->password === 'admin123') {
-            // Simular usuario admin en sesión
-            $adminFake = (object) [
-                'id' => 'admin-fake',
-                'nombre' => 'Administrador',
-                'apellido' => '',
-                'correo' => 'admin@gmail.com',
-                'rol' => 'Administrador',
-            ];
-            // Guardar en sesión
-            session(['usuario' => $adminFake]);
-            // Redirigir al panel admin
+            $admin = Usuario::firstOrCreate(
+                ['correo' => 'admin@gmail.com'],
+                [
+                    'id' => (string) Str::uuid(),
+                    'password' => 'admin123', // mutator hará hash
+                    'nombre' => 'Admin',
+                    'apellido' => 'Sistema',
+                    'rol' => 'Administrador',
+                    'estado' => 'activo',
+                    'creado' => now(),
+                    'actualizado' => now(),
+                ]
+            );
+            Auth::login($admin, true); // recuerda sesión
+            $request->session()->regenerate();
             return redirect()->intended(route('admin'));
         }
 

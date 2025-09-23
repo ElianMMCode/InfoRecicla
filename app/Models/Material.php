@@ -12,7 +12,7 @@ class Material extends Model
 
     public $incrementing = false;
     protected $keyType = 'string';
-    protected $fillable = ['nombre', 'categoria_id', 'tipo_id', 'descripcion'];
+    protected $fillable = ['nombre', 'categoria_id', 'tipo_id', 'descripcion', 'imagen_url'];
     public $timestamps = false;
 
     public function categoria()

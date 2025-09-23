@@ -29,17 +29,19 @@ use App\Models\Material;
 
 class AdminController extends Controller
 {
-    // actualizar o eliminar punto eca
+    /**
+     * Actualiza o elimina un punto ECA desde la tabla editable del panel admin
+     */
     public function updateOrDeleteEca(Request $request)
     {
-        // eliminar
+        // Eliminar
         if ($request->has('eliminar')) {
             $id = $request->input('eliminar');
             $punto = \App\Models\PuntoEca::findOrFail($id);
             $punto->delete();
             return back()->with('ok', 'Punto ECA eliminado');
         }
-        // editar
+        // Editar
         if ($request->has('editar')) {
             $id = $request->input('editar');
             $punto = \App\Models\PuntoEca::findOrFail($id);
@@ -52,10 +54,13 @@ class AdminController extends Controller
         }
         return back();
     }
-    // dashboard admin
+    /**
+     * Display a listing of the resource.
+     */
     public function indexAdmin(Request $request)
     {
-        // stats
+        // Mostrar Listado de Estadísticas Usuarios, Puntos ECA, Publicaciones
+
         $totalUsuarios  = Usuario::count();
         $totalAdmins   = Admin::where('rol', 'Administrador')->count();
         $totalGestores   = Admin::where('rol', 'GestorECA')->count();
@@ -63,7 +68,7 @@ class AdminController extends Controller
         $totalPuntosECAactivos = PuntoEca::where('estado', 'activo')->count();
         $totalPublicaciones = Publicaciones::count();
 
-        // filtros eca
+        // Filtros para puntos ECA
         $puntosECAQuery = PuntoEca::query();
         if ($request->filled('buscar_eca')) {
             $puntosECAQuery->where('nombre', 'like', '%' . $request->input('buscar_eca') . '%')
@@ -141,10 +146,10 @@ class AdminController extends Controller
             $materialesQuery->where('categoria_id', $request->input('categoria_material'));
         }
         $materiales = $materialesQuery->paginate(10)->appends($request->except('page'));
-        // stock total
+        // Contador de stock total (suma de stock_actual de todos los inventarios activos)
         $stockTotal = \App\Models\Inventario::where('activo', true)->sum('stock_actual');
 
-        // recolecciones semana
+        // Contador de recolecciones de la semana actual
         $inicioSemana = now()->startOfWeek();
         $finSemana = now()->endOfWeek();
         $recoleccionesSemana = \App\Models\ProgramacionRecoleccion::whereBetween('fecha', [$inicioSemana, $finSemana])->count();
@@ -175,7 +180,9 @@ class AdminController extends Controller
         return view('Administracion.administrador', $dataView);
     }
 
-    // crear usuario
+    /**
+     * Show the form for creating a new resource.
+     */
     public function store(StoreUsuarioRequest $request)
     {
         $data = $request->validated();
@@ -195,16 +202,14 @@ class AdminController extends Controller
             'estado' => 'activo',
             'creado' => now(),
             'actualizado' => now(),
-            // tipo
-            'tipo' => $data['tipo'] ?? null,
-            // 'rol' => $data['tipo'] ?? null
+            'rol' => $data['tipo'],
         ];
 
         DB::transaction(function () use ($carga) {
             Usuario::create($carga);
         });
 
-        return redirect('/registro/exitoso')->with('ok', true);
+        return back()->with('ok', 'Usuario creado');
     }
 
 
@@ -218,9 +223,7 @@ class AdminController extends Controller
 
             $usuario = Usuario::create([
                 'id' => $usuarioId,
-                // rol
                 'rol' => $data['tipo'],
-                'tipo' => $data['tipo'] ?? null,
                 'correo' => $data['correo'],
                 'password' => Hash::make($data['password']),
                 'nombre' => $data['nombre'],
@@ -258,11 +261,13 @@ class AdminController extends Controller
             }
         });
 
-        return redirect('/registro/exitoso')->with('ok', true);
+        return back()->with('ok', 'Gestor/ECA creado');
     }
 
 
-    // show usuario
+    /**
+     * Display the specified resource.
+     */
     public function usuarioShow(Usuario $usuario)
     {
         return view('Administracion.usuario_show', compact('usuario'));
@@ -274,7 +279,12 @@ class AdminController extends Controller
 
 
 
-    // edit eca
+    /**
+     * Show the form for editing the specified resource.
+     */
+    /**
+     * Muestra y procesa el formulario de edición de usuario básico
+     */
     public function ecaEdit(PuntoEca $puntoECA)
     {
         return view('Administracion.eca_edit', compact('puntoECA'));
@@ -283,95 +293,78 @@ class AdminController extends Controller
 
 
 
-    // update usuarios
-    public function updateUsuarios(StoreUsuarioRequest $request)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function updateUsuarios(StoreUsuarioRequest $request, string $id)
     {
         $data = $request->validated();
-
-        $carga = [
-            'id' => (string) Str::uuid(),
-            'correo' => $data['correo'],
-            'password' => Hash::make($data['password']),
-            'nombre' => $data['nombre'],
-            'apellido' => $data['apellido'],
-            'recibe_notificaciones' => isset($data['recibeNotificaciones']) ? (int) (bool) $data['recibeNotificaciones'] : 0,
-            'fecha_nacimiento' => $data['fechaNacimiento'] ?? null,
-            'avatar_url' => $data['avatar'] ?? null,
-            'nombre_usuario' => $data['nombre_usuario'] ?? null,
-            'genero' => $data['genero'] ?? null,
-            'localidad' => $data['localidad'] ?? null,
-            'estado' => 'activo',
-            'creado' => now(),
-            'actualizado' => now(),
-            // tipo
-            'tipo' => $data['tipo'] ?? null,
-            // 'rol' => $data['tipo'] ?? null
-        ];
-
-        DB::transaction(function () use ($carga) {
-            Usuario::update($carga);
+        $usuario = Usuario::findOrFail($id);
+        DB::transaction(function () use ($usuario, $data) {
+            $usuario->correo = $data['correo'];
+            $usuario->nombre = $data['nombre'];
+            $usuario->apellido = $data['apellido'];
+            if (!empty($data['password'])) {
+                $usuario->password = Hash::make($data['password']);
+            }
+            $usuario->nombre_usuario = $data['nombre_usuario'] ?? $usuario->nombre_usuario;
+            $usuario->genero = $data['genero'] ?? $usuario->genero;
+            $usuario->localidad = $data['localidad'] ?? $usuario->localidad;
+            $usuario->rol = $data['tipo'] ?? $usuario->rol; // mantener compatibilidad
+            $usuario->actualizado = now();
+            $usuario->save();
         });
-
-        return redirect()->route('admin')->with('success', 'usuario actualizado correctamente');
+        return back()->with('ok', 'Usuario actualizado');
     }
 
-    public function updateEca(StoreEcaRequest $request)
+    public function updateEca(StoreEcaRequest $request, string $id)
     {
         $data = $request->validated();
-
-        DB::transaction(function () use ($data) {
-            $usuarioId = (string) Str::uuid();
-
-            $usuario = Usuario::create([
-                'id' => $usuarioId,
-                // rol
-                'rol' => $data['tipo'],
-                'tipo' => $data['tipo'] ?? null,
-                'correo' => $data['correo'],
-                'password' => Hash::make($data['password']),
-                'nombre' => $data['nombre'],
-                'apellido' => $data['apellido'],
-                'recibe_notificaciones' => isset($data['recibeNotificaciones']) ? (int) (bool) $data['recibeNotificaciones'] : 0,
-                'tipo_documento' => $data['tipoDocumento'] ?? null,
-                'numero_documento' => $data['numeroDocumento'] ?? null,
-                'nombre_usuario' => $data['nombrePunto'] ?? null,
-                'estado' => 'activo',
-                'creado' => now(),
-                'actualizado' => now(),
-            ]);
+        $usuario = Usuario::findOrFail($id);
+        DB::transaction(function () use ($usuario, $data) {
+            $usuario->correo = $data['correo'];
+            $usuario->nombre = $data['nombre'];
+            $usuario->apellido = $data['apellido'];
+            if (!empty($data['password'])) {
+                $usuario->password = Hash::make($data['password']);
+            }
+            $usuario->rol = $data['tipo'] ?? $usuario->rol;
+            $usuario->nombre_usuario = $data['nombrePunto'] ?? $usuario->nombre_usuario;
+            $usuario->actualizado = now();
+            $usuario->save();
 
             if ($usuario->rol === 'GestorECA') {
-                PuntoEca::update([
-                    'id' => (string) Str::uuid(),
-                    'gestor_id' => $usuarioId,
-                    'nombre' => $data['nombrePunto'],
-                    'direccion' => $data['direccionPunto'],
-                    'telefonoPunto' => $data['telefonoPunto'],
-                    'correoPunto' => $data['correoPunto'],
-                    'ciudad' => $data['ciudad'],
-                    'localidad' => $data['localidadPunto'],
-                    'latitud' => $data['latitud'] ?? null,
-                    'longitud' => $data['longitud'] ?? null,
-                    'nit' => $data['nit'] ?? null,
-                    'horario_atencion' => $data['horarioAtencion'] ?? null,
-                    'sitio_web' => $data['sitioWeb'] ?? null,
-                    'logo_url' => $data['logo'] ?? null,
-                    'foto_url' => $data['foto'] ?? null,
-                    'mostrar_mapa' => isset($data['mostrarMapa']) ? (int) (bool) $data['mostrarMapa'] : 0,
-                    'creado' => now(),
-                    'actualizado' => now(),
-                ]);
+                $punto = PuntoEca::where('gestor_id', $usuario->id)->first();
+                if ($punto) {
+                    $punto->nombre = $data['nombrePunto'] ?? $punto->nombre;
+                    $punto->direccion = $data['direccionPunto'] ?? $punto->direccion;
+                    $punto->telefonoPunto = $data['telefonoPunto'] ?? $punto->telefonoPunto;
+                    $punto->correoPunto = $data['correoPunto'] ?? $punto->correoPunto;
+                    $punto->ciudad = $data['ciudad'] ?? $punto->ciudad;
+                    $punto->localidad = $data['localidadPunto'] ?? $punto->localidad;
+                    $punto->latitud = $data['latitud'] ?? $punto->latitud;
+                    $punto->longitud = $data['longitud'] ?? $punto->longitud;
+                    $punto->nit = $data['nit'] ?? $punto->nit;
+                    $punto->horario_atencion = $data['horarioAtencion'] ?? $punto->horario_atencion;
+                    $punto->sitio_web = $data['sitioWeb'] ?? $punto->sitio_web;
+                    $punto->logo_url = $data['logo'] ?? $punto->logo_url;
+                    $punto->foto_url = $data['foto'] ?? $punto->foto_url;
+                    $punto->mostrar_mapa = isset($data['mostrarMapa']) ? (int) (bool) $data['mostrarMapa'] : $punto->mostrar_mapa;
+                    $punto->actualizado = now();
+                    $punto->save();
+                }
             }
         });
-
-        return redirect()->route('admin')->with('success', 'ECA actualizado correctamente');
+        return back()->with('ok', 'ECA actualizado');
     }
 
 
 
 
 
-    // destroy usuario
+    /**
+     * Remove the specified resource from storage.
+     */
     public function usuariosDestroy(string $id)
     {
         $usuario = Admin::findOrFail($id);
@@ -392,7 +385,12 @@ class AdminController extends Controller
         return view('Administracion.administrador');
     }
 
-    // edit usuario
+    /**
+     * Muestra el formulario de edición de usuario básico
+     */
+    /**
+     * Muestra y procesa el formulario de edición de usuario básico
+     */
     public function usuarioEdit(Request $request, $id)
     {
         $usuario = Usuario::findOrFail($id);
@@ -401,7 +399,7 @@ class AdminController extends Controller
             $usuario->correo = $request->input('correo');
             $usuario->rol = $request->input('rol');
             $usuario->save();
-            return redirect()->back()->with('success', 'Usuario actualizado correctamente');
+            return back()->with('ok', 'Usuario editado');
         }
         return view('Administracion.administrador', [
             'usuarioEdit' => $usuario

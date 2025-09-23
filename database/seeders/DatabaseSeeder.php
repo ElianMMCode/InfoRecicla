@@ -2,22 +2,31 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+// se eliminó App\Models\User; usar Usuario si se desea poblar
+use App\Models\Usuario;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // ejemplo: crear un usuario de prueba mínimo si la tabla está vacía
+        if (Usuario::count() === 0) {
+            Usuario::create([
+                'id' => (string) \Illuminate\Support\Str::uuid(),
+                'correo' => 'admin@example.com',
+                'password' => 'password', // mutator hace hash
+                'nombre' => 'Admin',
+                'apellido' => 'Inicial',
+                'rol' => 'Administrador',
+                'tipo_documento' => 'Cédula de Ciudadanía',
+                'numero_documento' => '0000000000',
+                'telefono' => '0000000',
+                'recibe_notificaciones' => true,
+                'fecha_nacimiento' => now()->subYears(30),
+                'nombre_usuario' => 'admin',
+                'estado' => 'activo',
+            ]);
+        }
     }
 }

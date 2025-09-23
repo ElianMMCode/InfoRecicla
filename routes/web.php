@@ -84,15 +84,14 @@ Route::middleware(['auth', 'role:Ciudadano'])->group(function () {
 Route::get('/mapa', [MapaController::class, 'view_mapa'])->name('mapa');
 // Route::get('/publicaciones', [PublicacionController::class, 'view_publicaciones'])->name('publicaciones'); // módulo publicaciones OFF
 // Route::get('/publicacion', [PublicacionController::class, 'view_publicacion'])->name('publicacion'); // módulo publicaciones OFF
-Route::get('/admin', [AdminController::class, 'indexAdmin'])->name('admin');
-Route::post('/admin/usuarios', [AdminController::class, 'createUsuarios'])->name('admin.usuarios.create');
 
-
-Route::post('/admin/eca', [AdminController::class, 'storeEca'])->name('admin.eca.store');
-Route::post('/admin/eca/update', [AdminController::class, 'updateOrDeleteEca'])->name('admin.eca.update');
 
 //RUTAS MATERIALES
 Route::middleware(['auth', 'role:Administrador'])->group(function () {
+    Route::get('/admin', [AdminController::class, 'indexAdmin'])->name('admin');
+    Route::post('/admin/usuarios', [AdminController::class, 'store'])->name('admin.usuarios.create');
+    Route::post('/admin/eca', [AdminController::class, 'storeEca'])->name('admin.eca.store');
+    Route::post('/admin/eca/update', [AdminController::class, 'updateOrDeleteEca'])->name('admin.eca.update');
     Route::post('/admin/materiales', [MaterialController::class, 'storeMateriales'])->name('materiales.store');
     Route::post('/materiales/update/{id}', [MaterialController::class, 'materialesUpdate'])->name('materiales.update');
     Route::post('/materiales/delete/{id}', [MaterialController::class, 'materialesDestroy'])->name('materiales.delete');
