@@ -21,21 +21,35 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        //valida las credenciales
+        // Si es el usuario admin predeterminado, simula login
+        if ($request->correo === 'admin@gmail.com' && $request->password === 'admin123') {
+            // Simular usuario admin en sesión
+            $adminFake = (object) [
+                'id' => 'admin-fake',
+                'nombre' => 'Administrador',
+                'apellido' => '',
+                'correo' => 'admin@gmail.com',
+                'rol' => 'Administrador',
+            ];
+            // Guardar en sesión
+            session(['usuario' => $adminFake]);
+            // Redirigir al panel admin
+            return redirect()->intended(route('admin'));
+        }
+
+        //valida las credenciales normales
         $autenticado = Auth::attempt(
             ['correo' => $request->correo, 'password' => $request->password],
             $request->boolean('remember')
         );
 
         if ($autenticado) {
-            // Regenera la sesión
             $request->session()->regenerate();
-
             $usuario = Auth::user();
-
-            // Redirige según el rol
-            if ($usuario->rol === 'GestorECA' || $usuario->rol === 'Administrador') {
+            if ($usuario->rol === 'GestorECA') {
                 return redirect()->intended(route('eca.index', ['seccion' => 'resumen']));
+            } elseif ($usuario->rol === 'Administrador') {
+                return redirect()->intended(route('admin'));
             } elseif ($usuario->rol === 'Ciudadano') {
                 return redirect()->intended(route('ciudadano'));
             }
