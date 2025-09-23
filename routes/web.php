@@ -81,7 +81,7 @@ Route::middleware(['auth', 'role:Ciudadano'])->group(function () {
 });
 
 // RUTAS PUBLICAS
-Route::get('/mapa', [MapaController::class, 'view_mapa'])->name('mapa');
+Route::get('/mapa', [MapaController::class, 'index'])->name('mapa');
 // Route::get('/publicaciones', [PublicacionController::class, 'view_publicaciones'])->name('publicaciones'); // módulo publicaciones OFF
 // Route::get('/publicacion', [PublicacionController::class, 'view_publicacion'])->name('publicacion'); // módulo publicaciones OFF
 
