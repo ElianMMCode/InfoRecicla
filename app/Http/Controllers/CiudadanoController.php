@@ -17,7 +17,7 @@ class CiudadanoController extends Controller
 
     public function updatePerfil(Request $request)
     {
-        /** @var \App\Models\Usuario $user */
+        // usuario auth
         $user = Auth::user();
 
         // 1) Validación de campos básicos + reglas de unicidad

@@ -13,9 +13,7 @@ use Illuminate\Support\Str;
 
 class MaterialController extends Controller
 {
-    /**
-     * Muestra la tabla editable de materiales en la vista de administración
-     */
+    // tabla materiales admin
     public function indexMateriales(Request $request)
     {
         $query = Material::query();
@@ -34,21 +32,7 @@ class MaterialController extends Controller
         return view('Administracion.administrador', compact('materiales', 'categorias', 'tipos'));
     }
 
-    /**
-     * Display a listing of the resource.
-     */
-    /**
-     * Muestra el catálogo de materiales y el inventario del punto ECA
-     * 
-     * @param Request $request
-     * @return \Illuminate\View\View
-     */
-
-
-    /**
-     * Proveedor de datos para materiales e inventario sin renderizar vista.
-     * Usado por PuntoEcaController (refactor coordinador) y reutilizable en index().
-     */
+    // data materiales
     public function data(Request $request): array
     {
         $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', Auth::id())->first();
@@ -94,9 +78,7 @@ class MaterialController extends Controller
         ];
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // store material
     public function storeMateriales(Request $request)
     {
         $materials = [
@@ -209,26 +191,22 @@ class MaterialController extends Controller
         return back()->with('ok', 'Material agregado al inventario');
     }
 
-    /**
-     * Display the specified resource.
-     */
+    // show material
     public function show(string $id)
     {
-        //Mostrar detalle de un material
+        // detalle material
         $material = Material::with(['categoria', 'tipo'])->findOrFail($id);
         return view('Administracion.material_show', compact('material'));
     }
 
     public function showCategoria(string $id)
     {
-        //Mostrar detalle de una categoría
+        // detalle categoria
         $categoria = CategoriaMaterial::findOrFail($id);
         return view('Administracion.categoria_show', compact('categoria'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    // edit material
     public function materialesEdit(string $id)
     {
         $material = Material::findOrFail($id);
@@ -250,9 +228,7 @@ class MaterialController extends Controller
         return view('Administracion.tipo_edit', compact('tipo'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    // update material
     public function materialesUpdate(Request $request, string $id)
     {
         $material = Material::findOrFail($id);
@@ -308,9 +284,7 @@ class MaterialController extends Controller
     }
 
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    // destroy material
     public function materialesDestroy(string $id)
     {
         $material = Material::findOrFail($id);

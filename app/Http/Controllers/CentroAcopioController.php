@@ -11,9 +11,7 @@ use Illuminate\Support\Str;
 
 class CentroAcopioController extends Controller
 {
-    /**
-     * Devuelve listados filtrados de centros globales y propios con paginación.
-     */
+    // data centros
     public function data(Request $request): array
     {
         $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', Auth::id())->first();
@@ -54,7 +52,7 @@ class CentroAcopioController extends Controller
             ->paginate(10, ['*'], 'page_cp')
             ->withQueryString();
 
-        // Materiales disponibles del punto para filtros multi-select
+        // materiales punto
         $materialesPunto = DB::table('inventario as i')
             ->join('materiales as m', 'm.id', '=', 'i.material_id')
             ->where('i.punto_eca_id', $puntoEcaId)
@@ -75,7 +73,7 @@ class CentroAcopioController extends Controller
 
         $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', $user->id)->first();
 
-        //extraer el id
+        // id punto
         $puntoEcaId = $punto->id;
 
         $data = $request->validate([
@@ -122,12 +120,10 @@ class CentroAcopioController extends Controller
         ]);
 
         //
-        //con este metodo se sincronizan los materiales con el centro de acopio
-        //con los ids de los materiales y la relacion de las tablas
+        // sync materiales
         $centro->materiales()->sync($cac['materiales'] ?? []);
 
-        //validacion de la peticion
-        //
+        // validar update
         $data = $request->validate([
             'cac.nombre' => ['required', 'string', 'max:150'],
             'cac.tipo' => ['required', Rule::in(['Planta', 'Proveedor', 'Otro'])],
@@ -144,18 +140,18 @@ class CentroAcopioController extends Controller
             'cac.estado' => ['nullable', Rule::in(['activo', 'inactivo'])],
         ]);
 
-        // valida que el punto logueado sea el dueño del centro de acopio
+        // ownership
         abort_if($centro->owner_punto_eca_id !== $punto->id, 403);
 
-        // actualiza el centro
+        // update centro
         $payload = $data['cac'];
-        // aseguramos que contacto y ciudad se mantengan null si antes tenían algo
+        // contacto/cudad null
         $payload['contacto'] = null;
         $payload['ciudad'] = null;
         $centro->fill($payload);
         $centro->save();
 
-        // ✅ sincroniza si vino el campo
+        // sync opcional
         if (array_key_exists('materiales', $data['cac'])) {
             $centro->materiales()->sync($data['cac']['materiales'] ?? []);
         }
@@ -185,9 +181,9 @@ class CentroAcopioController extends Controller
             'cac.notas' => ['nullable', 'string', 'max:300'],
         ]);
 
-        // fill asignara los valores de la data al centro de acopio
+        // fill
         $centro->fill($data['cac']);
-        // se guardan los cambios
+        // save
         $centro->save();
 
         return redirect()->route('eca.index', ['seccion' => 'centros'])
@@ -198,13 +194,13 @@ class CentroAcopioController extends Controller
     {
         $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', Auth::id())->first();
         abort_if(!$punto, 404);
-        // Solo permitir borrar centros propios (alcance eca)
+        // validar eca
         if ($centro->alcance !== 'eca' || $centro->owner_punto_eca_id !== $punto->id) {
             return redirect()->route('eca.index', ['seccion' => 'centros'])
                 ->with('error', 'No autorizado para eliminar este centro.');
         }
 
-        // Si tiene relaciones (materiales pivot) se limpian
+        // detach relaciones
         try {
             DB::transaction(function () use ($centro) {
                 $centro->materiales()->detach();

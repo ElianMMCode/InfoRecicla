@@ -14,21 +14,14 @@ use App\Models\ProgramacionRecoleccion;
 
 class ProgramacionRecoleccionController extends Controller
 {
-    /**
-     * Muestra el calendario con la programación de recolección
-     * 
-     * @param Request $request
-     * @return \Illuminate\View\View
-     */
+    // calendario index
     public function index(Request $request)
     {
         $data = $this->data($request);
         return view('PuntoECA.punto-eca', ['seccion' => 'calendario'] + $data);
     }
 
-    /**
-     * Devuelve la estructura de calendario (dias, mesTitulo, navPrevUrl, navNextUrl, rangoLabel) sin renderizar vista.
-     */
+    // data calendario
     public function data(Request $request): array
     {
         $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', Auth::id())->first();
@@ -83,9 +76,7 @@ class ProgramacionRecoleccionController extends Controller
         ];
     }
 
-    /**
-     * Agrega un evento al array de eventos para un día específico
-     */
+    // add evento
     private function addEventoToDay(&$eventos, $fecha, $r, $start, $end)
     {
         if ($fecha >= $start && $fecha <= $end) {
@@ -105,9 +96,7 @@ class ProgramacionRecoleccionController extends Controller
         }
     }
 
-    /**
-     * Maneja las repeticiones de eventos según su frecuencia
-     */
+    // repeticiones
     private function manejarRepeticiones(&$eventos, $fecha, $r, $start, $end)
     {
         $iter = $fecha->copy();
@@ -126,9 +115,7 @@ class ProgramacionRecoleccionController extends Controller
         }
     }
 
-    /**
-     * Construye el array de días para el calendario
-     */
+    // dias calendario
     private function construirDiasCalendario($start, $eventos)
     {
         $dias = [];
@@ -198,9 +185,7 @@ class ProgramacionRecoleccionController extends Controller
             ->with('ok', 'Perfil actualizado correctamente.');
     }
 
-    /**
-     * Elimina una programación concreta
-     */
+    // destroy evento
     public function destroy(string $id)
     {
         $gestorId = Auth::id();

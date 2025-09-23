@@ -11,9 +11,7 @@ use App\Models\Inventario;
 
 class InventarioController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // listado inventario
     public function index(Request $request)
     {
         //
@@ -21,7 +19,7 @@ class InventarioController extends Controller
         $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', Auth::id())->first();
         $puntoEcaId = $punto->id;
 
-        // Filtros del inventario
+        // filtros
         $q = $request->validate([
             'q_categoria' => ['nullable', 'uuid', 'exists:categorias_material,id'],
             'q_tipo' => ['nullable', 'uuid', 'exists:tipos_material,id'],
@@ -41,17 +39,13 @@ class InventarioController extends Controller
         return view('PuntoECA.partials.inventario-listado', compact('inventario', 'puntoEcaId', 'q'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // create
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // store
     public function store(Request $request)
     {
         //
@@ -90,31 +84,25 @@ class InventarioController extends Controller
             ->with('ok', 'Material creado correctamente');
     }
 
-    /**
-     * Display the specified resource.
-     */
+    // show
     public function show(string $id)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    // edit
     public function edit(string $id)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    // update
     public function update(Request $request, Inventario $inventario)
     {
         $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', Auth::id())->first();
         $puntoEcaId = $punto?->id;
 
-        //Validaciones de que el punto eca sea el mismo
+        // validar ownership
         if ($inventario->punto_eca_id !== $puntoEcaId) {
             abort(403, 'No autorizado.');
         }
@@ -137,9 +125,7 @@ class InventarioController extends Controller
             ->with('ok', 'Inventario actualizado.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    // destroy
     public function destroy(Request $request, Inventario $inventario)
     {
         $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', Auth::id())->first();

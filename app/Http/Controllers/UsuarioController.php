@@ -18,9 +18,7 @@ use Illuminate\Validation\ValidationException;
 
 class UsuarioController extends Controller
 {
-    /**
-     * Vista del Gestor ECA
-     */
+    // vista gestor eca
     public function indexEca(Request $request)
     {
         $user = Auth::user();
@@ -30,10 +28,7 @@ class UsuarioController extends Controller
         return view('users.indexEca', compact('gestor'));
     }
 
-    /**
-     * Registro de usuario (Ciudadano / GestorECA / Administrador)
-     * Usa StoreUsuarioRequest con validaciones estrictas.
-     */
+    // registro usuario
     public function store(StoreUsuarioRequest $request)
     {
         $data = $request->validated();
@@ -53,9 +48,9 @@ class UsuarioController extends Controller
             'estado' => 'activo',
             'creado' => now(),
             'actualizado' => now(),
-            // Si en tu tabla guardas el tipo/rol, respétalo:
+            // tipo
             'tipo' => $data['tipo'] ?? null,
-            // 'rol' => $data['tipo'] ?? null, // usa este si tu columna es 'rol' en vez de 'tipo'
+            // 'rol' => $data['tipo'] ?? null
         ];
 
         DB::transaction(function () use ($carga) {
@@ -65,10 +60,7 @@ class UsuarioController extends Controller
         return redirect('/registro/exitoso')->with('ok', true);
     }
 
-    /**
-     * Registro de Gestor ECA + creación de Punto ECA
-     * Usa StoreEcaRequest con validaciones estrictas por contexto.
-     */
+    // registro eca
     public function storeEca(StoreEcaRequest $request)
     {
         $data = $request->validated();
@@ -78,9 +70,9 @@ class UsuarioController extends Controller
 
             $usuario = Usuario::create([
                 'id' => $usuarioId,
-                // En tu código usas 'rol' aquí; si en tu tabla realmente se llama 'tipo', cambia a 'tipo' y no dupliques.
+                // rol
                 'rol' => $data['tipo'],
-                'tipo' => $data['tipo'] ?? null, // déjalo si tu tabla también guarda 'tipo'
+                'tipo' => $data['tipo'] ?? null,
                 'correo' => $data['correo'],
                 'password' => Hash::make($data['password']),
                 'nombre' => $data['nombre'],
@@ -121,10 +113,7 @@ class UsuarioController extends Controller
         return redirect('/registro/exitoso')->with('ok', true);
     }
 
-    /**
-     * Actualización de perfil (usuario + punto)
-     * Usa UpdatePerfilRequest con validaciones estrictas y normalización.
-     */
+    // update perfil
     public function updatePerfil(UpdatePerfilRequest $request)
     {
         $authUser = Usuario::findOrFail(Auth::user()->id);
@@ -132,7 +121,7 @@ class UsuarioController extends Controller
 
         $data = $request->validated();
 
-        // Si el usuario envía contraseña actual pero no nueva → error controlado
+        // password nueva requerida si hay current
         if (!empty(data_get($data, 'usuarios.current_password')) && empty(data_get($data, 'usuarios.password'))) {
             throw ValidationException::withMessages([
                 'usuarios.password' => 'Debes indicar la nueva contraseña.',
@@ -140,23 +129,23 @@ class UsuarioController extends Controller
         }
 
         DB::transaction(function () use ($data, $authUser, $punto, $request) {
-            // ==== USUARIO ====
+            // usuario
             $authUser->nombre = $data['usuarios']['nombre'];
             $authUser->apellido = $data['usuarios']['apellido'];
             $authUser->correo = $data['usuarios']['correo'];
 
-            // Teléfono (puede venir null/nullable)
+            // telefono
             if (array_key_exists('telefono', $data['usuarios'])) {
                 $authUser->telefono = $data['usuarios']['telefono'];
             }
 
-            // Password (si viene y pasó validación)
+            // password
             $nueva = $data['usuarios']['password'] ?? null;
             if (filled($nueva)) {
                 $authUser->password = Hash::make($nueva);
             }
 
-            // Avatar (input file con name="usuarios[avatar]")
+            // avatar
             if ($request->hasFile('usuarios.avatar')) {
                 $path = $request->file('usuarios.avatar')->store('avatars', 'public');
                 $authUser->avatar_url = Storage::url($path);
@@ -165,9 +154,9 @@ class UsuarioController extends Controller
             $authUser->actualizado = now();
             $authUser->save();
 
-            // ==== PUNTO ====
+            // punto
             $punto->nombre = $data['punto']['nombre'];
-            $punto->telefonoPunto = $data['punto']['telefono'] ?? null; // ← nombre que ya usas en tu asignación
+            $punto->telefonoPunto = $data['punto']['telefono'] ?? null;
             $punto->direccion = $data['punto']['direccion'] ?? null;
             $punto->ciudad = $data['punto']['ciudad'] ?? null;
             $punto->localidad = $data['punto']['localidad'] ?? null;
@@ -175,7 +164,7 @@ class UsuarioController extends Controller
             $punto->longitud = $data['punto']['longitud'] ?? null;
             $punto->horario_atencion = $data['punto']['horario_atencion'] ?? null;
 
-            // Archivos anidados (name="punto[foto]" y "punto[logo]")
+            // archivos
             if ($request->hasFile('punto.foto')) {
                 $path = $request->file('punto.foto')->store('puntos', 'public');
                 $punto->foto_url = Storage::url($path);
@@ -194,9 +183,7 @@ class UsuarioController extends Controller
             ->with('ok', 'Perfil actualizado correctamente.');
     }
 
-    /**
-     * Vistas de registro por tipo
-     */
+    // vistas registro
     public function view_registro($tipo = null)
     {
         switch ($tipo) {

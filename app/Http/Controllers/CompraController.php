@@ -11,26 +11,20 @@ use Illuminate\Support\Str;
 
 class CompraController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // listado
     public function index(Request $request)
     {
         $seccion = 'movimientos';
         return view('PuntoECA.punto-eca', $seccion);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // create
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // store
     public function store(Request $request)
     {
         $user = Auth::user();
@@ -50,10 +44,9 @@ class CompraController extends Controller
             'creado' => now(),
         ]);
 
-        // transaction es un helper de DB
-        //  que permite asegurar todas las consultas de la transacción
+        // tx
         DB::transaction(function () use ($data, $inventarioId) {
-            //Combinar los arrays de los dos arreglos
+            // create
             Compra::create(
                 array_merge($data, [
                     // asignar el id del inventario
@@ -65,33 +58,25 @@ class CompraController extends Controller
         return back()->with('ok', 'Compra registrada en el inventario');
     }
 
-    /**
-     * Display the specified resource.
-     */
+    // show
     public function show(string $id)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    // edit
     public function edit(string $id)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    // update
     public function update(Request $request, string $id)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    // destroy
     public function destroy(string $id)
     {
         //

@@ -98,7 +98,7 @@
                         </div>
                         <small class="text-muted">En: “Punto ECA Suba reabrió”</small>
                     </a>
-                    {{-- Bloque de comentario relacionado con publicaciones oculto temporalmente --}}
+                    {{-- Publicaciones off --}}
                     {{-- <a class="list-group-item list-group-item-action" href="#">
                         <div class="d-flex w-100 justify-content-between">
                             <h6 class="mb-1">Sería útil incluir más publicaciones sobre reciclaje de electrónicos.</h6>

@@ -13,7 +13,7 @@ class Inventario extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    // Timestamps custom
+    // timestamps
     const CREATED_AT = 'creado';
     const UPDATED_AT = 'actualizado';
 
@@ -55,7 +55,7 @@ class Inventario extends Model
         return $this->belongsTo(Inventario::class);
     }
 
-    /** Scopes para filtros de inventario */
+    // scopes inventario
     public function scopeForPunto($q, string $puntoId)
     {
         return $q->where('punto_eca_id', $puntoId);

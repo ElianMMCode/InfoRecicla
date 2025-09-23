@@ -29,19 +29,17 @@ use App\Models\Material;
 
 class AdminController extends Controller
 {
-    /**
-     * Actualiza o elimina un punto ECA desde la tabla editable del panel admin
-     */
+    // actualizar o eliminar punto eca
     public function updateOrDeleteEca(Request $request)
     {
-        // Eliminar
+        // eliminar
         if ($request->has('eliminar')) {
             $id = $request->input('eliminar');
             $punto = \App\Models\PuntoEca::findOrFail($id);
             $punto->delete();
             return back()->with('ok', 'Punto ECA eliminado');
         }
-        // Editar
+        // editar
         if ($request->has('editar')) {
             $id = $request->input('editar');
             $punto = \App\Models\PuntoEca::findOrFail($id);
@@ -54,13 +52,10 @@ class AdminController extends Controller
         }
         return back();
     }
-    /**
-     * Display a listing of the resource.
-     */
+    // dashboard admin
     public function indexAdmin(Request $request)
     {
-        // Mostrar Listado de Estadísticas Usuarios, Puntos ECA, Publicaciones
-
+        // stats
         $totalUsuarios  = Usuario::count();
         $totalAdmins   = Admin::where('rol', 'Administrador')->count();
         $totalGestores   = Admin::where('rol', 'GestorECA')->count();
@@ -68,7 +63,7 @@ class AdminController extends Controller
         $totalPuntosECAactivos = PuntoEca::where('estado', 'activo')->count();
         $totalPublicaciones = Publicaciones::count();
 
-        // Filtros para puntos ECA
+        // filtros eca
         $puntosECAQuery = PuntoEca::query();
         if ($request->filled('buscar_eca')) {
             $puntosECAQuery->where('nombre', 'like', '%' . $request->input('buscar_eca') . '%')
@@ -146,10 +141,10 @@ class AdminController extends Controller
             $materialesQuery->where('categoria_id', $request->input('categoria_material'));
         }
         $materiales = $materialesQuery->paginate(10)->appends($request->except('page'));
-        // Contador de stock total (suma de stock_actual de todos los inventarios activos)
+        // stock total
         $stockTotal = \App\Models\Inventario::where('activo', true)->sum('stock_actual');
 
-        // Contador de recolecciones de la semana actual
+        // recolecciones semana
         $inicioSemana = now()->startOfWeek();
         $finSemana = now()->endOfWeek();
         $recoleccionesSemana = \App\Models\ProgramacionRecoleccion::whereBetween('fecha', [$inicioSemana, $finSemana])->count();
@@ -180,9 +175,7 @@ class AdminController extends Controller
         return view('Administracion.administrador', $dataView);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // crear usuario
     public function store(StoreUsuarioRequest $request)
     {
         $data = $request->validated();
@@ -202,9 +195,9 @@ class AdminController extends Controller
             'estado' => 'activo',
             'creado' => now(),
             'actualizado' => now(),
-            // Si en tu tabla guardas el tipo/rol, respétalo:
+            // tipo
             'tipo' => $data['tipo'] ?? null,
-            // 'rol' => $data['tipo'] ?? null, // usa este si tu columna es 'rol' en vez de 'tipo'
+            // 'rol' => $data['tipo'] ?? null
         ];
 
         DB::transaction(function () use ($carga) {
@@ -225,9 +218,9 @@ class AdminController extends Controller
 
             $usuario = Usuario::create([
                 'id' => $usuarioId,
-                // En tu código usas 'rol' aquí; si en tu tabla realmente se llama 'tipo', cambia a 'tipo' y no dupliques.
+                // rol
                 'rol' => $data['tipo'],
-                'tipo' => $data['tipo'] ?? null, // déjalo si tu tabla también guarda 'tipo'
+                'tipo' => $data['tipo'] ?? null,
                 'correo' => $data['correo'],
                 'password' => Hash::make($data['password']),
                 'nombre' => $data['nombre'],
@@ -269,9 +262,7 @@ class AdminController extends Controller
     }
 
 
-    /**
-     * Display the specified resource.
-     */
+    // show usuario
     public function usuarioShow(Usuario $usuario)
     {
         return view('Administracion.usuario_show', compact('usuario'));
@@ -283,12 +274,7 @@ class AdminController extends Controller
 
 
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    /**
-     * Muestra y procesa el formulario de edición de usuario básico
-     */
+    // edit eca
     public function ecaEdit(PuntoEca $puntoECA)
     {
         return view('Administracion.eca_edit', compact('puntoECA'));
@@ -297,9 +283,7 @@ class AdminController extends Controller
 
 
 
-    /**
-     * Update the specified resource in storage.
-     */
+    // update usuarios
     public function updateUsuarios(StoreUsuarioRequest $request)
     {
         $data = $request->validated();
@@ -319,9 +303,9 @@ class AdminController extends Controller
             'estado' => 'activo',
             'creado' => now(),
             'actualizado' => now(),
-            // Si en tu tabla guardas el tipo/rol, respétalo:
+            // tipo
             'tipo' => $data['tipo'] ?? null,
-            // 'rol' => $data['tipo'] ?? null, // usa este si tu columna es 'rol' en vez de 'tipo'
+            // 'rol' => $data['tipo'] ?? null
         ];
 
         DB::transaction(function () use ($carga) {
@@ -340,9 +324,9 @@ class AdminController extends Controller
 
             $usuario = Usuario::create([
                 'id' => $usuarioId,
-                // En tu código usas 'rol' aquí; si en tu tabla realmente se llama 'tipo', cambia a 'tipo' y no dupliques.
+                // rol
                 'rol' => $data['tipo'],
-                'tipo' => $data['tipo'] ?? null, // déjalo si tu tabla también guarda 'tipo'
+                'tipo' => $data['tipo'] ?? null,
                 'correo' => $data['correo'],
                 'password' => Hash::make($data['password']),
                 'nombre' => $data['nombre'],
@@ -387,9 +371,7 @@ class AdminController extends Controller
 
 
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    // destroy usuario
     public function usuariosDestroy(string $id)
     {
         $usuario = Admin::findOrFail($id);
@@ -410,12 +392,7 @@ class AdminController extends Controller
         return view('Administracion.administrador');
     }
 
-    /**
-     * Muestra el formulario de edición de usuario básico
-     */
-    /**
-     * Muestra y procesa el formulario de edición de usuario básico
-     */
+    // edit usuario
     public function usuarioEdit(Request $request, $id)
     {
         $usuario = Usuario::findOrFail($id);

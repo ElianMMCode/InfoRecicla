@@ -1153,7 +1153,7 @@
                                                             @endforeach
                                                         </select>
                                                     </div>
-                                                    {{-- Input oculto que usa el script para unificar el valor enviado --}}
+                                                    {{-- Hidden para centro seleccionado --}}
                                                     <input type="hidden" name="venta[centro_acopio_id]"
                                                         id="centro_hidden"
                                                         value="{{ old('venta.centro_acopio_id') }}">

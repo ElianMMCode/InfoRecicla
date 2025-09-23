@@ -17,15 +17,7 @@ use Illuminate\Validation\Rule;
 
 class MovimientosController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    /**
-     * Muestra la vista de movimientos con los últimos movimientos de compra y venta
-     * 
-     * @param Request $request
-     * @return \Illuminate\View\View
-     */
+    // index movimientos
     public function index(Request $request)
     {
         // Mantengo index como alias a data() para compatibilidad (responde JSON)
@@ -33,18 +25,13 @@ class MovimientosController extends Controller
         return response()->json($payload + ['seccion' => 'movimientos']);
     }
 
-    /**
-     * Devuelve los últimos movimientos (compras + ventas) combinados (máx 10) y listas de centros filtrables.
-     * No renderiza vista: usado por PuntoEcaController como proveedor de datos.
-     *
-     * @return array
-     */
+    // data movimientos
     public function data(Request $request): array
     {
         $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', Auth::id())->first();
         $puntoEcaId = $punto->id;
 
-        // Últimas 10 compras
+        // compras
         $compras = Compra::query()
             ->with(['inventario.material:id,nombre'])
             ->whereHas('inventario', fn($q2) => $q2->where('punto_eca_id', $puntoEcaId))
@@ -64,7 +51,7 @@ class MovimientosController extends Controller
                 ];
             });
 
-        // Últimas 10 ventas
+        // ventas
         $ventas = Venta::query()
             ->with(['inventario.material:id,nombre'])
             ->whereHas('inventario', fn($q2) => $q2->where('punto_eca_id', $puntoEcaId))
@@ -84,7 +71,7 @@ class MovimientosController extends Controller
                 ];
             });
 
-        // Filtros nombre, tipo, localidad, estado, material
+        // filtros centros
         $f2 = $request->validate([
             'f_nombre' => ['nullable', 'string', 'max:150'],
             'f_tipo' => ['nullable', Rule::in(['Planta', 'Proveedor', 'Otro'])],
@@ -92,8 +79,7 @@ class MovimientosController extends Controller
             'f_material' => ['nullable', 'uuid', 'exists:materiales,id'],
         ]);
 
-        //filtros para los centros
-        //Esta vez se construye la consulta con los filtros para aplicarlo a la consulta de los centros tanto globales como propios
+        // filtros centros apply
         $applyFilters = function ($q) use ($f2) {
             return $q
                 ->when($f2['f_nombre'] ?? null, fn($qq, $v) => $qq->where('nombre', 'like', "%{$v}%"))
@@ -103,7 +89,7 @@ class MovimientosController extends Controller
                 ->when($f2['f_material'] ?? null, fn($qq, $v) => $qq->where('materiales_centro_acc', $v));
         };
 
-        // Combinar y ordenar movimientos
+        // merge movimientos
         $ultimosMovimientos = $compras->concat($ventas)
             ->sortByDesc('fecha')
             ->take(10)
@@ -112,7 +98,7 @@ class MovimientosController extends Controller
         $centrosGlobalesLista = CentroAcopio::query()
             ->select(['id', 'nombre'])
             ->where('alcance', 'global')
-            // con tap() le decimos que ejecute la consulta que le pasamos
+            // tap filtros
             ->tap($applyFilters)
             ->orderBy('nombre')
             ->get();
@@ -132,16 +118,13 @@ class MovimientosController extends Controller
         ];
     }
 
-    /**
-     * Historial completo paginado de compras y ventas (para tab historial si se requiere separar luego).
-     * De momento retorna arrays vacíos; se implementará en fase posterior si se externaliza del PuntoEcaController.
-     */
+    // historial
     public function dataHistorial(Request $request): array
     {
         $punto = DB::table('puntos_eca')->select('id', 'gestor_id')->where('gestor_id', Auth::id())->first();
         $puntoEcaId = $punto->id;
 
-        // Materiales del punto para selects
+        // materiales punto
         $materialesPunto = Inventario::query()
             ->where('punto_eca_id', $puntoEcaId)
             ->with('material:id,nombre')
@@ -150,13 +133,13 @@ class MovimientosController extends Controller
             ->unique('id')
             ->values();
 
-        // Filtros compras
+        // filtros compras
         $fc = $request->validate([
             'hc_desde' => ['nullable', 'date'],
             'hc_hasta' => ['nullable', 'date', 'after_or_equal:hc_desde'],
             'hc_material' => ['nullable', 'uuid', 'exists:materiales,id'],
         ]);
-        // Filtros ventas
+        // filtros ventas
         $fv = $request->validate([
             'hs_desde' => ['nullable', 'date'],
             'hs_hasta' => ['nullable', 'date', 'after_or_equal:hs_desde'],
@@ -189,22 +172,18 @@ class MovimientosController extends Controller
         ];
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    // create
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // store compra
     public function storeCompra(Request $request)
     {
         $userId = Auth::id();
 
-        // 1) Validación con namespacing "compra.*"
+        // validar compra
         $data = $request->validate([
             'compra.inventario_id' => ['required', 'uuid', 'exists:inventario,id'],
             'compra.cantidad' => ['required', 'numeric', 'gt:0'],
@@ -212,7 +191,7 @@ class MovimientosController extends Controller
             'compra.observaciones' => ['nullable', 'string', 'max:500'],
         ]);
 
-        // Normalizar cantidad a 2 decimales
+        // normalizar
         $data['compra']['cantidad'] = round((float)$data['compra']['cantidad'], 2);
         $precio = DB::table('inventario')->where('id', '=', $data['compra']['inventario_id'])->value('precio_compra');
         $precioCompra = round($data['compra']['cantidad'] * (float)$precio, 2);
@@ -220,18 +199,18 @@ class MovimientosController extends Controller
 
         $compra = $data['compra'];
 
-        // 2) Verificar pertenencia del inventario al Punto del gestor autenticado
+        // ownership
         $inv = Inventario::with('puntoEca:id,gestor_id')->findOrFail($compra['inventario_id']);
         if ($inv->puntoEca?->gestor_id !== $userId) {
             abort(403, 'No autorizado.');
         }
 
-        // 3) Transacción con bloqueo de fila para consistencia de stock
+        // tx + lock
         DB::transaction(function () use ($compra) {
-            // Bloquear la fila del inventario para esta operación
+            // lock
             $locked = Inventario::whereKey($compra['inventario_id'])->lockForUpdate()->firstOrFail();
 
-            // Crear la compra (entrada)
+            // crear
             Compra::create([
                 'inventario_id' => $locked->id,
                 'cantidad' => round($compra['cantidad'], 2),
@@ -240,7 +219,7 @@ class MovimientosController extends Controller
                 'precio_compra' => round($compra['precio_compra'], 2),
             ]);
 
-            // Sumar stock
+            // sumar stock
             $locked->increment('stock_actual', round($compra['cantidad'], 2));
         });
 
@@ -252,7 +231,7 @@ class MovimientosController extends Controller
     {
         $userId = Auth::id();
 
-        // 1) Validación con namespacing "venta.*"
+        // validar venta
         $data = $request->validate([
             'venta.inventario_id' => ['required', 'uuid', 'exists:inventario,id'],
             'venta.cantidad' => ['required', 'numeric', 'gt:0'],
@@ -266,25 +245,25 @@ class MovimientosController extends Controller
         $data['venta']['precio_venta'] = round((float)($data['venta']['precio_venta'] ?? 0), 2);
         $venta = $data['venta'];
 
-        // Verificar pertenencia del inventario al Punto del gestor autenticado
+        // ownership
         $inv = Inventario::with('puntoEca:id,gestor_id')->findOrFail($venta['inventario_id']);
         if ($inv->puntoEca?->gestor_id !== $userId) {
             abort(403, 'No autorizado.');
         }
 
-        // Transacción con bloqueo de fila y verificación de stock suficiente
+        // tx + lock
         DB::transaction(function () use ($venta) {
-            // Bloquear la fila del inventario para esta operación
+            // lock
             $locked = Inventario::whereKey($venta['inventario_id'])->lockForUpdate()->firstOrFail();
 
-            // Stock suficiente
+            // stock check
             if (($locked->stock_actual ?? 0) < $venta['cantidad']) {
                 throw ValidationException::withMessages([
                     'venta.cantidad' => 'Stock insuficiente para la salida.',
                 ]);
             }
 
-            // Crear la venta (salida)
+            // crear
             Venta::create([
                 'inventario_id' => $locked->id,
                 'cantidad' => round($venta['cantidad'], 2),
@@ -294,7 +273,7 @@ class MovimientosController extends Controller
                 'observaciones' => $venta['observaciones'] ?? null,
             ]);
 
-            // Restar stock
+            // restar stock
             $locked->decrement('stock_actual', round($venta['cantidad'], 2));
         });
 
@@ -302,33 +281,25 @@ class MovimientosController extends Controller
             ->with('ok', 'Salida registrada.');
     }
 
-    /**
-     * Display the specified resource.
-     */
+    // show
     public function show(string $id)
     {
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    // edit
     public function edit(string $id)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    // update
     public function update(Request $request, string $id)
     {
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
+    // destroy
     public function destroy(string $id)
     {
         //

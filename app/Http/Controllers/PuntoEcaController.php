@@ -18,29 +18,13 @@ use App\Http\Controllers\ProgramacionRecoleccionController;
 use App\Http\Controllers\CentroAcopioController;
 use App\Models\Usuario;
 
-/**
- * Controlador principal del panel de Punto ECA
- * 
- * Este controlador actúa como coordinador central del panel de Punto ECA,
- * delegando las funcionalidades específicas a controladores especializados
- * y manteniendo solo la lógica de coordinación y resumen general.
- */
+// panel punto eca
 class PuntoEcaController extends Controller
 {
-    /**
-     * Lista de secciones permitidas en el panel de Punto ECA
-     */
+    // secciones permitidas
     protected $permitidas = ['resumen', 'perfil', 'materiales', 'movimientos', 'historial', 'calendario', 'centros', 'conversaciones', 'configuracion'];
 
-    /**
-     * Controlador principal que coordina la vista del panel de Punto ECA
-     * Actúa como un coordinador que delega la lógica específica a otros controladores
-     * mientras mantiene la estructura general de la vista
-     * 
-     * @param Request $request
-     * @param string|null $seccion
-     * @return \Illuminate\View\View
-     */
+    // vista principal
     public function view_punto_eca(Request $request, $seccion = null)
     {
         // Validar y establecer sección por defecto
@@ -50,7 +34,7 @@ class PuntoEcaController extends Controller
 
         $usuario = Auth::user();
 
-        // Obtener datos básicos del punto ECA
+        // datos punto
         $punto = DB::table('puntos_eca')
             ->select(
                 'id',
@@ -76,7 +60,7 @@ class PuntoEcaController extends Controller
         $puntoEcaId = $punto->id;
 
 
-        // Datos base mínimos siempre presentes (evitar sobrecargar con consultas innecesarias)
+        // base
         $viewData = [
             'usuarios' => $usuario,
             'seccion' => $seccion,
@@ -87,7 +71,7 @@ class PuntoEcaController extends Controller
         // no es necesario inicializar placeholders para evitar "Undefined variable".
         // Solo cargaremos lo estrictamente necesario por sección.
 
-        // Delegar la lógica específica según la sección
+        // delegar
         switch ($seccion) {
             case 'materiales':
                 $materialController = new MaterialController();
@@ -96,11 +80,11 @@ class PuntoEcaController extends Controller
                 break;
 
             case 'movimientos':
-                // Últimos movimientos + listas de centros + inventario simple para selects
+                // movimientos
                 $movimientosController = new MovimientosController();
                 $movimientosData = $movimientosController->data($request);
 
-                // Inventario (colección simple) requerido para selects de entrada/salida
+                // inventario selects
                 $inventarioList = Inventario::query()
                     ->with('material:id,nombre')
                     ->where('punto_eca_id', $puntoEcaId)
@@ -119,11 +103,11 @@ class PuntoEcaController extends Controller
                 break;
 
             case 'calendario':
-                // Calendario + inventario reducido + listas de centros para programar despacho
+                // calendario
                 $calendarioController = new ProgramacionRecoleccionController();
                 $calData = $calendarioController->data($request);
 
-                // Filtros para centros (solo si se usan aquí)
+                // filtros centros
                 $f2 = $request->validate([
                     'f_nombre' => ['nullable', 'string', 'max:150'],
                     'f_tipo' => ['nullable', Rule::in(['Planta', 'Proveedor', 'Otro'])],
@@ -175,52 +159,47 @@ class PuntoEcaController extends Controller
                 break;
 
             case 'resumen':
-                // Lógica del resumen (KPIs y alertas)
+                // resumen
                 $viewData['resumen'] = $this->getResumenData($punto->id);
                 break;
         }
 
-        // Agregar configuración del usuario
+        // config usuario
         $viewData['config'] = [
             'mostrar_mapa' => (bool) ($punto->mostrar_mapa ?? false),
             'recibir_notificaciones' => (bool) (Auth::user()->recibe_notificaciones ?? false),
         ];
 
-        // No añadimos defaults genéricos: cada sección controla sus variables.
+        // sin defaults
 
         return view('PuntoECA.punto-eca', $viewData);
     }
 
-    /**
-     * Obtiene los datos del resumen (KPIs y alertas)
-     * 
-     * @param string $puntoEcaId
-     * @return array
-     */
+    // resumen data
     private function getResumenData($puntoEcaId)
     {
-        // Límites de mes actual para KPIs
+        // mes actual
         $inicioMes = Carbon::now()->startOfMonth()->toDateString();
         $finMes = Carbon::now()->endOfMonth()->toDateString();
 
-        // Inventario total (kg) = suma de stock_actual del punto
+        // inventario total
         $kpiInventario = (float) Inventario::query()
             ->where('punto_eca_id', $puntoEcaId)
             ->sum('stock_actual');
 
-        // Entradas del mes (kg) = suma de cantidad en Compras del mes
+        // entradas mes
         $kpiEntradasMes = (float) Compra::query()
             ->whereHas('inventario', fn($q) => $q->where('punto_eca_id', $puntoEcaId))
             ->whereBetween('fecha', [$inicioMes, $finMes])
             ->sum('cantidad');
 
-        // Salidas del mes (kg) = suma de cantidad en Ventas
+        // salidas mes
         $kpiSalidasMes = (float) Venta::query()
             ->whereHas('inventario', fn($q) => $q->where('punto_eca_id', $puntoEcaId))
             ->whereBetween('fecha', [$inicioMes, $finMes])
             ->sum('cantidad');
 
-        // Próximo despacho (si tiene ProgramacionRecoleccion)
+        // proximo despacho
         $proximo = ProgramacionRecoleccion::query()
             ->with(['material:id,nombre', 'centroAcopio:id,nombre'])
             ->where('punto_eca_id', $puntoEcaId)
@@ -244,7 +223,7 @@ class PuntoEcaController extends Controller
             );
         }
 
-        // Alertas por umbrales/capacidad según columnas del inventario
+        // alertas
         $alertas = [];
         $invParaAlertas = Inventario::query()
             ->with(['material:id,nombre'])

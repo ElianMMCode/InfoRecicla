@@ -186,7 +186,6 @@
     </div>
 
     @push('scripts')
-        <!-- Eliminado ciudadano.js antiguo: interceptaba el submit con IDs que ya no existen y prevenía el envío real -->
         <script>
             // Enfocar primer campo inválido si existe
             const invalid = document.querySelector('.is-invalid');

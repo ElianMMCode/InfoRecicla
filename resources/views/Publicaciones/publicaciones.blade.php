@@ -1,4 +1,4 @@
-{{-- Módulo de Publicaciones ocultado temporalmente. Conservamos el contenido para futura reactivación. --}}
+{{-- Publicaciones off --}}
 {{-- <x-app-layout>
 
     <link rel="stylesheet" href="css/Publicaciones/stylePublicaciones.css">

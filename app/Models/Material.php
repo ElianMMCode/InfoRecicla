@@ -28,7 +28,7 @@ class Material extends Model
         return $this->hasMany(Inventario::class);
     }
 
-    /** Filtros */
+    // filtros
     public function scopeBuscar($q, ?string $nombre)
     {
         return $q->when($nombre, fn($qq) => $qq->where('nombre', 'like', "%{$nombre}%"));

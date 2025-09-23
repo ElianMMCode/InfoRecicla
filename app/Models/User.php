@@ -46,7 +46,7 @@ class Usuario extends Authenticatable
         'actualizado'           => 'datetime',
     ];
 
-    // Hash automático si asignas password en claro:
+    // hash password
     public function setPasswordAttribute($value)
     {
         $this->attributes['password'] = Hash::needsRehash($value)
@@ -54,15 +54,11 @@ class Usuario extends Authenticatable
             : $value;
     }
 
-    // (Opcional) explícito, tu password ya se llama 'password':
+    // auth password
     public function getAuthPassword()
     {
         return $this->password;
     }
 
-    /**
-     * Verifica si el usuario posee uno o varios roles.
-     * @param string|array $roles Un rol o lista de roles a comparar
-     * @return bool
-     */
+    // roles
 }

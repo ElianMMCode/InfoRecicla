@@ -960,7 +960,7 @@
                                             </div>
                                         </div>
 
-                                        <!-- Campo oculto que se enviará en el formulario con la información de los centros -->
+                                        <!-- Hidden centro seleccionado -->
                                         <input type="hidden" name="venta[centro_acopio_id]" id="centro_hidden" class="@error('venta.centro_acopio_id') is-invalid @enderror">
 @error('venta.centro_acopio_id')
     <div class="invalid-feedback d-block">{{ $message }}</div>

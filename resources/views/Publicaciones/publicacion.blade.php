@@ -1,4 +1,4 @@
-{{-- Vista individual de Publicación ocultada temporalmente --}}
+{{-- Publicacion off --}}
 {{-- <x-app-layout>
 
     <link rel="stylesheet" href="/css/Publicaciones/stylePublicacion.css">

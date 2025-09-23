@@ -34,7 +34,7 @@
             <section class="bg-success text-white py-5">
                 <div class="container">
                     <div class="row g-4">
-                        {{-- Módulo Publicaciones temporalmente oculto --}}
+                        {{-- Publicaciones off --}}
                         {{-- <div class="col-md-6">
                             <a href="/publicaciones" class="text-decoration-none text-white">
                                 <div class="card h-100 bg-transparent shadow-lg border-white">
