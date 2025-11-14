@@ -1,0 +1,80 @@
+<!-- Fragment: Movimientos -->
+<section th:fragment="movimientos" class="container py-4">
+    <h2 class="h5 mb-3">Movimientos</h2>
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white"><strong>Registrar ENTRADA</strong></div>
+                <div class="card-body">
+                    <p class="small text-muted mb-2">Selecciona material y cantidad de entrada.</p>
+                    <div class="mb-2">
+                        <label class="form-label small" for="entradaMaterial">Material</label>
+                        <select id="entradaMaterial" class="form-select form-select-sm">
+                            <option selected>Selecciona...</option>
+                            <option>Ejemplo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small" for="entradaCantidad">Cantidad</label>
+                        <input id="entradaCantidad" type="number" step="0.01" class="form-control form-control-sm" placeholder="0.00">
+                    </div>
+                    <button type="button" class="btn btn-success btn-sm" disabled aria-disabled="true">Guardar entrada</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-danger text-white"><strong>Registrar SALIDA</strong></div>
+                <div class="card-body">
+                    <p class="small text-muted mb-2">Selecciona material y cantidad de salida.</p>
+                    <div class="mb-2">
+                        <label class="form-label small" for="salidaMaterial">Material</label>
+                        <select id="salidaMaterial" class="form-select form-select-sm">
+                            <option selected>Selecciona...</option>
+                            <option>Ejemplo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small" for="salidaCantidad">Cantidad</label>
+                        <input id="salidaCantidad" type="number" step="0.01" class="form-control form-control-sm" placeholder="0.00">
+                    </div>
+                    <button type="button" class="btn btn-danger btn-sm" disabled aria-disabled="true">Guardar salida</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card mt-2">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <strong>Últimos movimientos</strong>
+                    <span class="small text-light">0 registros</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle table-hover mb-0">
+                            <thead class="bg-success text-white small">
+                                <tr>
+                                    <th scope="col" style="width:110px;">Fecha</th>
+                                    <th scope="col" style="width:90px;">Tipo</th>
+                                    <th scope="col" style="min-width:140px;">Material</th>
+                                    <th scope="col" class="text-end" style="width:120px;">Cantidad</th>
+                                    <th scope="col" style="width:70px;">Unidad</th>
+                                    <th scope="col" class="text-end" style="width:100px;">Precio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table-success-subtle">
+                                    <td>—</td>
+                                    <td><span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle">Entrada</span></td>
+                                    <td class="fw-semibold">—</td>
+                                    <td class="text-end">0</td>
+                                    <td>kg</td>
+                                    <td class="text-end">0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
