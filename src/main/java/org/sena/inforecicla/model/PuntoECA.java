@@ -3,12 +3,9 @@ package org.sena.inforecicla.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.sena.inforecicla.model.base.EntidadLocalizacionWebHorario;
 import org.sena.inforecicla.model.enums.Estado;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,8 +26,8 @@ public class PuntoECA extends EntidadLocalizacionWebHorario {
 
     @Id
     @GeneratedValue
-    @Column(name = "gestor_id", updatable = false, nullable = false)
-    private UUID gestorId;
+    @Column(name = "punto_id")
+    private UUID puntoEcaID;
 
     @Column(name = "nombre_punto", nullable = false, length = 30)
     @NotBlank
@@ -63,20 +60,13 @@ public class PuntoECA extends EntidadLocalizacionWebHorario {
     @Column(nullable = false, length = 15)
     private Estado estado;
 
-    @CreationTimestamp
-    @Column(name = "fecha_creacion", nullable = false, updatable = false)
-    private LocalDateTime fechaCreacion;
-
-    @UpdateTimestamp
-    @Column(name = "fecha_actualizacion", nullable = false)
-    private LocalDateTime fechaActualizacion;
-
     @OneToOne
-    @MapsId
-    @JoinColumn(name = "gestor_id",nullable = false, foreignKey = @ForeignKey(name = "fk_puntoeca_gestor"))
+    @JoinColumn(name = "gestor_id",nullable = false, foreignKey = @ForeignKey(name = "fk_puntoeca_gestor"),insertable = false,updatable = false)
     private Usuario usuario;
 
     @OneToMany(mappedBy = "puntoEca", cascade = {CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
     private List<CentroAcopio> cntAcps;
 
+    @OneToMany(mappedBy = "puntoEca", cascade = {CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
+    private List<Inventario> inventarios;
 }

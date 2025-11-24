@@ -26,8 +26,7 @@ public class Usuario extends EntidadLocalizacion {
 
     @Id
     @GeneratedValue
-    @Column(name = "usuario_id")
-    private UUID id;
+    private UUID usuarioId;
 
     @Column(nullable = false, length = 30)
     @NotBlank
@@ -60,6 +59,12 @@ public class Usuario extends EntidadLocalizacion {
     @Column(name = "numero_documento", length = 20, unique = true)
     @Size(min = 6, max = 20, message = "El número de documento debe tener entre 6 y 20 caracteres")
     private String numeroDocumento;
+
+    @Pattern(
+            regexp = "^(19|20)\\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$",
+            message = "La fecha debe tener un formato válido YYYY-MM-DD"
+    )
+    private String fechaNacimiento;
 
     @Column(name = "foto_perfil")
     private String fotoPerfil;

@@ -57,4 +57,7 @@ public class CentroAcopio extends EntidadLocalizacionWebHorario {
     @ManyToOne
     @JoinColumn(name = "punto_eca_id", foreignKey = @ForeignKey(name = "fk_puntoeca_centroacopio"))
     private PuntoECA puntoEca;
+
+    @OneToOne(mappedBy = "ctrAcopio")
+    private VentaInventario ventaInventario;
 }
