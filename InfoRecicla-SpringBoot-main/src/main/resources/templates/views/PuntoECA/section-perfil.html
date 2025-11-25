@@ -1,0 +1,41 @@
+<!-- Fragment: Perfil Punto ECA -->
+<section th:fragment="perfil" class="container py-4">
+    <h2 class="h5 mb-4">Perfil del Punto ECA</h2>
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="mb-3">Encargado</h5>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <img src="/imagenes/perfil_default.png" alt="Foto encargado" class="rounded-circle img-thumbnail" style="width:96px;height:96px;object-fit:cover;">
+                        <div class="flex-grow-1">
+                            <div class="small text-muted">Nombre</div>
+                            <div class="fw-semibold" th:text="${nombre}">—</div>
+                            <div class="small text-muted mt-2">Correo</div>
+                            <div>—</div>
+                        </div>
+                    </div>
+                    <hr>
+                    <h6 class="mb-2">Contacto</h6>
+                    <div class="small text-muted">Teléfono</div>
+                    <div>—</div>
+                    <div class="small text-muted mt-2">Dirección</div>
+                    <div>—</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="mb-3">Resumen Operativo</h5>
+                    <div class="small text-muted">Capacidad total (kg)</div>
+                    <div class="fw-semibold">—</div>
+                    <div class="small text-muted mt-2">Estado</div>
+                    <div>—</div>
+                    <div class="small text-muted mt-2">Descripción</div>
+                    <p class="mb-0">—</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
