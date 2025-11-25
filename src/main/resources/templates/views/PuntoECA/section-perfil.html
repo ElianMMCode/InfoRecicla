@@ -1,41 +1,431 @@
 <!-- Fragment: Perfil Punto ECA -->
-<section th:fragment="perfil" class="container py-4">
-    <h2 class="h5 mb-4">Perfil del Punto ECA</h2>
-    <div class="row g-4">
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="mb-3">Encargado</h5>
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <img src="/imagenes/perfil_default.png" alt="Foto encargado" class="rounded-circle img-thumbnail" style="width:96px;height:96px;object-fit:cover;">
-                        <div class="flex-grow-1">
-                            <div class="small text-muted">Nombre</div>
-                            <div class="fw-semibold" th:text="${nombre}">—</div>
-                            <div class="small text-muted mt-2">Correo</div>
-                            <div>—</div>
-                        </div>
-                    </div>
-                    <hr>
-                    <h6 class="mb-2">Contacto</h6>
-                    <div class="small text-muted">Teléfono</div>
-                    <div>—</div>
-                    <div class="small text-muted mt-2">Dirección</div>
-                    <div>—</div>
+<section th:fragment="perfil" class="container-fluid py-4">
+    <!-- Header con título mejorado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between bg-primary bg-gradient text-white p-4 rounded-3 shadow-sm">
+                <div>
+                    <h2 class="h4 mb-1 fw-bold">
+                        <i class="bi bi-person-gear me-2"></i>Perfil del Punto ECA
+                    </h2>
+                    <p class="mb-0 opacity-75">Gestiona la información del encargado y datos del punto</p>
                 </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="mb-3">Resumen Operativo</h5>
-                    <div class="small text-muted">Capacidad total (kg)</div>
-                    <div class="fw-semibold">—</div>
-                    <div class="small text-muted mt-2">Estado</div>
-                    <div>—</div>
-                    <div class="small text-muted mt-2">Descripción</div>
-                    <p class="mb-0">—</p>
+                <div class="text-end">
+                    <span class="badge bg-light text-dark fs-6">En edición</span>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Formulario único -->
+    <form id="perfilForm" th:action="@{/punto-eca/{id}(id=${gestor.usuarioId})}" method="post" enctype="multipart/form-data">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <input type="hidden" name="usuarioId" th:value="${gestor.usuarioId}" />
+
+        <div class="row g-4">
+            <!-- Columna Izquierda: Encargado -->
+            <div class="col-xl-6 col-lg-12">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-success bg-gradient text-white py-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-person-circle me-2 fs-5"></i>
+                            <h5 class="mb-0 fw-semibold">Información del Encargado</h5>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Sección de foto de perfil -->
+                        <div class="text-center mb-4">
+                            <div class="position-relative d-inline-block">
+                                <img id="previewPerfil"
+                                     th:src="${gestor.fotoPerfil != null ? gestor.fotoPerfil : '/imagenes/perfil_default.png'}"
+                                     alt="Foto encargado"
+                                     class="rounded-circle img-thumbnail border-3 border-success shadow"
+                                     style="width:140px;height:140px;object-fit:cover;">
+                                <div class="position-absolute bottom-0 end-0 bg-success rounded-circle p-2">
+                                    <i class="bi bi-camera text-white"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <label for="fotoPerfil" class="form-label fw-semibold text-success">
+                                    <i class="bi bi-upload me-1"></i>Actualizar foto de perfil
+                                </label>
+                                <input class="form-control form-control-lg" type="file" id="fotoPerfil" name="fotoPerfil" accept="image/*">
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Nombres y Apellidos en una fila -->
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control form-control-lg border-2" id="nombres" name="nombres" th:value="${gestor.nombres}" placeholder="Nombres">
+                                    <label for="nombres" class="text-muted">
+                                        <i class="bi bi-person me-1"></i>Nombres
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control form-control-lg border-2" id="apellidos" name="apellidos" th:value="${gestor.apellidos}" placeholder="Apellidos">
+                                    <label for="apellidos" class="text-muted">
+                                        <i class="bi bi-person me-1"></i>Apellidos
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Email y teléfono -->
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="email" class="form-control form-control-lg border-2" id="email" name="email" th:value="${gestor.email}" placeholder="correo@ejemplo.com">
+                                    <label for="email" class="text-muted">
+                                        <i class="bi bi-envelope me-1"></i>Correo electrónico
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="tel" class="form-control form-control-lg border-2" id="celular" name="celular" th:value="${gestor.celular}" placeholder="Teléfono">
+                                    <label for="celular" class="text-muted">
+                                        <i class="bi bi-telephone me-1"></i>Teléfono / Celular
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Información adicional -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select form-control-lg border-2" id="tipoUsuario" name="tipoUsuario">
+                                        <option value="Admin" th:selected="${gestor.tipoUsuario?.name() == 'Admin'}">Administrador</option>
+                                        <option value="GestorECA" th:selected="${gestor.tipoUsuario?.name() == 'GestorECA'}">Gestor ECA</option>
+                                        <option value="Ciudadano" th:selected="${gestor.tipoUsuario?.name() == 'Ciudadano'}">Ciudadano</option>
+                                    </select>
+                                    <label for="tipoUsuario" class="text-muted">
+                                        <i class="bi bi-person-badge me-1"></i>Tipo de usuario
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select form-control-lg border-2" id="tipoDocumento" name="tipoDocumento">
+                                        <option value="CC" th:selected="${gestor.tipoDocumento?.name() == 'CC'}">Cédula de Ciudadanía</option>
+                                        <option value="TI" th:selected="${gestor.tipoDocumento?.name() == 'TI'}">Tarjeta de Identidad</option>
+                                        <option value="CE" th:selected="${gestor.tipoDocumento?.name() == 'CE'}">Cédula de Extranjería</option>
+                                        <option value="PP" th:selected="${gestor.tipoDocumento?.name() == 'PP'}">Pasaporte</option>
+                                    </select>
+                                    <label for="tipoDocumento" class="text-muted">
+                                        <i class="bi bi-card-text me-1"></i>Tipo de documento
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control form-control-lg border-2" id="numeroDocumento" name="numeroDocumento" th:value="${gestor.numeroDocumento}" placeholder="Número">
+                                    <label for="numeroDocumento" class="text-muted">
+                                        <i class="bi bi-123 me-1"></i>Número de documento
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control form-control-lg border-2" id="fechaNacimiento" name="fechaNacimiento" th:value="${gestor.fechaNacimiento}">
+                                    <label for="fechaNacimiento" class="text-muted">
+                                        <i class="bi bi-calendar-date me-1"></i>Fecha de nacimiento
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <label for="biografia" class="form-label fw-semibold text-muted">
+                                <i class="bi bi-chat-square-text me-1"></i>Biografía
+                            </label>
+                            <textarea class="form-control form-control-lg border-2" id="biografia" name="biografia" rows="4" th:text="${gestor.biografia}" placeholder="Descripción breve del encargado..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Datos del Punto ECA -->
+            <div class="col-xl-6 col-lg-12">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-info bg-gradient text-white py-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-geo-alt-fill me-2 fs-5"></i>
+                            <h5 class="mb-0 fw-semibold">Datos del Punto ECA</h5>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Sección de foto del punto -->
+                        <div class="text-center mb-4">
+                            <div class="position-relative d-inline-block">
+                                <img id="previewPunto"
+                                     th:src="${gestor.fotoPunto != null ? gestor.fotoPunto : '/imagenes/eca-default.png'}"
+                                     alt="Foto del punto ECA"
+                                     class="img-fluid rounded-3 img-thumbnail border-3 border-info shadow"
+                                     style="max-height:160px; object-fit:cover;">
+                                <div class="position-absolute bottom-0 end-0 bg-info rounded-circle p-2">
+                                    <i class="bi bi-building text-white"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <label for="fotoPunto" class="form-label fw-semibold text-info">
+                                    <i class="bi bi-upload me-1"></i>Actualizar foto del punto
+                                </label>
+                                <input class="form-control form-control-lg" type="file" id="fotoPunto" name="fotoPunto" accept="image/*">
+                            </div>
+                        </div>
+
+                        <!-- ID del punto (readonly con badge) -->
+                        <div class="alert alert-light border-info border-2 mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-hash text-info me-2"></i>
+                                <div>
+                                    <strong class="text-info">ID del Punto ECA</strong>
+                                    <div class="font-monospace text-muted" th:text="${gestor.puntoEcaId ?: 'No asignado'}">ID</div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="puntoEcaId" th:value="${gestor.puntoEcaId}">
+                        </div>
+
+                        <!-- Información básica del punto -->
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control form-control-lg border-2" id="nombrePunto" name="nombrePunto" th:value="${gestor.nombrePunto}" placeholder="Nombre del punto">
+                                    <label for="nombrePunto" class="text-muted">
+                                        <i class="bi bi-building me-1"></i>Nombre del Punto
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control form-control-lg border-2" id="direccionPunto" name="direccionPunto" th:value="${gestor.direccionPunto}" placeholder="Dirección">
+                                    <label for="direccionPunto" class="text-muted">
+                                        <i class="bi bi-geo-alt me-1"></i>Dirección completa
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Ubicación geográfica -->
+                        <h6 class="text-muted mb-3 fw-semibold">
+                            <i class="bi bi-map me-1"></i>Ubicación Geográfica
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control form-control-lg border-2" id="ciudadPunto" name="ciudadPunto" th:value="${gestor.ciudad ?: ''}" placeholder="Ciudad">
+                                    <label for="ciudadPunto" class="text-muted">
+                                        <i class="bi bi-buildings me-1"></i>Ciudad
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select form-control-lg border-2" id="localidadPunto" name="localidadPunto">
+                                        <option value="">Seleccione una localidad</option>
+                                        <option value="USAQUEN" th:selected="${gestor.localidadBogota?.name() == 'USAQUEN'}">Usaquén</option>
+                                        <option value="CHAPINERO" th:selected="${gestor.localidadBogota?.name() == 'CHAPINERO'}">Chapinero</option>
+                                        <option value="SANTA_FE" th:selected="${gestor.localidadBogota?.name() == 'SANTA_FE'}">Santa Fe</option>
+                                        <option value="SAN_CRISTOBAL" th:selected="${gestor.localidadBogota?.name() == 'SAN_CRISTOBAL'}">San Cristóbal</option>
+                                        <option value="USME" th:selected="${gestor.localidadBogota?.name() == 'USME'}">Usme</option>
+                                        <option value="TUNJUELITO" th:selected="${gestor.localidadBogota?.name() == 'TUNJUELITO'}">Tunjuelito</option>
+                                        <option value="BOSA" th:selected="${gestor.localidadBogota?.name() == 'BOSA'}">Bosa</option>
+                                        <option value="KENNEDY" th:selected="${gestor.localidadBogota?.name() == 'KENNEDY'}">Kennedy</option>
+                                        <option value="FONTIBON" th:selected="${gestor.localidadBogota?.name() == 'FONTIBON'}">Fontibón</option>
+                                        <option value="ENGATIVA" th:selected="${gestor.localidadBogota?.name() == 'ENGATIVA'}">Engativá</option>
+                                        <option value="SUBA" th:selected="${gestor.localidadBogota?.name() == 'SUBA'}">Suba</option>
+                                        <option value="BARRIOS_UNIDOS" th:selected="${gestor.localidadBogota?.name() == 'BARRIOS_UNIDOS'}">Barrios Unidos</option>
+                                        <option value="TEUSAQUILLO" th:selected="${gestor.localidadBogota?.name() == 'TEUSAQUILLO'}">Teusaquillo</option>
+                                        <option value="LOS_MARTIRES" th:selected="${gestor.localidadBogota?.name() == 'LOS_MARTIRES'}">Los Mártires</option>
+                                        <option value="ANTONIO_NARINO" th:selected="${gestor.localidadBogota?.name() == 'ANTONIO_NARINO'}">Antonio Nariño</option>
+                                        <option value="PUENTE_ARANDA" th:selected="${gestor.localidadBogota?.name() == 'PUENTE_ARANDA'}">Puente Aranda</option>
+                                        <option value="LA_CANDELARIA" th:selected="${gestor.localidadBogota?.name() == 'LA_CANDELARIA'}">La Candelaria</option>
+                                        <option value="RAFAEL_URIBE_URIBE" th:selected="${gestor.localidadBogota?.name() == 'RAFAEL_URIBE_URIBE'}">Rafael Uribe Uribe</option>
+                                        <option value="CIUDAD_BOLIVAR" th:selected="${gestor.localidadBogota?.name() == 'CIUDAD_BOLIVAR'}">Ciudad Bolívar</option>
+                                        <option value="SUMAPAZ" th:selected="${gestor.localidadBogota?.name() == 'SUMAPAZ'}">Sumapaz</option>
+                                    </select>
+                                    <label for="localidadPunto" class="text-muted">
+                                        <i class="bi bi-pin-map me-1"></i>Localidad
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Coordenadas con botón de geolocalización -->
+                        <div class="mt-3">
+                            <label for="coordenadas" class="form-label fw-semibold text-muted">
+                                <i class="bi bi-crosshair me-1"></i>Coordenadas GPS
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light border-2">
+                                    <i class="bi bi-geo-fill text-muted"></i>
+                                </span>
+                                <input type="text" class="form-control border-2" id="coordenadas" name="coordenadas" th:value="${gestor.coordenadasPunto ?: ''}" placeholder="Latitud, Longitud">
+                                <button class="btn btn-outline-info border-2 px-4" type="button" id="btnUbicacion">
+                                    <i class="bi bi-crosshair2 me-1"></i>Obtener ubicación
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Usa el botón para obtener automáticamente las coordenadas de tu ubicación actual
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Información adicional del punto -->
+                        <h6 class="text-muted mb-3 fw-semibold">
+                            <i class="bi bi-info-circle me-1"></i>Información Adicional
+                        </h6>
+
+                        <!-- Descripción del punto -->
+                        <div class="mb-3">
+                            <label for="descripcionPunto" class="form-label fw-semibold text-muted">
+                                <i class="bi bi-card-text me-1"></i>Descripción del Punto ECA
+                            </label>
+                            <textarea class="form-control form-control-lg border-2" id="descripcionPunto" name="descripcionPunto" rows="3" th:text="${gestor.descripcionPunto ?: ''}" placeholder="Descripción detallada del punto ECA..."></textarea>
+                        </div>
+
+                        <!-- Teléfonos de contacto del punto -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="tel" class="form-control form-control-lg border-2" id="telefonoPunto" name="telefonoPunto" th:value="${gestor.telefonoPunto ?: ''}" placeholder="Teléfono fijo">
+                                    <label for="telefonoPunto" class="text-muted">
+                                        <i class="bi bi-telephone me-1"></i>Teléfono del Punto
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="url" class="form-control form-control-lg border-2" id="logoPunto" name="logoPunto" th:value="${gestor.logoUrlPunto ?: ''}" placeholder="URL del logo">
+                                    <label for="logoPunto" class="text-muted">
+                                        <i class="bi bi-image me-1"></i>URL del Logo
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Logo del punto (preview) -->
+                        <div class="text-center mb-3" th:if="${gestor.logoUrlPunto != null and !#strings.isEmpty(gestor.logoUrlPunto)}">
+                            <div class="card border-2 border-info bg-light p-3 d-inline-block">
+                                <label class="form-label fw-semibold text-info mb-2">
+                                    <i class="bi bi-award me-1"></i>Logo del Punto ECA
+                                </label>
+                                <div>
+                                    <img th:src="${gestor.logoUrlPunto}"
+                                         alt="Logo del punto ECA"
+                                         class="img-fluid rounded shadow-sm"
+                                         style="max-height:80px; max-width:200px; object-fit:contain;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones de acción estilizados -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="d-flex justify-content-center gap-3">
+                    <button class="btn btn-success btn-lg shadow px-5 py-3" type="submit" name="action" value="guardar">
+                        <i class="bi bi-check-circle me-2"></i>Guardar Cambios
+                    </button>
+                    <button class="btn btn-outline-primary btn-lg px-5 py-3" type="submit" name="action" value="actualizar">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Actualizar
+                    </button>
+                    <button class="btn btn-outline-secondary btn-lg px-4 py-3" type="button" onclick="history.back()">
+                        <i class="bi bi-arrow-left me-2"></i>Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+    </div> <!-- Cierre del div condicional th:if="${gestor != null}" -->
 </section>
+
+<!-- Script mejorado con mejor UX -->
+<script>
+    // Previews para imágenes con animaciones
+    (function(){
+        const fotoPerfil = document.getElementById('fotoPerfil');
+        const fotoPunto = document.getElementById('fotoPunto');
+
+        fotoPerfil?.addEventListener('change', function(e){
+            const file = e.target.files[0];
+            if(!file) return;
+            const img = document.getElementById('previewPerfil');
+            img.style.opacity = '0.5';
+            setTimeout(() => {
+                img.src = URL.createObjectURL(file);
+                img.style.opacity = '1';
+            }, 200);
+        });
+
+        fotoPunto?.addEventListener('change', function(e){
+            const file = e.target.files[0];
+            if(!file) return;
+            const img = document.getElementById('previewPunto');
+            img.style.opacity = '0.5';
+            setTimeout(() => {
+                img.src = URL.createObjectURL(file);
+                img.style.opacity = '1';
+            }, 200);
+        });
+
+        // Geolocalización con mejor feedback
+        document.getElementById('btnUbicacion')?.addEventListener('click', function(){
+            const btn = this;
+            const originalText = btn.innerHTML;
+
+            if(!navigator.geolocation) {
+                alert('Geolocalización no soportada en este navegador');
+                return;
+            }
+
+            // Mostrar loading
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Obteniendo...';
+            btn.disabled = true;
+
+            navigator.geolocation.getCurrentPosition(pos => {
+                const lat = pos.coords.latitude.toFixed(6);
+                const lon = pos.coords.longitude.toFixed(6);
+                document.getElementById('coordenadas').value = lat + ', ' + lon;
+
+                // Restaurar botón
+                btn.innerHTML = '<i class="bi bi-check-circle me-1"></i>¡Obtenido!';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 2000);
+            }, err => {
+                alert('No se pudo obtener la ubicación: ' + err.message);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        });
+
+        // Añadir transiciones suaves a los elementos del formulario
+        document.querySelectorAll('.form-control, .form-select').forEach(input => {
+            input.style.transition = 'all 0.3s ease';
+            input.addEventListener('focus', function() {
+                this.style.transform = 'scale(1.02)';
+                this.style.boxShadow = '0 0 0 0.25rem rgba(13, 110, 253, 0.25)';
+            });
+            input.addEventListener('blur', function() {
+                this.style.transform = 'scale(1)';
+                this.style.boxShadow = '';
+            });
+        });
+    })();
+</script>
+
+<!-- Añadir Bootstrap Icons CDN si no está incluido -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">

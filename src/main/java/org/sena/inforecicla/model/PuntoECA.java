@@ -49,6 +49,9 @@ public class PuntoECA extends EntidadLocalizacionWebHorario {
     @Column(length = 150)
     private String direccion;
 
+    @Column(name = "coordenadas", length = 50)
+    private String coordenadas;
+
     @Column(name = "logo_url_punto")
     private String logoUrlPunto;
 
@@ -61,7 +64,7 @@ public class PuntoECA extends EntidadLocalizacionWebHorario {
     private Estado estado;
 
     @OneToOne
-    @JoinColumn(name = "gestor_id",nullable = false, foreignKey = @ForeignKey(name = "fk_puntoeca_gestor"),insertable = false,updatable = false)
+    @JoinColumn(name = "gestor_id", nullable = false, foreignKey = @ForeignKey(name = "fk_puntoeca_gestor"))
     private Usuario usuario;
 
     @OneToMany(mappedBy = "puntoEca", cascade = {CascadeType.MERGE, CascadeType.REMOVE}, orphanRemoval = true)
