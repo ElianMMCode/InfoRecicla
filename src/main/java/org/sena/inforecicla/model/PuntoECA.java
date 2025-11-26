@@ -37,6 +37,9 @@ public class PuntoECA extends EntidadLocalizacionWebHorario {
     @Column(length = 500)
     private String descripcion;
 
+    @Column(name = "gestor_id", insertable = false, updatable = false)
+    private UUID gestorId;
+
 
     @Pattern(
             regexp = "^60\\d{8}$",
