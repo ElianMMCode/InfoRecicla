@@ -1,5 +1,6 @@
 package org.sena.inforecicla.repository;
 
+import org.sena.inforecicla.dto.puntoEca.InventarioResponseDTO;
 import org.sena.inforecicla.model.Inventario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,15 +20,7 @@ public interface InventarioRepository extends JpaRepository<Inventario, UUID> {
                                        @Param("gestorId") UUID gestorId,
                                        @Param("materialId") UUID materialId);
 
-    //Busqueda por Punto Eca
-    @Query("SELECT i FROM Inventario i " +
-            "WHERE i.puntoEca.puntoEcaID = :puntoEcaId " +
-            "AND i.puntoEca.gestorId = :usuarioId")
-    List<Inventario> buscarPorPuntoEca(@Param("puntoEcaId") UUID puntoEcaId,
-                                       @Param("usuarioId") UUID usuarioId);
-
-
+    //Búsqueda por Punto Eca
+    List<Inventario> findAllByPuntoEca_PuntoEcaID(UUID puntoEcaId);
 //    List<Inventario> filtrarPorUmbral(UUID puntoEcaId, UUID usuarioId, Short umbral);
-
-
 }

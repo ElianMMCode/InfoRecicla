@@ -3,6 +3,7 @@ package org.sena.inforecicla.controller;
 import lombok.AllArgsConstructor;
 import org.sena.inforecicla.dto.usuario.UsuarioGestorResponseDTO;
 import org.sena.inforecicla.service.GestorEcaService;
+import org.sena.inforecicla.service.InventarioService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,38 +19,43 @@ import java.util.UUID;
 public class PuntoEcaController {
 
     private final GestorEcaService gestorEcaService;
+    private final InventarioService inventarioService;
 
     // Vista principal con usuarioId
-    @GetMapping("/{usuarioId}")
+    @GetMapping("/{nombrePunto}/{gestorId}")
     public String puntoEca(
-            @PathVariable UUID usuarioId,
+            @PathVariable String nombrePunto,
+            @PathVariable UUID gestorId,
             Model model
     ) {
-        UsuarioGestorResponseDTO usuario = gestorEcaService.buscarGestorPuntoEca(usuarioId);
+        UsuarioGestorResponseDTO usuario = gestorEcaService.buscarGestorPuntoEca(gestorId);
 
         model.addAttribute("usuario", usuario);
-        model.addAttribute("gestor", usuario);
+        model.addAttribute("gestor", usuario.nombrePunto());
         model.addAttribute("seccion", "resumen");
+        model.addAttribute("inventarios", inventarioService.mostrarInventariosPuntoEca(usuario.puntoEcaId()));
         return "views/PuntoECA/puntoECA-layout";
     }
 
     // Navegación: /punto-eca/{usuarioId}?seccion=materiales
-    @GetMapping(value = "/{usuarioId}", params = "seccion")
+    @GetMapping(value = "/{nombrePunto}/{gestorId}", params = "seccion")
     public String puntoEcaPorQuery(
-            @PathVariable UUID usuarioId,
+            @PathVariable String nombrePunto,
+            @PathVariable UUID gestorId,
             @RequestParam String seccion,
             Model model
-    ) {
-        UsuarioGestorResponseDTO usuario = gestorEcaService.buscarGestorPuntoEca(usuarioId);
+            ) {
+        UsuarioGestorResponseDTO usuario = gestorEcaService.buscarGestorPuntoEca(gestorId);
 
         model.addAttribute("usuario", usuario);
-        model.addAttribute("gestor", usuario);
+        model.addAttribute("gestor", usuario.nombrePunto());
         model.addAttribute("seccion", seccion);
+        model.addAttribute("inventarios", inventarioService.mostrarInventariosPuntoEca(usuario.puntoEcaId()));
         return "views/PuntoECA/puntoECA-layout";
     }
 
     // Navegación por path: /punto-eca/{usuarioId}/{seccion}
-    @GetMapping("/{usuarioId}/{seccion}")
+    @GetMapping("/{nombrePunto}/{usuarioId}/{seccion}")
     public String puntoEcaPorPath(
             @PathVariable UUID usuarioId,
             @PathVariable String seccion,
@@ -58,8 +64,9 @@ public class PuntoEcaController {
         UsuarioGestorResponseDTO usuario = gestorEcaService.buscarGestorPuntoEca(usuarioId);
 
         model.addAttribute("usuario", usuario);
-        model.addAttribute("gestor", usuario);
+        model.addAttribute("gestor", usuario.nombrePunto());
         model.addAttribute("seccion", seccion);
+        model.addAttribute("inventarios", inventarioService.mostrarInventariosPuntoEca(usuario.puntoEcaId()));
         return "views/PuntoECA/puntoECA-layout";
     }
 }

@@ -18,9 +18,10 @@
     </div>
 
     <!-- Formulario único -->
-    <form id="perfilForm" th:action="@{/punto-eca/{id}(id=${gestor.usuarioId})}" method="post" enctype="multipart/form-data">
+    <!--/*@thymesVar id="usuario" type="org.sena.inforecicla.dto.usuario.UsuarioGestorResponseDTO"*/-->
+    <form id="perfilForm" th:action="@{/punto-eca/{id}(id=${usuario.usuarioId})}" method="post" enctype="multipart/form-data">
         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-        <input type="hidden" name="usuarioId" th:value="${gestor.usuarioId}" />
+        <input type="hidden" name="usuarioId" th:value="${usuario.usuarioId}" />
 
         <div class="row g-4">
             <!-- Columna Izquierda: Encargado -->
@@ -37,7 +38,7 @@
                         <div class="text-center mb-4">
                             <div class="position-relative d-inline-block">
                                 <img id="previewPerfil"
-                                     th:src="${gestor.fotoPerfil != null ? gestor.fotoPerfil : '/imagenes/perfil_default.png'}"
+                                     th:src="${usuario.fotoPerfil != null ? usuario.fotoPerfil : '/imagenes/perfil_default.png'}"
                                      alt="Foto encargado"
                                      class="rounded-circle img-thumbnail border-3 border-success shadow"
                                      style="width:140px;height:140px;object-fit:cover;">
@@ -57,7 +58,7 @@
                             <!-- Nombres y Apellidos en una fila -->
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control form-control-lg border-2" id="nombres" name="nombres" th:value="${gestor.nombres}" placeholder="Nombres">
+                                    <input type="text" class="form-control form-control-lg border-2" id="nombres" name="nombres" th:value="${usuario.nombres}" placeholder="Nombres">
                                     <label for="nombres" class="text-muted">
                                         <i class="bi bi-person me-1"></i>Nombres
                                     </label>
@@ -65,7 +66,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control form-control-lg border-2" id="apellidos" name="apellidos" th:value="${gestor.apellidos}" placeholder="Apellidos">
+                                    <input type="text" class="form-control form-control-lg border-2" id="apellidos" name="apellidos" th:value="${usuario.apellidos}" placeholder="Apellidos">
                                     <label for="apellidos" class="text-muted">
                                         <i class="bi bi-person me-1"></i>Apellidos
                                     </label>
@@ -75,7 +76,7 @@
                             <!-- Email y teléfono -->
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="email" class="form-control form-control-lg border-2" id="email" name="email" th:value="${gestor.email}" placeholder="correo@ejemplo.com">
+                                    <input type="email" class="form-control form-control-lg border-2" id="email" name="email" th:value="${usuario.email}" placeholder="correo@ejemplo.com">
                                     <label for="email" class="text-muted">
                                         <i class="bi bi-envelope me-1"></i>Correo electrónico
                                     </label>
@@ -83,7 +84,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="tel" class="form-control form-control-lg border-2" id="celular" name="celular" th:value="${gestor.celular}" placeholder="Teléfono">
+                                    <input type="tel" class="form-control form-control-lg border-2" id="celular" name="celular" th:value="${usuario.celular}" placeholder="Teléfono">
                                     <label for="celular" class="text-muted">
                                         <i class="bi bi-telephone me-1"></i>Teléfono / Celular
                                     </label>
@@ -98,9 +99,9 @@
                             <div class="col-md-6">
                                 <div class="form-floating">
                                     <select class="form-select form-control-lg border-2" id="tipoUsuario" name="tipoUsuario">
-                                        <option value="Admin" th:selected="${gestor.tipoUsuario?.name() == 'Admin'}">Administrador</option>
-                                        <option value="GestorECA" th:selected="${gestor.tipoUsuario?.name() == 'GestorECA'}">Gestor ECA</option>
-                                        <option value="Ciudadano" th:selected="${gestor.tipoUsuario?.name() == 'Ciudadano'}">Ciudadano</option>
+                                        <option value="Admin" th:selected="${usuario.tipoUsuario?.name() == 'Admin'}">Administrador</option>
+                                        <option value="GestorECA" th:selected="${usuario.tipoUsuario?.name() == 'GestorECA'}">Gestor ECA</option>
+                                        <option value="Ciudadano" th:selected="${usuario.tipoUsuario?.name() == 'Ciudadano'}">Ciudadano</option>
                                     </select>
                                     <label for="tipoUsuario" class="text-muted">
                                         <i class="bi bi-person-badge me-1"></i>Tipo de usuario
@@ -110,10 +111,10 @@
                             <div class="col-md-6">
                                 <div class="form-floating">
                                     <select class="form-select form-control-lg border-2" id="tipoDocumento" name="tipoDocumento">
-                                        <option value="CC" th:selected="${gestor.tipoDocumento?.name() == 'CC'}">Cédula de Ciudadanía</option>
-                                        <option value="TI" th:selected="${gestor.tipoDocumento?.name() == 'TI'}">Tarjeta de Identidad</option>
-                                        <option value="CE" th:selected="${gestor.tipoDocumento?.name() == 'CE'}">Cédula de Extranjería</option>
-                                        <option value="PP" th:selected="${gestor.tipoDocumento?.name() == 'PP'}">Pasaporte</option>
+                                        <option value="CC" th:selected="${usuario.tipoDocumento?.name() == 'CC'}">Cédula de Ciudadanía</option>
+                                        <option value="TI" th:selected="${usuario.tipoDocumento?.name() == 'TI'}">Tarjeta de Identidad</option>
+                                        <option value="CE" th:selected="${usuario.tipoDocumento?.name() == 'CE'}">Cédula de Extranjería</option>
+                                        <option value="PP" th:selected="${usuario.tipoDocumento?.name() == 'PP'}">Pasaporte</option>
                                     </select>
                                     <label for="tipoDocumento" class="text-muted">
                                         <i class="bi bi-card-text me-1"></i>Tipo de documento
@@ -122,7 +123,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control form-control-lg border-2" id="numeroDocumento" name="numeroDocumento" th:value="${gestor.numeroDocumento}" placeholder="Número">
+                                    <input type="text" class="form-control form-control-lg border-2" id="numeroDocumento" name="numeroDocumento" th:value="${usuario.numeroDocumento}" placeholder="Número">
                                     <label for="numeroDocumento" class="text-muted">
                                         <i class="bi bi-123 me-1"></i>Número de documento
                                     </label>
@@ -130,7 +131,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="date" class="form-control form-control-lg border-2" id="fechaNacimiento" name="fechaNacimiento" th:value="${gestor.fechaNacimiento}">
+                                    <input type="date" class="form-control form-control-lg border-2" id="fechaNacimiento" name="fechaNacimiento" th:value="${usuario.fechaNacimiento}">
                                     <label for="fechaNacimiento" class="text-muted">
                                         <i class="bi bi-calendar-date me-1"></i>Fecha de nacimiento
                                     </label>
@@ -142,7 +143,7 @@
                             <label for="biografia" class="form-label fw-semibold text-muted">
                                 <i class="bi bi-chat-square-text me-1"></i>Biografía
                             </label>
-                            <textarea class="form-control form-control-lg border-2" id="biografia" name="biografia" rows="4" th:text="${gestor.biografia}" placeholder="Descripción breve del encargado..."></textarea>
+                            <textarea class="form-control form-control-lg border-2" id="biografia" name="biografia" rows="4" placeholder="Descripción breve del encargado...">[[${usuario.biografia}]]</textarea>
                         </div>
                     </div>
                 </div>
@@ -162,7 +163,7 @@
                         <div class="text-center mb-4">
                             <div class="position-relative d-inline-block">
                                 <img id="previewPunto"
-                                     th:src="${gestor.fotoPunto != null ? gestor.fotoPunto : '/imagenes/eca-default.png'}"
+                                     th:src="${usuario.fotoPunto() != null ? usuario.fotoPunto : '/imagenes/eca-default.png'}"
                                      alt="Foto del punto ECA"
                                      class="img-fluid rounded-3 img-thumbnail border-3 border-info shadow"
                                      style="max-height:160px; object-fit:cover;">
@@ -184,17 +185,17 @@
                                 <i class="bi bi-hash text-info me-2"></i>
                                 <div>
                                     <strong class="text-info">ID del Punto ECA</strong>
-                                    <div class="font-monospace text-muted" th:text="${gestor.puntoEcaId ?: 'No asignado'}">ID</div>
+                                    <div class="font-monospace text-muted" th:text="${usuario.puntoEcaId ?: 'No asignado'}">ID</div>
                                 </div>
                             </div>
-                            <input type="hidden" name="puntoEcaId" th:value="${gestor.puntoEcaId}">
+                            <input type="hidden" name="puntoEcaId" th:value="${usuario.puntoEcaId}">
                         </div>
 
                         <!-- Información básica del punto -->
                         <div class="row g-3">
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control form-control-lg border-2" id="nombrePunto" name="nombrePunto" th:value="${gestor.nombrePunto}" placeholder="Nombre del punto">
+                                    <input type="text" class="form-control form-control-lg border-2" id="nombrePunto" name="nombrePunto" th:value="${usuario.nombrePunto}" placeholder="Nombre del punto">
                                     <label for="nombrePunto" class="text-muted">
                                         <i class="bi bi-building me-1"></i>Nombre del Punto
                                     </label>
@@ -202,7 +203,7 @@
                             </div>
                             <div class="col-12">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control form-control-lg border-2" id="direccionPunto" name="direccionPunto" th:value="${gestor.direccionPunto}" placeholder="Dirección">
+                                    <input type="text" class="form-control form-control-lg border-2" id="direccionPunto" name="direccionPunto" th:value="${usuario.direccionPunto}" placeholder="Dirección">
                                     <label for="direccionPunto" class="text-muted">
                                         <i class="bi bi-geo-alt me-1"></i>Dirección completa
                                     </label>
@@ -219,7 +220,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control form-control-lg border-2" id="ciudadPunto" name="ciudadPunto" th:value="${gestor.ciudad ?: ''}" placeholder="Ciudad">
+                                    <input type="text" class="form-control form-control-lg border-2" id="ciudadPunto" name="ciudadPunto" th:value="${usuario.ciudad ?: ''}" placeholder="Ciudad">
                                     <label for="ciudadPunto" class="text-muted">
                                         <i class="bi bi-buildings me-1"></i>Ciudad
                                     </label>
@@ -229,26 +230,26 @@
                                 <div class="form-floating">
                                     <select class="form-select form-control-lg border-2" id="localidadPunto" name="localidadPunto">
                                         <option value="">Seleccione una localidad</option>
-                                        <option value="USAQUEN" th:selected="${gestor.localidadBogota?.name() == 'USAQUEN'}">Usaquén</option>
-                                        <option value="CHAPINERO" th:selected="${gestor.localidadBogota?.name() == 'CHAPINERO'}">Chapinero</option>
-                                        <option value="SANTA_FE" th:selected="${gestor.localidadBogota?.name() == 'SANTA_FE'}">Santa Fe</option>
-                                        <option value="SAN_CRISTOBAL" th:selected="${gestor.localidadBogota?.name() == 'SAN_CRISTOBAL'}">San Cristóbal</option>
-                                        <option value="USME" th:selected="${gestor.localidadBogota?.name() == 'USME'}">Usme</option>
-                                        <option value="TUNJUELITO" th:selected="${gestor.localidadBogota?.name() == 'TUNJUELITO'}">Tunjuelito</option>
-                                        <option value="BOSA" th:selected="${gestor.localidadBogota?.name() == 'BOSA'}">Bosa</option>
-                                        <option value="KENNEDY" th:selected="${gestor.localidadBogota?.name() == 'KENNEDY'}">Kennedy</option>
-                                        <option value="FONTIBON" th:selected="${gestor.localidadBogota?.name() == 'FONTIBON'}">Fontibón</option>
-                                        <option value="ENGATIVA" th:selected="${gestor.localidadBogota?.name() == 'ENGATIVA'}">Engativá</option>
-                                        <option value="SUBA" th:selected="${gestor.localidadBogota?.name() == 'SUBA'}">Suba</option>
-                                        <option value="BARRIOS_UNIDOS" th:selected="${gestor.localidadBogota?.name() == 'BARRIOS_UNIDOS'}">Barrios Unidos</option>
-                                        <option value="TEUSAQUILLO" th:selected="${gestor.localidadBogota?.name() == 'TEUSAQUILLO'}">Teusaquillo</option>
-                                        <option value="LOS_MARTIRES" th:selected="${gestor.localidadBogota?.name() == 'LOS_MARTIRES'}">Los Mártires</option>
-                                        <option value="ANTONIO_NARINO" th:selected="${gestor.localidadBogota?.name() == 'ANTONIO_NARINO'}">Antonio Nariño</option>
-                                        <option value="PUENTE_ARANDA" th:selected="${gestor.localidadBogota?.name() == 'PUENTE_ARANDA'}">Puente Aranda</option>
-                                        <option value="LA_CANDELARIA" th:selected="${gestor.localidadBogota?.name() == 'LA_CANDELARIA'}">La Candelaria</option>
-                                        <option value="RAFAEL_URIBE_URIBE" th:selected="${gestor.localidadBogota?.name() == 'RAFAEL_URIBE_URIBE'}">Rafael Uribe Uribe</option>
-                                        <option value="CIUDAD_BOLIVAR" th:selected="${gestor.localidadBogota?.name() == 'CIUDAD_BOLIVAR'}">Ciudad Bolívar</option>
-                                        <option value="SUMAPAZ" th:selected="${gestor.localidadBogota?.name() == 'SUMAPAZ'}">Sumapaz</option>
+                                        <option value="USAQUEN" th:selected="${usuario.localidadBogota?.name() == 'USAQUEN'}">Usaquén</option>
+                                        <option value="CHAPINERO" th:selected="${usuario.localidadBogota?.name() == 'CHAPINERO'}">Chapinero</option>
+                                        <option value="SANTA_FE" th:selected="${usuario.localidadBogota?.name() == 'SANTA_FE'}">Santa Fe</option>
+                                        <option value="SAN_CRISTOBAL" th:selected="${usuario.localidadBogota?.name() == 'SAN_CRISTOBAL'}">San Cristóbal</option>
+                                        <option value="USME" th:selected="${usuario.localidadBogota?.name() == 'USME'}">Usme</option>
+                                        <option value="TUNJUELITO" th:selected="${usuario.localidadBogota?.name() == 'TUNJUELITO'}">Tunjuelito</option>
+                                        <option value="BOSA" th:selected="${usuario.localidadBogota?.name() == 'BOSA'}">Bosa</option>
+                                        <option value="KENNEDY" th:selected="${usuario.localidadBogota?.name() == 'KENNEDY'}">Kennedy</option>
+                                        <option value="FONTIBON" th:selected="${usuario.localidadBogota?.name() == 'FONTIBON'}">Fontibón</option>
+                                        <option value="ENGATIVA" th:selected="${usuario.localidadBogota?.name() == 'ENGATIVA'}">Engativá</option>
+                                        <option value="SUBA" th:selected="${usuario.localidadBogota?.name() == 'SUBA'}">Suba</option>
+                                        <option value="BARRIOS_UNIDOS" th:selected="${usuario.localidadBogota?.name() == 'BARRIOS_UNIDOS'}">Barrios Unidos</option>
+                                        <option value="TEUSAQUILLO" th:selected="${usuario.localidadBogota?.name() == 'TEUSAQUILLO'}">Teusaquillo</option>
+                                        <option value="LOS_MARTIRES" th:selected="${usuario.localidadBogota?.name() == 'LOS_MARTIRES'}">Los Mártires</option>
+                                        <option value="ANTONIO_NARINO" th:selected="${usuario.localidadBogota?.name() == 'ANTONIO_NARINO'}">Antonio Nariño</option>
+                                        <option value="PUENTE_ARANDA" th:selected="${usuario.localidadBogota?.name() == 'PUENTE_ARANDA'}">Puente Aranda</option>
+                                        <option value="LA_CANDELARIA" th:selected="${usuario.localidadBogota?.name() == 'LA_CANDELARIA'}">La Candelaria</option>
+                                        <option value="RAFAEL_URIBE_URIBE" th:selected="${usuario.localidadBogota?.name() == 'RAFAEL_URIBE_URIBE'}">Rafael Uribe Uribe</option>
+                                        <option value="CIUDAD_BOLIVAR" th:selected="${usuario.localidadBogota?.name() == 'CIUDAD_BOLIVAR'}">Ciudad Bolívar</option>
+                                        <option value="SUMAPAZ" th:selected="${usuario.localidadBogota?.name() == 'SUMAPAZ'}">Sumapaz</option>
                                     </select>
                                     <label for="localidadPunto" class="text-muted">
                                         <i class="bi bi-pin-map me-1"></i>Localidad
@@ -266,7 +267,7 @@
                                 <span class="input-group-text bg-light border-2">
                                     <i class="bi bi-geo-fill text-muted"></i>
                                 </span>
-                                <input type="text" class="form-control border-2" id="coordenadas" name="coordenadas" th:value="${gestor.coordenadasPunto ?: ''}" placeholder="Latitud, Longitud">
+                                <input type="text" class="form-control border-2" id="coordenadas" name="coordenadas" th:value="${usuario.coordenadasPunto ?: ''}" placeholder="Latitud, Longitud">
                                 <button class="btn btn-outline-info border-2 px-4" type="button" id="btnUbicacion">
                                     <i class="bi bi-crosshair2 me-1"></i>Obtener ubicación
                                 </button>
@@ -289,14 +290,14 @@
                             <label for="descripcionPunto" class="form-label fw-semibold text-muted">
                                 <i class="bi bi-card-text me-1"></i>Descripción del Punto ECA
                             </label>
-                            <textarea class="form-control form-control-lg border-2" id="descripcionPunto" name="descripcionPunto" rows="3" th:text="${gestor.descripcionPunto ?: ''}" placeholder="Descripción detallada del punto ECA..."></textarea>
+                            <textarea class="form-control form-control-lg border-2" id="descripcionPunto" name="descripcionPunto" rows="3" placeholder="Descripción detallada del punto ECA..." th:value="${usuario.descripcionPunto ?: ''}"></textarea>
                         </div>
 
                         <!-- Teléfonos de contacto del punto -->
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="tel" class="form-control form-control-lg border-2" id="telefonoPunto" name="telefonoPunto" th:value="${gestor.telefonoPunto ?: ''}" placeholder="Teléfono fijo">
+                                    <input type="tel" class="form-control form-control-lg border-2" id="telefonoPunto" name="telefonoPunto" th:value="${usuario.telefonoPunto ?: ''}" placeholder="Teléfono fijo">
                                     <label for="telefonoPunto" class="text-muted">
                                         <i class="bi bi-telephone me-1"></i>Teléfono del Punto
                                     </label>
@@ -304,7 +305,7 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="url" class="form-control form-control-lg border-2" id="logoPunto" name="logoPunto" th:value="${gestor.logoUrlPunto ?: ''}" placeholder="URL del logo">
+                                    <input type="url" class="form-control form-control-lg border-2" id="logoPunto" name="logoPunto" th:value="${usuario.logoUrlPunto ?: ''}" placeholder="URL del logo">
                                     <label for="logoPunto" class="text-muted">
                                         <i class="bi bi-image me-1"></i>URL del Logo
                                     </label>
@@ -313,13 +314,13 @@
                         </div>
 
                         <!-- Logo del punto (preview) -->
-                        <div class="text-center mb-3" th:if="${gestor.logoUrlPunto != null and !#strings.isEmpty(gestor.logoUrlPunto)}">
+                        <div class="text-center mb-3" th:if="${usuario.logoUrlPunto != null and !#strings.isEmpty(usuario.logoUrlPunto)}">
                             <div class="card border-2 border-info bg-light p-3 d-inline-block">
                                 <label class="form-label fw-semibold text-info mb-2">
                                     <i class="bi bi-award me-1"></i>Logo del Punto ECA
                                 </label>
                                 <div>
-                                    <img th:src="${gestor.logoUrlPunto}"
+                                    <img th:src="${usuario.logoUrlPunto}"
                                          alt="Logo del punto ECA"
                                          class="img-fluid rounded shadow-sm"
                                          style="max-height:80px; max-width:200px; object-fit:contain;">
@@ -348,7 +349,6 @@
             </div>
         </div>
     </form>
-    </div> <!-- Cierre del div condicional th:if="${gestor != null}" -->
 </section>
 
 <!-- Script mejorado con mejor UX -->

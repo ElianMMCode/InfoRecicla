@@ -1,10 +1,13 @@
 package org.sena.inforecicla.dto.puntoEca;
 
+import lombok.Builder;
 import org.sena.inforecicla.model.enums.UnidadMedida;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Builder
 public record InventarioResponseDTO(
 
         //Datos del inventario
@@ -20,7 +23,8 @@ public record InventarioResponseDTO(
         String nombreMaterial,
         //Datos puntoEca
         UUID puntoEcaId,
-        String nombrePuntoEca
-
+        String nombrePuntoEca,
+        LocalDateTime fechaCreacion,
+        LocalDateTime fechaActualizacion
 ) {
 }
