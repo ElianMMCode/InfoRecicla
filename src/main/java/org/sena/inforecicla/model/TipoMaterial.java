@@ -21,6 +21,6 @@ public class TipoMaterial extends EntidadDescripcion {
     @Column(name = "tipo_material_id")
     private UUID tipoMtId;
 
-    @OneToMany(mappedBy = "material_id")
+    @OneToMany(mappedBy = "tipoMaterial")
     private List<Material> materiales;
 }

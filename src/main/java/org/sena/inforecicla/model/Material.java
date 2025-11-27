@@ -20,7 +20,7 @@ public class Material extends EntidadDescripcion {
     @Id
     @GeneratedValue
     @Column(name = "material_id")
-    private UUID material_id;
+    private UUID materialId;
 
     @Column(name = "imgen_url")
     private String imagenUrl;

@@ -21,7 +21,7 @@ public abstract class EntidadLocalizacion extends EntidadContacto {
 
     @NotNull(message = "Debe escoger una localidad")
     @Enumerated(EnumType.STRING)
-    @Column(name = "localidad", nullable = false, length = 20)
+    @Column(name = "localidad", nullable = false, length = 30)
     private LocalidadBogota localidad;
 
     @DecimalMin(value = "-90.0", message = "Latitud mínima permitida: -90.0")

@@ -15,7 +15,6 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @AttributeOverrides({
         @AttributeOverride(name = "celular", column = @Column(name = "celular", nullable = false, length = 10, unique = true)),
         @AttributeOverride(name = "email", column = @Column(name = "email", nullable = false, unique = true, length = 150)),

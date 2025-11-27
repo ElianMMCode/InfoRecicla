@@ -74,10 +74,10 @@ public class Inventario extends EntidadCreacionModificacion {
     @NotNull
     private PuntoECA puntoEca;
 
-    @OneToMany(mappedBy = "compraId", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "inventario", cascade = CascadeType.REMOVE)
     private List<CompraInventario> compras;
 
-    @OneToMany(mappedBy = "ventaId", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "inventario", cascade = CascadeType.REMOVE)
     private List<VentaInventario> ventas;
 
 
