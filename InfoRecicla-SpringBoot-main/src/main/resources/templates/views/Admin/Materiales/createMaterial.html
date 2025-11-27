@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Material</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-success">
+                <i class="fas fa-plus-circle me-2"></i>Crear Nuevo Material
+            </h2>
+            <a th:href="@{/materiales}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Volver al Dashboard
+            </a>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Información del nuevo material</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" th:action="@{/materiales/crear}" th:object="${material}" class="row g-3">
+                            <div class="col-md-12">
+                                <label for="nombre" class="form-label text-success fw-semibold">
+                                    <i class="fas fa-tag me-1"></i>Nombre del material
+                                </label>
+                                <input type="text" class="form-control" id="nombre" th:field="*{nombre}" 
+                                       placeholder="Ej: Botella PET, Papel Blanco, Cartón, etc." required>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <label for="descripcion" class="form-label text-success fw-semibold">
+                                    <i class="fas fa-align-left me-1"></i>Descripción
+                                </label>
+                                <textarea class="form-control" id="descripcion" th:field="*{descripcion}" 
+                                          rows="3" placeholder="Describe las características, usos y especificaciones del material..." required></textarea>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="categoria" class="form-label text-success fw-semibold">
+                                    <i class="fas fa-tags me-1"></i>Categoría
+                                </label>
+                                <select class="form-select" id="categoria" th:field="*{categoria.id}" required>
+                                    <option value="" disabled selected>Selecciona una categoría...</option>
+                                    <option th:each="categoria : ${categorias}" 
+                                            th:value="${categoria.id}" 
+                                            th:text="${categoria.nombre}">
+                                    </option>
+                                </select>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('categoria.id')}" th:errors="*{categoria.id}"></div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="tipo" class="form-label text-success fw-semibold">
+                                    <i class="fas fa-list-alt me-1"></i>Tipo
+                                </label>
+                                <select class="form-select" id="tipo" th:field="*{tipo.id}" required>
+                                    <option value="" disabled selected>Selecciona un tipo...</option>
+                                    <option th:each="tipo : ${tipos}" 
+                                            th:value="${tipo.id}" 
+                                            th:text="${tipo.nombre}">
+                                    </option>
+                                </select>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('tipo.id')}" th:errors="*{tipo.id}"></div>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="imagenUrl" class="form-label text-success fw-semibold">
+                                    <i class="fas fa-image me-1"></i>URL de la imagen (opcional)
+                                </label>
+                                <input type="url" class="form-control" id="imagenUrl" th:field="*{imagenUrl}" 
+                                       placeholder="https://ejemplo.com/imagen-material.jpg">
+                                <div class="form-text">Proporciona una URL de imagen para identificar visualmente el material.</div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="activo" th:field="*{activo}" checked>
+                                    <label class="form-check-label" for="activo">
+                                        Material activo (disponible para su uso inmediato)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a th:href="@{/materiales}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-1"></i>Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save me-1"></i>Crear Material
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Información de ayuda -->
+                <div class="card border-info mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Información importante
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="small mb-0">
+                            <li>Los nombres de materiales deben ser únicos y descriptivos</li>
+                            <li>Las descripciones ayudan a los usuarios a identificar correctamente los materiales</li>
+                            <li>Selecciona la categoría y tipo apropiados para una mejor organización</li>
+                            <li>Los materiales inactivos no estarán disponibles en los listados públicos</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
