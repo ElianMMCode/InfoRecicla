@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public enum LocalidadBogota {
 
     USAQUEN("Usaquén"),
@@ -30,6 +29,10 @@ public enum LocalidadBogota {
 
     private final String nombre;
 
+    LocalidadBogota(String nombre) {
+        this.nombre = nombre;
+    }
+
     /**
      * Buscar localidad por nombre exacto (insensible a mayúsculas).
      */
@@ -53,4 +56,3 @@ public enum LocalidadBogota {
         }
     }
 }
-

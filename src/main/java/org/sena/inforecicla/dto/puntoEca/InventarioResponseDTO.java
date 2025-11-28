@@ -11,6 +11,7 @@ import java.util.UUID;
 public record InventarioResponseDTO(
 
         //Datos del inventario
+        UUID inventarioId,
         BigDecimal capacidadMaxima,
         UnidadMedida unidadMedida,
         BigDecimal stockActual,

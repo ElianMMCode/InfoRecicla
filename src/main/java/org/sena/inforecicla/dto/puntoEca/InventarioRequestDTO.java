@@ -42,6 +42,11 @@ public record InventarioRequestDTO(
         BigDecimal precioVenta,
 
         @NotNull
+        @DecimalMin(value = "0.001", message = "El precio de compra debe ser mayor a 0")
+        @Digits(integer = 11, fraction = 2, message = "Formato inválido para precio de compra")
+        BigDecimal precioCompra,
+
+        @NotNull
         Material material,
 
         @NotNull
