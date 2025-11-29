@@ -32,11 +32,6 @@ public class Publicacion extends EntidadDescription {
     @NotBlank(message = "El contenido no puede estar vacío")
     private String contenido;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "estado", nullable = false, columnDefinition = "ENUM('borrador','publicado','archivado')")
-    @NotNull(message = "El estado es obligatorio")
-    private EstadoPublicacion estado;
-
     @OneToMany(mappedBy = "publicacion")
     private List<Publicacion> publicaciones;
 
