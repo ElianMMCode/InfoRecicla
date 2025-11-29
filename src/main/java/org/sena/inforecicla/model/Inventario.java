@@ -16,9 +16,9 @@ import java.util.UUID;
 @Table(name = "inventario")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Inventario extends EntidadCreacionModificacion {
 
     @Id
