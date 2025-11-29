@@ -37,14 +37,6 @@ public class Publicacion extends EntidadDescription {
     @NotNull(message = "El estado es obligatorio")
     private EstadoPublicacion estado;
 
-    @CreationTimestamp
-    @Column(name = "creado", nullable = false, updatable = false)
-    private LocalDateTime creado;
-
-    @UpdateTimestamp
-    @Column(name = "actualizado", nullable = false)
-    private LocalDateTime actualizado;
-
     @OneToMany(mappedBy = "publicacion")
     private List<Publicacion> publicaciones;
 
