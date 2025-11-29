@@ -6,23 +6,19 @@ import lombok.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "categorias_publicaciones")
+@Table(name = "categoria_publicacion")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CategoriaPublicacion {
+public class CategoriaPublicacion extends EntidadDescripcion {
 
     @Id
     @GeneratedValue
-    @Column(name = "id", columnDefinition = "CHAR(36)")
-    private UUID id;
+    @Column(name = "categoiraPublicacionId", unique = true, nullable = false)
+    private UUID categoiraPublicacionId;
 
-    @Column(name = "nombre", nullable = false, length = 100)
-    private String nombre;
-
-    @Column(name = "descripcion", length = 500)
-    private String descripcion;
-
+    @OneToMany(mappedBy = "ctgPublicacion")
+    private List<Publicacion> publicaciones;
 }

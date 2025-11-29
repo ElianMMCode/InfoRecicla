@@ -10,32 +10,17 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "publicaciones")
+@Table(name = "publicacion")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Publicacion {
+public class Publicacion extends EntidadDescription {
     @Id
     @GeneratedValue(Strategy = GenerationType IDENTITY)
     @Column(name = "publicacion_id", unique = true, nullable = false)
     private UUID publicacionId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "usuario_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_publicacion_usuario")
-    )
-    @NotNull(message = "El usuario es obligatorio")
-    private Usuario usuario;
-
-    @Column(name = "usuario_id", insertable = false, updatable = false")
-    private UUID usuarioId;
-
-    @Column(name = "categoria_id", insertable = false, updatable = false")
-    private UUID categoriaId;
 
     @Column(name = "titulo", nullable = false, length = 50)
     @NotBlank(message = "El ttulo no puede estar vacío")
@@ -52,13 +37,6 @@ public class Publicacion {
     @NotNull(message = "El estado es obligatorio")
     private EstadoPublicacion estado;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "categoria_id",
-            foreignKey = @ForeignKey(name = "fk_publicacion_categoria")
-    )
-    private CategoriaPublicacion categoria;
-
     @CreationTimestamp
     @Column(name = "creado", nullable = false, updatable = false)
     private LocalDateTime creado;
@@ -66,16 +44,34 @@ public class Publicacion {
     @UpdateTimestamp
     @Column(name = "actualizado", nullable = false)
     private LocalDateTime actualizado;
-}
+
+    @OneToMany(mappedBy = "publicacion")
+    private List<Publicacion> publicaciones;
+
+    @Column(name = "usuario_id", insertable = false, updatable = false")
+    private UUID usuarioId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "usuario_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_publicacion_usuario")
+    )
+    @NotNull(message = "El usuario es obligatorio")
+    private Usuario usuario;
+
+    @Column(name = "categoria_id", insertable = false, updatable = false")
+    private UUID categoriaId;
 
     @OneToOne
     @JoinColumn(name = "usuario_id", nullable = false, foreignKey = @ForeignKey(name = "fk_puntoeca_gestor"))
     private Usuario usuario;
 
-    @OneToOne
-    @JoinColumn(name = "categoria_id", nullable = false, foreignKey = @ForeignKey(name = "fk_puntoeca_gestor"))
-    private Categoria categoria;
-
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "categoria_publicacion_id", nullable =false,
+            foreignKey = @ForeignKey(name = "fk_publicacion_categoria")
+    )
+    @NotNull
+    private CategoriaPublicacion categoriaPublicacion;
 }
-
