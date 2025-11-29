@@ -5,152 +5,79 @@
     <!-- ACORDEÓN PRINCIPAL CON TODO -->
     <div class="accordion" id="acordeonMateriales">
 
-        <!-- Item 1: BÚSQUEDA Y FILTROS -->
+        <!--/*@thymesVar id="inventario" type="org.sena.inforecicla.dto.puntoEca.inventario.InventarioResponseDTO"*/-->
+        <!-- Item 1: AGREGAR MATERIAL AL INVENTARIO -->
         <div class="accordion-item border-0 shadow-sm mb-3">
-            <h2 class="accordion-header" id="headingBusqueda">
-                <button class="accordion-button bg-light text-dark fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBusqueda" aria-expanded="true" aria-controls="collapseBusqueda">
-                    <i class="bi bi-search text-success me-2"></i>Búsqueda y Filtros
+            <h2 class="accordion-header" id="headingAgregar">
+                <button class="accordion-button bg-light text-dark fw-semibold collapsed" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#collapseAgregar" aria-expanded="false"
+                        aria-controls="collapseAgregar">
+                    <i class="bi bi-plus-circle text-success me-2"></i>Agregar Material al Inventario
                 </button>
             </h2>
-            <div id="collapseBusqueda" class="accordion-collapse collapse show" aria-labelledby="headingBusqueda" data-bs-parent="#acordeonMateriales">
+            <div id="collapseAgregar" class="accordion-collapse collapse" aria-labelledby="headingAgregar"
+                 data-bs-parent="#acordeonMateriales">
                 <div class="accordion-body p-4">
-                    <!-- Búsqueda principal -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-12">
-                            <label for="busquedaMaterial" class="form-label fw-semibold text-muted mb-2">
-                                <i class="bi bi-search me-1"></i>Buscar Material
-                            </label>
-                            <div class="input-group input-group-lg">
-                                <span class="input-group-text bg-light border-2 border-success">
-                                    <i class="bi bi-search text-success"></i>
-                                </span>
-                                <input type="text"
-                                       class="form-control form-control-lg border-2 border-success"
-                                       id="busquedaMaterial"
-                                       placeholder="Buscar por nombre de material..."
-                                       style="transition: all 0.3s ease;">
-                                <button class="btn btn-outline-success border-2"
-                                        type="button"
-                                        id="btnLimpiarBusqueda"
-                                        title="Limpiar búsqueda">
-                                    <i class="bi bi-x-circle"></i> Limpiar
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted mb-1" for="buscarMaterialInput">Buscar Material</label>
+                            <div class="input-group">
+                                <input id="buscarMaterialInput" type="text" class="form-control"
+                                       placeholder="Nombre, código, categoría..." aria-label="Buscar material">
+                                <button id="btnAbrirBuscar" class="btn btn-outline-success" type="button"
+                                        data-bs-toggle="modal" data-bs-target="#buscarMaterialModal">
+                                    <i class="bi bi-search"></i> Buscar
                                 </button>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Filtros en grid -->
-                    <div class="row g-3 mb-4">
-                        <!-- Filtro por Estado -->
-                        <div class="col-md-6 col-lg-3">
-                            <label for="filtroEstado" class="form-label fw-semibold text-muted mb-2">
-                                <i class="bi bi-exclamation-triangle me-1"></i>Estado
-                            </label>
-                            <select class="form-select form-select-sm filtro-select"
-                                    id="filtroEstado"
-                                    data-tipo="estado">
-                                <option value="">Todos los estados</option>
-                                <option value="ok">✓ OK</option>
-                                <option value="alerta">⚠ Alerta</option>
-                                <option value="critico">✕ Crítico</option>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold text-muted mb-1" for="buscarUnidad">Unidad</label>
+                            <select id="buscarUnidad" class="form-select">
+                                <option value="">Todas</option>
+                                <option value="kg">kg</option>
+                                <option value="l">l</option>
+                                <option value="unidad">unidad</option>
                             </select>
                         </div>
 
-                        <!-- Filtro por Unidad de Medida -->
-                        <div class="col-md-6 col-lg-3">
-                            <label for="filtroUnidad" class="form-label fw-semibold text-muted mb-2">
-                                <i class="bi bi-ruler me-1"></i>Unidad de Medida
-                            </label>
-                            <select class="form-select form-select-sm filtro-select"
-                                    id="filtroUnidad"
-                                    data-tipo="unidad">
-                                <option value="">Todas las unidades</option>
-                                <option value="kg">Kilogramos (kg)</option>
-                                <option value="l">Litros (l)</option>
-                                <option value="m">Metros (m)</option>
-                                <option value="m2">Metros cuadrados (m²)</option>
-                                <option value="unidad">Unidades</option>
-                            </select>
-                        </div>
-
-                        <!-- Filtro por Rango de Ocupación -->
-                        <div class="col-md-6 col-lg-3">
-                            <label for="filtroOcupacion" class="form-label fw-semibold text-muted mb-2">
-                                <i class="bi bi-percent me-1"></i>Ocupación
-                            </label>
-                            <select class="form-select form-select-sm filtro-select"
-                                    id="filtroOcupacion"
-                                    data-tipo="ocupacion">
-                                <option value="">Cualquier ocupación</option>
-                                <option value="0-25">0% - 25%</option>
-                                <option value="25-50">25% - 50%</option>
-                                <option value="50-75">50% - 75%</option>
-                                <option value="75-100">75% - 100%</option>
-                            </select>
-                        </div>
-
-                        <!-- Filtro por Stock -->
-                        <div class="col-md-6 col-lg-3">
-                            <label for="filtroStock" class="form-label fw-semibold text-muted mb-2">
-                                <i class="bi bi-box2 me-1"></i>Stock
-                            </label>
-                            <select class="form-select form-select-sm filtro-select"
-                                    id="filtroStock"
-                                    data-tipo="stock">
-                                <option value="">Cualquier stock</option>
-                                <option value="vacio">Vacío</option>
-                                <option value="bajo">Bajo</option>
-                                <option value="medio">Medio</option>
-                                <option value="alto">Alto</option>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold text-muted mb-1" for="buscarCategoria">Categoría</label>
+                            <select id="buscarCategoria" class="form-select">
+                                <option value="">Todas</option>
+                                <option value="materia-prima">Materia Prima</option>
+                                <option value="consumible">Consumible</option>
+                                <option value="producto">Producto</option>
                             </select>
                         </div>
                     </div>
 
-                    <!-- Botones de acción -->
-                    <div class="row g-2">
+                    <div class="row mt-3">
                         <div class="col-auto">
-                            <button class="btn btn-sm btn-success"
-                                    type="button"
-                                    id="btnAplicarFiltros">
-                                <i class="bi bi-check-circle me-1"></i>Aplicar
-                            </button>
-                        </div>
-                        <div class="col-auto">
-                            <button class="btn btn-sm btn-outline-secondary"
-                                    type="button"
-                                    id="btnRestablecerFiltros">
-                                <i class="bi bi-arrow-clockwise me-1"></i>Restablecer
-                            </button>
-                        </div>
-                        <div class="col-auto">
-                            <span class="badge bg-info text-dark" id="resultadosInfo" style="display:none;">
-                                <i class="bi bi-funnel me-1"></i>Filtros Activos: <span id="contadorFiltros">0</span>
-                            </span>
-                        </div>
-                        <div class="col-auto ms-auto">
-                            <span class="badge bg-success" id="resultadosCount" style="display:none;">
-                                Mostrando <span id="resultadosCountNum">0</span> de <span id="totalCount">0</span>
-                            </span>
+                            <small class="text-muted">Pulse "Buscar" para ver coincidencias y seleccionar un material.</small>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Item 2: OCUPACIÓN DE INVENTARIO (TABLA) -->
+        <!-- Item 2: OCUPACIÓN DE INVENTARIO -->
         <div class="accordion-item border-0 shadow-sm mb-3">
             <h2 class="accordion-header" id="headingOcupacion">
-                <button class="accordion-button bg-light text-dark fw-semibold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOcupacion" aria-expanded="false" aria-controls="collapseOcupacion">
+                <button class="accordion-button bg-light text-dark fw-semibold collapsed" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#collapseOcupacion" aria-expanded="false"
+                        aria-controls="collapseOcupacion">
                     <i class="bi bi-graph-up text-success me-2"></i>Ocupación de Inventario
-                    <span class="badge bg-success ms-2" th:text="${#lists.size(inventarios)} + ' materiales'">0 materiales</span>
+                    <span class="badge bg-success ms-2" th:text="${#lists.size(inventario)} + ' materiales'">0 materiales</span>
                 </button>
             </h2>
-            <div id="collapseOcupacion" class="accordion-collapse collapse" aria-labelledby="headingOcupacion" data-bs-parent="#acordeonMateriales">
+            <div id="collapseOcupacion" class="accordion-collapse collapse" aria-labelledby="headingOcupacion"
+                 data-bs-parent="#acordeonMateriales">
                 <div class="accordion-body p-4">
-                    <div th:if="${#lists.isEmpty(inventarios)}" class="text-muted text-center py-3">
+                    <div th:if="${#lists.isEmpty(inventario)}" class="text-muted text-center py-3">
                         No hay datos de inventario disponibles
                     </div>
-                    <div class="table-responsive" th:if="${not #lists.isEmpty(inventarios)}">
+                    <div class="table-responsive" th:if="${not #lists.isEmpty(inventario)}">
                         <table class="table table-sm align-middle mb-0">
                             <thead class="bg-success text-white">
                                 <tr>
@@ -161,11 +88,12 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr th:each="inventario : ${inventarios}">
-                                    <!--/*@thymesVar id="inventario" type="org.sena.inforecicla.dto.puntoEca.InventarioResponseDTO"*/-->
+                                <tr th:each="inventario : ${inventario}">
                                     <td class="fw-semibold" th:text="${inventario.nombreMaterial()}">Material</td>
-                                    <td class="text-end" th:text="${#numbers.formatDecimal(inventario.stockActual(), 1, 'COMMA', 2, 'POINT')}">0.00</td>
-                                    <td class="text-end" th:text="${#numbers.formatDecimal(inventario.capacidadMaxima(), 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                                    <td class="text-end"
+                                        th:text="${#numbers.formatDecimal(inventario.stockActual(), 1, 'COMMA', 2, 'POINT')}">0.00</td>
+                                    <td class="text-end"
+                                        th:text="${#numbers.formatDecimal(inventario.capacidadMaxima(), 1, 'COMMA', 2, 'POINT')}">0.00</td>
                                     <td>
                                         <th:block th:with="ocupacion = ${(inventario.stockActual() / inventario.capacidadMaxima() * 100).intValue()}">
                                             <div class="progress" style="height:18px;">
@@ -183,28 +111,163 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="small text-muted mt-2">Colores: <span class="badge bg-success">OK</span> <span class="badge bg-warning">Alerta</span> <span class="badge bg-danger">Crítico</span></div>
+                    <div class="small text-muted mt-2">
+                        Colores: <span class="badge bg-success">OK</span> <span class="badge bg-warning">Alerta</span>
+                        <span class="badge bg-danger">Crítico</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Item 3: TARJETAS DE MATERIALES -->
-        <div class="accordion-item border-0 shadow-sm">
+        <!-- Item 3: MATERIALES EN INVENTARIO -->
+        <div class="accordion-item border-0 shadow-sm mb-3">
             <h2 class="accordion-header" id="headingTarjetas">
-                <button class="accordion-button bg-light text-dark fw-semibold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTarjetas" aria-expanded="false" aria-controls="collapseTarjetas">
-                    <i class="bi bi-collection text-success me-2"></i>Tarjetas de Materiales
-                    <span class="badge bg-success ms-2" th:text="${#lists.size(inventarios)} + ' items'">0 items</span>
+                <button class="accordion-button bg-light text-dark fw-semibold" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#collapseTarjetas"
+                        aria-expanded="true" aria-controls="collapseTarjetas">
+                    <i class="bi bi-collection text-success me-2"></i>Materiales en Inventario
+                    <span class="badge bg-success ms-2" th:text="${#lists.size(inventario)} + ' items'">0 items</span>
                 </button>
             </h2>
-            <div id="collapseTarjetas" class="accordion-collapse collapse" aria-labelledby="headingTarjetas" data-bs-parent="#acordeonMateriales">
+            <div id="collapseTarjetas" class="accordion-collapse collapse show"
+                 aria-labelledby="headingTarjetas" data-bs-parent="#acordeonMateriales">
                 <div class="accordion-body p-4">
-                    <div th:if="${#lists.isEmpty(inventarios)}" class="alert alert-info" role="alert">
+                    <div class="accordion mb-4" id="acordeonFiltrosTarjetas">
+                        <div class="accordion-item border-0 shadow-sm">
+                            <h2 class="accordion-header" id="headingBusquedaTarjetas">
+                                <button class="accordion-button bg-light text-dark fw-semibold" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#collapseBusquedaTarjetas"
+                                        aria-expanded="true" aria-controls="collapseBusquedaTarjetas">
+                                    <i class="bi bi-search text-success me-2"></i>Búsqueda y Filtros
+                                </button>
+                            </h2>
+                            <div id="collapseBusquedaTarjetas" class="accordion-collapse collapse show"
+                                 aria-labelledby="headingBusquedaTarjetas" data-bs-parent="#acordeonFiltrosTarjetas">
+                                <div class="accordion-body p-4">
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-12">
+                                            <label for="busquedaMaterial" class="form-label fw-semibold text-muted mb-2">
+                                                <i class="bi bi-search me-1"></i>Buscar Material
+                                            </label>
+                                            <div class="input-group input-group-lg">
+                                                <span class="input-group-text bg-light border-2 border-success">
+                                                    <i class="bi bi-search text-success"></i>
+                                                </span>
+                                                <input type="text"
+                                                       class="form-control form-control-lg border-2 border-success"
+                                                       id="busquedaMaterial"
+                                                       placeholder="Buscar por nombre de material..."
+                                                       style="transition: all 0.3s ease;">
+                                                <button class="btn btn-outline-success border-2"
+                                                        type="button"
+                                                        id="btnLimpiarBusqueda"
+                                                        title="Limpiar búsqueda">
+                                                    <i class="bi bi-x-circle"></i> Limpiar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-md-6 col-lg-3">
+                                            <label for="filtroEstado" class="form-label fw-semibold text-muted mb-2">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>Estado
+                                            </label>
+                                            <select class="form-select form-select-sm filtro-select"
+                                                    id="filtroEstado"
+                                                    data-tipo="estado">
+                                                <option value="">Todos los estados</option>
+                                                <option value="ok">✓ OK</option>
+                                                <option value="alerta">⚠ Alerta</option>
+                                                <option value="critico">✕ Crítico</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6 col-lg-3">
+                                            <label for="filtroUnidad" class="form-label fw-semibold text-muted mb-2">
+                                                <i class="bi bi-ruler me-1"></i>Unidad de Medida
+                                            </label>
+                                            <select class="form-select form-select-sm filtro-select"
+                                                    id="filtroUnidad"
+                                                    data-tipo="unidad">
+                                                <option value="">Todas las unidades</option>
+                                                <option value="kg">Kilogramos (kg)</option>
+                                                <option value="l">Litros (l)</option>
+                                                <option value="m">Metros (m)</option>
+                                                <option value="m2">Metros cuadrados (m²)</option>
+                                                <option value="unidad">Unidades</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6 col-lg-3">
+                                            <label for="filtroOcupacion" class="form-label fw-semibold text-muted mb-2">
+                                                <i class="bi bi-percent me-1"></i>Ocupación
+                                            </label>
+                                            <select class="form-select form-select-sm filtro-select"
+                                                    id="filtroOcupacion"
+                                                    data-tipo="ocupacion">
+                                                <option value="">Cualquier ocupación</option>
+                                                <option value="0-25">0% - 25%</option>
+                                                <option value="25-50">25% - 50%</option>
+                                                <option value="50-75">50% - 75%</option>
+                                                <option value="75-100">75% - 100%</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6 col-lg-3">
+                                            <label for="filtroStock" class="form-label fw-semibold text-muted mb-2">
+                                                <i class="bi bi-box2 me-1"></i>Stock
+                                            </label>
+                                            <select class="form-select form-select-sm filtro-select"
+                                                    id="filtroStock"
+                                                    data-tipo="stock">
+                                                <option value="">Cualquier stock</option>
+                                                <option value="vacio">Vacío</option>
+                                                <option value="bajo">Bajo</option>
+                                                <option value="medio">Medio</option>
+                                                <option value="alto">Alto</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-2">
+                                        <div class="col-auto">
+                                            <button class="btn btn-sm btn-success"
+                                                    type="button"
+                                                    id="btnAplicarFiltros">
+                                                <i class="bi bi-check-circle me-1"></i>Aplicar
+                                            </button>
+                                        </div>
+                                        <div class="col-auto">
+                                            <button class="btn btn-sm btn-outline-secondary"
+                                                    type="button"
+                                                    id="btnRestablecerFiltros">
+                                                <i class="bi bi-arrow-clockwise me-1"></i>Restablecer
+                                            </button>
+                                        </div>
+                                        <div class="col-auto">
+                                            <span class="badge bg-info text-dark" id="resultadosInfo" style="display:none;">
+                                                <i class="bi bi-funnel me-1"></i>Filtros Activos: <span id="contadorFiltros">0</span>
+                                            </span>
+                                        </div>
+                                        <div class="col-auto ms-auto">
+                                            <span class="badge bg-success" id="resultadosCount" style="display:none;">
+                                                Mostrando <span id="resultadosCountNum">0</span> de <span id="totalCount">0</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(inventario)}" class="alert alert-info" role="alert">
                         <strong>Sin materiales</strong> - No hay materiales registrados en el inventario.
                     </div>
 
-                    <div class="row g-4" th:if="${not #lists.isEmpty(inventarios)}" id="contenedorMateriales">
+                    <div class="row g-4" th:if="${not #lists.isEmpty(inventario)}" id="contenedorMateriales">
             <div class="col-12 col-md-6 col-lg-4 tarjeta-material"
-                 th:each="inventario : ${inventarios}"
+                 th:each="inventario : ${inventario}"
                  th:data-nombre-material="${inventario.nombreMaterial()}"
                  th:data-unidad-medida="${inventario.unidadMedida()}"
                  th:with="ocupacion = ${(inventario.stockActual() / inventario.capacidadMaxima() * 100).intValue()}">
@@ -291,7 +354,6 @@
 
                     <!-- Botón de detalles -->
                     <div class="card-footer bg-light border-top d-grid gap-2">
-                        <!-- DEBUG: inventarioId = [[${inventario.inventarioId()}]] -->
                         <button type="button" class="btn btn-success btn-sm detallesBtn"
                                 th:data-inventario-id="${inventario.inventarioId() != null ? inventario.inventarioId() : ''}"
                                 th:data-material-id="${inventario.materialId() != null ? inventario.materialId() : ''}"
@@ -309,10 +371,10 @@
                 </div>
             </div>
         </div>
-                    </div>
                 </div>
             </div>
         </div>
+
     </div>
 
 </section>
@@ -612,7 +674,107 @@
     </div>
 </div>
 
-</section>
+<!-- Modal: Resultados de Búsqueda -->
+<div class="modal fade" id="buscarMaterialModal" tabindex="-1" aria-labelledby="buscarMaterialModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="buscarMaterialModalLabel"><i class="bi bi-search me-2"></i>Buscar Material</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Contenedor donde se inyectarán los resultados -->
+                <div id="resultadosBusqueda" class="list-group">
+                    <!-- Ejemplo estático (el backend llenará dinámicamente) -->
+                    <button type="button" class="list-group-item list-group-item-action resultado-material-item d-flex justify-content-between align-items-start"
+                            data-material-id="MAT-001"
+                            data-nombre="Arena Lavada"
+                            data-unidad="kg"
+                            data-categoria="materia-prima">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-semibold">Arena Lavada</div>
+                            <small class="text-muted">MAT-001 · kg · Materia Prima</small>
+                        </div>
+                        <span class="badge bg-success rounded-pill">Seleccionar</span>
+                    </button>
+
+                    <!-- Placeholder para que el desarrollador reemplace por resultados dinámicos -->
+                </div>
+            </div>
+            <div class="modal-footer border-top bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Formulario para Agregar Material al Inventario -->
+<div class="modal fade" id="agregarInventarioModal" tabindex="-1" aria-labelledby="agregarInventarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="agregarInventarioModalLabel"><i class="bi bi-plus-circle me-2"></i>Agregar Material al Inventario</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form id="formAgregarInventario" novalidate>
+                <div class="modal-body">
+                    <input type="hidden" id="agregarMaterialId" name="materialId">
+
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold" for="agregarMaterialNombre">Nombre del Material</label>
+                            <input id="agregarMaterialNombre" class="form-control" type="text" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold" for="agregarMaterialUnidad">Unidad</label>
+                            <input id="agregarMaterialUnidad" class="form-control" type="text" readonly>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold" for="agregarStock">Stock Inicial</label>
+                            <input id="agregarStock" class="form-control" type="number" step="0.01" min="0" placeholder="0.00" required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold" for="agregarCapacidad">Capacidad Máxima</label>
+                            <input id="agregarCapacidad" class="form-control" type="number" step="0.01" min="0" placeholder="0.00" required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold" for="agregarPrecioCompra">Precio Compra</label>
+                            <input id="agregarPrecioCompra" class="form-control" type="number" step="0.01" min="0" placeholder="0.00">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold" for="agregarPrecioVenta">Precio Venta</label>
+                            <input id="agregarPrecioVenta" class="form-control" type="number" step="0.01" min="0" placeholder="0.00">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold" for="agregarUmbralAlerta">Umbral Alerta (%)</label>
+                            <input id="agregarUmbralAlerta" class="form-control" type="number" min="0" max="100" placeholder="Ej. 70">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold" for="agregarUmbralCritico">Umbral Crítico (%)</label>
+                            <input id="agregarUmbralCritico" class="form-control" type="number" min="0" max="100" placeholder="Ej. 90">
+                        </div>
+
+                        <div class="col-12">
+                            <small class="text-muted">Notas: campos de solo lectura provienen del catálogo de materiales. El resto son configurables al crear el inventario.</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button id="btnGuardarInventario" type="button" class="btn btn-success">Guardar en Inventario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- Script para manejar el modal de detalles y filtros -->
 <script>
@@ -947,5 +1109,57 @@
     });
 </script>
 
-<!-- Script removido: ahora está en puntoECA-layout.html -->
+<!-- Script UI: transferir selección de resultados al formulario (solo UI, sin lógica de persistencia) -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Delegación: al hacer click en un resultado se abre el modal de agregar y se llenan campos
+    const resultadosCont = document.getElementById('resultadosBusqueda');
 
+    if (resultadosCont) {
+        resultadosCont.addEventListener('click', function (e) {
+            const item = e.target.closest('.resultado-material-item');
+            if (!item) return;
+
+            // Leer atributos del resultado
+            const materialId = item.dataset.materialId || '';
+            const nombre = item.dataset.nombre || '';
+            const unidad = item.dataset.unidad || '';
+
+            // Llenar formulario del modal de agregar
+            const inputId = document.getElementById('agregarMaterialId');
+            const inputNombre = document.getElementById('agregarMaterialNombre');
+            const inputUnidad = document.getElementById('agregarMaterialUnidad');
+            if (inputId) inputId.value = materialId;
+            if (inputNombre) inputNombre.value = nombre;
+            if (inputUnidad) inputUnidad.value = unidad;
+
+            // Cerrar modal de búsqueda y abrir modal de agregar
+            const buscarModalEl = document.getElementById('buscarMaterialModal');
+            const buscarModal = bootstrap.Modal.getInstance(buscarModalEl) || new bootstrap.Modal(buscarModalEl);
+            try { buscarModal.hide(); } catch (err) { /* no-op */ }
+
+            const agregarModalEl = document.getElementById('agregarInventarioModal');
+            const agregarModal = new bootstrap.Modal(agregarModalEl);
+            agregarModal.show();
+        });
+    }
+
+    // Botón Guardar: solo cierra modal por ahora (la lógica real la implementará el backend)
+    const btnGuardar = document.getElementById('btnGuardarInventario');
+    if (btnGuardar) {
+        btnGuardar.addEventListener('click', function () {
+            const agregarModalEl = document.getElementById('agregarInventarioModal');
+            const agregarModal = bootstrap.Modal.getInstance(agregarModalEl) || new bootstrap.Modal(agregarModalEl);
+            try { agregarModal.hide(); } catch (err) { /* no-op */ }
+        });
+    }
+
+    // Abrir búsqueda: opcionalmente se puede disparar una búsqueda usando los filtros
+    const btnAbrir = document.getElementById('btnAbrirBuscar');
+    if (btnAbrir) {
+        btnAbrir.addEventListener('click', function () {
+            // Placeholder: el desarrollador puede implementar la llamada que llene #resultadosBusqueda
+        });
+    }
+});
+</script>

@@ -1,8 +1,8 @@
 package org.sena.inforecicla.service;
 
 import lombok.RequiredArgsConstructor;
-import org.sena.inforecicla.dto.puntoEca.InventarioResponseDTO;
-import org.sena.inforecicla.dto.puntoEca.InventarioUpdateDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.InventarioResponseDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.InventarioUpdateDTO;
 import org.sena.inforecicla.exception.InventarioNotFoundException;
 import org.sena.inforecicla.model.Inventario;
 import org.sena.inforecicla.repository.InventarioRepository;
@@ -23,7 +23,7 @@ public class InventarioService {
     private final MaterialRepository materialRepository;
     private final InventarioRepository inventarioRepository;
 
-    public List<InventarioResponseDTO> mostrarInventariosPuntoEca(UUID puntoId) {
+    public List<InventarioResponseDTO> mostrarInventarioPuntoEca(UUID puntoId) {
 
         List<Inventario> inv = inventarioRepository.findAllByPuntoEca_PuntoEcaID(puntoId);
 
@@ -62,7 +62,6 @@ public class InventarioService {
         Inventario guardado = inventarioRepository.save(inventario);
 
         return InventarioResponseDTO.builder()
-                .inventarioId(guardado.getInventarioId())
                 .materialId(guardado.getMaterial().getMaterialId())
                 .capacidadMaxima(guardado.getCapacidadMaxima())
                 .fechaActualizacion(guardado.getFechaActualizacion())

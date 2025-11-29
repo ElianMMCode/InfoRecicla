@@ -4,16 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public enum TipoCentroAcopio {
     PLANTA("Planta"),
     PROVEEDOR("Proveedor"),
     OTRO("OTRO");
 
-    private final String tipo;
-
-    TipoCentroAcopio(String tipo) {
-        this.tipo = tipo;
-    }/**
+    private final String tipo;/**
 
      * Buscar tipo de CntAcp exacto (insensible a mayúsculas).
      */

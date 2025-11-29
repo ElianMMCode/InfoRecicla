@@ -3,6 +3,7 @@ package org.sena.inforecicla.model.enums;
 import lombok.*;
 
 @Getter
+@AllArgsConstructor
 public enum TipoUsuario {
 
     Admin("Administrador"),
@@ -10,8 +11,4 @@ public enum TipoUsuario {
     GestorECA("GestorECA");
 
     private final String descripcion;
-
-    TipoUsuario(String descripcion) {
-        this.descripcion = descripcion;
-    }
 }

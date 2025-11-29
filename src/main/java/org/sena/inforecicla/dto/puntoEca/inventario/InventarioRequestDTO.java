@@ -1,4 +1,4 @@
-package org.sena.inforecicla.dto.puntoEca;
+package org.sena.inforecicla.dto.puntoEca.inventario;
 
 import jakarta.validation.constraints.*;
 import org.sena.inforecicla.model.Material;

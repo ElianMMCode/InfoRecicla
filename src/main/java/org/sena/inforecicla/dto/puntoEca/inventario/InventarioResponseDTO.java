@@ -1,4 +1,4 @@
-package org.sena.inforecicla.dto.puntoEca;
+package org.sena.inforecicla.dto.puntoEca.inventario;
 
 import lombok.Builder;
 import org.sena.inforecicla.model.enums.UnidadMedida;

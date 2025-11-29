@@ -2,6 +2,7 @@ package org.sena.inforecicla.model.enums;
 
 import lombok.*;
 
+@AllArgsConstructor
 @Getter
 public enum Estado {
 
@@ -11,8 +12,4 @@ public enum Estado {
     Bloqueado("Bloqueado");
 
     private final String descripcion;
-    
-    Estado(String descripcion) {
-        this.descripcion = descripcion;
-    }
 }

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public enum UnidadMedida {
 
     KG("Kilogramo"),
@@ -12,8 +13,4 @@ public enum UnidadMedida {
     M3("Metro Cubico");
 
     private final String nombre;
-
-    UnidadMedida(String nombre) {
-        this.nombre = nombre;
-    }
 }
