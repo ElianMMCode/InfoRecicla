@@ -1,0 +1,236 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║         ESPECIFICACIÓN DEL ENDPOINT PARA BÚSQUEDA DE MATERIALES             ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+
+📌 ENDPOINT QUE LA VISTA ESPERA
+═════════════════════════════════════════════════════════════════════════════════
+
+URL: GET /api/catalogo/materiales/buscar
+
+Query Parameters (todos OPCIONALES):
+  - texto: string (búsqueda por nombre/descripción)
+  - categoria: string (nombre de categoría)
+  - tipo: string (nombre de tipo)
+
+Ejemplos:
+  GET /api/catalogo/materiales/buscar
+  GET /api/catalogo/materiales/buscar?texto=botella
+  GET /api/catalogo/materiales/buscar?categoria=Plástico
+  GET /api/catalogo/materiales/buscar?texto=botella&categoria=Plástico&tipo=PET
+
+
+📊 RESPUESTA ESPERADA (JSON Array)
+═════════════════════════════════════════════════════════════════════════════════
+
+Status: 200 OK
+Content-Type: application/json
+
+Formato:
+[
+  {
+    "id": "material_id_unique",
+    "nombre": "Nombre del Material",
+    "unidad": "unidad de medida",
+    "categoria": "nombre de categoría"
+  },
+  ...
+]
+
+Ejemplo COMPLETO:
+[
+  {
+    "id": "mat_001",
+    "nombre": "Botella PET 2L",
+    "unidad": "unidad",
+    "categoria": "Plástico"
+  },
+  {
+    "id": "mat_002",
+    "nombre": "Cartón Ondulado",
+    "unidad": "kg",
+    "categoria": "Papel"
+  },
+  {
+    "id": "mat_003",
+    "nombre": "Vidrio Transparente",
+    "unidad": "kg",
+    "categoria": "Vidrio"
+  }
+]
+
+CASO SIN RESULTADOS (Status 200 con array vacío):
+[]
+
+
+🔴 ERRORES (Opcionales, pero recomendados)
+═════════════════════════════════════════════════════════════════════════════════
+
+Status: 500 Internal Server Error
+{
+  "error": "Mensaje descriptivo del error"
+}
+
+
+☕ IMPLEMENTACIÓN EN SPRING BOOT
+═════════════════════════════════════════════════════════════════════════════════
+
+@RestController
+@RequestMapping("/api/catalogo")
+public class CatalogoController {
+
+    @Autowired
+    private MaterialService materialService;
+
+    @GetMapping("/materiales/buscar")
+    public ResponseEntity<List<MaterialDTO>> buscarMateriales(
+        @RequestParam(required = false, defaultValue = "") String texto,
+        @RequestParam(required = false, defaultValue = "") String categoria,
+        @RequestParam(required = false, defaultValue = "") String tipo
+    ) {
+        try {
+            List<MaterialDTO> resultados = materialService.buscar(texto, categoria, tipo);
+            return ResponseEntity.ok(resultados);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+}
+
+
+📌 DTO RECOMENDADO
+═════════════════════════════════════════════════════════════════════════════════
+
+public class MaterialDTO {
+    private String id;           // ID único del material
+    private String nombre;       // Nombre del material
+    private String unidad;       // Unidad de medida (kg, l, unidad, m, m2, etc)
+    private String categoria;    // Categoría del material
+
+    // Constructor
+    public MaterialDTO(String id, String nombre, String unidad, String categoria) {
+        this.id = id;
+        this.nombre = nombre;
+        this.unidad = unidad;
+        this.categoria = categoria;
+    }
+
+    // Getters y Setters
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
+
+    public String getUnidad() { return unidad; }
+    public void setUnidad(String unidad) { this.unidad = unidad; }
+
+    public String getCategoria() { return categoria; }
+    public void setCategoria(String categoria) { this.categoria = categoria; }
+}
+
+
+🔍 IMPLEMENTACIÓN DEL SERVICE
+═════════════════════════════════════════════════════════════════════════════════
+
+@Service
+public class MaterialService {
+
+    @Autowired
+    private MaterialRepository materialRepository;
+
+    public List<MaterialDTO> buscar(String texto, String categoria, String tipo) {
+        // 1. Construir la especificación de búsqueda
+        // 2. Buscar en BD
+        // 3. Mapear a DTOs
+        // 4. Retornar
+
+        List<Material> resultados = materialRepository.findAll(); // Simplificado
+
+        // Filtrar por texto
+        if (!texto.isEmpty()) {
+            resultados = resultados.stream()
+                .filter(m -> m.getNombre().toLowerCase().contains(texto.toLowerCase()))
+                .collect(Collectors.toList());
+        }
+
+        // Filtrar por categoría
+        if (!categoria.isEmpty()) {
+            resultados = resultados.stream()
+                .filter(m -> m.getCategoria().getNombre().equalsIgnoreCase(categoria))
+                .collect(Collectors.toList());
+        }
+
+        // Filtrar por tipo
+        if (!tipo.isEmpty()) {
+            resultados = resultados.stream()
+                .filter(m -> m.getTipo().getNombre().equalsIgnoreCase(tipo))
+                .collect(Collectors.toList());
+        }
+
+        // Mapear a DTO
+        return resultados.stream()
+            .map(m -> new MaterialDTO(
+                m.getId().toString(),
+                m.getNombre(),
+                m.getUnidadMedida(),
+                m.getCategoria().getNombre()
+            ))
+            .collect(Collectors.toList());
+    }
+}
+
+
+✅ VERIFICAR QUE FUNCIONA
+═════════════════════════════════════════════════════════════════════════════════
+
+1. Arranca la app
+2. Navega a: /punto-eca/[punto]/materiales
+3. Abre consola (F12)
+4. Haz click en "AGREGAR"
+5. En consola deberías ver:
+   ✓ Click en AGREGAR
+   ✓ Buscando en: /api/catalogo/materiales/buscar
+   ✓ Respuesta status: 200
+   ✓ Datos recibidos: [...]
+6. Los materiales deberían aparecer en el modal
+
+
+🐛 DEPURACIÓN
+═════════════════════════════════════════════════════════════════════════════════
+
+Si ves "Respuesta status: 404":
+  → El endpoint no existe o la ruta es incorrecta
+  → Verifica que esté en @RestController @RequestMapping("/api/catalogo")
+
+Si ves error de CORS:
+  → Añade @CrossOrigin en el controller
+
+Si ves "Sin resultados":
+  → La query devuelve lista vacía
+  → Verifica que hay materiales en BD
+  → Revisa los filtros de búsqueda
+
+Si la lista es nula:
+  → Asegúrate de devolver List, nunca null
+  → Siempre retorna al menos []
+
+
+💡 NOTAS IMPORTANTES
+═════════════════════════════════════════════════════════════════════════════════
+
+✓ Los parámetros son OPCIONALES (por defecto = "")
+✓ Si están vacíos, NO filtrar por eso (devolver todos)
+✓ Siempre devuelve array ([] si no hay resultados)
+✓ Los campos id, nombre, unidad, categoria son REQUERIDOS
+✓ Status siempre 200 OK (excepto errores reales)
+
+
+════════════════════════════════════════════════════════════════════════════════
+
+Una vez implementado este endpoint, TODO FUNCIONARÁ PERFECTO.
+
+════════════════════════════════════════════════════════════════════════════════
+

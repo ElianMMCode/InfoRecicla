@@ -1,0 +1,223 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║                  GUÍA DE PRUEBA - BOTONES AHORA FUNCIONAN                  ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+PASO 1: Abre tu aplicación en el navegador
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Inicia tu aplicación Spring Boot
+2. Navega a: http://localhost:8080/[tu-url]/materiales
+3. Scroll hacia abajo hasta encontrar "Agregar Material al Inventario"
+
+
+PASO 2: Abre la consola del navegador
+═══════════════════════════════════════════════════════════════════════════════
+
+Presiona F12 o Ctrl+Shift+I y ve a la pestaña "Consola"
+
+Deberías ver mensajes como:
+   ✓ section-materiales: script cargado
+   ✓ Vinculando handlers de botones...
+   ✓ btnAbrirBuscar: <button id="btnAbrirBuscar"...>
+   ✓ Vinculando evento click a btnAbrirBuscar
+   ✓ Vinculando evento click a btnLimpiarAgregar
+
+
+PASO 3: Haz click en el botón "AGREGAR"
+═══════════════════════════════════════════════════════════════════════════════
+
+En la consola verás:
+   🔍 CLICK EN AGREGAR
+   Filtros obtenidos: {texto: "", categoria: "", tipo: ""}
+   Disparando evento catalogoMateriales:buscar
+   ✓ Abriendo modal de búsqueda
+
+Y un modal debería abrirse mostrando:
+   ┌─────────────────────────────────────────────────────┐
+   │ Buscar Material                             [X]      │
+   │                                                      │
+   │ Criterios: Texto: Sin filtro | Cat: Sin... │ Tipo... │
+   │                                                      │
+   │ [Spinner de carga/Estado esperando búsqueda]        │
+   │                                                      │
+   │                         [Cerrar]                    │
+   └─────────────────────────────────────────────────────┘
+
+
+PASO 4: Pega datos de prueba en la consola
+═══════════════════════════════════════════════════════════════════════════════
+
+Aún con el modal abierto, en la consola pega esto:
+
+   const fake = [
+     {id: 'm01', nombre: 'Botella PET', unidad: 'unidad', categoria: 'Plástico'},
+     {id: 'm02', nombre: 'Cartón', unidad: 'kg', categoria: 'Papel'}
+   ];
+   window.BusquedaMaterialesUI.mostrarResultados(fake);
+
+Presiona Enter.
+
+El modal debería actualizarse y mostrar:
+   ┌─────────────────────────────────────────────────────┐
+   │ Buscar Material                             [X]      │
+   │                                                      │
+   │ Criterios seleccionados:                            │
+   │ Texto: Sin filtro | Categoría: Sin filtro | Tipo... │
+   │                                                      │
+   │ ┌──────────────────────────────────────────────┐   │
+   │ │ • Botella PET                   [Seleccionar] │   │
+   │ │   m01 · unidad · Plástico                    │   │
+   │ ├──────────────────────────────────────────────┤   │
+   │ │ • Cartón                        [Seleccionar] │   │
+   │ │   m02 · kg · Papel                           │   │
+   │ └──────────────────────────────────────────────┘   │
+   │                                                      │
+   │                         [Cerrar]                    │
+   └─────────────────────────────────────────────────────┘
+
+
+PASO 5: Selecciona un material
+═══════════════════════════════════════════════════════════════════════════════
+
+Haz click en [Seleccionar] de cualquiera de los materiales.
+
+El modal de búsqueda debería cerrarse y uno nuevo abrirse:
+   ┌──────────────────────────────────────────────────┐
+   │ Agregar Material al Inventario        [X]         │
+   │                                                   │
+   │ Nombre del Material: [Botella PET] (solo lectura) │
+   │ Unidad:             [unidad]        (solo lectura) │
+   │                                                   │
+   │ Stock Inicial:      [____________]              │
+   │ Capacidad Máxima:   [____________]              │
+   │ Precio Compra:      [____________]              │
+   │ Precio Venta:       [____________]              │
+   │ Umbral Alerta (%):  [____________]              │
+   │ Umbral Crítico (%): [____________]              │
+   │                                                   │
+   │             [Cancelar]  [Guardar]                │
+   └──────────────────────────────────────────────────┘
+
+
+PASO 6: Haz click en el botón "LIMPIAR"
+═══════════════════════════════════════════════════════════════════════════════
+
+Cierra los modales si están abiertos (click en [Cerrar]).
+
+Ahora en la sección "Agregar Material al Inventario", haz click en [Limpiar].
+
+En la consola verás:
+   🧹 CLICK EN LIMPIAR
+   ✓ Formulario limpiado
+
+Y los campos deberían limpiarse (input vacío, radios resetados).
+
+
+PRUEBA COMPLETA - Lo que debería suceder
+═══════════════════════════════════════════════════════════════════════════════
+
+1. ✓ Click AGREGAR → Modal se abre con spinner
+2. ✓ Datos enviados a API (intenta conectar a /api/catalogo/materiales/buscar)
+3. ✓ Pegar datos de prueba → Se muestran en modal
+4. ✓ Click SELECCIONAR → Se abre formulario
+5. ✓ Click LIMPIAR → Se limpian todos los campos
+
+
+LOGS ESPERADOS EN CONSOLA
+═══════════════════════════════════════════════════════════════════════════════
+
+Cuando carga la página:
+   ✓ section-materiales: script cargado
+   ✓ Vinculando handlers de botones...
+   ✓ btnAbrirBuscar: HTMLButtonElement
+   ✓ btnLimpiarAgregar: HTMLButtonElement
+   ✓ Vinculando evento click a btnAbrirBuscar
+   ✓ Vinculando evento click a btnLimpiarAgregar
+
+Cuando haces click en AGREGAR:
+   🔍 CLICK EN AGREGAR
+   Filtros obtenidos: {texto: "", categoria: "", tipo: ""}
+   Disparando evento catalogoMateriales:buscar
+   ✓ Abriendo modal de búsqueda
+   Evento catalogoMateriales:buscar disparado con filtros: {texto: "", categoria: "", tipo: ""}
+   Endpoint: /api/catalogo/materiales/buscar
+
+Cuando pegas datos:
+   (No hay error, solo se actualizan los resultados)
+
+Cuando haces click en LIMPIAR:
+   🧹 CLICK EN LIMPIAR
+   ✓ Formulario limpiado
+
+
+SI VES UN ERROR
+═══════════════════════════════════════════════════════════════════════════════
+
+✗ Error: "Cannot read properties of null (reading 'addEventListener')"
+   → El elemento no existe. Verifica IDs en HTML.
+
+✗ Error: "window.BusquedaMaterialesUI is not defined"
+   → Script no cargó. Recarga la página.
+
+✗ Error: "fetch failed... 404"
+   → Backend no tiene el endpoint. Es esperado, pero evento se disparó ok.
+
+✗ Error: "Modal is not a function"
+   → Bootstrap no está cargado. Verifica que Bootstrap esté en el HTML.
+
+
+RESUMEN RÁPIDO
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│  1. Abre consola (F12)                                     │
+│  2. Navega a Materiales                                    │
+│  3. Haz click en AGREGAR                                   │
+│  4. Deberías ver "CLICK EN AGREGAR" en consola             │
+│  5. Modal se abre                                          │
+│  6. Pega: window.BusquedaMaterialesUI.mostrarResultados... │
+│  7. Ves datos en modal                                     │
+│                                                             │
+│  ¡ÉXITO! Todo funciona.                                    │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+
+SCRIPT COMPLETO PARA PEGAR EN CONSOLA
+═══════════════════════════════════════════════════════════════════════════════
+
+// Simular que traes datos del backend
+const materialesPrueba = [
+  {
+    id: 'mat_001',
+    nombre: 'Botella PET 2L',
+    unidad: 'unidad',
+    categoria: 'Plástico'
+  },
+  {
+    id: 'mat_002',
+    nombre: 'Cartón Ondulado',
+    unidad: 'kg',
+    categoria: 'Papel'
+  },
+  {
+    id: 'mat_003',
+    nombre: 'Vidrio Transparente',
+    unidad: 'kg',
+    categoria: 'Vidrio'
+  }
+];
+
+// Mostrar en el modal
+window.BusquedaMaterialesUI.mostrarResultados(materialesPrueba);
+
+// Ya puedes seleccionar uno haciendo click en [Seleccionar]
+
+═════════════════════════════════════════════════════════════════════════════════
+
+¡LISTO! Ahora los botones funcionan. 🚀
+
+

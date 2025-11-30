@@ -7,4 +7,7 @@ import java.util.UUID;
 
 public interface MaterialRepository extends JpaRepository<Material, UUID> {
 
+    Material findByNombreContainingIgnoreCase(String nombre);
+
+
 }

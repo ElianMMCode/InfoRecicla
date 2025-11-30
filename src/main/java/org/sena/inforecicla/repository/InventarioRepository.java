@@ -21,5 +21,8 @@ public interface InventarioRepository extends JpaRepository<Inventario, UUID> {
 
     //Búsqueda por Punto Eca
     List<Inventario> findAllByPuntoEca_PuntoEcaID(UUID puntoEcaId);
-//    List<Inventario> filtrarPorUmbral(UUID puntoEcaId, UUID usuarioId, Short umbral);
+
+    //Búsqueda de existencia de materiales en el punto
+    boolean existsByPuntoEca_PuntoEcaIDAndMaterial_MaterialId(UUID puntoId, UUID materialId);
+
 }
