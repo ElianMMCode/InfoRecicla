@@ -1,47 +1,35 @@
 package org.sena.inforecicla.service;
 
-import lombok.RequiredArgsConstructor;
-import org.sena.inforecicla.dto.puntoEca.InventarioRequestDTO;
-import org.sena.inforecicla.dto.puntoEca.InventarioResponseDTO;
-import org.sena.inforecicla.model.Inventario;
-import org.sena.inforecicla.repository.InventarioRepository;
-import org.sena.inforecicla.repository.MaterialRepository;
-import org.sena.inforecicla.repository.PuntoEcaRepository;
-import org.springframework.stereotype.Service;
+import org.sena.inforecicla.dto.puntoEca.inventario.InventarioGuardarDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.InventarioResponseDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.InventarioUpdateDTO;
+import org.sena.inforecicla.dto.puntoEca.materiales.CategoriaMaterialesInvResponseDTO;
+import org.sena.inforecicla.dto.puntoEca.materiales.MaterialInvResponseDTO;
+import org.sena.inforecicla.dto.puntoEca.materiales.TipoMaterialesInvResponseDTO;
+import org.sena.inforecicla.exception.InventarioFoundExistException;
+import org.sena.inforecicla.exception.InventarioNotFoundException;
+import org.sena.inforecicla.exception.MaterialNotFoundException;
+import org.sena.inforecicla.exception.PuntoEcaNotFoundException;
+import org.sena.inforecicla.model.enums.Alerta;
 
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.Comparator.comparing;
+public interface InventarioService {
 
-@Service
-@RequiredArgsConstructor
-public class InventarioService {
+    List<InventarioResponseDTO> mostrarInventarioPuntoEca(UUID puntoId);
 
-    private final PuntoEcaRepository puntoEcaRepository;
-    private final MaterialRepository materialRepository;
-    private final InventarioRepository inventarioRepository;
+    InventarioResponseDTO actualizarInventario(UUID inventarioId, InventarioUpdateDTO invUpdate) throws InventarioNotFoundException;
 
-    public List<InventarioResponseDTO> mostrarInventariosPuntoEca(UUID puntoId) {
+    List<TipoMaterialesInvResponseDTO> listarTiposMateriales();
 
-        List<Inventario> inv = inventarioRepository.findAllByPuntoEca_PuntoEcaID(puntoId);
+    List<CategoriaMaterialesInvResponseDTO> listarCategoriasMateriales();
 
-        return inv.stream().map(i -> InventarioResponseDTO.builder()
-                        .capacidadMaxima(i.getCapacidadMaxima())
-                        .unidadMedida(i.getUnidadMedida())
-                        .stockActual(i.getStockActual())
-                        .umbralAlerta(i.getUmbralAlerta())
-                        .umbralCritico(i.getUmbralCritico())
-                        .precioCompra(i.getPrecioCompra())
-                        .precioVenta(i.getPrecioVenta())
-                        .materialId(i.getMaterial().getMaterialId())
-                        .nombreMaterial(i.getMaterial().getNombre())
-                        .puntoEcaId(i.getPuntoEca().getPuntoEcaID())
-                        .nombrePuntoEca(i.getPuntoEca().getNombrePunto())
-                        .fechaCreacion(i.getFechaCreacion())
-                        .fechaActualizacion(i.getFechaActualizacion())
-                        .build())
-                .sorted(comparing(InventarioResponseDTO::fechaActualizacion).reversed())
-                .toList();
-    }
+    List<MaterialInvResponseDTO> buscarMaterialFiltrandoInventario(UUID inventarioId, String texto, String categoria, String tipo) throws InventarioFoundExistException;
+
+    void guardarInventario(InventarioGuardarDTO dto) throws MaterialNotFoundException, PuntoEcaNotFoundException;
+
+    List<InventarioResponseDTO> filtraInventario(UUID gestorId, String texto, String categoria, String tipo, Alerta alerta, String unidad, String ocupacion) throws InventarioFoundExistException;
+
+    void eliminarInventario(UUID inventarioId) throws InventarioNotFoundException;
 }

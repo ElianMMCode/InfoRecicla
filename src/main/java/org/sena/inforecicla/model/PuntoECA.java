@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.sena.inforecicla.model.base.EntidadLocalizacionWebHorario;
+import org.sena.inforecicla.model.enums.Alerta;
 import org.sena.inforecicla.model.enums.Estado;
 
 import java.util.List;
