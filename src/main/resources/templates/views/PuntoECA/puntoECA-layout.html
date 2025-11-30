@@ -739,6 +739,59 @@
                     document.getElementById('btnEditarMaterial').onclick = function() {
                         abrirModalEditar();
                     };
+
+                    // Evento: Click en botón Borrar
+                    document.getElementById('btnBorrarMaterial').onclick = function() {
+                        const datos = window.datosEditarInventario;
+                        if (!datos || !datos.inventarioId) {
+                            alert('Error: No se pudo obtener el ID del inventario');
+                            return;
+                        }
+
+                        // Confirmar antes de borrar
+                        if (!confirm('¿Estás seguro de que deseas borrar este material del inventario?\n\nMaterial: ' + datos.nombreMaterial)) {
+                            return;
+                        }
+
+                        // Hacer petición al servidor para borrar
+                        console.log('Borrando inventario con ID:', datos.inventarioId);
+
+                        // Obtener información de la URL
+                        const pathSegments = window.location.pathname.split('/').filter(s => s);
+                        const nombrePunto = pathSegments[1];
+                        const gestorId = pathSegments[2];
+
+                        // Enviar solicitud DELETE al servidor
+                        fetch(`/punto-eca/${nombrePunto}/${gestorId}/eliminar-inventario/${datos.inventarioId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Error al eliminar: ' + response.statusText);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('✓ Material eliminado correctamente');
+                            alert('Material eliminado del inventario correctamente');
+
+                            // Cerrar modal y recargar página
+                            const detallesModal = bootstrap.Modal.getInstance(document.getElementById('detallesModal'));
+                            if (detallesModal) detallesModal.hide();
+
+                            // Recargar página después de un pequeño delay
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 500);
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error al eliminar el material: ' + error.message);
+                        });
+                    };
                 } catch (err) {
                     console.error('ERROR:', err);
                 }

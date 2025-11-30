@@ -83,20 +83,16 @@ public class PuntoEcaController {
                 List<?> resultado = inventarioService.filtraInventario(usuario.puntoEcaId(), texto, categoria, tipo, alerta, unidad, ocupacion);
 
                 if (resultado == null || resultado.isEmpty()) {
-                    inventarioFiltrado = Collections.emptyList();
                     mensajeAlerta = "No se encontraron coincidencias con los filtros aplicados.";
                 } else {
                     inventarioFiltrado = resultado;
-                    mensajeAlerta = null;
                 }
             } else {
                 // Si NO hay filtros, mostrar todos los materiales del inventario
                 inventarioFiltrado = inventarioService.mostrarInventarioPuntoEca(usuario.puntoEcaId());
-                mensajeAlerta = null;
             }
         } catch (Exception e) {
             // Error en la búsqueda
-            inventarioFiltrado = Collections.emptyList();
             mensajeAlerta = "No se encontraron coincidencias con los filtros aplicados.";
         }
 
@@ -205,5 +201,31 @@ public class PuntoEcaController {
         }
     }
 
+    // Endpoint: Eliminar material del inventario
+    @DeleteMapping("/{nombrePunto}/{gestorId}/eliminar-inventario/{inventarioId}")
+    @ResponseBody
+    public ResponseEntity<?> eliminarInventario(
+            @PathVariable String nombrePunto,
+            @PathVariable UUID gestorId,
+            @PathVariable UUID inventarioId
+    ) {
+        try {
+            inventarioService.eliminarInventario(inventarioId);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "mensaje", "Material eliminado del inventario correctamente"
+            ));
+        } catch (InventarioNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                    "error", true,
+                    "mensaje", "Inventario no encontrado: " + e.getMessage()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "error", true,
+                    "mensaje", "Error al eliminar inventario: " + e.getMessage()
+            ));
+        }
+    }
 
 }

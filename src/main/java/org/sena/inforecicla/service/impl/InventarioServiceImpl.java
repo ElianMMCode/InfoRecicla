@@ -15,6 +15,7 @@ import org.sena.inforecicla.model.Inventario;
 import org.sena.inforecicla.model.Material;
 import org.sena.inforecicla.model.PuntoECA;
 import org.sena.inforecicla.model.enums.Alerta;
+import org.sena.inforecicla.model.enums.Estado;
 import org.sena.inforecicla.repository.*;
 import org.sena.inforecicla.service.InventarioService;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,7 @@ public class InventarioServiceImpl implements InventarioService {
     @Override
     public List<InventarioResponseDTO> mostrarInventarioPuntoEca(UUID puntoId) {
         return inventarioRepository.findAllByPuntoEca_PuntoEcaID(puntoId).stream()
+                .filter(inv -> inv.getEstado() == Estado.Activo)
                 .map(InventarioResponseDTO::derivado)
                 .sorted(comparing(InventarioResponseDTO::fechaActualizacion).reversed())
                 .toList();
@@ -67,7 +69,7 @@ public class InventarioServiceImpl implements InventarioService {
 
     @Override
     public List<TipoMaterialesInvResponseDTO> listarTiposMateriales() {
-        return tipoMaterialRepository.findAll().stream()
+        return tipoMaterialRepository.findAllActivos().stream()
                 .map(TipoMaterialesInvResponseDTO::derivado)
                 .sorted(comparing(TipoMaterialesInvResponseDTO::nmbCategoria))
                 .toList();
@@ -75,7 +77,7 @@ public class InventarioServiceImpl implements InventarioService {
 
     @Override
     public List<CategoriaMaterialesInvResponseDTO> listarCategoriasMateriales() {
-        return categoriaMaterialRepository.findAll().stream()
+        return categoriaMaterialRepository.findAllActivos().stream()
                 .map(CategoriaMaterialesInvResponseDTO::derivado)
                 .sorted(comparing(CategoriaMaterialesInvResponseDTO::nmbCategoria))
                 .toList();
@@ -106,7 +108,7 @@ public class InventarioServiceImpl implements InventarioService {
         final String tipoNormal = tipoNormalizado.toLowerCase();
 
         // Obtener todos los materiales que coinciden con los filtros
-        List<Material> materialesEncontrados = materialRepository.findAll().stream()
+        List<Material> materialesEncontrados = materialRepository.findAllActivos().stream()
                 .filter(material -> textoNormalizado.isEmpty() || material.getNombre().toLowerCase().contains(textoNormal))
                 .filter(material -> categoriaNormalizada.isEmpty() || material.getCtgMaterial().getNombre().toLowerCase().equals(categoriaNormal))
                 .filter(material -> tipoNormalizado.isEmpty() || material.getTipoMaterial().getNombre().toLowerCase().equals(tipoNormal))
@@ -200,7 +202,9 @@ public class InventarioServiceImpl implements InventarioService {
 
         var inventarios = inventarioRepository.findAllByPuntoEca_PuntoEcaID(gestorId);
 
-        var resultado = inventarios.stream()
+
+        return inventarios.stream()
+                .filter(inv -> inv.getEstado() == Estado.Activo)
                 .filter(inv -> textoNormalizado.isEmpty() || inv.getMaterial().getNombre().toLowerCase().contains(textoNormal))
                 .filter(inv -> {
                     String catBD = inv.getMaterial().getCtgMaterial() != null ? inv.getMaterial().getCtgMaterial().getNombre().toLowerCase() : "NULL";
@@ -216,9 +220,6 @@ public class InventarioServiceImpl implements InventarioService {
                 .map(InventarioResponseDTO::derivado)
                 .sorted(comparing(InventarioResponseDTO::fechaActualizacion).reversed())
                 .toList();
-
-
-        return resultado;
     }
 
     private boolean verificarOcupacion(Inventario inv, String ocupacion) {
@@ -237,6 +238,15 @@ public class InventarioServiceImpl implements InventarioService {
             case "75-100" -> porcentajeOcupacion > 75 && porcentajeOcupacion <= 100;
             default -> false;
         };
+    }
+
+    @Override
+    public void eliminarInventario(UUID inventarioId) throws InventarioNotFoundException {
+        Inventario inventario = inventarioRepository.findById(inventarioId).orElseThrow(
+                () -> new InventarioNotFoundException("Inventario no encontrado con ID: " + inventarioId)
+        );
+        inventario.setEstado(Estado.Inactivo);
+        inventarioRepository.save(inventario);
     }
 }
 

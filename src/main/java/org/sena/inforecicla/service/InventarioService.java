@@ -30,4 +30,6 @@ public interface InventarioService {
     void guardarInventario(InventarioGuardarDTO dto) throws MaterialNotFoundException, PuntoEcaNotFoundException;
 
     List<InventarioResponseDTO> filtraInventario(UUID gestorId, String texto, String categoria, String tipo, Alerta alerta, String unidad, String ocupacion) throws InventarioFoundExistException;
+
+    void eliminarInventario(UUID inventarioId) throws InventarioNotFoundException;
 }
