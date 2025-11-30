@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Categorías de Material</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+</head>
+<body class="bg-light m-0">
+
+<div class="container-fluid px-0">
+    <div class="row g-0">
+
+        <!-- Vertical sidebar (fixed on md+, no JS, no custom CSS) -->
+        <aside class="d-none d-md-flex col-md-2 position-fixed top-0 start-0 vh-100 bg-success text-white p-3 flex-column z-3 shadow-sm">
+            <a class="navbar-brand d-flex align-items-center gap-2 text-white mb-3" th:href="@{/}">
+                <img th:src="@{/imagenes/logo.png}" src="/imagenes/logo.png" alt="Logo" width="48" height="48"
+                     class="rounded">
+                <span class="fw-semibold">InfoRecicla</span>
+            </a>
+
+            <nav class="w-100" role="navigation" aria-label="Menú principal Categorías de Material">
+                <ul class="nav nav-pills flex-column gap-2 w-100">
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${(#strings.equals(seccion,'dashboard') or #strings.isEmpty(seccion)) ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
+                           th:attr="aria-current=${(#strings.equals(seccion,'dashboard') or #strings.isEmpty(seccion)) ? 'page' : null}"
+                           th:href="@{/categorias?seccion=dashboard}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${#strings.equals(seccion,'listado') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
+                           th:attr="aria-current=${#strings.equals(seccion,'listado') ? 'page' : null}"
+                           th:href="@{/categorias/listado?seccion=listado}">Listado</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${#strings.equals(seccion,'crear') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
+                           th:attr="aria-current=${#strings.equals(seccion,'crear') ? 'page' : null}"
+                           th:href="@{/categorias/crear?seccion=crear}">Crear Categoría</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${#strings.equals(seccion,'materiales') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
+                           th:attr="aria-current=${#strings.equals(seccion,'materiales') ? 'page' : null}"
+                           th:href="@{/materiales?seccion=materiales}">Materiales</a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="mt-auto small text-white-50">
+                <span>&copy; 2025 InfoRecicla</span>
+            </div>
+        </aside>
+
+        <!-- Top horizontal nav for small screens (fixed-top) -->
+        <div class="d-md-none w-100 bg-success py-2 fixed-top z-3 shadow-sm">
+            <div class="d-flex align-items-center justify-content-between px-3">
+                <a class="navbar-brand d-flex align-items-center gap-2 text-white" th:href="@{/}">
+                    <img th:src="@{/imagenes/logo.png}" src="/imagenes/logo.png" alt="Logo" width="1024" height="1024"
+                         class="rounded">
+                    <span class="fw-semibold">InfoRecicla</span>
+                </a>
+            </div>
+            <nav class="mt-2" role="navigation" aria-label="Menú alternativo Categorías de Material">
+                <ul class="nav nav-pills flex-row gap-2 overflow-auto px-3">
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${(#strings.equals(seccion,'dashboard') or #strings.isEmpty(seccion)) ? 'bg-white text-success fw-semibold border-bottom border-3 border-success rounded-bottom' : 'text-white'}"
+                           th:attr="aria-current=${(#strings.equals(seccion,'dashboard') or #strings.isEmpty(seccion)) ? 'page' : null}"
+                           th:href="@{/categorias?seccion=dashboard}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${#strings.equals(seccion,'listado') ? 'bg-white text-success fw-semibold border-bottom border-3 border-success rounded-bottom' : 'text-white'}"
+                           th:attr="aria-current=${#strings.equals(seccion,'listado') ? 'page' : null}"
+                           th:href="@{/categorias/listado?seccion=listado}">Listado</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${#strings.equals(seccion,'crear') ? 'bg-white text-success fw-semibold border-bottom border-3 border-success rounded-bottom' : 'text-white'}"
+                           th:attr="aria-current=${#strings.equals(seccion,'crear') ? 'page' : null}"
+                           th:href="@{/categorias/crear?seccion=crear}">Crear</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${#strings.equals(seccion,'materiales') ? 'bg-white text-success fw-semibold border-bottom border-3 border-success rounded-bottom' : 'text-white'}"
+                           th:attr="aria-current=${#strings.equals(seccion,'materiales') ? 'page' : null}"
+                           th:href="@{/materiales?seccion=materiales}">Materiales</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main content column (offset on md+ so it doesn't go under the fixed sidebar) -->
+        <main class="col offset-md-2 p-4 pt-5 pt-md-0">
+            <div th:switch="${#strings.isEmpty(seccion) ? 'dashboard' : seccion}">
+                <div th:case="'dashboard'" th:insert="~{views/CategoriaMaterial/section-indexCategoriaMaterial :: dashboard}"></div>
+                <div th:case="'listado'" th:insert="~{views/CategoriaMaterial/section-listCategoriaMaterial :: listado}"></div>
+                <div th:case="'crear'" th:insert="~{views/CategoriaMaterial/section-createCategoriaMaterial :: crear}"></div>
+                <div th:case="'editar'" th:insert="~{views/CategoriaMaterial/section-editCategoriaMaterial :: editar}"></div>
+                <div th:case="'detalle'" th:insert="~{views/CategoriaMaterial/section-showCategoriaMaterial :: detalle}"></div>
+                <div th:case="*" class="text-center text-muted">Sección no encontrada.</div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+</body>
+</html>

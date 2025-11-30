@@ -491,7 +491,7 @@
 
 </html-->
 
-<!DOCTYPE html>
+<!--DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -501,7 +501,7 @@
 </head>
 <body>
     <div class="container-fluid py-4">
-        <!-- ====== MÓDULO: PUNTOS ECA ====== -->
+        <!-- ====== MÓDULO: PUNTOS ECA ====== >
         <section id="mod-ecas" class="mb-5">
             <h2 class="h5 text-success mb-2">Puntos ECA</h2>
             <ul class="nav nav-pills mb-3">
@@ -563,4 +563,66 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
+</html-->
+
+<!-- Fragment: Inicio Puntos ECA -->
+<section th:fragment="indexPuntoECA" class="container-fluid py-4">
+    <!-- ====== MÓDULO: PUNTOS ECA ====== -->
+    <section id="mod-ecas" class="mb-5">
+        <h2 class="h5 text-success mb-2">Puntos ECA</h2>
+        <ul class="nav nav-pills mb-3">
+            <li class="nav-item">
+                <a href="#ecas-resumen" class="nav-link active bg-success">Resumen</a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{'/admin/puntos-eca/' + ${admin} + '/' + ${usuario.usuarioId} + '?seccion=listPuntoECA'}" class="nav-link">Listado</a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{'/admin/puntos-eca/' + ${admin} + '/' + ${usuario.usuarioId} + '?seccion=createPuntoECA'}" class="nav-link">Crear</a>
+            </li>
+            <li class="nav-item">
+                <a href="#programaciones" class="nav-link">Programaciones</a>
+            </li>
+        </ul>
+
+        <div id="ecas-resumen" class="mb-3">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card border-success h-100">
+                        <div class="card-body">
+                            <div class="text-success">ECAs activos</div>
+                            <div class="display-6 text-success" th:text="${totalPuntosECAactivos}">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-warning h-100">
+                        <div class="card-body">
+                            <div class="text-warning">ECAs inactivos</div>
+                            <div class="display-6 text-warning" th:text="${totalPuntosECAinactivos}">0</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-info h-100">
+                        <div class="card-body">
+                            <div class="text-info">Total ECAs</div>
+                            <div class="display-6 text-info" th:text="${totalPuntosECA}">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="programaciones" class="mt-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Programaciones Recientes</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">No hay programaciones recientes.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>

@@ -23,16 +23,16 @@ DELETE FROM `inventario` WHERE `inventario_id` IN (
     ) t WHERE t.rn > 1
 );
 
-DELETE FROM `centro_acopio` WHERE `centro_acopio_id` IN (
-    SELECT `centro_acopio_id` FROM (
-        SELECT `centro_acopio_id`, ROW_NUMBER() OVER (PARTITION BY `centro_acopio_id` ORDER BY `fecha_creacion` ASC) as rn
+DELETE FROM `centro_acopio` WHERE `cnt_acp_id` IN (
+    SELECT `cnt_acp_id` FROM (
+        SELECT `cnt_acp_id`, ROW_NUMBER() OVER (PARTITION BY `cnt_acp_id` ORDER BY `fecha_creacion` ASC) as rn
         FROM `centro_acopio`
     ) t WHERE t.rn > 1
 );
 
-DELETE FROM `punto_eca` WHERE `punto_id` IN (
-    SELECT `punto_id` FROM (
-        SELECT `punto_id`, ROW_NUMBER() OVER (PARTITION BY `punto_id` ORDER BY `fecha_creacion` ASC) as rn
+DELETE FROM `punto_eca` WHERE `punto_eca_id` IN (
+    SELECT `punto_eca_id` FROM (
+        SELECT `punto_eca_id`, ROW_NUMBER() OVER (PARTITION BY `punto_eca_id` ORDER BY `fecha_creacion` ASC) as rn
         FROM `punto_eca`
     ) t WHERE t.rn > 1
 );
@@ -44,16 +44,16 @@ DELETE FROM `material` WHERE `material_id` IN (
     ) t WHERE t.rn > 1
 );
 
-DELETE FROM `categoria_material` WHERE `categoria_material_id` IN (
-    SELECT `categoria_material_id` FROM (
-        SELECT `categoria_material_id`, ROW_NUMBER() OVER (PARTITION BY `categoria_material_id` ORDER BY `fecha_creacion` ASC) as rn
+DELETE FROM `categoria_material` WHERE `ctg_mt_id` IN (
+    SELECT `ctg_mt_id` FROM (
+        SELECT `ctg_mt_id`, ROW_NUMBER() OVER (PARTITION BY `ctg_mt_id` ORDER BY `fecha_creacion` ASC) as rn
         FROM `categoria_material`
     ) t WHERE t.rn > 1
 );
 
-DELETE FROM `tipo_material` WHERE `tipo_material_id` IN (
-    SELECT `tipo_material_id` FROM (
-        SELECT `tipo_material_id`, ROW_NUMBER() OVER (PARTITION BY `tipo_material_id` ORDER BY `fecha_creacion` ASC) as rn
+DELETE FROM `tipo_material` WHERE `tipo_mt_id` IN (
+    SELECT `tipo_mt_id` FROM (
+        SELECT `tipo_mt_id`, ROW_NUMBER() OVER (PARTITION BY `tipo_mt_id` ORDER BY `fecha_creacion` ASC) as rn
         FROM `tipo_material`
     ) t WHERE t.rn > 1
 );
@@ -66,7 +66,7 @@ INSERT IGNORE INTO `tipo_material` (
     `fecha_actualizacion`,
     `fecha_creacion`,
     `nombre`,
-    `tipo_material_id`,
+    `tipo_mt_id`,
     `descripcion`,
     `estado`
 ) VALUES
@@ -108,7 +108,7 @@ INSERT IGNORE INTO `categoria_material` (
     `fecha_actualizacion`,
     `fecha_creacion`,
     `nombre`,
-    `categoria_material_id`,
+    `ctg_mt_id`,
     `descripcion`,
     `estado`
 ) VALUES
@@ -584,7 +584,7 @@ INSERT IGNORE INTO `punto_eca` (
    CENTRO_ACOPIO
    ========================================================= */
 INSERT IGNORE INTO `centro_acopio` (
-    `centro_acopio_id`,
+    `cnt_acp_id`,
     `nombre_centro_acopio`,
     `tipo_centro_acopio`,
     `visibilidad`,
@@ -851,7 +851,7 @@ INSERT IGNORE INTO `venta_inventario` (
     `fecha_venta`,
     `precio_venta`,
     `observaciones`,
-    `centro_acopio_id`,
+    `cnt_acp_id`,
     `estado`,
     `fecha_creacion`,
     `fecha_actualizacion`

@@ -157,7 +157,7 @@
 
 </html-->
 
-<!DOCTYPE html>
+<!--DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -264,7 +264,7 @@
             </div>
 
             <div class="col-md-4">
-                <!-- Avatar y acciones -->
+                <!-- Avatar y acciones >
                 <div class="card border-info mb-3">
                     <div class="card-body text-center">
                         <div th:if="${usuario.avatarUrl}" class="mb-3">
@@ -291,7 +291,7 @@
                     </div>
                 </div>
 
-                <!-- Información del sistema -->
+                <!-- Información del sistema >
                 <div class="card border-secondary">
                     <div class="card-header bg-secondary text-white">
                         <h6 class="mb-0">Información del Sistema</h6>
@@ -314,4 +314,100 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
+</html-->
+
+<!-- Fragment: Detalle Usuario -->
+<section th:fragment="showUsuario" class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-dark">
+            <i class="fas fa-user me-2"></i>Detalle del Usuario
+        </h2>
+        <a th:href="@{'/usuarios/' + ${usuario.usuarioId} + '?seccion=listUsuario'}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i>Volver al Listado
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card border-dark">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0" th:text="${usuarioShow.nombre + ' ' + usuarioShow.apellido}">Nombre del Usuario</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong class="text-dark">Información Personal:</strong>
+                                <div class="mt-2 ps-3">
+                                    <p><strong>Correo:</strong> <span th:text="${usuarioShow.correo}">correo@ejemplo.com</span></p>
+                                    <p><strong>Rol:</strong>
+                                        <span th:switch="${usuarioShow.rol}" class="badge">
+                                            <span th:case="'Administrador'" class="badge bg-danger">Administrador</span>
+                                            <span th:case="'GestorECA'" class="badge bg-info">Gestor ECA</span>
+                                            <span th:case="'Ciudadano'" class="badge bg-success">Ciudadano</span>
+                                        </span>
+                                    </p>
+                                    <p><strong>Estado:</strong>
+                                        <span th:switch="${usuarioShow.estado}" class="badge">
+                                            <span th:case="'activo'" class="badge bg-success">Activo</span>
+                                            <span th:case="'inactivo'" class="badge bg-warning">Inactivo</span>
+                                            <span th:case="'bloqueado'" class="badge bg-danger">Bloqueado</span>
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong class="text-dark">Información Adicional:</strong>
+                                <div class="mt-2 ps-3">
+                                    <p th:if="${usuarioShow.nombreUsuario}">
+                                        <strong>Usuario:</strong>
+                                        <span th:text="${usuarioShow.nombreUsuario}">usuario123</span>
+                                    </p>
+                                    <p>
+                                        <strong>Fecha Registro:</strong>
+                                        <span th:text="${#temporals.format(usuarioShow.fechaCreacion, 'dd/MM/yyyy HH:mm')}">01/01/2024</span>
+                                    </p>
+                                    <p>
+                                        <strong>Última Actualización:</strong>
+                                        <span th:text="${#temporals.format(usuarioShow.fechaActualizacion, 'dd/MM/yyyy HH:mm')}">01/01/2024</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Avatar y acciones -->
+            <div class="card border-info mb-3">
+                <div class="card-body text-center">
+                    <div th:if="${usuarioShow.avatarUrl}" class="mb-3">
+                        <img th:src="${usuarioShow.avatarUrl}" alt="Avatar" class="img-thumbnail rounded-circle" style="width: 120px; height: 120px;">
+                    </div>
+                    <div th:unless="${usuarioShow.avatarUrl}" class="mb-3">
+                        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center"
+                             style="width: 120px; height: 120px;">
+                            <i class="fas fa-user text-muted fa-3x"></i>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a th:href="@{'/usuarios/' + ${usuario.usuarioId} + '/edit/' + ${usuarioShow.id} + '?seccion=editUsuario'}" class="btn btn-warning">
+                            <i class="fas fa-edit me-2"></i>Editar Usuario
+                        </a>
+                        <form method="POST" th:action="@{'/usuarios/eliminar/' + ${usuarioShow.id}}"
+                              class="d-inline w-100"
+                              onsubmit="return confirm('¿Está seguro de eliminar este usuario?')">
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="fas fa-trash me-2"></i>Eliminar Usuario
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

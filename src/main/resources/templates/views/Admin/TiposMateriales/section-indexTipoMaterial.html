@@ -41,7 +41,7 @@
                         <h2 class="h4 text-success">
                             <i class="fas fa-recycle"></i> Tipos de Material
                         </h2>
-                        <button class="btn btn-success" onclick="window.location.href='createTipoMaterial.html'">
+                        <button class="btn btn-success" onclick="window.location.href='section-createTipoMaterial.html'">
                             <i class="fas fa-plus"></i> Nuevo Tipo
                         </button>
                     </div>
@@ -104,8 +104,8 @@
 
 </html-->
 
-<!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--DOCTYPE html>
+<html-- lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -151,7 +151,7 @@
             </div>
         </div>
 
-        <!-- Tipos recientes -->
+        <!-- Tipos recientes >
         <div class="card border-success">
             <div class="card-header bg-success text-white">
                 <h5 class="mb-0">
@@ -200,7 +200,7 @@
             </div>
         </div>
 
-        <!-- Estadísticas de uso -->
+        <!-- Estadísticas de uso >
         <div class="row mt-4">
             <div class="col-md-6">
                 <div class="card border-info">
@@ -253,4 +253,151 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
+</html-->
+
+<!-- Fragment: Dashboard Tipos de Material -->
+<section th:fragment="indexTipoMaterial" class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-warning">
+            <i class="fas fa-tags me-2"></i>Dashboard de Tipos de Material
+        </h1>
+        <a th:href="@{'/tipos-material/' + ${usuario.usuarioId} + '?seccion=createTipoMaterial'}"
+           class="btn btn-warning">
+            <i class="fas fa-plus-circle me-2"></i>Nuevo Tipo
+        </a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-warning h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-tags text-warning fa-2x mb-2"></i>
+                    <div class="text-warning fw-bold">Total Tipos</div>
+                    <div class="h2 text-warning" th:text="${totalTipos}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-success h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                    <div class="text-success fw-bold">Tipos Activos</div>
+                    <div class="h2 text-success" th:text="${tiposActivos}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-info h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-boxes text-info fa-2x mb-2"></i>
+                    <div class="text-info fw-bold">Materiales Totales</div>
+                    <div class="h2 text-info" th:text="${totalMateriales}">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tipos recientes -->
+    <div class="card border-warning">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">
+                <i class="fas fa-history me-2"></i>Tipos de Material Recientes
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-warning">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Estado</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="tipo : ${tiposRecientes}">
+                        <td th:text="${tipo.nombre}">Nombre</td>
+                        <td>
+                            <span th:if="${tipo.descripcion}" th:text="${tipo.descripcion}" class="small"></span>
+                            <span th:unless="${tipo.descripcion}" class="text-muted small">Sin descripción</span>
+                        </td>
+                        <td>
+                            <span th:if="${tipo.activo}" class="badge bg-success">Activo</span>
+                            <span th:unless="${tipo.activo}" class="badge bg-secondary">Inactivo</span>
+                        </td>
+                        <td class="text-end">
+                            <a th:href="@{'/tipos-material/' + ${usuario.usuarioId} + '/show/' + ${tipo.id} + '?seccion=showTipoMaterial'}"
+                               class="btn btn-sm btn-outline-warning me-1">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a th:href="@{'/tipos-material/' + ${usuario.usuarioId} + '/edit/' + ${tipo.id} + '?seccion=editTipoMaterial'}"
+                               class="btn btn-sm btn-outline-info">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${tiposRecientes.empty}">
+                        <td colspan="4" class="text-center text-muted">
+                            No hay tipos de material registrados
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas de uso -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Materiales por Tipo
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div th:each="stats : ${estadisticasTipos}" class="mb-3">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span th:text="${stats.tipoNombre}">Tipo</span>
+                            <span th:text="${stats.totalMateriales}" class="fw-bold"></span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-info"
+                                 th:style="'width: ' + ${stats.porcentaje} + '%;'"
+                                 th:title="${stats.totalMateriales} + ' materiales'">
+                            </div>
+                        </div>
+                    </div>
+                    <div th:if="${estadisticasTipos.empty}" class="text-center text-muted small">
+                        No hay materiales asignados a tipos
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Acciones Rápidas
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <a th:href="@{'/tipos-material/' + ${usuario.usuarioId} + '?seccion=createTipoMaterial'}"
+                       class="btn btn-warning mb-2 w-100">
+                        <i class="fas fa-plus-circle me-2"></i>Crear Nuevo Tipo
+                    </a>
+                    <a th:href="@{'/tipos-material/' + ${usuario.usuarioId} + '?seccion=listTipoMaterial'}"
+                       class="btn btn-outline-primary mb-2 w-100">
+                        <i class="fas fa-list me-2"></i>Ver Listado Completo
+                    </a>
+                    <a th:href="@{'/materiales/' + ${usuario.usuarioId}}"
+                       class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-boxes me-2"></i>Gestionar Materiales
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

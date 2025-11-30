@@ -25,6 +25,7 @@ public class Usuario extends EntidadLocalizacion {
 
     @Id
     @GeneratedValue
+    @Column(nullable = false, updatable = false)
     private UUID usuarioId;
 
     @Column(nullable = false, length = 30)
