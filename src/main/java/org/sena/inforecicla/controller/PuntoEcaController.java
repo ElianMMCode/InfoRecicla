@@ -7,18 +7,18 @@ import org.sena.inforecicla.dto.puntoEca.inventario.InventarioUpdateDTO;
 import org.sena.inforecicla.dto.puntoEca.materiales.MaterialInvResponseDTO;
 import org.sena.inforecicla.dto.usuario.UsuarioGestorResponseDTO;
 import org.sena.inforecicla.exception.InventarioFoundExistException;
+import org.sena.inforecicla.exception.InventarioNotFoundException;
 import org.sena.inforecicla.exception.MaterialNotFoundException;
 import org.sena.inforecicla.exception.PuntoEcaNotFoundException;
+import org.sena.inforecicla.model.enums.Alerta;
 import org.sena.inforecicla.model.enums.UnidadMedida;
 import org.sena.inforecicla.service.GestorEcaService;
 import org.sena.inforecicla.service.InventarioService;
-import org.sena.inforecicla.exception.InventarioNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
 
@@ -42,32 +42,93 @@ public class PuntoEcaController {
         return "views/PuntoECA/puntoECA-layout";
     }
 
-
-    // Navegación por path: /punto-eca/{usuarioId}/{seccion}
+    // Navegación por path con filtros: /punto-eca/{nombrePunto}/{gestorId}/{seccion}?texto=...&alerta=...
     @GetMapping("/{nombrePunto}/{gestorId}/{seccion}")
-    public String puntoEca( @PathVariable String nombrePunto, @PathVariable UUID gestorId, @PathVariable String seccion, Model model) {
-        //Información Gestor y Punto Eca
-        UsuarioGestorResponseDTO usuario = gestorEcaService.buscarGestorPuntoEca(gestorId);
-        model.addAttribute("usuario", usuario);
-        // Usar el path variable nombrePunto para evitar warning por parámetro no usado
-        model.addAttribute("gestor", nombrePunto);
-        model.addAttribute("seccion", seccion);
-        //Información Inventario
-        if (seccion.equalsIgnoreCase("Materiales")) {
-            Map<String, Object> atributos = Map.of(
-                    "inventario", inventarioService.mostrarInventarioPuntoEca(usuario.puntoEcaId()),
-                    "categoriaMateriales", inventarioService.listarCategoriasMateriales(),
-                    "tiposMateriales", inventarioService.listarTiposMateriales(),
-                    "unidadesMedida", Arrays.stream(UnidadMedida.values()).map(unidad -> {
-                        Map<String, String> map = new HashMap<>();
-                        map.put("clave", unidad.name());
-                        map.put("nombre", unidad.getNombre());
-                        return map;
-                    }).toList()
-            );
+    public String puntoEca(
+            @PathVariable String nombrePunto,
+            @PathVariable UUID gestorId,
+            @PathVariable String seccion,
+            @RequestParam(required = false) String texto,
+            @RequestParam(required = false) String categoria,
+            @RequestParam(required = false) String tipo,
+            @RequestParam(required = false) Alerta alerta,
+            @RequestParam(required = false) String unidad,
+            @RequestParam(required = false) String ocupacion,
+            Model model
+    ) {
+        // Normalizar sección a minúsculas para que coincida con los casos del layout
+        seccion = seccion != null ? seccion.toLowerCase() : "resumen";
 
-            model.addAllAttributes(atributos);
+        // Referencia de path variables para evitar warnings
+        Objects.requireNonNull(nombrePunto);
+
+        // Obtener información del usuario/gestor
+        UsuarioGestorResponseDTO usuario = gestorEcaService.buscarGestorPuntoEca(gestorId);
+
+        // Aquí filtras el inventario según los parámetros
+        List<?> inventarioFiltrado = Collections.emptyList();
+        String mensajeAlerta = null;
+
+        // Verificar si hay algún filtro activo
+        boolean hayFiltros = (texto != null && !texto.trim().isEmpty()) ||
+                             (categoria != null && !categoria.trim().isEmpty()) ||
+                             (tipo != null && !tipo.trim().isEmpty()) ||
+                             (alerta != null) ||
+                             (unidad != null && !unidad.trim().isEmpty()) ||
+                             (ocupacion != null && !ocupacion.trim().isEmpty());
+
+        try {
+            if (hayFiltros) {
+                // Si hay filtros, aplicar búsqueda filtrada
+                List<?> resultado = inventarioService.filtraInventario(usuario.puntoEcaId(), texto, categoria, tipo, alerta, unidad, ocupacion);
+
+                if (resultado == null || resultado.isEmpty()) {
+                    inventarioFiltrado = Collections.emptyList();
+                    mensajeAlerta = "No se encontraron coincidencias con los filtros aplicados.";
+                } else {
+                    inventarioFiltrado = resultado;
+                    mensajeAlerta = null;
+                }
+            } else {
+                // Si NO hay filtros, mostrar todos los materiales del inventario
+                inventarioFiltrado = inventarioService.mostrarInventarioPuntoEca(usuario.puntoEcaId());
+                mensajeAlerta = null;
+            }
+        } catch (Exception e) {
+            // Error en la búsqueda
+            inventarioFiltrado = Collections.emptyList();
+            mensajeAlerta = "No se encontraron coincidencias con los filtros aplicados.";
         }
+
+        Map<String, Object> atributos = Map.of(
+                "usuario", usuario,
+                "gestor", nombrePunto,
+                "seccion", seccion,
+                "inventario", inventarioFiltrado,
+                "categoriaMateriales", inventarioService.listarCategoriasMateriales(),
+                "tiposMateriales", inventarioService.listarTiposMateriales(),
+                "unidadesMedida", Arrays.stream(UnidadMedida.values()).map(unidadMd -> {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("clave", unidadMd.name());
+                    map.put("nombre", unidadMd.getNombre());
+                    return map;
+                }).toList(),
+                "alerta", Arrays.stream(Alerta.values()).map(alertaTp -> {
+                    Map<String, String> map2 = new HashMap<>();
+                    map2.put("clave", alertaTp.name());
+                    map2.put("tipo", alertaTp.getTipo());
+                    return map2;
+                }).toList()
+        );
+
+        // Y cargas los materiales filtrados
+        model.addAllAttributes(atributos);
+
+        // Agregar mensaje de alerta si existe
+        if (mensajeAlerta != null) {
+            model.addAttribute("mensajeAlerta", mensajeAlerta);
+        }
+
         return "views/PuntoECA/puntoECA-layout";
     }
 
@@ -76,23 +137,23 @@ public class PuntoEcaController {
     @ResponseBody
     public ResponseEntity<?> buscarMateriales(
             @RequestParam UUID puntoId,
-            @RequestParam (required = false, defaultValue = "") String texto,
-            @RequestParam (required = false, defaultValue = "") String categoria,
-            @RequestParam (required = false, defaultValue = "") String tipo
-    ){
+            @RequestParam(required = false, defaultValue = "") String texto,
+            @RequestParam(required = false, defaultValue = "") String categoria,
+            @RequestParam(required = false, defaultValue = "") String tipo
+    ) {
         try {
-            List<MaterialInvResponseDTO> resultados = inventarioService.buscarMaterial(puntoId, texto, categoria, tipo);
+            List<MaterialInvResponseDTO> resultados = inventarioService.buscarMaterialFiltrandoInventario(puntoId, texto, categoria, tipo);
             return ResponseEntity.ok(resultados);
         } catch (InventarioFoundExistException e) {
             // Devolver el mensaje de error de forma legible al frontend
             return ResponseEntity.badRequest().body(Map.of(
-                "error", true,
-                "mensaje", e.getMessage()
+                    "error", true,
+                    "mensaje", e.getMessage()
             ));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of(
-                "error", true,
-                "mensaje", "Error al buscar materiales: " + e.getMessage()
+                    "error", true,
+                    "mensaje", "Error al buscar materiales: " + e.getMessage()
             ));
         }
     }
@@ -145,21 +206,4 @@ public class PuntoEcaController {
     }
 
 
-}
-
-// Controlador REST separado para la API
-@RestController
-@RequestMapping("/api")
-@AllArgsConstructor
-class ApiController {
-    // Endpoint REST: obtener todas las unidades de medida disponibles
-    @GetMapping("/unidades-medida")
-    public List<Map<String, String>> obtenerUnidadesMedida() {
-        return Arrays.stream(UnidadMedida.values()).map(unidad -> {
-            Map<String, String> map = new HashMap<>();
-            map.put("clave", unidad.name());
-            map.put("nombre", unidad.getNombre());
-            return map;
-        }).toList();
-    }
 }

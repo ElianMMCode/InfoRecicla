@@ -10,6 +10,7 @@ import org.sena.inforecicla.exception.InventarioFoundExistException;
 import org.sena.inforecicla.exception.InventarioNotFoundException;
 import org.sena.inforecicla.exception.MaterialNotFoundException;
 import org.sena.inforecicla.exception.PuntoEcaNotFoundException;
+import org.sena.inforecicla.model.enums.Alerta;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +25,9 @@ public interface InventarioService {
 
     List<CategoriaMaterialesInvResponseDTO> listarCategoriasMateriales();
 
-    List<MaterialInvResponseDTO> buscarMaterial(UUID inventarioId, String texto, String categoria, String tipo) throws InventarioFoundExistException;
+    List<MaterialInvResponseDTO> buscarMaterialFiltrandoInventario(UUID inventarioId, String texto, String categoria, String tipo) throws InventarioFoundExistException;
 
     void guardarInventario(InventarioGuardarDTO dto) throws MaterialNotFoundException, PuntoEcaNotFoundException;
+
+    List<InventarioResponseDTO> filtraInventario(UUID gestorId, String texto, String categoria, String tipo, Alerta alerta, String unidad, String ocupacion) throws InventarioFoundExistException;
 }

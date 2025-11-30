@@ -1,6 +1,7 @@
 package org.sena.inforecicla.dto.puntoEca.inventario;
 
 import org.sena.inforecicla.model.Inventario;
+import org.sena.inforecicla.model.enums.Alerta;
 import org.sena.inforecicla.model.enums.UnidadMedida;
 
 import java.math.BigDecimal;
@@ -16,6 +17,7 @@ public record InventarioResponseDTO(
         BigDecimal stockActual,
         Short umbralAlerta,
         Short umbralCritico,
+        Alerta alerta,
         BigDecimal precioCompra,
         BigDecimal precioVenta,
         //Datos material
@@ -37,6 +39,7 @@ public record InventarioResponseDTO(
                 i.getStockActual(),
                 i.getUmbralAlerta(),
                 i.getUmbralCritico(),
+                i.getAlerta(),
                 i.getPrecioCompra(),
                 i.getPrecioVenta(),
                 i.getMaterial().getMaterialId(),

@@ -653,6 +653,87 @@
                 console.log('✓ Handler GUARDAR INVENTARIO vinculado');
             }
 
+            // ============================================================
+            // HANDLER: BOTÓN APLICAR FILTROS (RECARGAR PÁGINA CON FILTROS)
+            // Usando event delegation para que funcione incluso si el elemento se carga después
+            // ============================================================
+            document.addEventListener('click', function(e) {
+                if (e.target.id === 'btnAplicarFiltros' || e.target.closest('#btnAplicarFiltros')) {
+                    console.log('🔎 Click en APLICAR filtros (Inventario)');
+
+                    // Recolectar filtros desde el formulario de inventario
+                    const texto = (document.getElementById('busquedaMaterial')?.value || '').trim();
+                    const categoria = (document.querySelector('input[name="filtroCategoria"]:checked')?.value || '').trim();
+                    const tipo = (document.querySelector('input[name="filtroTipo"]:checked')?.value || '').trim();
+                    const alerta = (document.getElementById('filtroAlerta')?.value || '').trim();
+                    const unidad = (document.getElementById('filtroUnidad')?.value || '').trim();
+                    const ocupacion = (document.getElementById('filtroOcupacion')?.value || '').trim();
+
+                    const filtros = { texto, categoria, tipo, alerta, unidad, ocupacion };
+                    console.log('Filtros aplicados:', filtros);
+
+                    // Construir query parameters
+                    const params = new URLSearchParams();
+                    if (texto) params.append('texto', texto);
+                    if (categoria) params.append('categoria', categoria);
+                    if (tipo) params.append('tipo', tipo);
+                    if (alerta) params.append('alerta', alerta);
+                    if (unidad) params.append('unidad', unidad);
+                    if (ocupacion) params.append('ocupacion', ocupacion);
+
+                    // Obtener nombrePunto y gestorId de la URL actual
+                    const pathSegments = window.location.pathname.split('/').filter(s => s);
+                    // Formato esperado: /punto-eca/{nombrePunto}/{gestorId}/Materiales
+                    const nombrePunto = pathSegments[1];
+                    const gestorId = pathSegments[2];
+
+                    console.log('nombrePunto:', nombrePunto, 'gestorId:', gestorId);
+
+                    if (!nombrePunto || !gestorId) {
+                        console.error('❌ No se pudieron obtener nombrePunto o gestorId de la URL');
+                        alert('Error: No se pudo obtener la información del punto ECA');
+                        return;
+                    }
+
+                    // Construir URL: /punto-eca/{nombrePunto}/{gestorId}/Materiales?filtros
+                    const url = `/punto-eca/${nombrePunto}/${gestorId}/Materiales${params.toString() ? ('?' + params.toString()) : ''}`;
+                    console.log('🚀 Recargando página con URL:', url);
+
+                    // Recargar página con los filtros como parámetros de URL
+                    window.location.href = url;
+                }
+            }, true); // Usar captura para asegurar que se dispare antes
+            console.log('✓ Handler APLICAR FILTROS vinculado (recarga página con filtros)');
+
+            // ============================================================
+            // HANDLER: BOTÓN RESTABLECER FILTROS
+            // ============================================================
+            document.addEventListener('click', function(e) {
+                if (e.target.id === 'btnRestablecerFiltros' || e.target.closest('#btnRestablecerFiltros')) {
+                    // Limpiar búsqueda de texto
+                    document.getElementById('busquedaMaterial').value = '';
+
+                    // Limpiar radio buttons de categoría (seleccionar "Ninguno")
+                    document.getElementById('filtroCategoriaNone').checked = true;
+
+                    // Limpiar radio buttons de tipo (seleccionar "Ninguno")
+                    document.getElementById('filtroTipoNone').checked = true;
+
+                    // Limpiar selects
+                    document.getElementById('filtroAlerta').value = '';
+                    document.getElementById('filtroUnidad').value = '';
+                    document.getElementById('filtroOcupacion').value = '';
+
+                    // Recargar la página sin filtros
+                    const pathSegments = window.location.pathname.split('/').filter(s => s);
+                    const nombrePunto = pathSegments[1];
+                    const gestorId = pathSegments[2];
+                    const url = `/punto-eca/${nombrePunto}/${gestorId}/Materiales`;
+                    window.location.href = url;
+                }
+            }, true);
+            console.log('✓ Handler RESTABLECER FILTROS vinculado');
+
             console.log('📌 Script inline completado ✓');
         })();
         </script>
@@ -731,13 +812,13 @@
                     <div class="accordion mb-4" id="acordeonFiltrosTarjetas">
                         <div class="accordion-item border-0 shadow-sm">
                             <h2 class="accordion-header" id="headingBusquedaTarjetas">
-                                <button class="accordion-button bg-light text-dark fw-semibold" type="button"
+                                <button class="accordion-button bg-light text-dark fw-semibold collapsed" type="button"
                                         data-bs-toggle="collapse" data-bs-target="#collapseBusquedaTarjetas"
-                                        aria-expanded="true" aria-controls="collapseBusquedaTarjetas">
+                                        aria-expanded="false" aria-controls="collapseBusquedaTarjetas">
                                     <i class="bi bi-search text-success me-2"></i>Búsqueda y Filtros
                                 </button>
                             </h2>
-                            <div id="collapseBusquedaTarjetas" class="accordion-collapse collapse show"
+                            <div id="collapseBusquedaTarjetas" class="accordion-collapse collapse"
                                  aria-labelledby="headingBusquedaTarjetas" data-bs-parent="#acordeonFiltrosTarjetas">
                                 <div class="accordion-body p-4">
                                     <div class="row g-3 mb-4">
@@ -764,26 +845,30 @@
                                         </div>
                                     </div>
 
-                                    <div class="row g-3 mb-4">
-                                        <div class="col-md-6 col-lg-3">
-                                            <label for="filtroEstado" class="form-label fw-semibold text-muted mb-2">
-                                                <i class="bi bi-exclamation-triangle me-1"></i>Estado
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-6 col-lg-4">
+                                            <label for="filtroAlerta" class="form-label fw-semibold text-muted mb-2">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>Alerta
                                             </label>
-                                            <select class="form-select form-select-sm filtro-select"
-                                                    id="filtroEstado"
-                                                    data-tipo="estado">
-                                                <option value="">Todos los estados</option>
-                                                <option value="ok">✓ OK</option>
-                                                <option value="alerta">⚠ Alerta</option>
-                                                <option value="critico">✕ Crítico</option>
+                                            <select class="form-select form-select-sm border-2 border-success filtro-select"
+                                                    id="filtroAlerta"
+                                                    data-tipo="alerta">
+                                                <option value="">Todas las alertas</option>
+                                                <th:block th:if="${not #lists.isEmpty(alerta)}">
+                                                    <option th:each="alert : ${alerta}"
+                                                            th:value="${alert.clave}"
+                                                            th:text="${alert.tipo}">
+                                                        Alerta
+                                                    </option>
+                                                </th:block>
                                             </select>
                                         </div>
 
-                                        <div class="col-md-6 col-lg-3">
+                                        <div class="col-md-6 col-lg-4">
                                             <label for="filtroUnidad" class="form-label fw-semibold text-muted mb-2">
                                                 <i class="bi bi-ruler me-1"></i>Unidad de Medida
                                             </label>
-                                            <select class="form-select form-select-sm filtro-select"
+                                            <select class="form-select form-select-sm border-2 border-success filtro-select"
                                                     id="filtroUnidad"
                                                     data-tipo="unidad">
                                                 <option value="">Todas las unidades</option>
@@ -795,11 +880,11 @@
                                             </select>
                                         </div>
 
-                                        <div class="col-md-6 col-lg-3">
+                                        <div class="col-md-6 col-lg-4">
                                             <label for="filtroOcupacion" class="form-label fw-semibold text-muted mb-2">
                                                 <i class="bi bi-percent me-1"></i>Ocupación
                                             </label>
-                                            <select class="form-select form-select-sm filtro-select"
+                                            <select class="form-select form-select-sm border-2 border-success filtro-select"
                                                     id="filtroOcupacion"
                                                     data-tipo="ocupacion">
                                                 <option value="">Cualquier ocupación</option>
@@ -809,98 +894,102 @@
                                                 <option value="75-100">75% - 100%</option>
                                             </select>
                                         </div>
-
-                                        <div class="col-md-6 col-lg-3">
-                                            <label for="filtroStock" class="form-label fw-semibold text-muted mb-2">
-                                                <i class="bi bi-box2 me-1"></i>Stock
-                                            </label>
-                                            <select class="form-select form-select-sm filtro-select"
-                                                    id="filtroStock"
-                                                    data-tipo="stock">
-                                                <option value="">Cualquier stock</option>
-                                                <option value="vacio">Vacío</option>
-                                                <option value="bajo">Bajo</option>
-                                                <option value="medio">Medio</option>
-                                                <option value="alto">Alto</option>
-                                            </select>
-                                        </div>
                                     </div>
 
-                                    <!-- Nuevo bloque de filtros: Categoría y Tipo -->
-                                    <div class="row g-3 mb-4">
-                                        <div class="col-md-6 col-lg-3">
-                                            <label for="filtroCategoria" class="form-label fw-semibold text-muted mb-2">
+                                        <!-- Filtro de Categoría con radio buttons -->
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-12">
+                                            <span class="form-label fw-semibold text-muted d-block mb-2">
                                                 <i class="bi bi-tags me-1"></i>Categoría
-                                            </label>
-                                            <select class="form-select form-select-sm filtro-select"
-                                                    id="filtroCategoria"
-                                                    data-tipo="categoria">
-                                                <option value="">Todas las categorías</option>
+                                            </span>
+                                            <div class="btn-group flex-wrap gap-2" role="group" aria-label="Filtro categoría">
+                                                <input type="radio" class="btn-check" name="filtroCategoria" id="filtroCategoriaNone" value="" autocomplete="off" checked>
+                                                <label class="btn btn-outline-success" for="filtroCategoriaNone">Ninguno</label>
                                                 <th:block th:if="${not #lists.isEmpty(categoriaMateriales)}">
-                                                    <option th:each="cat : ${categoriaMateriales}"
-                                                            th:value="${cat.nmbCategoria}"
-                                                            th:text="${cat.nmbCategoria}">
-                                                        Categoria
-                                                    </option>
+                                                    <th:block th:each="cat, iter : ${categoriaMateriales}">
+                                                        <input type="radio" class="btn-check" name="filtroCategoria"
+                                                               th:id="${'filtroCategoria_' + iter.index}" th:value="${cat.nmbCategoria}" autocomplete="off">
+                                                        <label class="btn btn-outline-success"
+                                                               th:for="${'filtroCategoria_' + iter.index}" th:text="${cat.nmbCategoria}">
+                                                            Categoría
+                                                        </label>
+                                                    </th:block>
                                                 </th:block>
-                                            </select>
-                                        </div>
-
-                                        <div class="col-md-6 col-lg-3">
-                                            <label for="filtroTipo" class="form-label fw-semibold text-muted mb-2">
-                                                <i class="bi bi-shuffle me-1"></i>Tipo
-                                            </label>
-                                            <select class="form-select form-select-sm filtro-select"
-                                                    id="filtroTipo"
-                                                    data-tipo="tipo">
-                                                <option value="">Todos los tipos</option>
-                                                <th:block th:if="${not #lists.isEmpty(tiposMateriales)}">
-                                                    <option th:each="tipo : ${tiposMateriales}"
-                                                            th:value="${tipo.nmbCategoria}"
-                                                            th:text="${tipo.nmbCategoria}">
-                                                        Tipo
-                                                    </option>
+                                                <th:block th:if="${#lists.isEmpty(categoriaMateriales)}">
+                                                    <span class="text-muted small">No hay categorías registradas</span>
                                                 </th:block>
-                                            </select>
+                                            </div>
                                         </div>
-
-                                        <!-- espacio reservado para futuros filtros -->
-                                        <div class="col-md-6 col-lg-3"></div>
-
-                                        <div class="col-md-6 col-lg-3"></div>
                                     </div>
 
-                                    <div class="row g-2">
-                                        <div class="col-auto">
-                                            <button class="btn btn-sm btn-success"
-                                                    type="button"
-                                                    id="btnAplicarFiltros">
-                                                <i class="bi bi-check-circle me-1"></i>Aplicar
-                                            </button>
-                                        </div>
-                                        <div class="col-auto">
-                                            <button class="btn btn-sm btn-outline-secondary"
-                                                    type="button"
-                                                    id="btnRestablecerFiltros">
-                                                <i class="bi bi-arrow-clockwise me-1"></i>Restablecer
-                                            </button>
-                                        </div>
-                                        <div class="col-auto">
-                                            <span class="badge bg-info text-dark" id="resultadosInfo" style="display:none;">
-                                                <i class="bi bi-funnel me-1"></i>Filtros Activos: <span id="contadorFiltros">0</span>
+                                    <!-- Filtro de Tipo con radio buttons -->
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-12">
+                                            <span class="form-label fw-semibold text-muted d-block mb-2">
+                                                <i class="bi bi-shuffle me-1"></i>Tipo
                                             </span>
+                                            <div class="btn-group flex-wrap gap-2" role="group" aria-label="Filtro tipo">
+                                                <input type="radio" class="btn-check" name="filtroTipo" id="filtroTipoNone" value="" autocomplete="off" checked>
+                                                <label class="btn btn-outline-success" for="filtroTipoNone">Ninguno</label>
+                                                <th:block th:if="${not #lists.isEmpty(tiposMateriales)}">
+                                                    <th:block th:each="tipo, iter : ${tiposMateriales}">
+                                                        <input type="radio" class="btn-check" name="filtroTipo"
+                                                               th:id="${'filtroTipo_' + iter.index}" th:value="${tipo.nmbCategoria}" autocomplete="off">
+                                                        <label class="btn btn-outline-success"
+                                                               th:for="${'filtroTipo_' + iter.index}" th:text="${tipo.nmbCategoria}">
+                                                            Tipo
+                                                        </label>
+                                                    </th:block>
+                                                </th:block>
+                                                <th:block th:if="${#lists.isEmpty(tiposMateriales)}">
+                                                    <span class="text-muted small">No hay tipos registrados</span>
+                                                </th:block>
+                                            </div>
                                         </div>
-                                        <div class="col-auto ms-auto">
-                                            <span class="badge bg-success" id="resultadosCount" style="display:none;">
-                                                Mostrando <span id="resultadosCountNum">0</span> de <span id="totalCount">0</span>
-                                            </span>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <small class="text-muted">Selecciona los filtros que desees aplicar o deja en "Ninguno" para no filtrar por esa opción.</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mt-4">
+                                        <div class="col-12 d-flex flex-wrap gap-3 justify-content-between align-items-center">
+                                            <div>
+                                                <span class="badge bg-info text-dark" id="resultadosInfo" style="display:none;">
+                                                    <i class="bi bi-funnel me-1"></i>Filtros Activos: <span id="contadorFiltros">0</span>
+                                                </span>
+                                                <span class="badge bg-success" id="resultadosCount" style="display:none;">
+                                                    Mostrando <span id="resultadosCountNum">0</span> de <span id="totalCount">0</span>
+                                                </span>
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-success"
+                                                        type="button"
+                                                        id="btnAplicarFiltros">
+                                                    <i class="bi bi-check-circle me-1"></i>Aplicar Filtros
+                                                </button>
+                                                <button class="btn btn-outline-secondary"
+                                                        type="button"
+                                                        id="btnRestablecerFiltros">
+                                                    <i class="bi bi-arrow-clockwise me-1"></i>Restablecer
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                    <div th:if="${#lists.isEmpty(inventario)}" class="alert alert-info" role="alert">
+                    <div th:if="${mensajeAlerta != null and !#strings.isEmpty(mensajeAlerta)}" class="alert alert-warning" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong th:text="${mensajeAlerta}">Mensaje de alerta</strong>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(inventario) and (mensajeAlerta == null or #strings.isEmpty(mensajeAlerta))}" class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle me-2"></i>
                         <strong>Sin materiales</strong> - No hay materiales registrados en el inventario.
                     </div>
 

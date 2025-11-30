@@ -14,10 +14,13 @@ import org.sena.inforecicla.exception.PuntoEcaNotFoundException;
 import org.sena.inforecicla.model.Inventario;
 import org.sena.inforecicla.model.Material;
 import org.sena.inforecicla.model.PuntoECA;
+import org.sena.inforecicla.model.enums.Alerta;
 import org.sena.inforecicla.repository.*;
 import org.sena.inforecicla.service.InventarioService;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -79,7 +82,7 @@ public class InventarioServiceImpl implements InventarioService {
     }
 
     @Override
-    public List<MaterialInvResponseDTO> buscarMaterial(UUID puntoId, String texto, String categoria, String tipo) throws InventarioFoundExistException {
+    public List<MaterialInvResponseDTO> buscarMaterialFiltrandoInventario(UUID puntoId, String texto, String categoria, String tipo) throws InventarioFoundExistException {
 
         // Normalizar valores nulos a strings vacíos
         String textoNormalizado = texto != null ? texto : "";
@@ -89,8 +92,8 @@ public class InventarioServiceImpl implements InventarioService {
         // Validar que al menos un filtro esté presente
         if (textoNormalizado.trim().isEmpty() && categoriaNormalizada.trim().isEmpty() && tipoNormalizado.trim().isEmpty()) {
             throw new InventarioFoundExistException(
-                "⚠️ Debes ingresar al menos un criterio de búsqueda. " +
-                "Por favor, escribe un nombre, selecciona una categoría o un tipo de material."
+                    "⚠️ Debes ingresar al menos un criterio de búsqueda. " +
+                            "Por favor, escribe un nombre, selecciona una categoría o un tipo de material."
             );
         }
 
@@ -109,10 +112,6 @@ public class InventarioServiceImpl implements InventarioService {
                 .filter(material -> tipoNormalizado.isEmpty() || material.getTipoMaterial().getNombre().toLowerCase().equals(tipoNormal))
                 .toList();
 
-        System.out.println("DEBUG buscarMaterial - PuntoId: " + puntoId);
-        System.out.println("DEBUG materiales existentes en inventario: " + materialesExistentes.size());
-        System.out.println("DEBUG materiales encontrados en búsqueda: " + materialesEncontrados.size());
-
         // Verificar si hay materiales encontrados y todos ya existen en el inventario
         if (!materialesEncontrados.isEmpty()) {
             // Contar cuántos de los materiales encontrados YA existen en el inventario
@@ -120,21 +119,20 @@ public class InventarioServiceImpl implements InventarioService {
                     .filter(material -> materialesExistentes.contains(material.getMaterialId()))
                     .toList();
 
-            System.out.println("DEBUG materiales que ya existen en el inventario: " + materialesQueYaExisten.size());
 
             // Si TODOS los materiales encontrados ya existen en el inventario
             if (materialesQueYaExisten.size() == materialesEncontrados.size()) {
                 int totalEncontrados = materialesEncontrados.size();
                 if (totalEncontrados == 1) {
                     throw new InventarioFoundExistException(
-                        "⚠️ El material '" + materialesEncontrados.getFirst().getNombre() +
-                        "' ya ha sido agregado al inventario de este punto ECA. No puedes agregar el mismo material dos veces."
+                            "⚠️ El material '" + materialesEncontrados.getFirst().getNombre() +
+                                    "' ya ha sido agregado al inventario de este punto ECA. No puedes agregar el mismo material dos veces."
                     );
                 } else {
                     throw new InventarioFoundExistException(
-                        "⚠️ Todos los " + totalEncontrados +
-                        " materiales encontrados con esos criterios ya han sido agregados al inventario de este punto ECA. " +
-                        "Intenta con diferentes filtros o busca otros materiales disponibles."
+                            "⚠️ Todos los " + totalEncontrados +
+                                    " materiales encontrados con esos criterios ya han sido agregados al inventario de este punto ECA. " +
+                                    "Intenta con diferentes filtros o busca otros materiales disponibles."
                     );
                 }
             }
@@ -150,26 +148,12 @@ public class InventarioServiceImpl implements InventarioService {
 
     @Override
     public void guardarInventario(InventarioGuardarDTO dto) throws MaterialNotFoundException, PuntoEcaNotFoundException {
-
-        System.out.println("🔍 Iniciando guardarInventario con DTO: " + dto);
-
-        System.out.println("1️⃣ Buscando material con ID: " + dto.materialId());
         Material material = materialRepository.findById(dto.materialId())
-                .orElseThrow(() -> {
-                    System.err.println("❌ Material no encontrado");
-                    return new MaterialNotFoundException("Material no encontrado");
-                });
-        System.out.println("✅ Material encontrado: " + material.getNombre());
+                .orElseThrow(() -> new MaterialNotFoundException("Material no encontrado"));
 
-        System.out.println("2️⃣ Buscando punto ECA con ID: " + dto.puntoEcaId());
         PuntoECA punto = puntoEcaRepository.findById(dto.puntoEcaId())
-                .orElseThrow(() -> {
-                    System.err.println("❌ Punto ECA no encontrado");
-                    return new PuntoEcaNotFoundException("Punto ECA no encontrado");
-                });
-        System.out.println("✅ Punto ECA encontrado: " + punto.getNombrePunto());
+                .orElseThrow(() -> new PuntoEcaNotFoundException("Punto ECA no encontrado"));
 
-        System.out.println("3️⃣ Construyendo objeto Inventario...");
         Inventario inv = Inventario.builder()
                 .capacidadMaxima(dto.capacidadMaxima())
                 .unidadMedida(dto.unidadMedida())
@@ -185,11 +169,74 @@ public class InventarioServiceImpl implements InventarioService {
         // Asignar estado automáticamente en el servidor
         inv.setEstado(org.sena.inforecicla.model.enums.Estado.Activo);
 
-        System.out.println("✅ Objeto Inventario construido");
-
-        System.out.println("4️⃣ Guardando en la base de datos...");
         inventarioRepository.save(inv);
-        System.out.println("✅ Inventario guardado exitosamente");
+    }
+
+    @Override
+    public List<InventarioResponseDTO> filtraInventario(UUID gestorId, String texto, String categoria, String tipo, Alerta alerta, String unidad, String ocupacion) throws InventarioFoundExistException {
+        String textoNormalizado = texto != null ? texto : "";
+        String categoriaNormalizada = categoria != null ? categoria : "";
+        String tipoNormalizado = tipo != null ? tipo : "";
+        String ocupacionNormalizada = ocupacion != null ? ocupacion : "";
+
+        // Validar que al menos un filtro esté presente
+        // Se permite: texto, categoria, tipo, alerta, unidad, O ocupacion
+        boolean hayAlgunFiltro = !textoNormalizado.trim().isEmpty() ||
+                                !categoriaNormalizada.trim().isEmpty() ||
+                                !tipoNormalizado.trim().isEmpty() ||
+                                (alerta != null) ||
+                                (unidad != null && !unidad.trim().isEmpty()) ||
+                                !ocupacionNormalizada.trim().isEmpty();
+
+        if (!hayAlgunFiltro) {
+            throw new InventarioFoundExistException(
+                    "⚠️ Debes ingresar al menos un criterio de búsqueda. "
+            );
+        }
+
+        final String textoNormal = textoNormalizado.toLowerCase();
+        final String categoriaNormal = categoriaNormalizada.toLowerCase();
+        final String tipoNormal = tipoNormalizado.toLowerCase();
+
+        var inventarios = inventarioRepository.findAllByPuntoEca_PuntoEcaID(gestorId);
+
+        var resultado = inventarios.stream()
+                .filter(inv -> textoNormalizado.isEmpty() || inv.getMaterial().getNombre().toLowerCase().contains(textoNormal))
+                .filter(inv -> {
+                    String catBD = inv.getMaterial().getCtgMaterial() != null ? inv.getMaterial().getCtgMaterial().getNombre().toLowerCase() : "NULL";
+                    return categoriaNormalizada.isEmpty() || catBD.equals(categoriaNormal);
+                })
+                .filter(inv -> {
+                    String tipoBD = inv.getMaterial().getTipoMaterial() != null ? inv.getMaterial().getTipoMaterial().getNombre().toLowerCase() : "NULL";
+                    return tipoNormalizado.isEmpty() || tipoBD.equals(tipoNormal);
+                })
+                .filter(inv -> alerta == null || inv.getAlerta() == alerta)
+                .filter(inv -> (unidad == null || unidad.isEmpty()) || (inv.getUnidadMedida() != null && inv.getUnidadMedida().name().equals(unidad)))
+                .filter(inv -> ocupacionNormalizada.isEmpty() || verificarOcupacion(inv, ocupacionNormalizada))
+                .map(InventarioResponseDTO::derivado)
+                .sorted(comparing(InventarioResponseDTO::fechaActualizacion).reversed())
+                .toList();
+
+
+        return resultado;
+    }
+
+    private boolean verificarOcupacion(Inventario inv, String ocupacion) {
+        BigDecimal stock = inv.getStockActual();
+        BigDecimal capacidad = inv.getCapacidadMaxima();
+
+        int porcentajeOcupacion = capacidad.compareTo(BigDecimal.ZERO) == 0 ? 0 :
+                stock.multiply(new BigDecimal(100))
+                        .divide(capacidad, 0, RoundingMode.HALF_UP)
+                        .intValue();
+
+        return switch(ocupacion) {
+            case "0-25" -> porcentajeOcupacion >= 0 && porcentajeOcupacion <= 25;
+            case "25-50" -> porcentajeOcupacion > 25 && porcentajeOcupacion <= 50;
+            case "50-75" -> porcentajeOcupacion > 50 && porcentajeOcupacion <= 75;
+            case "75-100" -> porcentajeOcupacion > 75 && porcentajeOcupacion <= 100;
+            default -> false;
+        };
     }
 }
 
