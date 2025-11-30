@@ -1,13 +1,17 @@
 package org.sena.inforecicla.dto.puntoEca.materiales;
 
 import org.sena.inforecicla.model.CategoriaMaterial;
-import org.sena.inforecicla.model.TipoMaterial;
 
-import java.util.UUID;
-
-public class CategoriaMaterialesInvResponseDTO {
+public record CategoriaMaterialesInvResponseDTO (
     //Categoria Material
-    String nmbCategoria;
-    String dscCategoria;
+    String nmbCategoria,
+    String dscCategoria
+){
 
+    public static CategoriaMaterialesInvResponseDTO derivado(CategoriaMaterial cat){
+        return new CategoriaMaterialesInvResponseDTO(
+                cat.getNombre(),
+                cat.getDescripcion()
+        );
+    }
 }

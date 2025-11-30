@@ -26,51 +26,51 @@
                         <a class="nav-link"
                            th:classappend="${(#strings.equals(seccion,'resumen') or #strings.isEmpty(seccion)) ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
                            th:attr="aria-current=${(#strings.equals(seccion,'resumen') or #strings.isEmpty(seccion)) ? 'page' : null}"
-                           th:href="@{'/punto-eca/'+${gestor}+'/'+${usuario.usuarioId} + '?seccion=resumen'}">Resumen</a>
+                           th:href="@{'/punto-eca/'+${gestor}+'/'+${usuario.usuarioId} + '/resumen'}">Resumen</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'perfil') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'perfil') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '?seccion=perfil'}">Perfil</a>
+                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/perfil'}">Perfil</a>
 
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'materiales') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'materiales') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '?seccion=materiales'}">Materiales</a>
+                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/materiales'}">Materiales</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'movimientos') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'movimientos') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '?seccion=movimientos'}">Movimientos</a>
+                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/movimientos'}">Movimientos</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'historial') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'historial') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '?seccion=historial'}">Historial</a>
+                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/historial'}">Historial</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'calendario') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'calendario') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '?seccion=calendario'}">Calendario</a>
+                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/calendario'}">Calendario</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'centros') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'centros') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '?seccion=centros'}">Centros
+                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/centros'}">Centros
                             de Acopio</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'configuracion') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'configuracion') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '?seccion=configuracion'}">Configuración</a>
+                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/configuracion'}">Configuración</a>
 
                     </li>
                 </ul>
@@ -96,50 +96,50 @@
                         <a class="nav-link"
                            th:classappend="${(#strings.equals(seccion,'resumen') or #strings.isEmpty(seccion)) ? 'bg-white text-success fw-semibold border-bottom border-3 border-success rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${(#strings.equals(seccion,'resumen') or #strings.isEmpty(seccion)) ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '?seccion=resumen'}">Resumen</a>
+                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/resumen'}">Resumen</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'perfil') ? 'bg-white text-success fw-semibold border-bottom border-3 border-success rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'perfil') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '?seccion=perfil'}">Perfil</a>
+                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/perfil'}">Perfil</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'materiales') ? 'bg-white text-success fw-semibold border-bottom border-3 border-success rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'materiales') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '?seccion=materiales'}">Materiales</a>
+                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/materiales'}">Materiales</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'movimientos') ? 'bg-white text-success fw-semibold border-bottom border-3 border-success rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'movimientos') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '?seccion=movimientos'}">Movimientos</a>
+                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/movimientos'}">Movimientos</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'historial') ? 'bg-white text-success fw-semibold border-bottom border-3 border-success rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'historial') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '?seccion=historial'}">Historial</a>
+                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/historial'}">Historial</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'calendario') ? 'bg-white text-success fw-semibold border-bottom border-3 border-success rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'calendario') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '?seccion=calendario'}">Calendario</a>
+                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/calendario'}">Calendario</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'centros') ? 'bg-white text-success fw-semibold border-bottom border-3 border-success rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'centros') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '?seccion=centros'}">Centros
+                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/centros'}">Centros
                             de Acopio</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'configuracion') ? 'bg-white text-success fw-semibold border-bottom border-3 border-success rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'configuracion') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '?seccion=configuracion'}">Configuración</a>
+                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/configuracion'}">Configuración</a>
                     </li>
                 </ul>
             </nav>
@@ -738,6 +738,59 @@
                     // Evento: Click en botón Editar
                     document.getElementById('btnEditarMaterial').onclick = function() {
                         abrirModalEditar();
+                    };
+
+                    // Evento: Click en botón Borrar
+                    document.getElementById('btnBorrarMaterial').onclick = function() {
+                        const datos = window.datosEditarInventario;
+                        if (!datos || !datos.inventarioId) {
+                            alert('Error: No se pudo obtener el ID del inventario');
+                            return;
+                        }
+
+                        // Confirmar antes de borrar
+                        if (!confirm('¿Estás seguro de que deseas borrar este material del inventario?\n\nMaterial: ' + datos.nombreMaterial)) {
+                            return;
+                        }
+
+                        // Hacer petición al servidor para borrar
+                        console.log('Borrando inventario con ID:', datos.inventarioId);
+
+                        // Obtener información de la URL
+                        const pathSegments = window.location.pathname.split('/').filter(s => s);
+                        const nombrePunto = pathSegments[1];
+                        const gestorId = pathSegments[2];
+
+                        // Enviar solicitud DELETE al servidor
+                        fetch(`/punto-eca/${nombrePunto}/${gestorId}/eliminar-inventario/${datos.inventarioId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Error al eliminar: ' + response.statusText);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('✓ Material eliminado correctamente');
+                            alert('Material eliminado del inventario correctamente');
+
+                            // Cerrar modal y recargar página
+                            const detallesModal = bootstrap.Modal.getInstance(document.getElementById('detallesModal'));
+                            if (detallesModal) detallesModal.hide();
+
+                            // Recargar página después de un pequeño delay
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 500);
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error al eliminar el material: ' + error.message);
+                        });
                     };
                 } catch (err) {
                     console.error('ERROR:', err);

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.sena.inforecicla.model.base.EntidadCreacionModificacion;
+import org.sena.inforecicla.model.enums.Alerta;
 import org.sena.inforecicla.model.enums.UnidadMedida;
 
 import java.math.BigDecimal;
@@ -50,6 +51,10 @@ public class Inventario extends EntidadCreacionModificacion {
     @Max(100)
     private Short umbralCritico;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 15, columnDefinition = "VARCHAR(15) DEFAULT 'OK'")
+    private Alerta alerta = Alerta.OK;
+
     @Column(name = "precio_compra", precision = 12, scale = 2)
     private BigDecimal precioCompra;
 
@@ -75,9 +80,11 @@ public class Inventario extends EntidadCreacionModificacion {
     private PuntoECA puntoEca;
 
     @OneToMany(mappedBy = "inventario", cascade = CascadeType.REMOVE)
+    @Column(nullable = false)
     private List<CompraInventario> compras;
 
     @OneToMany(mappedBy = "inventario", cascade = CascadeType.REMOVE)
+    @Column(nullable = false)
     private List<VentaInventario> ventas;
 
 
