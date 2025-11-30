@@ -18,7 +18,7 @@ public class CategoriaMaterial extends EntidadDescripcion {
 
     @Id
     @GeneratedValue
-    @Column(name = "categoria_material_id")
+    @Column(name="categoria_material_id",nullable = false, updatable = false)
     private UUID ctgMtId;
 
     @OneToMany(mappedBy = "ctgMaterial")

@@ -3,10 +3,10 @@ package org.sena.inforecicla.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import org.sena.inforecicla.model.base.EntidadLocalizacionWebHorario;
+import org.sena.inforecicla.model.base.EntidadDescripcion;
 import org.sena.inforecicla.model.enums.Estado;
 
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -16,14 +16,14 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Publicacion extends EntidadDescription {
+public class Publicacion extends EntidadDescripcion {
     @Id
-    @GeneratedValue(Strategy = GenerationType IDENTITY)
-    @Column(name = "publicacion_id", unique = true, nullable = false)
+    @GeneratedValue
+    @Column(nullable = false, updatable = false)
     private UUID publicacionId;
 
     @Column(name = "titulo", nullable = false, length = 50)
-    @NotBlank(message = "El ttulo no puede estar vacío")
+    @NotBlank(message = "El título no puede estar vacío")
     @Size(min = 3, max = 50)
     private String titulo;
 
@@ -33,17 +33,11 @@ public class Publicacion extends EntidadDescription {
     private String contenido;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "estado", nullable = false, columnDefinition = "ENUM('borrador','publicado','archivado')")
+    @Column(name = "estado", nullable = false)
     @NotNull(message = "El estado es obligatorio")
-    private EstadoPublicacion estado;
+    private Estado estado;
 
-    @OneToMany(mappedBy = "publicacion")
-    private List<Publicacion> publicaciones;
-
-    @Column(name = "usuario_id", insertable = false, updatable = false")
-    private UUID usuarioId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "usuario_id",
             nullable = false,
@@ -52,18 +46,12 @@ public class Publicacion extends EntidadDescription {
     @NotNull(message = "El usuario es obligatorio")
     private Usuario usuario;
 
-    @Column(name = "categoria_id", insertable = false, updatable = false")
-    private UUID categoriaId;
-
-    @OneToOne
-    @JoinColumn(name = "usuario_id", nullable = false, foreignKey = @ForeignKey(name = "fk_puntoeca_gestor"))
-    private Usuario usuario;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "categoria_publicacion_id", nullable =false,
-            foreignKey = @ForeignKey(name = "fk_publicacion_categoria")
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "publicacion_categoria",
+            joinColumns = @JoinColumn(name = "publicacion_id", foreignKey = @ForeignKey(name = "fk_pub_cat_publicacion")),
+            inverseJoinColumns = @JoinColumn(name = "categoria_id", foreignKey = @ForeignKey(name = "fk_pub_cat_categoria"))
     )
-    @NotNull
-    private CategoriaPublicacion categoriaPublicacion;
+    @NotEmpty(message = "Debe tener al menos una categoría")
+    private Set<CategoriaPublicacion> categorias;
 }

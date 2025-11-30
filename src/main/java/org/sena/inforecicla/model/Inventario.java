@@ -23,7 +23,7 @@ public class Inventario extends EntidadCreacionModificacion {
 
     @Id
     @GeneratedValue
-    @Column(name = "inventario_id")
+    @Column(nullable = false, updatable = false)
     private UUID inventarioId;
 
     @NotNull

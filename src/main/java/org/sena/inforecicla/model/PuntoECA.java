@@ -26,7 +26,7 @@ public class PuntoECA extends EntidadLocalizacionWebHorario {
 
     @Id
     @GeneratedValue
-    @Column(name = "punto_id")
+    @Column(nullable = false, updatable = false)
     private UUID puntoEcaID;
 
     @Column(name = "nombre_punto", nullable = false, length = 30)

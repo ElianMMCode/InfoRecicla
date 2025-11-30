@@ -2,7 +2,9 @@ package org.sena.inforecicla.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.sena.inforecicla.model.base.EntidadDescripcion;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -16,9 +18,9 @@ public class CategoriaPublicacion extends EntidadDescripcion {
 
     @Id
     @GeneratedValue
-    @Column(name = "categoiraPublicacionId", unique = true, nullable = false)
+    @Column(nullable = false, updatable = false)
     private UUID categoiraPublicacionId;
 
-    @OneToMany(mappedBy = "ctgPublicacion")
-    private List<Publicacion> publicaciones;
+    @ManyToMany(mappedBy = "categorias", fetch = FetchType.LAZY)
+    private Set<Publicacion> publicaciones;
 }
