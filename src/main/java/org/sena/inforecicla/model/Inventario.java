@@ -53,6 +53,7 @@ public class Inventario extends EntidadCreacionModificacion {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 15, columnDefinition = "VARCHAR(15) DEFAULT 'OK'")
+    @Builder.Default
     private Alerta alerta = Alerta.OK;
 
     @Column(name = "precio_compra", precision = 12, scale = 2)

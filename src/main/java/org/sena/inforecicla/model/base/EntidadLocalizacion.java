@@ -1,15 +1,12 @@
 package org.sena.inforecicla.model.base;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.sena.inforecicla.model.enums.LocalidadBogota;
+import org.sena.inforecicla.model.Localidad;
 
 @MappedSuperclass
 @Getter
@@ -20,9 +17,9 @@ public abstract class EntidadLocalizacion extends EntidadContacto {
     private String ciudad;
 
     @NotNull(message = "Debe escoger una localidad")
-    @Enumerated(EnumType.STRING)
-    @Column(name = "localidad", nullable = false, length = 30)
-    private LocalidadBogota localidad;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "localidad_id", nullable = false, foreignKey = @ForeignKey(name = "fk_entidad_localidad"))
+    private Localidad localidad;
 
     @DecimalMin(value = "-90.0", message = "Latitud mínima permitida: -90.0")
     @DecimalMax(value = "90.0", message = "Latitud máxima permitida: 90.0")
