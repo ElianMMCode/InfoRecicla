@@ -26,7 +26,7 @@ public class CentroAcopio extends EntidadLocalizacionWebHorario {
 
     @Id
     @GeneratedValue
-    @Column(name = "centro_acopio_id")
+    @Column(name="centro_acopio_id",nullable = false, updatable = false)
     private UUID cntAcpId;
 
     @Column(name = "nombre_centro_acopio", nullable = false, length = 30)

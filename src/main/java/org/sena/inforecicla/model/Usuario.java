@@ -17,7 +17,6 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @AttributeOverrides({
         @AttributeOverride(name = "celular", column = @Column(name = "celular", nullable = false, length = 10, unique = true)),
         @AttributeOverride(name = "email", column = @Column(name = "email", nullable = false, unique = true, length = 150)),
@@ -28,6 +27,7 @@ public class Usuario extends EntidadLocalizacion {
 
     @Id
     @GeneratedValue
+    @Column(nullable = false, updatable = false)
     private UUID usuarioId;
 
     @Column(nullable = false, length = 30)
