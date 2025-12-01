@@ -1,62 +1,62 @@
-/* =========================================================
-   LIMPIAR DATOS DUPLICADOS - EJECUTAR PRIMERO
-   ========================================================= */
--- Eliminar registros duplicados manteniendo solo el primero por ID
-DELETE FROM `venta_inventario` WHERE `venta_id` IN (
-    SELECT `venta_id` FROM (
-        SELECT `venta_id`, ROW_NUMBER() OVER (PARTITION BY `venta_id` ORDER BY `fecha_creacion` ASC) as rn
-        FROM `venta_inventario`
-    ) t WHERE t.rn > 1
-);
-
-DELETE FROM `compra_inventario` WHERE `compra_id` IN (
-    SELECT `compra_id` FROM (
-        SELECT `compra_id`, ROW_NUMBER() OVER (PARTITION BY `compra_id` ORDER BY `fecha_creacion` ASC) as rn
-        FROM `compra_inventario`
-    ) t WHERE t.rn > 1
-);
-
-DELETE FROM `inventario` WHERE `inventario_id` IN (
-    SELECT `inventario_id` FROM (
-        SELECT `inventario_id`, ROW_NUMBER() OVER (PARTITION BY `inventario_id` ORDER BY `fecha_creacion` ASC) as rn
-        FROM `inventario`
-    ) t WHERE t.rn > 1
-);
-
-DELETE FROM `centro_acopio` WHERE `cnt_acp_id` IN (
-    SELECT `cnt_acp_id` FROM (
-        SELECT `cnt_acp_id`, ROW_NUMBER() OVER (PARTITION BY `cnt_acp_id` ORDER BY `fecha_creacion` ASC) as rn
-        FROM `centro_acopio`
-    ) t WHERE t.rn > 1
-);
-
-DELETE FROM `punto_eca` WHERE `punto_eca_id` IN (
-    SELECT `punto_eca_id` FROM (
-        SELECT `punto_eca_id`, ROW_NUMBER() OVER (PARTITION BY `punto_eca_id` ORDER BY `fecha_creacion` ASC) as rn
-        FROM `punto_eca`
-    ) t WHERE t.rn > 1
-);
-
-DELETE FROM `material` WHERE `material_id` IN (
-    SELECT `material_id` FROM (
-        SELECT `material_id`, ROW_NUMBER() OVER (PARTITION BY `material_id` ORDER BY `fecha_creacion` ASC) as rn
-        FROM `material`
-    ) t WHERE t.rn > 1
-);
-
-DELETE FROM `categoria_material` WHERE `ctg_mt_id` IN (
-    SELECT `ctg_mt_id` FROM (
-        SELECT `ctg_mt_id`, ROW_NUMBER() OVER (PARTITION BY `ctg_mt_id` ORDER BY `fecha_creacion` ASC) as rn
-        FROM `categoria_material`
-    ) t WHERE t.rn > 1
-);
-
-DELETE FROM `tipo_material` WHERE `tipo_mt_id` IN (
-    SELECT `tipo_mt_id` FROM (
-        SELECT `tipo_mt_id`, ROW_NUMBER() OVER (PARTITION BY `tipo_mt_id` ORDER BY `fecha_creacion` ASC) as rn
-        FROM `tipo_material`
-    ) t WHERE t.rn > 1
-);
+# /* =========================================================
+#    LIMPIAR DATOS DUPLICADOS - EJECUTAR PRIMERO
+#    ========================================================= */
+# -- Eliminar registros duplicados manteniendo solo el primero por ID
+# DELETE FROM `venta_inventario` WHERE `venta_id` IN (
+#     SELECT `venta_id` FROM (
+#         SELECT `venta_id`, ROW_NUMBER() OVER (PARTITION BY `venta_id` ORDER BY `fecha_creacion` ASC) as rn
+#         FROM `venta_inventario`
+#     ) t WHERE t.rn > 1
+# );
+#
+# DELETE FROM `compra_inventario` WHERE `compra_id` IN (
+#     SELECT `compra_id` FROM (
+#         SELECT `compra_id`, ROW_NUMBER() OVER (PARTITION BY `compra_id` ORDER BY `fecha_creacion` ASC) as rn
+#         FROM `compra_inventario`
+#     ) t WHERE t.rn > 1
+# );
+#
+# DELETE FROM `inventario` WHERE `inventario_id` IN (
+#     SELECT `inventario_id` FROM (
+#         SELECT `inventario_id`, ROW_NUMBER() OVER (PARTITION BY `inventario_id` ORDER BY `fecha_creacion` ASC) as rn
+#         FROM `inventario`
+#     ) t WHERE t.rn > 1
+# );
+#
+# DELETE FROM `centro_acopio` WHERE `cnt_acp_id` IN (
+#     SELECT `cnt_acp_id` FROM (
+#         SELECT `cnt_acp_id`, ROW_NUMBER() OVER (PARTITION BY `cnt_acp_id` ORDER BY `fecha_creacion` ASC) as rn
+#         FROM `centro_acopio`
+#     ) t WHERE t.rn > 1
+# );
+#
+# DELETE FROM `punto_eca` WHERE `punto_eca_id` IN (
+#     SELECT `punto_eca_id` FROM (
+#         SELECT `punto_eca_id`, ROW_NUMBER() OVER (PARTITION BY `punto_eca_id` ORDER BY `fecha_creacion` ASC) as rn
+#         FROM `punto_eca`
+#     ) t WHERE t.rn > 1
+# );
+#
+# DELETE FROM `material` WHERE `material_id` IN (
+#     SELECT `material_id` FROM (
+#         SELECT `material_id`, ROW_NUMBER() OVER (PARTITION BY `material_id` ORDER BY `fecha_creacion` ASC) as rn
+#         FROM `material`
+#     ) t WHERE t.rn > 1
+# );
+#
+# DELETE FROM `categoria_material` WHERE `categoria_material_id` IN (
+#     SELECT `categoria_material_id` FROM (
+#         SELECT `categoria_material_id`, ROW_NUMBER() OVER (PARTITION BY `categoria_material_id` ORDER BY `fecha_creacion` ASC) as rn
+#         FROM `categoria_material`
+#     ) t WHERE t.rn > 1
+# );
+#
+# DELETE FROM `tipo_material` WHERE `tipo_material_id` IN (
+#     SELECT `tipo_material_id` FROM (
+#         SELECT `tipo_material_id`, ROW_NUMBER() OVER (PARTITION BY `tipo_material_id` ORDER BY `fecha_creacion` ASC) as rn
+#         FROM `tipo_material`
+#     ) t WHERE t.rn > 1
+# );
 
 /* =========================================================
   TIPO_MATERIAL
@@ -66,7 +66,7 @@ INSERT IGNORE INTO `tipo_material` (
     `fecha_actualizacion`,
     `fecha_creacion`,
     `nombre`,
-    `tipo_mt_id`,
+    `tipo_material_id`,
     `descripcion`,
     `estado`
 ) VALUES
@@ -108,7 +108,7 @@ INSERT IGNORE INTO `categoria_material` (
     `fecha_actualizacion`,
     `fecha_creacion`,
     `nombre`,
-    `ctg_mt_id`,
+    `categoria_material_id`,
     `descripcion`,
     `estado`
 ) VALUES
@@ -517,7 +517,7 @@ INSERT IGNORE INTO `usuario` (
    PUNTO_ECA (principal asociado al GestorECA 3333...)
    ========================================================= */
 INSERT IGNORE INTO `punto_eca` (
-    `punto_id`,
+    `punto_ecaid`,
     `nombre_punto`,
     `descripcion`,
     `telefono_punto`,
@@ -584,7 +584,7 @@ INSERT IGNORE INTO `punto_eca` (
    CENTRO_ACOPIO
    ========================================================= */
 INSERT IGNORE INTO `centro_acopio` (
-    `cnt_acp_id`,
+    `centro_acopio_id`,
     `nombre_centro_acopio`,
     `tipo_centro_acopio`,
     `visibilidad`,
@@ -851,7 +851,7 @@ INSERT IGNORE INTO `venta_inventario` (
     `fecha_venta`,
     `precio_venta`,
     `observaciones`,
-    `cnt_acp_id`,
+    `centro_acopio_id`,
     `estado`,
     `fecha_creacion`,
     `fecha_actualizacion`

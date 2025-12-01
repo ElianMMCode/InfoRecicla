@@ -1,6 +1,8 @@
 package org.sena.inforecicla.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.sena.inforecicla.dto.puntoEca.gestor.GestorResponseDTO;
+import org.sena.inforecicla.dto.puntoEca.gestor.GestorUpdateDTO;
 import org.sena.inforecicla.dto.usuario.UsuarioGestorRequestDTO;
 import org.sena.inforecicla.dto.usuario.UsuarioGestorResponseDTO;
 import org.sena.inforecicla.model.PuntoECA;
@@ -85,6 +87,26 @@ public class GestorEcaServiceImpl implements GestorEcaService {
         }
 
         return construirUsuarioGestorResponseDTO(usuario, puntoECA);
+    }
+
+    @Override
+    @Transactional
+    public GestorResponseDTO actualizarGestor(UUID gestorId, GestorUpdateDTO gestorUpdate){
+       Usuario gestor = usuarioRepository.findById(gestorId)
+               .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + gestorId));
+
+       gestor.setNombres(gestorUpdate.nombres());
+       gestor.setApellidos(gestorUpdate.apellidos());
+       gestor.setTipoDocumento(gestorUpdate.tipoDocumento());
+       gestor.setNumeroDocumento(gestorUpdate.numeroDocumento());
+       gestor.setFechaNacimiento(gestorUpdate.fechaNacimiento());
+       gestor.setCelular(gestorUpdate.celular());
+       gestor.setEmail(gestorUpdate.email());
+       gestor.setBiografia(gestorUpdate.biografia());
+
+       Usuario actualizado = usuarioRepository.save(gestor);
+
+       return GestorResponseDTO.derivado(actualizado);
     }
 
     private UsuarioGestorResponseDTO construirUsuarioGestorResponseDTO(Usuario usuario, PuntoECA puntoECA) {
