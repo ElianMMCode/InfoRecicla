@@ -261,192 +261,182 @@
 <!-- Bootstrap JS Bundle con Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
-<!-- Verificar que Bootstrap cargó correctamente -->
+<!-- Script para manejar botones de guardar en la sección de perfil -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Verificar que Bootstrap esté disponible
-        if (typeof bootstrap === 'undefined') {
-            console.error('ERROR: Bootstrap no se cargó correctamente');
-        } else {
-            console.log('✓ Bootstrap cargado correctamente', bootstrap.Modal);
+document.addEventListener('DOMContentLoaded', function() {
+    // Pequeño delay para asegurar que Bootstrap y el DOM estén completamente cargados
+    setTimeout(function() {
+        // ===== PREVIEW FOTO DE PERFIL =====
+        const inputFotoPerfil = document.getElementById('inputFotoPerfil');
+        if (inputFotoPerfil) {
+            inputFotoPerfil.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const previewImg = document.getElementById('previewFotoPerfil');
+                    if (previewImg) previewImg.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
         }
 
-        // ============= EVENT LISTENER PARA GUARDAR ENCARGADO =============
-        const btnGuardarEncargado = document.querySelector('.btnGuardarEncargado');
+        // ===== PREVIEW FOTO DEL PUNTO ECA =====
+        const inputFotoPunto = document.getElementById('inputFotoPunto');
+        if (inputFotoPunto) {
+            inputFotoPunto.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const previewImg = document.getElementById('previewFotoPunto');
+                    if (previewImg) previewImg.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // ===== GUARDAR ENCARGADO =====
+        const btnGuardarEncargado = document.getElementById('btnGuardarEncargado');
         if (btnGuardarEncargado) {
-            console.log('✓ Botón Guardar Encargado encontrado');
             btnGuardarEncargado.addEventListener('click', async function(e) {
                 e.preventDefault();
-                console.log('🔍 Click en Guardar Encargado');
+
+                const nombres = document.getElementById('nombres')?.value.trim();
+                const apellidos = document.getElementById('apellidos')?.value.trim();
+                const email = document.getElementById('email')?.value.trim();
+                const celular = document.getElementById('celular')?.value.trim();
+                const tipoDocumento = document.getElementById('tipoDocumento')?.value;
+                const numeroDocumento = document.getElementById('numeroDocumento')?.value.trim();
+                const fechaNacimiento = document.getElementById('fechaNacimiento')?.value;
+                const biografia = document.getElementById('biografia')?.value.trim();
+
+                if (!nombres || nombres.length < 3) { alert('Nombres: mín 3 caracteres'); return; }
+                if (!apellidos || apellidos.length < 2) { alert('Apellidos: mín 2 caracteres'); return; }
+                if (!email || !email.includes('@')) { alert('Email inválido'); return; }
+                if (!celular || celular.length !== 10 || !/^\d{10}$/.test(celular)) { alert('Celular: 10 dígitos'); return; }
 
                 try {
-                    const nombres = document.getElementById('enc_nombres')?.value.trim();
-                    const apellidos = document.getElementById('enc_apellidos')?.value.trim();
-                    const email = document.getElementById('enc_email')?.value.trim();
-                    const celular = document.getElementById('enc_celular')?.value.trim();
+                    const pathname = window.location.pathname;
+                    const match = pathname.match(/\/punto-eca\/([^\/]+)\/([^\/]+)\/perfil/);
+                    if (!match) throw new Error('No se encontraron los IDs en la URL');
 
-                    if (!nombres || !apellidos || !email || !celular) {
-                        alert('Por favor completa todos los campos requeridos');
-                        return;
-                    }
+                    const usuarioId = match[2];
 
-                    if (!email.includes('@')) {
-                        alert('Email inválido');
-                        return;
-                    }
+                    const params = new URLSearchParams({
+                        nombres, apellidos, email, celular, tipoDocumento, numeroDocumento, fechaNacimiento, biografia
+                    });
 
-                    const usuarioId = document.querySelector('input[name="usuarioId"]')?.value;
-                    if (!usuarioId) {
-                        alert('Error: No se encontró el UUID del usuario');
-                        return;
-                    }
+                    const url = `/punto-eca/${usuarioId}/perfil/encargado`;
 
-                    console.log('🔍 usuarioId:', usuarioId);
-                    console.log('🔍 Ruta:', `/punto-eca/${usuarioId}/perfil/encargado`);
-
-                    const btn = this;
-                    btn.disabled = true;
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';
-
-                    const datos = {
-                        nombres,
-                        apellidos,
-                        email,
-                        celular,
-                        tipoDocumento: document.getElementById('enc_tipoDocumento')?.value,
-                        numeroDocumento: document.getElementById('enc_numeroDocumento')?.value,
-                        fechaNacimiento: document.getElementById('enc_fechaNacimiento')?.value,
-                        biografia: document.getElementById('enc_biografia')?.value,
-                        fotoPerfil: null
-                    };
-
-                    const csrfToken = document.querySelector('input[name="_csrf"]')?.value;
-                    console.log('🔍 Enviando:', datos);
-
-                    const response = await fetch(`/punto-eca/${usuarioId}/perfil/encargado`, {
+                    const response = await fetch(url, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken || ''
-                        },
-                        body: JSON.stringify(datos)
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params
                     });
 
                     if (!response.ok) {
-                        const text = await response.text();
-                        console.error('❌ Status:', response.status);
-                        console.error('❌ Ruta enviada:', `/punto-eca/${usuarioId}/perfil/encargado`);
-                        console.error('❌ Respuesta:', text);
-                        throw new Error(`HTTP ${response.status}: ${text}`);
+                        const data = await response.json();
+                        throw new Error(data.error || 'Error');
                     }
 
-                    const data = await response.json();
-                    console.log('✅ Guardado:', data);
-
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3';
-                    alertDiv.style.zIndex = '10000';
-                    alertDiv.innerHTML = `<i class="bi bi-check-circle me-2"></i><strong>Éxito:</strong> Encargado actualizado<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
-                    document.body.appendChild(alertDiv);
-
-                    setTimeout(() => alertDiv.remove(), 3000);
-
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                } catch (error) {
-                    console.error('❌ Error:', error);
-                    alert('Error al guardar: ' + error.message);
-                    this.disabled = false;
-                    this.innerHTML = this.dataset.originalText || 'Guardar';
+                    alert('✅ Encargado guardado correctamente');
+                    location.reload();
+                } catch (e) {
+                    alert('❌ Error: ' + e.message);
                 }
             });
-        } else {
-            console.warn('⚠️ Botón Guardar Encargado no encontrado');
         }
 
-        // ============= EVENT LISTENER PARA GUARDAR PUNTO ECA =============
-        const btnGuardarPunto = document.querySelector('.btnGuardarPunto');
+        // ===== GUARDAR PUNTO ECA =====
+        const btnGuardarPunto = document.getElementById('btnGuardarPunto');
         if (btnGuardarPunto) {
-            console.log('✓ Botón Guardar Punto ECA encontrado');
             btnGuardarPunto.addEventListener('click', async function(e) {
                 e.preventDefault();
-                console.log('🔍 Click en Guardar Punto ECA');
+
+                const nombrePunto = document.getElementById('nombrePunto')?.value.trim();
+                const direccionPunto = document.getElementById('direccionPunto')?.value.trim();
+                const localidadPuntoId = document.getElementById('localidadPuntoId')?.value;
+                const celularPunto = document.getElementById('celularPunto')?.value.trim();
+                const emailPunto = document.getElementById('emailPunto')?.value.trim();
+                const telefonoPunto = document.getElementById('telefonoPunto')?.value.trim();
+                const latitud = document.getElementById('latitud')?.value || '0';
+                const longitud = document.getElementById('longitud')?.value || '0';
+                const descripcionPunto = document.getElementById('descripcionPunto')?.value.trim();
+                const logoUrlPunto = document.getElementById('logoUrlPunto')?.value.trim();
+                const sitioWebPunto = document.getElementById('sitioWebPunto')?.value.trim();
+                const horarioAtencionPunto = document.getElementById('horarioAtencionPunto')?.value.trim();
+
+                if (!nombrePunto || nombrePunto.length < 3) { alert('Nombre: mín 3 caracteres'); return; }
+                if (!direccionPunto) { alert('Dirección: obligatoria'); return; }
+                if (!localidadPuntoId) { alert('Localidad: obligatoria'); return; }
+                if (!celularPunto || celularPunto.length !== 10 || !/^\d{10}$/.test(celularPunto)) { alert('Celular: 10 dígitos'); return; }
+                if (!emailPunto || !emailPunto.includes('@')) { alert('Email inválido'); return; }
+                if (telefonoPunto && !/^60\d{8}$/.test(telefonoPunto)) { alert('Teléfono: formato 60 + 8 dígitos (opcional)'); return; }
 
                 try {
-                    const nombre = document.getElementById('pun_nombre')?.value.trim();
-                    const direccion = document.getElementById('pun_direccion')?.value.trim();
+                    const pathname = window.location.pathname;
+                    const match = pathname.match(/\/punto-eca\/([^\/]+)\/([^\/]+)\/perfil/);
+                    if (!match) throw new Error('No se encontraron los IDs en la URL');
 
-                    if (!nombre || !direccion) {
-                        alert('Por favor completa nombre y dirección');
-                        return;
-                    }
-
+                    const usuarioId = match[2];
                     const puntoEcaId = document.querySelector('input[name="puntoEcaId"]')?.value;
-                    const usuarioId = document.querySelector('input[name="usuarioId"]')?.value;
 
-                    if (!puntoEcaId || !usuarioId) {
-                        alert('Error: No se encontraron los IDs necesarios');
-                        return;
-                    }
+                    if (!puntoEcaId) throw new Error('No se encontró el ID del Punto ECA');
 
-                    const btn = this;
-                    btn.disabled = true;
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';
+                    const params = new URLSearchParams({
+                        nombrePunto, direccionPunto, localidadPuntoId, latitud, longitud,
+                        telefonoPunto, celularPunto, emailPunto, descripcionPunto, logoUrlPunto,
+                        sitioWebPunto, horarioAtencionPunto
+                    });
 
-                    const formData = new FormData();
-                    formData.append('nombrePunto', nombre);
-                    formData.append('direccionPunto', document.getElementById('pun_direccion')?.value);
-                    formData.append('ciudadPunto', document.getElementById('pun_ciudad')?.value || '');
-                    formData.append('localidadPunto', document.getElementById('pun_localidad')?.value || '');
-                    formData.append('telefonoPunto', document.getElementById('pun_telefono')?.value || '');
-                    formData.append('coordenadas', document.getElementById('pun_coordenadas')?.value || '');
-                    formData.append('descripcionPunto', document.getElementById('pun_descripcion')?.value || '');
+                    const url = `/punto-eca/${usuarioId}/perfil/punto/${puntoEcaId}`;
 
-                    const fotoPuntoFile = document.getElementById('fotoPunto')?.files[0];
-                    if (fotoPuntoFile) {
-                        formData.append('fotoPunto', fotoPuntoFile);
-                    }
-
-                    console.log('🔍 Enviando Punto ECA a:', `/punto-eca/${usuarioId}/perfil/punto/${puntoEcaId}`);
-
-                    const response = await fetch(`/punto-eca/${usuarioId}/perfil/punto/${puntoEcaId}`, {
+                    const response = await fetch(url, {
                         method: 'POST',
-                        body: formData
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params
                     });
 
                     if (!response.ok) {
-                        const text = await response.text();
-                        console.error('❌ Status:', response.status);
-                        console.error('❌ Respuesta:', text);
-                        throw new Error(`HTTP ${response.status}: ${text}`);
+                        const data = await response.json();
+                        throw new Error(data.error || 'Error');
                     }
 
-                    const data = await response.json();
-                    console.log('✅ Punto ECA guardado:', data);
-
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'alert alert-info alert-dismissible fade show position-fixed top-0 end-0 m-3';
-                    alertDiv.style.zIndex = '10000';
-                    alertDiv.innerHTML = `<i class="bi bi-check-circle me-2"></i><strong>Éxito:</strong> Punto ECA actualizado<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
-                    document.body.appendChild(alertDiv);
-
-                    setTimeout(() => alertDiv.remove(), 3000);
-
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                } catch (error) {
-                    console.error('❌ Error:', error);
-                    alert('Error al guardar: ' + error.message);
-                    this.disabled = false;
-                    this.innerHTML = this.dataset.originalText || 'Guardar';
+                    alert('✅ Punto ECA guardado correctamente');
+                    location.reload();
+                } catch (e) {
+                    alert('❌ Error: ' + e.message);
                 }
             });
-        } else {
-            console.warn('⚠️ Botón Guardar Punto ECA no encontrado');
         }
-    });
+
+        // ===== GPS =====
+        const btnGPS = document.getElementById('btnGPS');
+        if (btnGPS) {
+            btnGPS.addEventListener('click', function() {
+                if (!navigator.geolocation) {
+                    alert('Geolocalización no disponible');
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition(pos => {
+                    const lat = pos.coords.latitude.toFixed(6);
+                    const lon = pos.coords.longitude.toFixed(6);
+                    const latInput = document.getElementById('latitud');
+                    const lonInput = document.getElementById('longitud');
+                    if (latInput) latInput.value = lat;
+                    if (lonInput) lonInput.value = lon;
+                    alert('✅ Coordenadas obtenidas');
+                }, () => {
+                    alert('❌ Error al obtener ubicación');
+                });
+            });
+        }
+    }, 500);
+});
 </script>
 
 <!-- Nota: El script específico del modal global fue movido a la plantilla de materiales. -->
@@ -495,23 +485,17 @@
 function scrollToAccordion(event, selectorAccordion) {
     event.preventDefault();
 
-    console.log('🔍 Buscando acordeón:', selectorAccordion);
-
     // Obtener el elemento del acordeón (el div collapse)
     const accordionElement = document.querySelector(selectorAccordion);
     if (!accordionElement) {
-        console.warn('❌ Acordeón no encontrado:', selectorAccordion);
         return;
     }
-
-    console.log('✅ Acordeón encontrado:', selectorAccordion);
 
     // Verificar si ya está expandido
     const isCollapsed = accordionElement.classList.contains('collapse') &&
                        !accordionElement.classList.contains('show');
 
     if (isCollapsed) {
-        console.log('📖 Expandiendo acordeón...');
         // Usar Bootstrap Collapse API para expandir
         new bootstrap.Collapse(accordionElement, {
             toggle: true
@@ -524,7 +508,6 @@ function scrollToAccordion(event, selectorAccordion) {
             behavior: 'smooth',
             block: 'start'
         });
-        console.log('✅ Navegado a:', selectorAccordion);
     }, 350);
 }
 
@@ -532,7 +515,6 @@ function scrollToAccordion(event, selectorAccordion) {
  * Inicializar el menú desplegable del sidebar
  */
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🎯 Inicializando menú desplegable del sidebar...');
 
     // Inicializar chevrons según el estado actual
     document.querySelectorAll('.dropdown-menu-container [data-bs-toggle="collapse"]').forEach(chevron => {

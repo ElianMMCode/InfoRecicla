@@ -1,15 +1,19 @@
 package org.sena.inforecicla.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sena.inforecicla.dto.puntoEca.gestor.GestorResponseDTO;
 import org.sena.inforecicla.dto.puntoEca.gestor.GestorUpdateDTO;
+import org.sena.inforecicla.dto.puntoEca.gestor.PuntoEcaResponseDTO;
+import org.sena.inforecicla.dto.puntoEca.gestor.PuntoEcaUpdateDTO;
 import org.sena.inforecicla.dto.usuario.UsuarioGestorRequestDTO;
 import org.sena.inforecicla.dto.usuario.UsuarioGestorResponseDTO;
 import org.sena.inforecicla.model.PuntoECA;
 import org.sena.inforecicla.model.Usuario;
 import org.sena.inforecicla.model.enums.Estado;
-import org.sena.inforecicla.model.enums.LocalidadBogota;
 import org.sena.inforecicla.model.enums.TipoUsuario;
+import org.sena.inforecicla.repository.LocalidadRepository;
 import org.sena.inforecicla.repository.PuntoEcaRepository;
 import org.sena.inforecicla.repository.UsuarioRepository;
 import org.sena.inforecicla.service.GestorEcaService;
@@ -23,8 +27,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class GestorEcaServiceImpl implements GestorEcaService {
 
+    private static final Logger logger = LoggerFactory.getLogger(GestorEcaServiceImpl.class);
+
     private final UsuarioRepository usuarioRepository;
     private final PuntoEcaRepository puntoECARepository;
+    private final LocalidadRepository localidadRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -36,7 +43,8 @@ public class GestorEcaServiceImpl implements GestorEcaService {
         usuario.setEmail(dto.email());
         usuario.setCelular(dto.celular());
         usuario.setCiudad(dto.ciudad());
-        usuario.setLocalidad(LocalidadBogota.valueOf(dto.localidad()));
+        usuario.setLocalidad(localidadRepository.findByNombreIgnoreCase(dto.localidad())
+                .orElseThrow(() -> new RuntimeException("Localidad no encontrada: " + dto.localidad())));
         usuario.setTipoUsuario(TipoUsuario.GestorECA);
         usuario.setTipoDocumento(dto.tipoDocumento());
         usuario.setNumeroDocumento(dto.numeroDocumento());
@@ -52,10 +60,10 @@ public class GestorEcaServiceImpl implements GestorEcaService {
         puntoECA.setDescripcion(dto.descripcionPunto());
         puntoECA.setTelefonoPunto(dto.telefonoPunto());
         puntoECA.setDireccion(dto.direccionPunto());
-        puntoECA.setCoordenadas(dto.coordenadasPunto());
         puntoECA.setLogoUrlPunto(dto.logoUrlPunto());
         puntoECA.setFotoUrlPunto(dto.fotoUrlPunto());
-        puntoECA.setLocalidad(LocalidadBogota.valueOf(dto.localidadPunto()));
+        puntoECA.setLocalidad(localidadRepository.findByNombreIgnoreCase(dto.localidadPunto())
+                .orElseThrow(() -> new RuntimeException("Localidad no encontrada: " + dto.localidadPunto())));
         puntoECA.setCelular(dto.celularPunto());
         puntoECA.setEmail(dto.emailPunto());
         puntoECA.setSitioWeb(dto.sitioWebPunto());
@@ -98,42 +106,67 @@ public class GestorEcaServiceImpl implements GestorEcaService {
        gestor.setNombres(gestorUpdate.nombres());
        gestor.setApellidos(gestorUpdate.apellidos());
        gestor.setTipoDocumento(gestorUpdate.tipoDocumento());
-       gestor.setNumeroDocumento(gestorUpdate.numeroDocumento());
-       gestor.setFechaNacimiento(gestorUpdate.fechaNacimiento());
+       if (gestorUpdate.numeroDocumento() != null && !gestorUpdate.numeroDocumento().trim().isEmpty()) {
+           gestor.setNumeroDocumento(gestorUpdate.numeroDocumento());
+       }
+       if (gestorUpdate.fechaNacimiento() != null && !gestorUpdate.fechaNacimiento().trim().isEmpty()) {
+           gestor.setFechaNacimiento(gestorUpdate.fechaNacimiento());
+       }
        gestor.setCelular(gestorUpdate.celular());
        gestor.setEmail(gestorUpdate.email());
-       gestor.setBiografia(gestorUpdate.biografia());
+       if (gestorUpdate.biografia() != null && !gestorUpdate.biografia().trim().isEmpty()) {
+           gestor.setBiografia(gestorUpdate.biografia());
+       }
 
        Usuario actualizado = usuarioRepository.save(gestor);
 
        return GestorResponseDTO.derivado(actualizado);
     }
 
+    @Override
+    @Transactional
+    public PuntoEcaResponseDTO actualizarPunto(UUID usuarioId, UUID puntoEcaId, PuntoEcaUpdateDTO puntoUpdate) {
+        PuntoECA punto = puntoECARepository.findByPuntoEcaIDAndGestorId(puntoEcaId, usuarioId)
+                .orElseThrow(()-> new RuntimeException("Punto eca no encontrado con ID: "+ puntoEcaId));
+
+        punto.setNombrePunto(puntoUpdate.nombrePunto());
+
+        if (puntoUpdate.descripcionPunto() != null && !puntoUpdate.descripcionPunto().trim().isEmpty()) {
+            punto.setDescripcion(puntoUpdate.descripcionPunto());
+        }
+
+        punto.setCelular(puntoUpdate.celularPunto());
+        punto.setEmail(puntoUpdate.emailPunto());
+        punto.setDireccion(puntoUpdate.direccionPunto());
+
+        punto.setLocalidad(localidadRepository.findById(puntoUpdate.localidadPuntoId())
+                .orElseThrow(() -> new RuntimeException("Localidad no encontrada")));
+
+        if (puntoUpdate.latitud() != null && puntoUpdate.latitud() != 0) {
+            punto.setLatitud(puntoUpdate.latitud());
+        }
+        if (puntoUpdate.longitud() != null && puntoUpdate.longitud() != 0) {
+            punto.setLongitud(puntoUpdate.longitud());
+        }
+
+        if (puntoUpdate.sitioWebPunto() != null && !puntoUpdate.sitioWebPunto().trim().isEmpty()) {
+            punto.setSitioWeb(puntoUpdate.sitioWebPunto());
+        }
+
+        if (puntoUpdate.horarioAtencionPunto() != null && !puntoUpdate.horarioAtencionPunto().trim().isEmpty()) {
+            punto.setHorarioAtencion(puntoUpdate.horarioAtencionPunto());
+        }
+
+        // Asegurar que el estado nunca sea null
+        if (punto.getEstado() == null) {
+            punto.setEstado(Estado.Activo);
+        }
+
+        PuntoECA actualizado = puntoECARepository.save(punto);
+        return PuntoEcaResponseDTO.derivado(actualizado);
+    }
+
     private UsuarioGestorResponseDTO construirUsuarioGestorResponseDTO(Usuario usuario, PuntoECA puntoECA) {
-        return new UsuarioGestorResponseDTO(
-                usuario.getUsuarioId(),
-                usuario.getNombres(),
-                usuario.getApellidos(),
-                usuario.getTipoUsuario(),
-                usuario.getTipoDocumento(),
-                usuario.getNumeroDocumento(),
-                usuario.getFechaNacimiento(),
-                usuario.getCelular(),
-                usuario.getEmail(),
-                usuario.getCiudad(),
-                usuario.getLocalidad(),
-                usuario.getFotoPerfil(),
-                usuario.getBiografia(),
-                puntoECA.getPuntoEcaID(),
-                puntoECA.getNombrePunto(),
-                puntoECA.getDescripcion(),
-                puntoECA.getFotoUrlPunto(),
-                puntoECA.getLogoUrlPunto(),
-                puntoECA.getTelefonoPunto(),
-                puntoECA.getDireccion(),
-                puntoECA.getLocalidad(),
-                puntoECA.getCoordenadas(),
-                puntoECA.getLogoUrlPunto()
-        );
+        return UsuarioGestorResponseDTO.derivado(usuario, puntoECA);
     }
 }

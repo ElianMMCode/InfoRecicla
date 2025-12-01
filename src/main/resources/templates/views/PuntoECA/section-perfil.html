@@ -1,489 +1,260 @@
-<!-- Fragment: Perfil Punto ECA - 2 Formularios Independientes -->
-<section th:fragment="perfil" class="container-fluid py-3 px-2">
-    <!-- Header -->
-    <div class="row mb-3">
+<!-- Sección de Perfil - Nuevo y Limpio -->
+<section th:fragment="perfil" class="container-fluid py-4">
+    <div class="row">
         <div class="col-12">
-            <div class="d-flex align-items-center justify-content-between bg-gradient p-3 rounded-3 shadow" style="background: linear-gradient(135deg, #198754 0%, #20c997 100%); border-left: 4px solid #0f5132;">
-                <div>
-                    <h2 class="h4 mb-1 fw-bold d-flex align-items-center" style="color: #0f5132;">
-                        <i class="bi bi-file-earmark-person me-2 fs-5" style="color: #0f5132;"></i>Perfil del Punto ECA
-                    </h2>
-                    <p class="mb-0 small fw-500" style="color: #0f5132;">
-                        <i class="bi bi-info-circle me-1" style="color: #0f5132;"></i>Gestiona la información del encargado y datos del punto
-                    </p>
-                </div>
-                <div class="text-end">
-                    <span class="badge bg-white text-success px-2 py-1" style="font-size: 0.85rem;">
-                        <i class="bi bi-pencil me-1"></i>En edición
-                    </span>
+            <!-- Header -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body bg-success text-white p-3">
+                    <h3 class="mb-0"><i class="bi bi-person-check me-2"></i>Perfil del Gestor</h3>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Acordeones Independientes -->
-    <div class="accordion accordion-flush" id="perfilAccordion">
-
-        <!-- ACORDEÓN 1: ENCARGADO -->
-        <div class="accordion-item border-0 mb-2 shadow-sm rounded-3" style="border-top: 3px solid #198754 !important;">
-            <h2 class="accordion-header">
-                <button class="accordion-button fw-semibold py-3" type="button" data-bs-toggle="collapse" data-bs-target="#encargadoPanel" aria-expanded="true" aria-controls="encargadoPanel" style="background: linear-gradient(135deg, #f0f9f7 0%, #e8f5f1 100%); color: #198754;">
-                    <i class="bi bi-person-circle me-2 text-success fs-5"></i>Encargado
-                    <span class="badge bg-success ms-auto me-2">Información Personal</span>
-                </button>
-            </h2>
-            <div id="encargadoPanel" class="accordion-collapse collapse show" data-bs-parent="#perfilAccordion">
-                <div class="accordion-body p-3">
-                    <!--/*@thymesVar id="usuario" type="org.sena.inforecicla.dto.usuario.UsuarioGestorResponseDTO"*/-->
-                    <form id="formEncargado" class="encargadoForm" th:data-usuario-id="${usuario.usuarioId}">
-                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                        <input type="hidden" name="usuarioId" th:value="${usuario.usuarioId}" />
-
-                        <!-- Foto Perfil -->
-                        <div class="text-center mb-3">
-                            <div class="position-relative d-inline-block">
-                                <img id="previewPerfil"
-                                     th:src="${usuario.fotoPerfil != null ? usuario.fotoPerfil : '/imagenes/perfil_default.png'}"
-                                     alt="Foto encargado"
-                                     class="rounded-circle img-thumbnail border-2 border-success shadow-sm"
-                                     style="width:100px;height:100px;object-fit:cover;">
-                                <div class="position-absolute bottom-0 end-0 bg-success rounded-circle p-1" style="font-size: 0.8rem;">
-                                    <i class="bi bi-camera text-white"></i>
+            <!-- Acordeones -->
+            <div class="accordion" id="perfilAccordion">
+                <!-- ACORDEÓN 1: INFORMACIÓN DEL ENCARGADO -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#encargadoPanel">
+                            <i class="bi bi-person-circle me-2 text-success"></i> Información del Encargado
+                        </button>
+                    </h2>
+                    <div id="encargadoPanel" class="accordion-collapse collapse show" data-bs-parent="#perfilAccordion">
+                        <div class="accordion-body">
+                            <!-- Foto de Perfil - Al Inicio -->
+                            <div class="text-center mb-4 pb-3 border-bottom">
+                                <div class="position-relative d-inline-block">
+                                    <img id="previewFotoPerfil"
+                                         th:src="${usuario.fotoPerfil != null ? usuario.fotoPerfil : '/imagenes/perfil_default.png'}"
+                                         alt="Foto de perfil"
+                                         class="rounded-circle img-thumbnail border-3 border-success shadow"
+                                         style="width:120px;height:120px;object-fit:cover;">
+                                    <div class="position-absolute bottom-0 end-0 bg-success rounded-circle p-2" style="cursor: pointer;" onclick="document.getElementById('inputFotoPerfil').click()">
+                                        <i class="bi bi-camera text-white" style="font-size: 1rem;"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <p class="text-muted small mb-2">Haz clic en la cámara para cambiar la foto</p>
+                                    <input type="file" id="inputFotoPerfil" accept="image/*" style="display:none;">
                                 </div>
                             </div>
-                            <div class="mt-2">
-                                <label for="fotoPerfil" class="form-label fw-semibold text-success small mb-1">
-                                    <i class="bi bi-upload me-1"></i>Actualizar foto
-                                </label>
-                                <input class="form-control form-control-sm" type="file" id="fotoPerfil" name="fotoPerfil" accept="image/*">
-                            </div>
-                        </div>
 
-                        <hr class="my-2">
+                            <!-- Formulario del Encargado -->
+                            <form id="formEncargado" method="POST">
+                                <input type="hidden" name="usuarioId" th:value="${usuario.usuarioId}">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Nombres *</label>
+                                        <input type="text" class="form-control" id="nombres" th:value="${usuario.nombres}" required>
+                                        <small class="text-muted">3-30 caracteres</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Apellidos *</label>
+                                        <input type="text" class="form-control" id="apellidos" th:value="${usuario.apellidos}" required>
+                                        <small class="text-muted">2-40 caracteres</small>
+                                    </div>
+                                </div>
 
-                        <!-- Datos Personales -->
-                        <div class="row g-2">
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control form-control-sm border-1" id="enc_nombres" name="nombres" th:value="${usuario.nombres}" placeholder="Nombres" required>
-                                    <label for="enc_nombres" class="text-muted small">
-                                        <i class="bi bi-person me-1"></i>Nombres
-                                    </label>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Email *</label>
+                                        <input type="email" class="form-control" id="email" th:value="${usuario.email}" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Celular *</label>
+                                        <input type="text" class="form-control" id="celular" th:value="${usuario.celular}" maxlength="10" placeholder="10 dígitos" required>
+                                        <small class="text-muted">Exactamente 10 dígitos</small>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control form-control-sm border-1" id="enc_apellidos" name="apellidos" th:value="${usuario.apellidos}" placeholder="Apellidos" required>
-                                    <label for="enc_apellidos" class="text-muted small">
-                                        <i class="bi bi-person me-1"></i>Apellidos
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="email" class="form-control form-control-sm border-1" id="enc_email" name="email" th:value="${usuario.email}" placeholder="Email" required>
-                                    <label for="enc_email" class="text-muted small">
-                                        <i class="bi bi-envelope me-1"></i>Email
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="tel" class="form-control form-control-sm border-1" id="enc_celular" name="celular" th:value="${usuario.celular}" placeholder="Teléfono" required>
-                                    <label for="enc_celular" class="text-muted small">
-                                        <i class="bi bi-telephone me-1"></i>Teléfono
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
 
-                        <hr class="my-2">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label fw-bold">Tipo Documento *</label>
+                                        <select class="form-select" id="tipoDocumento" required>
+                                            <option value="">Selecciona un tipo...</option>
+                                            <option th:each="tipo : ${tiposDocumentos}"
+                                                    th:value="${tipo.name()}"
+                                                    th:text="${tipo.getDescripcion()}"
+                                                    th:selected="${usuario.tipoDocumento?.name() == tipo.name()}">
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label fw-bold">Número Documento</label>
+                                        <input type="text" class="form-control" id="numeroDocumento" th:value="${usuario.numeroDocumento}" placeholder="6-20 caracteres">
+                                        <small class="text-muted">6-20 caracteres (opcional)</small>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label fw-bold">Fecha Nacimiento</label>
+                                        <input type="date" class="form-control" id="fechaNacimiento" th:value="${usuario.fechaNacimiento}">
+                                        <small class="text-muted">Formato YYYY-MM-DD (opcional)</small>
+                                    </div>
+                                </div>
 
-                        <!-- Información Adicional -->
-                        <div class="row g-2">
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <select class="form-select form-control-sm border-1" id="enc_tipoUsuario" name="tipoUsuario">
-                                        <option value="Admin" th:selected="${usuario.tipoUsuario?.name() == 'Admin'}">Administrador</option>
-                                        <option value="GestorECA" th:selected="${usuario.tipoUsuario?.name() == 'GestorECA'}">Gestor ECA</option>
-                                        <option value="Ciudadano" th:selected="${usuario.tipoUsuario?.name() == 'Ciudadano'}">Ciudadano</option>
-                                    </select>
-                                    <label for="enc_tipoUsuario" class="text-muted small">
-                                        <i class="bi bi-person-badge me-1"></i>Tipo
-                                    </label>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Biografía</label>
+                                    <textarea class="form-control" id="biografia" rows="3" placeholder="Máximo 500 caracteres">[[${usuario.biografia}]]</textarea>
+                                    <small class="text-muted">Máximo 500 caracteres (opcional)</small>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <select class="form-select form-control-sm border-1" id="enc_tipoDocumento" name="tipoDocumento">
-                                        <option value="CC">Cédula de Ciudadanía</option>
-                                        <option value="TI">Tarjeta de Identidad</option>
-                                        <option value="CE">Cédula de Extranjería</option>
-                                        <option value="PP">Pasaporte</option>
-                                    </select>
-                                    <label for="enc_tipoDocumento" class="text-muted small">
-                                        <i class="bi bi-card-text me-1"></i>Tipo Documento
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control form-control-sm border-1" id="enc_numeroDocumento" name="numeroDocumento" th:value="${usuario.numeroDocumento}" placeholder="Número">
-                                    <label for="enc_numeroDocumento" class="text-muted small">
-                                        <i class="bi bi-123 me-1"></i>Documento
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="date" class="form-control form-control-sm border-1" id="enc_fechaNacimiento" name="fechaNacimiento" th:value="${usuario.fechaNacimiento}">
-                                    <label for="enc_fechaNacimiento" class="text-muted small">
-                                        <i class="bi bi-calendar-date me-1"></i>Nacimiento
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="mt-2">
-                            <label for="enc_biografia" class="form-label fw-semibold text-muted small mb-1">
-                                <i class="bi bi-chat-square-text me-1"></i>Biografía
-                            </label>
-                            <textarea class="form-control form-control-sm border-1" id="enc_biografia" name="biografia" rows="3" placeholder="Descripción breve...">[[${usuario.biografia}]]</textarea>
-                        </div>
-
-                        <!-- Botones -->
-                        <div class="row mt-3">
-                            <div class="col-12">
-                                <div class="d-flex justify-content-end gap-2 flex-wrap">
-                                    <button class="btn btn-success btn-sm shadow px-4 py-2 btnGuardarEncargado" type="button">
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-success" id="btnGuardarEncargado">
                                         <i class="bi bi-check-circle me-1"></i>Guardar Encargado
                                     </button>
-                                    <button class="btn btn-outline-secondary btn-sm px-4 py-2" type="reset">
+                                    <button type="reset" class="btn btn-outline-secondary">
                                         <i class="bi bi-arrow-counterclockwise me-1"></i>Limpiar
                                     </button>
                                 </div>
-                            </div>
+                            </form>
                         </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- ACORDEÓN 2: PUNTO ECA -->
-        <div class="accordion-item border-0 mb-2 shadow-sm rounded-3" style="border-top: 3px solid #0288d1 !important;">
-            <h2 class="accordion-header">
-                <button class="accordion-button fw-semibold py-3 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#puntoPanel" aria-expanded="false" aria-controls="puntoPanel" style="background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%); color: #01579b;">
-                    <i class="bi bi-geo-alt-fill me-2 text-info fs-5"></i>Punto ECA
-                    <span class="badge bg-info ms-auto me-2">Ubicación</span>
-                </button>
-            </h2>
-            <div id="puntoPanel" class="accordion-collapse collapse" data-bs-parent="#perfilAccordion">
-                <div class="accordion-body p-3">
-                    <form id="formPunto" class="puntoForm" th:data-punto-id="${usuario.puntoEcaId}">
-                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                        <input type="hidden" name="puntoEcaId" th:value="${usuario.puntoEcaId}" />
-                        <input type="hidden" name="usuarioId" th:value="${usuario.usuarioId}" />
-
-                        <!-- Foto Punto -->
-                        <div class="text-center mb-3">
-                            <div class="position-relative d-inline-block">
-                                <img id="previewPunto"
-                                     th:src="${usuario.fotoPunto() != null ? usuario.fotoPunto : '/imagenes/eca-default.png'}"
-                                     alt="Foto punto"
-                                     class="img-fluid rounded-3 img-thumbnail border-2 border-info shadow-sm"
-                                     style="max-height:120px; object-fit:cover;">
-                                <div class="position-absolute bottom-0 end-0 bg-info rounded-circle p-1" style="font-size: 0.8rem;">
-                                    <i class="bi bi-building text-white"></i>
+                <!-- ACORDEÓN 2: INFORMACIÓN DEL PUNTO ECA -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#puntoPanel">
+                            <i class="bi bi-building me-2 text-info"></i> Información del Punto ECA
+                        </button>
+                    </h2>
+                    <div id="puntoPanel" class="accordion-collapse collapse" data-bs-parent="#perfilAccordion">
+                        <div class="accordion-body">
+                            <!-- Foto del Punto ECA - Al Inicio -->
+                            <div class="text-center mb-4 pb-3 border-bottom">
+                                <div class="position-relative d-inline-block">
+                                    <img id="previewFotoPunto"
+                                         th:src="${usuario.fotoPunto != null ? usuario.fotoPunto : '/imagenes/eca-default.png'}"
+                                         alt="Foto del punto"
+                                         class="img-fluid rounded-3 img-thumbnail border-3 border-info shadow"
+                                         style="max-height:150px;object-fit:cover;">
+                                    <div class="position-absolute bottom-0 end-0 bg-info rounded-circle p-2" style="cursor: pointer;" onclick="document.getElementById('inputFotoPunto').click()">
+                                        <i class="bi bi-camera text-white" style="font-size: 1rem;"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <p class="text-muted small mb-2">Haz clic en la cámara para cambiar la foto</p>
+                                    <input type="file" id="inputFotoPunto" accept="image/*" style="display:none;">
                                 </div>
                             </div>
-                            <div class="mt-2">
-                                <label for="fotoPunto" class="form-label fw-semibold text-info small mb-1">
-                                    <i class="bi bi-upload me-1"></i>Actualizar foto
-                                </label>
-                                <input class="form-control form-control-sm" type="file" id="fotoPunto" name="fotoPunto" accept="image/*">
-                            </div>
-                        </div>
 
-                        <hr class="my-2">
-
-                        <!-- ID Punto (Oculto) -->
-                        <div class="alert alert-light border-info border-1 mb-3 py-2 px-3 d-none">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-hash text-info"></i>
-                                <div>
-                                    <strong class="text-info small">ID del Punto ECA</strong>
-                                    <div class="font-monospace text-muted small" th:text="${usuario.puntoEcaId ?: 'No asignado'}">ID</div>
+                            <!-- Formulario del Punto ECA -->
+                            <form id="formPunto" method="POST">
+                                <input type="hidden" name="usuarioId" th:value="${usuario.usuarioId}">
+                                <input type="hidden" name="puntoEcaId" th:value="${usuario.puntoEcaId}">
+                                <div class="row">
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label fw-bold">Nombre Punto *</label>
+                                        <input type="text" class="form-control" id="nombrePunto" th:value="${usuario.nombrePunto}" required>
+                                        <small class="text-muted">3-30 caracteres</small>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <!-- Información Básica -->
-                        <div class="row g-2">
-                            <div class="col-12">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control form-control-sm border-1" id="pun_nombre" name="nombrePunto" th:value="${usuario.nombrePunto}" placeholder="Nombre" required>
-                                    <label for="pun_nombre" class="text-muted small">
-                                        <i class="bi bi-building me-1"></i>Nombre
-                                    </label>
+                                <div class="row">
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label fw-bold">Dirección *</label>
+                                        <input type="text" class="form-control" id="direccionPunto" th:value="${usuario.direccionPunto}" maxlength="150" required>
+                                        <small class="text-muted">Máximo 150 caracteres</small>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control form-control-sm border-1" id="pun_direccion" name="direccionPunto" th:value="${usuario.direccionPunto}" placeholder="Dirección" required>
-                                    <label for="pun_direccion" class="text-muted small">
-                                        <i class="bi bi-geo-alt me-1"></i>Dirección
-                                    </label>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Localidad *</label>
+                                        <select class="form-select" id="localidadPuntoId" required>
+                                            <option value="">-- Seleccionar --</option>
+                                            <option th:each="loc : ${localidades}"
+                                                    th:value="${loc.localidadId}"
+                                                    th:text="${loc.nombre}"
+                                                    th:selected="${usuario.localidadPuntoId == loc.localidadId}">
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Ciudad</label>
+                                        <input type="text" class="form-control" th:value="${usuario.ciudad}" disabled>
+                                        <small class="text-muted">No editable</small>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <hr class="my-2">
-
-                        <!-- Ubicación Geográfica -->
-                        <h6 class="text-muted mb-2 fw-semibold small">
-                            <i class="bi bi-map me-1"></i>Ubicación
-                        </h6>
-                        <div class="row g-2 mb-2">
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control form-control-sm border-1" id="pun_ciudad" name="ciudadPunto" th:value="${usuario.ciudad ?: ''}" placeholder="Ciudad">
-                                    <label for="pun_ciudad" class="text-muted small">
-                                        <i class="bi bi-buildings me-1"></i>Ciudad
-                                    </label>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Celular *</label>
+                                        <input type="text" class="form-control" id="celularPunto" th:value="${usuario.celularPunto}" maxlength="10" placeholder="10 dígitos" required>
+                                        <small class="text-muted">Exactamente 10 dígitos</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Email *</label>
+                                        <input type="email" class="form-control" id="emailPunto" th:value="${usuario.emailPunto}" required>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <select class="form-select form-control-sm border-1" id="pun_localidad" name="localidadPunto">
-                                        <option value="">Seleccione</option>
-                                        <option value="USAQUEN">Usaquén</option>
-                                        <option value="CHAPINERO">Chapinero</option>
-                                        <option value="SANTA_FE">Santa Fe</option>
-                                        <option value="SAN_CRISTOBAL">San Cristóbal</option>
-                                        <option value="USME">Usme</option>
-                                        <option value="TUNJUELITO">Tunjuelito</option>
-                                        <option value="BOSA">Bosa</option>
-                                        <option value="KENNEDY">Kennedy</option>
-                                    </select>
-                                    <label for="pun_localidad" class="text-muted small">
-                                        <i class="bi bi-pin-map me-1"></i>Localidad
-                                    </label>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Teléfono Fijo</label>
+                                        <input type="text" class="form-control" id="telefonoPunto" th:value="${usuario.telefonoPunto}" maxlength="10" placeholder="60XXXXXXXX">
+                                        <small class="text-muted">Formato: 60 + 8 dígitos (opcional)</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Sitio Web</label>
+                                        <input type="url" class="form-control" id="sitioWebPunto" placeholder="https://ejemplo.com">
+                                        <small class="text-muted">URL del sitio web (opcional)</small>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <!-- Coordenadas -->
-                        <div class="mb-2">
-                            <label for="pun_coordenadas" class="form-label fw-semibold text-muted small mb-1">
-                                <i class="bi bi-crosshair me-1"></i>Coordenadas GPS
-                            </label>
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text bg-light border-1 py-1">
-                                    <i class="bi bi-geo-fill text-muted"></i>
-                                </span>
-                                <input type="text" class="form-control form-control-sm border-1" id="pun_coordenadas" name="coordenadas" th:value="${usuario.coordenadasPunto ?: ''}" placeholder="Lat, Lon">
-                                <button class="btn btn-outline-info border-1 btn-sm px-2 btnUbicacion" type="button">
-                                    <i class="bi bi-crosshair2 me-1"></i>Obtener
-                                </button>
-                            </div>
-                        </div>
-
-                        <hr class="my-2">
-
-                        <!-- Información Adicional -->
-                        <h6 class="text-muted mb-2 fw-semibold small">
-                            <i class="bi bi-info-circle me-1"></i>Información Adicional
-                        </h6>
-
-                        <div class="mb-2">
-                            <label for="pun_descripcion" class="form-label fw-semibold text-muted small mb-1">
-                                <i class="bi bi-card-text me-1"></i>Descripción
-                            </label>
-                            <textarea class="form-control form-control-sm border-1" id="pun_descripcion" name="descripcionPunto" rows="2" placeholder="Descripción...">[[${usuario.descripcionPunto ?: ''}]]</textarea>
-                        </div>
-
-                        <div class="row g-2 mb-2">
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="tel" class="form-control form-control-sm border-1" id="pun_telefono" name="telefonoPunto" th:value="${usuario.telefonoPunto ?: ''}" placeholder="Teléfono">
-                                    <label for="pun_telefono" class="text-muted small">
-                                        <i class="bi bi-telephone me-1"></i>Teléfono
-                                    </label>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Latitud</label>
+                                        <input type="number" step="0.000001" class="form-control" id="latitud" th:value="${usuario.latitud}" placeholder="-90 a 90">
+                                        <small class="text-muted">-90 a 90 (opcional)</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Longitud</label>
+                                        <input type="number" step="0.000001" class="form-control" id="longitud" th:value="${usuario.longitud}" placeholder="-180 a 180">
+                                        <small class="text-muted">-180 a 180 (opcional)</small>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="url" class="form-control form-control-sm border-1" id="pun_logo" name="logoPunto" th:value="${usuario.logoUrlPunto ?: ''}" placeholder="URL Logo">
-                                    <label for="pun_logo" class="text-muted small">
-                                        <i class="bi bi-image me-1"></i>Logo URL
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Botones -->
-                        <div class="row mt-3">
-                            <div class="col-12">
-                                <div class="d-flex justify-content-end gap-2 flex-wrap">
-                                    <button class="btn btn-info btn-sm shadow px-4 py-2 btnGuardarPunto" type="button">
-                                        <i class="bi bi-check-circle me-1"></i>Guardar Punto ECA
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Descripción</label>
+                                    <textarea class="form-control" id="descripcionPunto" rows="3" maxlength="500" placeholder="Máximo 500 caracteres">[[${usuario.descripcionPunto}]]</textarea>
+                                    <small class="text-muted">Máximo 500 caracteres (opcional)</small>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">URL Logo</label>
+                                        <input type="url" class="form-control" id="logoUrlPunto" th:value="${usuario.logoUrlPunto}" placeholder="https://ejemplo.com/logo.png">
+                                        <small class="text-muted">URL del logo (opcional)</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-bold">Horario Atención</label>
+                                        <input type="text" class="form-control" id="horarioAtencionPunto" maxlength="150" placeholder="Ej: Lunes-Viernes 8am-5pm">
+                                        <small class="text-muted">Máximo 150 caracteres (opcional)</small>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-info" id="btnGuardarPunto">
+                                        <i class="bi bi-check-circle me-1"></i>Guardar Punto
                                     </button>
-                                    <button class="btn btn-outline-secondary btn-sm px-4 py-2" type="reset">
+                                    <button type="reset" class="btn btn-outline-secondary">
                                         <i class="bi bi-arrow-counterclockwise me-1"></i>Limpiar
                                     </button>
+                                    <button type="button" class="btn btn-outline-info" id="btnGPS">
+                                        <i class="bi bi-crosshair2 me-1"></i>Obtener GPS
+                                    </button>
                                 </div>
-                            </div>
+                            </form>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Scripts de Manejo -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('🔍 DOM Cargado');
-
-        // ============= GUARDAR ENCARGADO =============
-        const btnGuardarEncargado = document.querySelector('.btnGuardarEncargado');
-        if (btnGuardarEncargado) {
-            btnGuardarEncargado.addEventListener('click', async function(e) {
-                e.preventDefault();
-                console.log('🔍 Click en Guardar Encargado');
-
-                try {
-                    const nombres = document.getElementById('enc_nombres').value.trim();
-                    const apellidos = document.getElementById('enc_apellidos').value.trim();
-                    const email = document.getElementById('enc_email').value.trim();
-                    const celular = document.getElementById('enc_celular').value.trim();
-
-                    if (!nombres || !apellidos || !email || !celular) {
-                        alert('Por favor completa todos los campos requeridos');
-                        return;
-                    }
-
-                    if (!email.includes('@')) {
-                        alert('Email inválido');
-                        return;
-                    }
-
-                    const usuarioId = document.querySelector('input[name="usuarioId"]').value;
-                    if (!usuarioId) {
-                        alert('Error: No se encontró el UUID del usuario');
-                        return;
-                    }
-
-                    const btn = this;
-                    btn.disabled = true;
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Guardando...';
-
-                    const datos = {
-                        nombres,
-                        apellidos,
-                        email,
-                        celular,
-                        tipoDocumento: document.getElementById('enc_tipoDocumento').value,
-                        numeroDocumento: document.getElementById('enc_numeroDocumento').value,
-                        fechaNacimiento: document.getElementById('enc_fechaNacimiento').value,
-                        biografia: document.getElementById('enc_biografia').value,
-                        fotoPerfil: null
-                    };
-
-                    const csrfToken = document.querySelector('input[name="_csrf"]')?.value;
-
-                    const response = await fetch(`/punto-eca/${usuarioId}/perfil/encargado`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken || ''
-                        },
-                        body: JSON.stringify(datos)
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-
-                    const data = await response.json();
-                    console.log('✅ Guardado:', data);
-
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3';
-                    alertDiv.style.zIndex = '10000';
-                    alertDiv.innerHTML = `<i class="bi bi-check-circle me-2"></i><strong>Éxito:</strong> Encargado actualizado<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
-                    document.body.appendChild(alertDiv);
-
-                    setTimeout(() => alertDiv.remove(), 3000);
-
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                } catch (error) {
-                    console.error('❌ Error:', error);
-                    alert('Error al guardar: ' + error.message);
-                    this.disabled = false;
-                    this.innerHTML = this.originalText;
-                }
-            });
-        }
-
-        // ============= FUNCIONALIDADES COMPARTIDAS =============
-        document.getElementById('fotoPerfil')?.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if(!file) return;
-            const img = document.getElementById('previewPerfil');
-            img.style.opacity = '0.5';
-            setTimeout(() => {
-                img.src = URL.createObjectURL(file);
-                img.style.opacity = '1';
-            }, 200);
-        });
-
-        document.getElementById('fotoPunto')?.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if(!file) return;
-            const img = document.getElementById('previewPunto');
-            img.style.opacity = '0.5';
-            setTimeout(() => {
-                img.src = URL.createObjectURL(file);
-                img.style.opacity = '1';
-            }, 200);
-        });
-
-        document.querySelectorAll('.btnUbicacion').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const originalText = btn.innerHTML;
-
-                if(!navigator.geolocation) {
-                    alert('Geolocalización no soportada');
-                    return;
-                }
-
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Obteniendo...';
-                btn.disabled = true;
-
-                navigator.geolocation.getCurrentPosition(pos => {
-                    const lat = pos.coords.latitude.toFixed(6);
-                    const lon = pos.coords.longitude.toFixed(6);
-                    document.getElementById('pun_coordenadas').value = lat + ', ' + lon;
-
-                    btn.innerHTML = '<i class="bi bi-check-circle me-1"></i>¡Obtenido!';
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.disabled = false;
-                    }, 2000);
-                }, err => {
-                    alert('Error: ' + err.message);
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                });
-            });
-        });
-    });
+// ✅ SCRIPT MOVIDO A puntoECA-layout.html
+// Todos los event listeners para los botones ahora se encuentran en el layout principal
+// para asegurar que se ejecuten correctamente con los fragmentos cargados vía th:insert
 </script>
-
-<!-- Bootstrap Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 

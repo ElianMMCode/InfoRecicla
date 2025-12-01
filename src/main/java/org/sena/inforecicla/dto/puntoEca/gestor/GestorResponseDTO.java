@@ -1,9 +1,7 @@
 package org.sena.inforecicla.dto.puntoEca.gestor;
 
 import org.sena.inforecicla.model.Usuario;
-import org.sena.inforecicla.model.enums.LocalidadBogota;
 import org.sena.inforecicla.model.enums.TipoDocumento;
-import org.sena.inforecicla.model.enums.TipoUsuario;
 
 import java.util.UUID;
 
@@ -17,7 +15,7 @@ public record GestorResponseDTO(
         String fechaNacimiento,
         String celular,
         String email,
-        LocalidadBogota localidad,
+        UUID localidadId,
         String fotoPerfil,
         String biografia
 ){
@@ -31,7 +29,7 @@ public record GestorResponseDTO(
                 u.getFechaNacimiento(),
                 u.getCelular(),
                 u.getEmail(),
-                u.getLocalidad(),
+                u.getLocalidad() != null ? u.getLocalidad().getLocalidadId() : null,
                 u.getFotoPerfil(),
                 u.getBiografia()
         );

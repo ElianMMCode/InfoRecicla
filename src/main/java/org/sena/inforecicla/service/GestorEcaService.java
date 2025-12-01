@@ -2,6 +2,8 @@ package org.sena.inforecicla.service;
 
 import org.sena.inforecicla.dto.puntoEca.gestor.GestorResponseDTO;
 import org.sena.inforecicla.dto.puntoEca.gestor.GestorUpdateDTO;
+import org.sena.inforecicla.dto.puntoEca.gestor.PuntoEcaResponseDTO;
+import org.sena.inforecicla.dto.puntoEca.gestor.PuntoEcaUpdateDTO;
 import org.sena.inforecicla.dto.usuario.UsuarioGestorRequestDTO;
 import org.sena.inforecicla.dto.usuario.UsuarioGestorResponseDTO;
 
@@ -14,4 +16,7 @@ public interface GestorEcaService {
     UsuarioGestorResponseDTO buscarGestorPuntoEca(UUID id);
 
     GestorResponseDTO actualizarGestor(UUID gestorId, GestorUpdateDTO gestorUpdate);
+
+    PuntoEcaResponseDTO actualizarPunto(UUID usuarioId, UUID puntoEcaId, PuntoEcaUpdateDTO dto);
+
 }

@@ -33,7 +33,7 @@ public record GestorUpdateDTO(
         @Email
         String email,
 
-        String fotoPerfil,
+        //String fotoPerfil,
 
         @Size(max = 500)
         String biografia
