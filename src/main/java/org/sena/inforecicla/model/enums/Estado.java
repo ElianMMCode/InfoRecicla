@@ -1,9 +1,10 @@
 package org.sena.inforecicla.model.enums;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
+@AllArgsConstructor
 public enum Estado {
 
     Activo("Activo"),

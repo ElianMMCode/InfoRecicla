@@ -7,6 +7,8 @@ import org.sena.inforecicla.model.base.EntidadLocalizacion;
 import org.sena.inforecicla.model.enums.TipoDocumento;
 import org.sena.inforecicla.model.enums.TipoUsuario;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -74,6 +76,12 @@ public class Usuario extends EntidadLocalizacion {
 
     @OneToOne(mappedBy = "usuario",cascade = CascadeType.ALL, orphanRemoval = true)
     private PuntoECA puntoECA;
+
+    @ManyToMany(mappedBy = "creadores")
+    private List<Conversaciones> conversaciones;
+
+    @OneToMany(mappedBy = "usuario_id", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Publicaciones> publicaciones = new ArrayList<>();
 
 
 }
