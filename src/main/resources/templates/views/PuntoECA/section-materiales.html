@@ -1,25 +1,37 @@
 <!-- Fragment: Materiales -->
-<section th:fragment="materiales" class="container py-4"
+<section th:fragment="materiales" class="py-4"
          th:data-gestor="${gestor}"
          th:data-usuario-id="${usuario.usuarioId}">
-    <h2 class="h5 mb-3">Materiales</h2>
+    <!-- Título principal -->
+    <div class="mb-4">
+        <h2 class="h4 fw-bold text-dark mb-1">
+            <i class="bi bi-box-seam me-2"></i>Gestión de Materiales
+        </h2>
+        <p class="text-muted small mb-0">Registra, visualiza y gestiona los materiales en el inventario del centro de acopio</p>
+    </div>
 
     <!-- ACORDEÓN PRINCIPAL CON TODO -->
-    <div class="accordion" id="acordeonMateriales">
+    <div class="accordion accordion-flush shadow-sm" id="acordeonMateriales">
 
         <!--/*@thymesVar id="inventario" type="org.sena.inforecicla.dto.puntoEca.inventario.InventarioResponseDTO"*/-->
         <!-- Item 1: AGREGAR MATERIAL AL INVENTARIO -->
-        <div class="accordion-item border-0 shadow-sm mb-3">
+        <div class="accordion-item border-start border-5 border-success">
             <h2 class="accordion-header" id="headingAgregar">
-                <button class="accordion-button bg-light text-dark fw-semibold collapsed" type="button"
+                <button class="accordion-button fw-bold collapsed" type="button"
                         data-bs-toggle="collapse" data-bs-target="#collapseAgregar" aria-expanded="false"
                         aria-controls="collapseAgregar">
-                    <i class="bi bi-plus-circle text-success me-2"></i>Agregar Material al Inventario
+                    <span class="bg-success p-2 rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-plus-circle text-white"></i>
+                    </span>
+                    <span>
+                        <span class="fw-bold text-dark d-block">Agregar Material al Inventario</span>
+                        <small class="text-muted fw-normal">Registra nuevos materiales en tu inventario</small>
+                    </span>
                 </button>
             </h2>
             <div id="collapseAgregar" class="accordion-collapse collapse" aria-labelledby="headingAgregar"
                  data-bs-parent="#acordeonMateriales">
-                <div class="accordion-body p-4">
+                <div class="accordion-body p-4 bg-light">
                     <!-- Barra de búsqueda principal -->
                     <div class="row g-3 mb-4">
                         <div class="col-12">
@@ -729,18 +741,23 @@
         </script>
 
         <!-- Item 2: OCUPACIÓN DE INVENTARIO -->
-        <div class="accordion-item border-0 shadow-sm mb-3">
+        <div class="accordion-item border-start border-5 border-info">
             <h2 class="accordion-header" id="headingOcupacion">
-                <button class="accordion-button bg-light text-dark fw-semibold collapsed" type="button"
+                <button class="accordion-button fw-bold collapsed" type="button"
                         data-bs-toggle="collapse" data-bs-target="#collapseOcupacion" aria-expanded="false"
                         aria-controls="collapseOcupacion">
-                    <i class="bi bi-graph-up text-success me-2"></i>Ocupación de Inventario
-                    <span class="badge bg-success ms-2" th:text="${inventario != null ? inventario.size() : 0} + ' materiales'">0 materiales</span>
+                    <span class="bg-info p-2 rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-graph-up text-white"></i>
+                    </span>
+                    <span>
+                        <span class="fw-bold text-dark d-block">Ocupación de Inventario</span>
+                        <small class="text-muted fw-normal"><span th:text="${inventario != null ? inventario.size() : 0}">0</span> materiales registrados</small>
+                    </span>
                 </button>
             </h2>
             <div id="collapseOcupacion" class="accordion-collapse collapse" aria-labelledby="headingOcupacion"
                  data-bs-parent="#acordeonMateriales">
-                <div class="accordion-body p-4">
+                <div class="accordion-body p-4 bg-light">
                     <div th:if="${#lists.isEmpty(inventario)}" class="text-muted text-center py-3">
                         No hay datos de inventario disponibles
                     </div>
@@ -787,18 +804,23 @@
         </div>
 
         <!-- Item 3: MATERIALES EN INVENTARIO -->
-        <div class="accordion-item border-0 shadow-sm mb-3">
+        <div class="accordion-item border-start border-5 border-primary">
             <h2 class="accordion-header" id="headingTarjetas">
-                <button class="accordion-button bg-light text-dark fw-semibold" type="button"
+                <button class="accordion-button fw-bold" type="button"
                         data-bs-toggle="collapse" data-bs-target="#collapseTarjetas"
                         aria-expanded="true" aria-controls="collapseTarjetas">
-                    <i class="bi bi-collection text-success me-2"></i>Materiales en Inventario
-                    <span class="badge bg-success ms-2" th:text="${inventario != null ? inventario.size() : 0} + ' items'">0 items</span>
+                    <span class="bg-primary p-2 rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-collection text-white"></i>
+                    </span>
+                    <span>
+                        <span class="fw-bold text-dark d-block">Materiales en Inventario</span>
+                        <small class="text-muted fw-normal"><span th:text="${inventario != null ? inventario.size() : 0}">0</span> items disponibles</small>
+                    </span>
                 </button>
             </h2>
             <div id="collapseTarjetas" class="accordion-collapse collapse show"
                  aria-labelledby="headingTarjetas" data-bs-parent="#acordeonMateriales">
-                <div class="accordion-body p-4">
+                <div class="accordion-body p-4 bg-light">
                     <div class="accordion mb-4" id="acordeonFiltrosTarjetas">
                         <div class="accordion-item border-0 shadow-sm">
                             <h2 class="accordion-header" id="headingBusquedaTarjetas">
