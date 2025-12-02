@@ -1,11 +1,10 @@
 package org.sena.inforecicla.repository;
 
 import org.sena.inforecicla.model.PuntoECA;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
-@Repository
-public interface PuntoECARepository extends JpaRepository<PuntoECA, UUID> {
+public interface PuntoEcaRepository extends BaseRepository<PuntoECA, UUID> {
+    Optional<PuntoECA> findByPuntoEcaIDAndGestorId(UUID puntoEcaId, UUID usuarioId);
 }
