@@ -5,10 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.sena.inforecicla.model.base.CreacionModificacionPublicaciones;
+import org.sena.inforecicla.model.base.EntidadCreacionModificacion;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -17,15 +15,12 @@ import java.util.UUID;
 @Getter
 @Setter
 @Table(name = "tb_mensajes")
-public class Mensajes extends CreacionModificacionPublicaciones {
+public class Mensajes extends EntidadCreacionModificacion {
 
     @Id
+    @GeneratedValue
     @Column(name = "mensajes_id", unique = true, nullable=false)
     private UUID mensajesId;
-
-    //conversacion_id llave foranea tabla conversaciones
-
-    //remitente_id llave foranea tabla usuarios
 
     @Column(name="cuerpo", columnDefinition = "TEXT", nullable = false )
     private String cuerpo;

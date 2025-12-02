@@ -83,5 +83,8 @@ public class Usuario extends EntidadLocalizacion {
     @OneToMany(mappedBy = "usuario_id", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Publicaciones> publicaciones = new ArrayList<>();
 
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Votos> votosRealizados;
+
 
 }

@@ -16,9 +16,10 @@ import java.util.UUID;
 @Data
 @ToString
 @Table(name = "tb_etiqueta")
-public class Etiquetas implements Serializable {
+public class Etiquetas {
 
     @Id
+    @GeneratedValue
     @Column(name = "etiqueta_id", unique = true, nullable=false)
     private UUID etiquetaId;
 

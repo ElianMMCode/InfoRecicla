@@ -5,12 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.sena.inforecicla.model.base.CreacionModificacionPublicaciones;
-import org.sena.inforecicla.model.enums.EstadoPublicacion;
-import org.sena.inforecicla.model.enums.TipoPublicacion;
+import org.sena.inforecicla.model.base.EntidadCreacionModificacion;
+import org.sena.inforecicla.model.enums.Estado;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -21,13 +18,12 @@ import java.util.UUID;
 @Getter
 @Setter
 @Table(name = "tb_publicaciones")
-public class Publicaciones extends CreacionModificacionPublicaciones {
+public class Publicaciones extends EntidadCreacionModificacion {
 
     @Id
+    @GeneratedValue
     @Column(name = "publicaciones_id", unique = true, nullable=false)
     private UUID publicacionesId;
-
-    //usuarios_id llave foranea tabla usuarios
 
     @Column(name = "tiulo", nullable = false, length = 200)
     private String titulo;
@@ -37,9 +33,8 @@ public class Publicaciones extends CreacionModificacionPublicaciones {
 
     @Column(name="estado_publicacion", length = 15, nullable = false)
     @Enumerated(EnumType.STRING)
-    private EstadoPublicacion estadoPublicacion;
+    private Estado estadoPublicacion;
 
-    //categoria_id llave Foranea tabla categoria_publicaciones
     @ManyToOne
     @JoinColumn(name = "categoria_id", nullable = false)
     private CategoriaPublicaciones categoria;
@@ -62,4 +57,6 @@ public class Publicaciones extends CreacionModificacionPublicaciones {
     @OneToMany(mappedBy = "publicacion", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PublicacionesMultimedia> multimedia = new ArrayList<>();
 
+    @OneToMany(mappedBy = "publicacion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Votos> votosRecibidos;
 }

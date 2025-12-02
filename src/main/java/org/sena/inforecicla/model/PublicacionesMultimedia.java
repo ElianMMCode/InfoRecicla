@@ -5,9 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.sena.inforecicla.model.base.CreacionModificacionPublicaciones;
+import org.sena.inforecicla.model.base.EntidadCreacionModificacion;
 import org.sena.inforecicla.model.enums.TipoMultimedia;
-import org.sena.inforecicla.model.enums.TipoPublicacion;
 
 import java.util.UUID;
 
@@ -17,13 +16,12 @@ import java.util.UUID;
 @Getter
 @Setter
 @Table(name = "tb_publicaciones_multimedia")
-public class PublicacionesMultimedia extends CreacionModificacionPublicaciones {
+public class PublicacionesMultimedia extends EntidadCreacionModificacion {
 
     @Id
+    @GeneratedValue
     @Column(name = "publicaciones_multimedia_id", unique = true, nullable=false)
     private UUID publicacionesMultimediaId;
-
-    //publicacion_id llave foranea tabla publicaciones
 
     @Column(name="tipo_multimedia", length = 15)
     @Enumerated(EnumType.STRING)

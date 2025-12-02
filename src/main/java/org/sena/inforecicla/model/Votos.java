@@ -5,8 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.sena.inforecicla.model.base.CreacionModificacionPublicaciones;
-import org.sena.inforecicla.model.enums.TipoMultimedia;
+import org.sena.inforecicla.model.base.EntidadCreacionModificacion;
 import org.sena.inforecicla.model.enums.TipoPublicacion;
 import org.sena.inforecicla.model.enums.Valor;
 
@@ -18,7 +17,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Table(name = "tb_votos")
-public class Votos extends CreacionModificacionPublicaciones {
+public class Votos extends EntidadCreacionModificacion {
 
     @Id
     @Column(name = "votos_id", unique = true, nullable=false)
@@ -28,36 +27,17 @@ public class Votos extends CreacionModificacionPublicaciones {
     @Enumerated(EnumType.STRING)
     private TipoPublicacion tipoPublicacion;
 
-    //usuario_id llave foranea tabla usuario
+
 
     @Column(name="valor", length = 15)
     @Enumerated(EnumType.STRING)
     private Valor valor;
 
-    //Getters y Setters
+    @ManyToOne
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
 
-
-    public UUID getVotosId() {
-        return votosId;
-    }
-
-    public void setVotosId(UUID votosId) {
-        this.votosId = votosId;
-    }
-
-    public TipoPublicacion getTipoPublicacion() {
-        return tipoPublicacion;
-    }
-
-    public void setTipoPublicacion(TipoPublicacion tipoPublicacion) {
-        this.tipoPublicacion = tipoPublicacion;
-    }
-
-    public Valor getValor() {
-        return valor;
-    }
-
-    public void setValor(Valor valor) {
-        this.valor = valor;
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "publicacion_id", nullable = false)
+    private Publicaciones publicacion;
 }

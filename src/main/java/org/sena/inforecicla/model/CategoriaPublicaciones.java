@@ -20,6 +20,7 @@ public class CategoriaPublicaciones {
 
 
     @Id
+    @GeneratedValue
     @Column(name = "categorias_publicaciones_id", unique = true, nullable=false)
     private UUID catePublId;
 
