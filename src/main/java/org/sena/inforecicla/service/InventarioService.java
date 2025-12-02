@@ -1,6 +1,6 @@
 package org.sena.inforecicla.service;
 
-import org.sena.inforecicla.dto.puntoEca.inventario.InventarioGuardarDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.InventarioRequestDTO;
 import org.sena.inforecicla.dto.puntoEca.inventario.InventarioResponseDTO;
 import org.sena.inforecicla.dto.puntoEca.inventario.InventarioUpdateDTO;
 import org.sena.inforecicla.dto.puntoEca.materiales.CategoriaMaterialesInvResponseDTO;
@@ -27,7 +27,7 @@ public interface InventarioService {
 
     List<MaterialInvResponseDTO> buscarMaterialFiltrandoInventario(UUID inventarioId, String texto, String categoria, String tipo) throws InventarioFoundExistException;
 
-    void guardarInventario(InventarioGuardarDTO dto) throws MaterialNotFoundException, PuntoEcaNotFoundException;
+    void guardarInventario(InventarioRequestDTO dto) throws MaterialNotFoundException, PuntoEcaNotFoundException;
 
     List<InventarioResponseDTO> filtraInventario(UUID gestorId, String texto, String categoria, String tipo, Alerta alerta, String unidad, String ocupacion) throws InventarioFoundExistException;
 

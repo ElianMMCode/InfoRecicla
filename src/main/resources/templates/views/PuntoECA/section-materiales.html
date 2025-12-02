@@ -1759,6 +1759,7 @@
                 }
                 if (btnBorrar) {
                     btnBorrar.dataset.inventarioId = inventarioId;
+                    btnBorrar.dataset.nombreMaterial = nombre;
                 }
 
                 // Mostrar modal detalles
@@ -1850,12 +1851,21 @@
             function configurarBtnGuardar() {
                 const btnGuardarModal = document.getElementById('btnGuardarCambios');
                 if (btnGuardarModal) {
-                    btnGuardarModal.removeEventListener('click', guardarCambios);
-                    btnGuardarModal.addEventListener('click', guardarCambios);
+                    btnGuardarModal.removeEventListener('click', manejarClickGuardar);
+                    btnGuardarModal.addEventListener('click', manejarClickGuardar);
                 }
             }
 
-            function guardarCambios() {
+            function manejarClickGuardar(e) {
+                e.preventDefault();
+                guardarCambios(this);
+            }
+
+            function guardarCambios(btnGuardar) {
+                if (!btnGuardar) {
+                    btnGuardar = document.getElementById('btnGuardarCambios');
+                }
+
                 const inventarioId = document.getElementById('editarMaterialId').value;
                 const stockActual = parseFloat(document.getElementById('editarStockActual').value) || 0;
                 const capacidadMaxima = parseFloat(document.getElementById('editarCapacidadMaxima').value) || 0;
@@ -1865,12 +1875,13 @@
                 const umbralAlerta = parseInt(document.getElementById('editarUmbralAlerta').value) || 0;
                 const umbralCritico = parseInt(document.getElementById('editarUmbralCritico').value) || 0;
 
-                const section = document.querySelector('section[th\\:fragment="materiales"]') || document.querySelector('section.container');
-                const gestor = section.dataset.gestor || section.getAttribute('data-gestor');
-                const usuarioId = section.dataset.usuarioId || section.getAttribute('data-usuario-id');
+                // ✅ Obtener datos del usuario correctamente
+                const section = document.querySelector('section[data-gestor]');
+                let gestor = section?.getAttribute('data-gestor') || '';
+                let usuarioId = section?.getAttribute('data-usuario-id') || '';
 
                 console.log('💾 Guardando cambios de inventario:', { inventarioId, stockActual, capacidadMaxima, unidadMedida, precioCompra, precioVenta, umbralAlerta, umbralCritico });
-                console.log('📍 Ruta datos:', { gestor, usuarioId });
+                console.log('📍 Datos de usuario:', { gestor, usuarioId });
 
                 if (!inventarioId) {
                     mostrarModalResultado(false, 'Error', 'No se encontró el ID del inventario');
@@ -1878,6 +1889,7 @@
                 }
 
                 if (!gestor || !usuarioId) {
+                    console.error('❌ Datos de usuario no encontrados. Verificar atributos data-*');
                     mostrarModalResultado(false, 'Error', 'No se encontraron los datos de usuario. Por favor recarga la página.');
                     return;
                 }
@@ -1897,11 +1909,14 @@
                     umbralCritico: umbralCritico
                 };
 
-                this.disabled = true;
-                const textoOriginal = this.innerHTML;
-                this.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Guardando...';
-                const btnGuardar = this;
+                // ✅ Usar la referencia al botón
+                const textoOriginal = btnGuardar?.innerHTML || 'Guardar Cambios';
+                if (btnGuardar) {
+                    btnGuardar.disabled = true;
+                    btnGuardar.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Guardando...';
+                }
 
+                // ✅ Construir URL correcta: /punto-eca/{nombrePunto}/{usuarioId}/actualizar-inventario/{inventarioId}
                 const url = `/punto-eca/${gestor}/${usuarioId}/actualizar-inventario/${inventarioId}`;
                 console.log('🔗 URL de actualización:', url);
 
@@ -1912,28 +1927,38 @@
                 })
                     .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, data })))
                     .then(({ status, ok, data }) => {
+                        console.log('📦 Respuesta del servidor:', { status, ok, data });
+
                         // Cerrar modales previos
                         if (editarModalInstance) editarModalInstance.hide();
 
                         if (!ok) {
                             // Mostrar error
-                            mostrarModalResultado(false, 'Error al guardar', data.mensaje || 'Hubo un error al guardar los cambios');
-                            btnGuardar.disabled = false;
-                            btnGuardar.innerHTML = textoOriginal;
+                            const mensajeError = data?.mensaje || data?.message || 'Hubo un error al guardar los cambios';
+                            console.error('❌ Error en respuesta:', mensajeError);
+                            mostrarModalResultado(false, 'Error al guardar', mensajeError);
+                            if (btnGuardar) {
+                                btnGuardar.disabled = false;
+                                btnGuardar.innerHTML = textoOriginal;
+                            }
                         } else {
                             console.log('✅ Actualización exitosa:', data);
                             // Mostrar éxito
                             mostrarModalResultado(true, '¡Operación Exitosa!', 'Los cambios se han guardado correctamente en la base de datos.');
-                            btnGuardar.disabled = false;
-                            btnGuardar.innerHTML = textoOriginal;
+                            if (btnGuardar) {
+                                btnGuardar.disabled = false;
+                                btnGuardar.innerHTML = textoOriginal;
+                            }
                         }
                     })
                     .catch(err => {
-                        console.error('❌ Error:', err);
+                        console.error('❌ Error en fetch:', err);
                         if (editarModalInstance) editarModalInstance.hide();
                         mostrarModalResultado(false, 'Error', 'Error al guardar cambios: ' + err.message);
-                        btnGuardar.disabled = false;
-                        btnGuardar.innerHTML = textoOriginal;
+                        if (btnGuardar) {
+                            btnGuardar.disabled = false;
+                            btnGuardar.innerHTML = textoOriginal;
+                        }
                     });
             }
 
@@ -1944,20 +1969,33 @@
             function configurarBtnBorrar() {
                 const btnBorrarModal = document.getElementById('btnBorrarMaterial');
                 if (btnBorrarModal) {
-                    btnBorrarModal.removeEventListener('click', confirmarBorrado);
-                    btnBorrarModal.addEventListener('click', confirmarBorrado);
+                    btnBorrarModal.removeEventListener('click', manejarClickBorrar);
+                    btnBorrarModal.addEventListener('click', manejarClickBorrar);
                 }
             }
 
-            function confirmarBorrado() {
-                const inventarioId = this.dataset.inventarioid || this.dataset.inventarioId || '';
+            function manejarClickBorrar(e) {
+                e.preventDefault();
+                confirmarBorrado(this);
+            }
 
-                // Obtener datos del usuario desde el atributo data-* de la sección
-                const section = document.querySelector('section[th\\:fragment="materiales"]') || document.querySelector('section.container');
-                const gestor = section.dataset.gestor || section.getAttribute('data-gestor');
-                const usuarioId = section.dataset.usuarioId || section.getAttribute('data-usuario-id');
+            function confirmarBorrado(btnBorrar) {
+                if (!btnBorrar) {
+                    btnBorrar = document.getElementById('btnBorrarMaterial');
+                }
+
+                const inventarioId = btnBorrar?.dataset.inventarioid || btnBorrar?.dataset.inventarioId || '';
+                const nombreMaterial = btnBorrar?.dataset.nombreMaterial || 'el material';
+
+                // ✅ Obtener datos del usuario correctamente
+                const section = document.querySelector('section[data-gestor]');
+                let gestor = section?.getAttribute('data-gestor') || '';
+                let usuarioId = section?.getAttribute('data-usuario-id') || '';
+
+                console.log('🗑️ Preparando eliminación:', { inventarioId, nombreMaterial, gestor, usuarioId });
 
                 if (!gestor || !usuarioId) {
+                    console.error('❌ Datos de usuario no encontrados');
                     alert('Error: No se encontraron los datos de usuario. Por favor recarga la página.');
                     return;
                 }
@@ -1965,26 +2003,31 @@
                 if (!inventarioId) {
                     if (!confirm('¿Deseas borrar este material del inventario?')) return;
                 } else {
-                    if (!confirm('¿Confirma eliminar el inventario con id ' + inventarioId + ' ?')) return;
+                    if (!confirm('¿Confirma eliminar "' + nombreMaterial + '" del inventario?')) return;
                 }
 
-                // Construir URL correcta: /punto-eca/{nombrePunto}/{usuarioId}/eliminar-inventario/{inventarioId}
+                // ✅ Construir URL correcta: /punto-eca/{nombrePunto}/{usuarioId}/eliminar-inventario/{inventarioId}
                 const url = `/punto-eca/${gestor}/${usuarioId}/eliminar-inventario/${inventarioId}`;
                 console.log('🗑️ URL de eliminación:', url);
 
                 fetch(url, { method: 'DELETE' })
                     .then(res => {
+                        console.log('📦 Respuesta del DELETE:', { status: res.status, ok: res.ok });
                         if (res.ok) {
-                            alert('Elemento eliminado');
+                            console.log('✅ Eliminación exitosa');
+                            mostrarModalResultado(true, '¡Eliminado!', 'El material ha sido eliminado del inventario correctamente.');
                             if (detallesModalInstance) detallesModalInstance.hide();
-                            window.location.reload();
+                            // Recargar después de cerrar modal
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
                         } else {
                             return res.json().then(j => { throw new Error(j?.mensaje || j?.message || 'Error al borrar'); });
                         }
                     })
                     .catch(err => {
-                        console.error('Error borrando:', err);
-                        alert('No fue posible borrar: ' + (err.message || err));
+                        console.error('❌ Error borrando:', err);
+                        mostrarModalResultado(false, 'Error al eliminar', 'No fue posible borrar: ' + (err.message || err));
                     });
             }
 

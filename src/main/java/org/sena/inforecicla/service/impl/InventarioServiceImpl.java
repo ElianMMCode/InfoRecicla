@@ -1,7 +1,7 @@
 package org.sena.inforecicla.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.sena.inforecicla.dto.puntoEca.inventario.InventarioGuardarDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.InventarioRequestDTO;
 import org.sena.inforecicla.dto.puntoEca.inventario.InventarioResponseDTO;
 import org.sena.inforecicla.dto.puntoEca.inventario.InventarioUpdateDTO;
 import org.sena.inforecicla.dto.puntoEca.materiales.CategoriaMaterialesInvResponseDTO;
@@ -163,7 +163,7 @@ public class InventarioServiceImpl implements InventarioService {
     }
 
     @Override
-    public void guardarInventario(InventarioGuardarDTO dto) throws MaterialNotFoundException, PuntoEcaNotFoundException {
+    public void guardarInventario(InventarioRequestDTO dto) throws MaterialNotFoundException, PuntoEcaNotFoundException {
         Material material = materialRepository.findById(dto.materialId())
                 .orElseThrow(() -> new MaterialNotFoundException("Material no encontrado"));
 

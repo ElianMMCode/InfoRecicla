@@ -1,254 +1,405 @@
 <!-- Fragment: Movimientos -->
-<section th:fragment="movimientos" class="py-4">
+<section th:fragment="movimientos" class="py-4"
+         th:data-gestor="${gestor}"
+         th:data-usuario-id="${usuario.usuarioId}">
     <!-- Título principal -->
     <div class="mb-4">
         <h2 class="h4 fw-bold text-dark mb-1">
-            <i class="bi bi-box-seam me-2"></i>Gestión de Movimientos de Inventario
+            <i class="bi bi-arrow-left-right me-2"></i>Gestión de Movimientos de Inventario
         </h2>
         <p class="text-muted small mb-0">Registra y consulta entradas y salidas de materiales en el centro de acopio</p>
     </div>
-
+    <!-- ═════════════════════════════════════════════════════════════ -->
+    <!-- SECCIÓN 1: BARRA DE BÚSQUEDA Y SELECCIÓN DE MATERIAL -->
+    <!-- ═════════════════════════════════════════════════════════════ -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary-subtle border-0 px-4 py-3">
+            <h6 class="mb-0 fw-bold text-primary">
+                <i class="bi bi-search me-2"></i>Seleccionar Material para Registrar Movimiento
+            </h6>
+        </div>
+        <div class="card-body">
+            <!-- Barra de búsqueda -->
+            <div class="row g-3 mb-4">
+                <div class="col-12">
+                    <label class="form-label fw-semibold text-muted mb-1" for="buscarMaterialMovimientos">Buscar Material</label>
+                    <div class="input-group input-group-lg flex-nowrap">
+                        <span class="input-group-text bg-light border-2 border-primary">
+                            <i class="bi bi-search text-primary"></i>
+                        </span>
+                        <input id="buscarMaterialMovimientos" type="text" class="form-control form-control-lg border-2 border-primary"
+                               placeholder="Nombre, código, categoría..." aria-label="Buscar material">
+                    </div>
+                </div>
+            </div>
+            <!-- Filtros: Categoría -->
+            <div class="row g-3 mb-3">
+                <div class="col-12">
+                    <span class="form-label fw-semibold text-muted d-block mb-2">Categoría</span>
+                    <div class="btn-group flex-wrap gap-2" role="group" aria-label="Filtro categoría movimientos">
+                        <input type="radio" class="btn-check" name="radioCategoriaMov" id="radioCategoriaMov_none" value="" autocomplete="off" checked>
+                        <label class="btn btn-outline-primary" for="radioCategoriaMov_none">Ninguno</label>
+                        <th:block th:if="${not #lists.isEmpty(categoriaMateriales)}">
+                            <th:block th:each="cat, iter : ${categoriaMateriales}">
+                                <input type="radio" class="btn-check" name="radioCategoriaMov"
+                                       th:id="${'radioCategoriaMov_' + iter.index}" th:value="${cat.nmbCategoria}" autocomplete="off">
+                                <label class="btn btn-outline-primary"
+                                       th:for="${'radioCategoriaMov_' + iter.index}" th:text="${cat.nmbCategoria}"
+                                       data-bs-toggle="tooltip" data-bs-placement="top"
+                                       th:attr="title=${cat.dscCategoria}">
+                                </label>
+                            </th:block>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+            <!-- Filtros: Tipo -->
+            <div class="row g-3 mb-4">
+                <div class="col-12">
+                    <span class="form-label fw-semibold text-muted d-block mb-2">Tipo</span>
+                    <div class="btn-group flex-wrap gap-2" role="group" aria-label="Filtro tipo movimientos">
+                        <input type="radio" class="btn-check" name="radioTipoMov" id="radioTipoMov_none" value="" autocomplete="off" checked>
+                        <label class="btn btn-outline-primary" for="radioTipoMov_none">Ninguno</label>
+                        <th:block th:if="${not #lists.isEmpty(tiposMateriales)}">
+                            <th:block th:each="tipo, iter : ${tiposMateriales}">
+                                <input type="radio" class="btn-check" name="radioTipoMov"
+                                       th:id="${'radioTipoMov_' + iter.index}" th:value="${tipo.nmbCategoria}" autocomplete="off">
+                                <label class="btn btn-outline-primary"
+                                       th:for="${'radioTipoMov_' + iter.index}" th:text="${tipo.nmbCategoria}"
+                                       data-bs-toggle="tooltip" data-bs-placement="top"
+                                       th:attr="title=${tipo.dscCategoria}">
+                                </label>
+                            </th:block>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+            <!-- Botones de acción -->
+            <div class="row">
+                <div class="col-12 d-flex flex-wrap gap-3 justify-content-between align-items-center">
+                    <small class="text-muted">Selecciona opcionalmente categoría y tipo o deja "Ninguno" para no filtrar.</small>
+                    <div class="d-flex gap-2">
+                        <button id="btnBuscarMaterialMov" class="btn btn-primary btn-sm fw-semibold" type="button">
+                            <i class="bi bi-search me-1"></i>Buscar
+                        </button>
+                        <button id="btnLimpiarBusquedaMov" class="btn btn-outline-secondary btn-sm fw-semibold" type="button">
+                            <i class="bi bi-eraser me-1"></i>Limpiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL: RESULTADOS DE BÚSQUEDA -->
+    <div class="modal fade" id="buscarMaterialMovimientosModal" tabindex="-1" aria-labelledby="buscarMaterialMovimientosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="buscarMaterialMovimientosLabel">
+                        <i class="bi bi-search me-2"></i>Selecciona un Material
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info mb-3">
+                        <strong>Filtros aplicados:</strong>
+                        <div class="mt-2">
+                            <span class="badge bg-info-subtle text-info">Texto: <strong id="resumenMaterialTexto">Sin filtro</strong></span>
+                            <span class="badge bg-info-subtle text-info ms-2">Categoría: <strong id="resumenMaterialCategoria">Sin filtro</strong></span>
+                            <span class="badge bg-info-subtle text-info ms-2">Tipo: <strong id="resumenMaterialTipo">Sin filtro</strong></span>
+                        </div>
+                    </div>
+                    <div id="estadoBusquedaMov" class="text-center text-muted py-4 mb-3">
+                        <i class="bi bi-search display-6 d-block mb-2"></i>
+                        <p class="mb-0">Buscando materiales...</p>
+                    </div>
+                    <div id="resultadosBusquedaMov" class="list-group">
+                        <!-- Los resultados se renderizarán aquí -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ═════════════════════════════════════════════════════════════ -->
     <!-- ACORDEÓN PRINCIPAL -->
+    <!-- ═════════════════════════════════════════════════════════════ -->
     <div class="accordion accordion-flush shadow-sm" id="movimientosAccordion">
-
-        <!-- ═════════════════════════════════════════════════════════════ -->
         <!-- ITEM 1: ENTRADAS DE MATERIAL -->
-        <!-- ═════════════════════════════════════════════════════════════ -->
         <div class="accordion-item border-start border-5 border-success">
             <h2 class="accordion-header" id="headingEntradas">
-                <button class="accordion-button fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEntradas" aria-expanded="false" aria-controls="collapseEntradas">
+                <button class="accordion-button fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEntradas">
                     <span class="bg-success p-2 rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                         <i class="bi bi-arrow-down text-white"></i>
                     </span>
                     <span>
                         <span class="fw-bold text-dark d-block">Entradas de Material</span>
-                        <small class="text-muted fw-normal">Registra la entrada de materiales reciclables</small>
+                        <small class="text-muted fw-normal">Registra la entrada de materiales reciclables al inventario</small>
                     </span>
                 </button>
             </h2>
-            <div id="collapseEntradas" class="accordion-collapse collapse" aria-labelledby="headingEntradas" data-bs-parent="#movimientosAccordion">
+            <div id="collapseEntradas" class="accordion-collapse collapse" data-bs-parent="#movimientosAccordion">
                 <div class="accordion-body p-4 bg-light">
-                    <div class="row g-4">
-                        <!-- Formulario de entrada -->
-                        <div class="col-lg-5">
-                            <div class="card border-start border-5 border-success shadow-sm h-100">
-                                <div class="card-header bg-success-subtle border-0 px-4 pt-4 pb-3">
-                                    <h6 class="mb-0 fw-bold text-success">Registrar Nueva Entrada</h6>
-                                </div>
-                                <div class="card-body">
-                                    <form>
-                                        <!-- Material -->
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold small" for="entradaMaterial">
-                                                Material <span class="text-danger">*</span>
-                                            </label>
-                                            <select id="entradaMaterial" class="form-select form-select-sm" required>
-                                                <option selected disabled value="">Selecciona un material...</option>
-                                                <option>Plástico</option>
-                                                <option>Papel</option>
-                                                <option>Vidrio</option>
-                                                <option>Metal</option>
-                                            </select>
-                                        </div>
-
-                                        <!-- Cantidad -->
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold small" for="entradaCantidad">
-                                                Cantidad (kg) <span class="text-danger">*</span>
-                                            </label>
-                                            <input id="entradaCantidad" type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00" required>
-                                        </div>
-
-                                        <!-- Fecha -->
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold small" for="entradaFecha">
-                                                Fecha <span class="text-danger">*</span>
-                                            </label>
-                                            <input id="entradaFecha" type="datetime-local" class="form-control form-control-sm" required>
-                                        </div>
-
-                                        <!-- Precio -->
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold small" for="entradaPrecio">
-                                                Precio Unitario (COP)
-                                            </label>
-                                            <input id="entradaPrecio" type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00">
-                                        </div>
-
-                                        <!-- Observaciones -->
-                                        <div class="mb-4">
-                                            <label class="form-label fw-semibold small" for="entradaObservaciones">
-                                                Observaciones
-                                            </label>
-                                            <textarea id="entradaObservaciones" class="form-control form-control-sm" rows="2" placeholder="Notas adicionales..."></textarea>
-                                        </div>
-
-                                        <!-- Botón -->
-                                        <button type="submit" class="btn btn-success w-100 btn-sm fw-semibold">
-                                            <i class="bi bi-check-circle me-2"></i>Guardar Entrada
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
+                    <!-- Formulario de entrada -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-success-subtle border-0 px-4 py-3">
+                            <h6 class="mb-0 fw-bold text-success">Registrar Nueva Entrada</h6>
                         </div>
-
-                        <!-- Tabla de últimas entradas -->
-                        <div class="col-lg-7">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-success-subtle border-0 px-4 py-3 d-flex justify-content-between align-items-center">
-                                    <h6 class="mb-0 fw-bold text-success">Últimas Entradas</h6>
-                                    <span class="badge bg-success rounded-pill">0 registros</span>
+                        <div class="card-body" id="formEntradaContainer" style="display: none;">
+                            <form id="formEntrada" class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Material <span class="text-danger">*</span></label>
+                                    <input id="entradaMaterialSeleccionado" type="text" class="form-control form-control-sm" readonly required>
+                                    <input id="entradaMaterialId" type="hidden">
                                 </div>
-                                <div class="card-body p-0">
-                                    <div class="table-responsive">
-                                        <table class="table table-sm table-hover align-middle mb-0">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th scope="col" class="fw-bold small">Fecha</th>
-                                                    <th scope="col" class="fw-bold small">Material</th>
-                                                    <th scope="col" class="fw-bold small text-end">Cantidad (kg)</th>
-                                                    <th scope="col" class="fw-bold small text-end">Precio Unit.</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="border-top">
-                                                <tr class="text-muted text-center">
-                                                    <td colspan="4" class="py-3">
-                                                        <small>Sin registros</small>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Cantidad (kg) <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Fecha <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" class="form-control form-control-sm" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Precio de Compra Unitario (COP)</label>
+                                    <input type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold small">Observaciones</label>
+                                    <textarea class="form-control form-control-sm" rows="2" placeholder="Notas adicionales..."></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-success btn-sm fw-semibold">
+                                        <i class="bi bi-check-circle me-2"></i>Guardar Entrada
+                                    </button>
+                                    <button type="reset" class="btn btn-outline-secondary btn-sm fw-semibold">
+                                        <i class="bi bi-eraser me-2"></i>Limpiar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Filtros -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-light border-0 px-4 py-3">
+                            <h6 class="mb-0 fw-bold text-dark">
+                                <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form class="row g-3" id="filtrosFormEntradas">
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Material</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="Buscar material...">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Desde</label>
+                                    <input type="date" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Hasta</label>
+                                    <input type="date" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">&nbsp;</label>
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary btn-sm fw-semibold flex-grow-1">
+                                            <i class="bi bi-search me-1"></i>Filtrar
+                                        </button>
+                                        <button type="reset" class="btn btn-outline-secondary btn-sm fw-semibold">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        </button>
                                     </div>
                                 </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Tabla de entradas -->
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light border-0 px-4 py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold text-dark">Historial de Entradas</h6>
+                            <span class="badge bg-success rounded-pill" id="badgeEntradasCount">0 registros</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th scope="col" class="fw-bold small">Fecha</th>
+                                            <th scope="col" class="fw-bold small">Material</th>
+                                            <th scope="col" class="fw-bold small text-end">Cantidad (kg)</th>
+                                            <th scope="col" class="fw-bold small text-end">Precio Unit.</th>
+                                            <th scope="col" class="fw-bold small">Observaciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="border-top" id="tablasEntradasBody">
+                                        <tr class="text-muted text-center">
+                                            <td colspan="5" class="py-3"><small>Sin registros</small></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
+                        </div>
+                        <div class="card-footer bg-light border-top px-4 py-3">
+                            <nav aria-label="Paginación entradas">
+                                <ul class="pagination pagination-sm mb-0 justify-content-center" id="paginacionEntradas">
+                                    <li class="page-item disabled"><a class="page-link" href="#">Anterior</a></li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">Siguiente</a></li>
+                                </ul>
+                            </nav>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- ═════════════════════════════════════════════════════════════ -->
         <!-- ITEM 2: SALIDAS DE MATERIAL -->
-        <!-- ═════════════════════════════════════════════════════════════ -->
         <div class="accordion-item border-start border-5 border-danger">
             <h2 class="accordion-header" id="headingSalidas">
-                <button class="accordion-button fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSalidas" aria-expanded="false" aria-controls="collapseSalidas">
+                <button class="accordion-button fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSalidas">
                     <span class="bg-danger p-2 rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                         <i class="bi bi-arrow-up text-white"></i>
                     </span>
                     <span>
                         <span class="fw-bold text-dark d-block">Salidas de Material</span>
-                        <small class="text-muted fw-normal">Registra la salida de materiales reciclables</small>
+                        <small class="text-muted fw-normal">Registra la salida de materiales reciclables del inventario</small>
                     </span>
                 </button>
             </h2>
-            <div id="collapseSalidas" class="accordion-collapse collapse" aria-labelledby="headingSalidas" data-bs-parent="#movimientosAccordion">
+            <div id="collapseSalidas" class="accordion-collapse collapse" data-bs-parent="#movimientosAccordion">
                 <div class="accordion-body p-4 bg-light">
-                    <div class="row g-4">
-                        <!-- Formulario de salida -->
-                        <div class="col-lg-5">
-                            <div class="card border-start border-5 border-danger shadow-sm h-100">
-                                <div class="card-header bg-danger-subtle border-0 px-4 pt-4 pb-3">
-                                    <h6 class="mb-0 fw-bold text-danger">Registrar Nueva Salida</h6>
-                                </div>
-                                <div class="card-body">
-                                    <form>
-                                        <!-- Material -->
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold small" for="salidaMaterial">
-                                                Material <span class="text-danger">*</span>
-                                            </label>
-                                            <select id="salidaMaterial" class="form-select form-select-sm" required>
-                                                <option selected disabled value="">Selecciona un material...</option>
-                                                <option>Plástico</option>
-                                                <option>Papel</option>
-                                                <option>Vidrio</option>
-                                                <option>Metal</option>
-                                            </select>
-                                        </div>
-
-                                        <!-- Cantidad -->
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold small" for="salidaCantidad">
-                                                Cantidad (kg) <span class="text-danger">*</span>
-                                            </label>
-                                            <input id="salidaCantidad" type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00" required>
-                                        </div>
-
-                                        <!-- Fecha -->
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold small" for="salidaFecha">
-                                                Fecha <span class="text-danger">*</span>
-                                            </label>
-                                            <input id="salidaFecha" type="datetime-local" class="form-control form-control-sm" required>
-                                        </div>
-
-                                        <!-- Precio de Venta -->
-                                        <div class="mb-3">
-                                            <label class="form-label fw-semibold small" for="salidaPrecio">
-                                                Precio de Venta (COP)
-                                            </label>
-                                            <input id="salidaPrecio" type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00">
-                                        </div>
-
-                                        <!-- Observaciones -->
-                                        <div class="mb-4">
-                                            <label class="form-label fw-semibold small" for="salidaObservaciones">
-                                                Observaciones
-                                            </label>
-                                            <textarea id="salidaObservaciones" class="form-control form-control-sm" rows="2" placeholder="Notas adicionales..."></textarea>
-                                        </div>
-
-                                        <!-- Botón -->
-                                        <button type="submit" class="btn btn-danger w-100 btn-sm fw-semibold">
-                                            <i class="bi bi-check-circle me-2"></i>Guardar Salida
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
+                    <!-- Formulario de salida -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-danger-subtle border-0 px-4 py-3">
+                            <h6 class="mb-0 fw-bold text-danger">Registrar Nueva Salida</h6>
                         </div>
-
-                        <!-- Tabla de últimas salidas -->
-                        <div class="col-lg-7">
-                            <div class="card shadow-sm">
-                                <div class="card-header bg-danger-subtle border-0 px-4 py-3 d-flex justify-content-between align-items-center">
-                                    <h6 class="mb-0 fw-bold text-danger">Últimas Salidas</h6>
-                                    <span class="badge bg-danger rounded-pill">0 registros</span>
+                        <div class="card-body" id="formSalidaContainer" style="display: none;">
+                            <form id="formSalida" class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Material <span class="text-danger">*</span></label>
+                                    <input id="salidaMaterialSeleccionado" type="text" class="form-control form-control-sm" readonly required>
+                                    <input id="salidaMaterialId" type="hidden">
                                 </div>
-                                <div class="card-body p-0">
-                                    <div class="table-responsive">
-                                        <table class="table table-sm table-hover align-middle mb-0">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th scope="col" class="fw-bold small">Fecha</th>
-                                                    <th scope="col" class="fw-bold small">Material</th>
-                                                    <th scope="col" class="fw-bold small text-end">Cantidad (kg)</th>
-                                                    <th scope="col" class="fw-bold small text-end">Precio Unit.</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="border-top">
-                                                <tr class="text-muted text-center">
-                                                    <td colspan="4" class="py-3">
-                                                        <small>Sin registros</small>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Cantidad (kg) <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Fecha <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" class="form-control form-control-sm" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Precio de Venta Unitario (COP)</label>
+                                    <input type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Centro de Acopio</label>
+                                    <select class="form-select form-select-sm" required>
+                                        <option value="">Selecciona un centro...</option>
+                                        <th:block th:if="${not #lists.isEmpty(centrosAcopio)}">
+                                            <option th:each="centro : ${centrosAcopio}"
+                                                    th:value="${centro.cntAcpId}"
+                                                    th:text="${centro.nombreCntAcp}">
+                                                Centro de Acopio
+                                            </option>
+                                        </th:block>
+                                        <th:block th:if="${#lists.isEmpty(centrosAcopio)}">
+                                            <option disabled>No hay centros disponibles</option>
+                                        </th:block>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Observaciones</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="Notas adicionales...">
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-danger btn-sm fw-semibold">
+                                        <i class="bi bi-check-circle me-2"></i>Guardar Salida
+                                    </button>
+                                    <button type="reset" class="btn btn-outline-secondary btn-sm fw-semibold">
+                                        <i class="bi bi-eraser me-2"></i>Limpiar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Filtros -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-light border-0 px-4 py-3">
+                            <h6 class="mb-0 fw-bold text-dark">
+                                <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form class="row g-3" id="filtrosFormSalidas">
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Material</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="Buscar material...">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Desde</label>
+                                    <input type="date" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Hasta</label>
+                                    <input type="date" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">&nbsp;</label>
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary btn-sm fw-semibold flex-grow-1">
+                                            <i class="bi bi-search me-1"></i>Filtrar
+                                        </button>
+                                        <button type="reset" class="btn btn-outline-secondary btn-sm fw-semibold">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        </button>
                                     </div>
                                 </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Tabla de salidas -->
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light border-0 px-4 py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold text-dark">Historial de Salidas</h6>
+                            <span class="badge bg-danger rounded-pill" id="badgeSalidasCount">0 registros</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th scope="col" class="fw-bold small">Fecha</th>
+                                            <th scope="col" class="fw-bold small">Material</th>
+                                            <th scope="col" class="fw-bold small text-end">Cantidad (kg)</th>
+                                            <th scope="col" class="fw-bold small text-end">Precio Unit.</th>
+                                            <th scope="col" class="fw-bold small">Centro Acopio</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="border-top" id="tablasSalidasBody">
+                                        <tr class="text-muted text-center">
+                                            <td colspan="5" class="py-3"><small>Sin registros</small></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
+                        </div>
+                        <div class="card-footer bg-light border-top px-4 py-3">
+                            <nav aria-label="Paginación salidas">
+                                <ul class="pagination pagination-sm mb-0 justify-content-center" id="paginacionSalidas">
+                                    <li class="page-item disabled"><a class="page-link" href="#">Anterior</a></li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">Siguiente</a></li>
+                                </ul>
+                            </nav>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- ═════════════════════════════════════════════════════════════ -->
         <!-- ITEM 3: HISTORIAL GENERAL -->
-        <!-- ═════════════════════════════════════════════════════════════ -->
         <div class="accordion-item border-start border-5 border-secondary">
             <h2 class="accordion-header" id="headingHistorial">
-                <button class="accordion-button fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHistorial" aria-expanded="false" aria-controls="collapseHistorial">
+                <button class="accordion-button fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHistorial">
                     <span class="bg-secondary p-2 rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                         <i class="bi bi-search text-white"></i>
                     </span>
@@ -258,7 +409,7 @@
                     </span>
                 </button>
             </h2>
-            <div id="collapseHistorial" class="accordion-collapse collapse" aria-labelledby="headingHistorial" data-bs-parent="#movimientosAccordion">
+            <div id="collapseHistorial" class="accordion-collapse collapse" data-bs-parent="#movimientosAccordion">
                 <div class="accordion-body p-4 bg-light">
                     <!-- Filtros -->
                     <div class="card shadow-sm mb-4">
@@ -268,92 +419,60 @@
                             </h6>
                         </div>
                         <div class="card-body">
-                            <form class="row g-3" id="filtrosForm">
-                                <!-- Material -->
+                            <form class="row g-3" id="filtrosFormHistorial">
                                 <div class="col-md-3">
-                                    <label class="form-label fw-semibold small" for="filtroMaterial">Material</label>
-                                    <select id="filtroMaterial" class="form-select form-select-sm">
-                                        <option value="">Todos</option>
-                                        <option>Plástico</option>
-                                        <option>Papel</option>
-                                        <option>Vidrio</option>
-                                        <option>Metal</option>
-                                    </select>
+                                    <label class="form-label fw-semibold small">Material</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="Buscar material...">
                                 </div>
-
-                                <!-- Tipo de Movimiento -->
                                 <div class="col-md-3">
-                                    <label class="form-label fw-semibold small" for="filtroTipo">Tipo de Movimiento</label>
-                                    <select id="filtroTipo" class="form-select form-select-sm">
+                                    <label class="form-label fw-semibold small">Tipo de Movimiento</label>
+                                    <select class="form-select form-select-sm">
                                         <option value="">Todos</option>
                                         <option value="entrada">Entradas</option>
                                         <option value="salida">Salidas</option>
                                     </select>
                                 </div>
-
-                                <!-- Fecha Inicio -->
                                 <div class="col-md-3">
-                                    <label class="form-label fw-semibold small" for="filtroFechaInicio">Desde</label>
-                                    <input id="filtroFechaInicio" type="date" class="form-control form-control-sm">
+                                    <label class="form-label fw-semibold small">Desde</label>
+                                    <input type="date" class="form-control form-control-sm">
                                 </div>
-
-                                <!-- Fecha Fin -->
                                 <div class="col-md-3">
-                                    <label class="form-label fw-semibold small" for="filtroFechaFin">Hasta</label>
-                                    <input id="filtroFechaFin" type="date" class="form-control form-control-sm">
+                                    <label class="form-label fw-semibold small">Hasta</label>
+                                    <input type="date" class="form-control form-control-sm">
                                 </div>
-
-                                <!-- Botones de acción -->
                                 <div class="col-12">
                                     <button type="submit" class="btn btn-primary btn-sm fw-semibold">
                                         <i class="bi bi-search me-2"></i>Buscar
                                     </button>
-                                    <button type="reset" class="btn btn-secondary btn-sm fw-semibold">
+                                    <button type="reset" class="btn btn-outline-secondary btn-sm fw-semibold">
                                         <i class="bi bi-arrow-counterclockwise me-2"></i>Limpiar
                                     </button>
                                 </div>
                             </form>
                         </div>
                     </div>
-
-                    <!-- Tabla General -->
+                    <!-- Tabla general -->
                     <div class="card shadow-sm">
                         <div class="card-header bg-light border-0 px-4 py-3 d-flex justify-content-between align-items-center">
                             <h6 class="mb-0 fw-bold text-dark">Todos los Movimientos</h6>
-                            <span class="badge bg-secondary rounded-pill">0 registros</span>
+                            <span class="badge bg-secondary rounded-pill" id="badgeHistorialCount">0 registros</span>
                         </div>
-
                         <div class="card-body p-0">
                             <div class="table-responsive">
-                                <table class="table table-hover align-middle mb-0">
+                                <table class="table table-sm table-hover align-middle mb-0">
                                     <thead class="table-light">
                                         <tr>
-                                            <th scope="col" class="fw-bold small" style="width: 130px;">
-                                                <i class="bi bi-calendar me-2"></i>Fecha
-                                            </th>
-                                            <th scope="col" class="fw-bold small" style="width: 100px;">
-                                                <i class="bi bi-arrow-left-right me-2"></i>Tipo
-                                            </th>
-                                            <th scope="col" class="fw-bold small">
-                                                <i class="bi bi-box me-2"></i>Material
-                                            </th>
-                                            <th scope="col" class="fw-bold small text-end" style="width: 120px;">
-                                                <i class="bi bi-graph-up me-2"></i>Cantidad
-                                            </th>
-                                            <th scope="col" class="fw-bold small text-center" style="width: 80px;">
-                                                <i class="bi bi-balance-scale me-2"></i>Unidad
-                                            </th>
-                                            <th scope="col" class="fw-bold small text-end" style="width: 130px;">
-                                                <i class="bi bi-cash-coin me-2"></i>Precio Unit.
-                                            </th>
-                                            <th scope="col" class="fw-bold small" style="width: 100px;">
-                                                <i class="bi bi-pencil-square me-2"></i>Acciones
-                                            </th>
+                                            <th scope="col" class="fw-bold small">Fecha</th>
+                                            <th scope="col" class="fw-bold small">Tipo</th>
+                                            <th scope="col" class="fw-bold small">Material</th>
+                                            <th scope="col" class="fw-bold small text-end">Cantidad (kg)</th>
+                                            <th scope="col" class="fw-bold small text-end">Precio Unit.</th>
+                                            <th scope="col" class="fw-bold small">Detalles</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="border-top">
+                                    <tbody class="border-top" id="tablasHistorialBody">
                                         <tr class="text-muted text-center">
-                                            <td colspan="7" class="py-4">
+                                            <td colspan="6" class="py-4">
                                                 <i class="bi bi-inbox"></i>
                                                 <p class="mb-0 mt-2">Sin movimientos registrados</p>
                                             </td>
@@ -362,30 +481,12 @@
                                 </table>
                             </div>
                         </div>
-
-                        <!-- Paginación -->
                         <div class="card-footer bg-light border-top px-4 py-3">
-                            <nav aria-label="Paginación de movimientos">
-                                <ul class="pagination pagination-sm mb-0 justify-content-center">
-                                    <li class="page-item disabled">
-                                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                                            <i class="bi bi-chevron-left me-1"></i>Anterior
-                                        </a>
-                                    </li>
-                                    <li class="page-item active">
-                                        <a class="page-link" href="#">1</a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="#">2</a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="#">3</a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="#">
-                                            Siguiente<i class="bi bi-chevron-right ms-1"></i>
-                                        </a>
-                                    </li>
+                            <nav aria-label="Paginación historial">
+                                <ul class="pagination pagination-sm mb-0 justify-content-center" id="paginacionHistorial">
+                                    <li class="page-item disabled"><a class="page-link" href="#">Anterior</a></li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">Siguiente</a></li>
                                 </ul>
                             </nav>
                         </div>
@@ -393,9 +494,111 @@
                 </div>
             </div>
         </div>
-
     </div>
     <!-- FIN DEL ACORDEÓN -->
 
-</section>
+    <!-- SCRIPT INLINE PARA BÚSQUEDA Y SELECCIÓN DE MATERIALES -->
+    <script>
+    (function() {
+        console.log('📌 Script inline de movimientos ejecutándose...');
 
+        // ...existing code...
+
+        // Mostrar estado inicial
+        mostrarEstadoBusquedaMov('idle');
+    })();
+    </script>
+
+    <!-- SCRIPT PARA CARGAR DATOS INICIALES DE ENTRADAS Y SALIDAS -->
+    <script th:inline="javascript">
+    (function() {
+        console.log('📌 Inicializando carga de datos de movimientos...');
+
+        // Datos de entradas (compras) - Inyectados desde Thymeleaf
+        const entradasData = /*[[${entradasIniciales.content}]]*/ [];
+
+        // Datos de salidas (ventas) - Inyectados desde Thymeleaf
+        const salidasData = /*[[${salidasIniciales.content}]]*/ [];
+
+        console.log('📊 Entradas cargadas:', entradasData.length, entradasData);
+        console.log('📊 Salidas cargadas:', salidasData.length, salidasData);
+
+        // Renderizar entradas
+        function renderizarEntradas() {
+            const tbody = document.getElementById('tablasEntradasBody');
+            if (!tbody) {
+                console.warn('⚠️ No se encontró tbody tablasEntradasBody');
+                return;
+            }
+
+            if (!entradasData || entradasData.length === 0) {
+                tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="5" class="py-3"><small>Sin registros</small></td></tr>';
+                document.getElementById('badgeEntradasCount').textContent = '0 registros';
+                return;
+            }
+
+            tbody.innerHTML = entradasData.map(entrada => {
+                const fecha = entrada.fechaCompra ? new Date(entrada.fechaCompra).toLocaleDateString('es-CO') : '-';
+                const precio = parseFloat(entrada.precioCompra || 0);
+                return `
+                    <tr>
+                        <td class="small">${fecha}</td>
+                        <td class="small">${entrada.nombreMaterial || '-'}</td>
+                        <td class="text-end small">-</td>
+                        <td class="text-end small">$${precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="small">${entrada.observaciones || '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('badgeEntradasCount').textContent = entradasData.length + ' registros';
+            console.log('✅ Tabla de entradas renderizada');
+        }
+
+        // Renderizar salidas
+        function renderizarSalidas() {
+            const tbody = document.getElementById('tablasSalidasBody');
+            if (!tbody) {
+                console.warn('⚠️ No se encontró tbody tablasSalidasBody');
+                return;
+            }
+
+            if (!salidasData || salidasData.length === 0) {
+                tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="5" class="py-3"><small>Sin registros</small></td></tr>';
+                document.getElementById('badgeSalidasCount').textContent = '0 registros';
+                return;
+            }
+
+            tbody.innerHTML = salidasData.map(salida => {
+                const fecha = salida.fechaVenta ? new Date(salida.fechaVenta).toLocaleDateString('es-CO') : '-';
+                const precio = parseFloat(salida.precioVenta || 0);
+                return `
+                    <tr>
+                        <td class="small">${fecha}</td>
+                        <td class="small">${salida.nombreMaterial || '-'}</td>
+                        <td class="text-end small">-</td>
+                        <td class="text-end small">$${precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="small">${salida.nombreCentroAcopio || '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('badgeSalidasCount').textContent = salidasData.length + ' registros';
+            console.log('✅ Tabla de salidas renderizada');
+        }
+
+        // Inicializar cuando el DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('✅ DOM cargado, renderizando...');
+                renderizarEntradas();
+                renderizarSalidas();
+            });
+        } else {
+            console.log('✅ DOM ya cargado, renderizando...');
+            renderizarEntradas();
+            renderizarSalidas();
+        }
+    })();
+    </script>
+</section>

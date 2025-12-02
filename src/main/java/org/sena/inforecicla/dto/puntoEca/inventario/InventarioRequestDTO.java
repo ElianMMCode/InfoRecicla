@@ -1,8 +1,6 @@
 package org.sena.inforecicla.dto.puntoEca.inventario;
 
 import jakarta.validation.constraints.*;
-import org.sena.inforecicla.model.Material;
-import org.sena.inforecicla.model.PuntoECA;
 import org.sena.inforecicla.model.enums.UnidadMedida;
 
 import java.math.BigDecimal;
@@ -11,11 +9,8 @@ import java.util.UUID;
 public record InventarioRequestDTO(
 
         @NotNull
-        UUID inventarioId,
-
-        @NotNull
-        @DecimalMin(value = "0.001", message = "La capacidad máxima debe ser mayor a 0")
-        @Digits(integer = 11, fraction = 3, message = "Formato inválido para capacidad máxima")
+        @DecimalMin(value = "0.01", message = "La capacidad máxima debe ser mayor a 0.01")
+        @Digits(integer = 10, fraction = 2, message = "Formato inválido para capacidad máxima")
         BigDecimal capacidadMaxima,
 
         @NotNull
@@ -23,34 +18,35 @@ public record InventarioRequestDTO(
 
         @NotNull
         @DecimalMin(value = "0.0", message = "El stock actual no puede ser negativo")
-        @Digits(integer = 11, fraction = 3, message = "Formato inválido para stock actual")
+        @Digits(integer = 10, fraction = 2, message = "Formato inválido para stock actual")
         BigDecimal stockActual,
 
         @NotNull
         @Min(value = 1, message = "El umbral de alerta debe ser mínimo 1")
-        @Max(value = 999, message = "El umbral de alerta debe ser máximo 999")
+        @Max(value = 100, message = "El umbral de alerta debe ser máximo 100")
         Short umbralAlerta,
 
         @NotNull
         @Min(value = 1, message = "El umbral crítico debe ser mínimo 1")
-        @Max(value = 999, message = "El umbral crítico debe ser máximo 999")
+        @Max(value = 100, message = "El umbral crítico debe ser máximo 100")
         Short umbralCritico,
 
         @NotNull
-        @DecimalMin(value = "0.001", message = "El precio de venta debe ser mayor a 0")
-        @Digits(integer = 11, fraction = 2, message = "Formato inválido para precio de venta")
+        @DecimalMin(value = "0.01", message = "El precio de venta debe ser mayor a 0.01")
+        @Digits(integer = 10, fraction = 2, message = "Formato inválido para precio de venta")
         BigDecimal precioVenta,
 
         @NotNull
-        @DecimalMin(value = "0.001", message = "El precio de compra debe ser mayor a 0")
-        @Digits(integer = 11, fraction = 2, message = "Formato inválido para precio de compra")
+        @DecimalMin(value = "0.01", message = "El precio de compra debe ser mayor a 0.01")
+        @Digits(integer = 10, fraction = 2, message = "Formato inválido para precio de compra")
         BigDecimal precioCompra,
 
         @NotNull
-        Material material,
+        UUID materialId,
 
         @NotNull
-        PuntoECA puntoECA
+        UUID puntoEcaId
 ) {
+
 }
 

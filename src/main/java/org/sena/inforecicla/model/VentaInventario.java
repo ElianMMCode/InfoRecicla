@@ -42,8 +42,7 @@ public class VentaInventario extends EntidadCreacionModificacion {
     @Column(length = 500)
     private String observaciones;
 
-
-    @OneToOne
-    @JoinColumn(name = "centro_acopio_id", foreignKey = @ForeignKey(name = "fk_venta_centroAcopio") )
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "centro_acopio_id", foreignKey = @ForeignKey(name = "fk_venta_centroAcopio"))
     private CentroAcopio ctrAcopio;
 }
