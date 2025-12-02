@@ -21,57 +21,149 @@
             </a>
 
             <nav class="w-100" role="navigation" aria-label="Menú principal Punto ECA">
-                <ul class="nav nav-pills flex-column gap-2 w-100">
+                <ul class="nav nav-pills flex-column gap-2 w-100" id="sidebarMenu">
+                    <!-- RESUMEN - Simple -->
                     <li class="nav-item">
-                        <a class="nav-link"
+                        <a class="nav-link d-flex align-items-center"
                            th:classappend="${(#strings.equals(seccion,'resumen') or #strings.isEmpty(seccion)) ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
                            th:attr="aria-current=${(#strings.equals(seccion,'resumen') or #strings.isEmpty(seccion)) ? 'page' : null}"
-                           th:href="@{'/punto-eca/'+${gestor}+'/'+${usuario.usuarioId} + '/resumen'}">Resumen</a>
+                           th:href="@{'/punto-eca/'+${gestor}+'/'+${usuario.usuarioId} + '/resumen'}">
+                            <i class="bi bi-graph-up me-2"></i>Resumen
+                        </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'perfil') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
-                           th:attr="aria-current=${#strings.equals(seccion,'perfil') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/perfil'}">Perfil</a>
 
+                    <!-- PERFIL - Desplegable -->
+                    <li class="nav-item dropdown-menu-container">
+                        <a class="nav-link w-100 text-start d-flex align-items-center justify-content-between gap-2 px-3 py-2"
+                           th:classappend="${#strings.equals(seccion,'perfil') ? 'bg-white text-success fw-semibold border-start border-4 border-success' : 'text-white'}"
+                           th:href="@{'/punto-eca/'+${gestor}+'/'+${usuario.usuarioId}+'/perfil'}">
+                            <span class="flex-grow-1"><i class="bi bi-person-circle me-2"></i>Perfil</span>
+                            <i class="bi bi-chevron-down fs-6"
+                               data-bs-toggle="collapse"
+                               data-bs-target="#perfilMenu"
+                               style="cursor: pointer;"></i>
+                        </a>
+                        <div class="collapse" id="perfilMenu" data-bs-parent="#sidebarMenu"
+                             th:classappend="${#strings.equals(seccion,'perfil') ? 'show' : ''}">
+                            <ul class="list-unstyled ps-3 py-1 border-start border-2 border-opacity-50 border-white">
+                                <li><a class="nav-link small text-white-50 px-2 py-1 rounded-1" href="javascript:void(0)" onclick="scrollToAccordion(event, '#encargadoPanel')"><i class="bi bi-person me-1"></i>Encargado</a></li>
+                                <li><a class="nav-link small text-white-50 px-2 py-1 rounded-1" href="javascript:void(0)" onclick="scrollToAccordion(event, '#puntoPanel')"><i class="bi bi-geo-alt me-1"></i>Punto ECA</a></li>
+                            </ul>
+                        </div>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'materiales') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
-                           th:attr="aria-current=${#strings.equals(seccion,'materiales') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/materiales'}">Materiales</a>
+
+                    <!-- MATERIALES - Desplegable -->
+                    <li class="nav-item dropdown-menu-container">
+                        <a class="nav-link w-100 text-start d-flex align-items-center justify-content-between gap-2 px-3 py-2"
+                           th:classappend="${#strings.equals(seccion,'materiales') ? 'bg-white text-success fw-semibold border-start border-4 border-success' : 'text-white'}"
+                           th:href="@{'/punto-eca/'+${gestor}+'/'+${usuario.usuarioId}+'/materiales'}">
+                            <span class="flex-grow-1"><i class="bi bi-boxes me-2"></i>Materiales</span>
+                            <i class="bi bi-chevron-down fs-6"
+                               data-bs-toggle="collapse"
+                               data-bs-target="#materialesMenu"
+                               style="cursor: pointer;"></i>
+                        </a>
+                        <div class="collapse" id="materialesMenu" data-bs-parent="#sidebarMenu"
+                             th:classappend="${#strings.equals(seccion,'materiales') ? 'show' : ''}">
+                            <ul class="list-unstyled ps-3 py-1 border-start border-2 border-opacity-50 border-white">
+                                <li><a class="nav-link small text-white-50 px-2 py-1 rounded-1" href="javascript:void(0)" onclick="scrollToAccordion(event, '#collapseAgregar')"><i class="bi bi-plus-circle me-1"></i>Agregar</a></li>
+                                <li><a class="nav-link small text-white-50 px-2 py-1 rounded-1" href="javascript:void(0)" onclick="scrollToAccordion(event, '#collapseOcupacion')"><i class="bi bi-graph-up me-1"></i>Ocupación</a></li>
+                                <li><a class="nav-link small text-white-50 px-2 py-1 rounded-1" href="javascript:void(0)" onclick="scrollToAccordion(event, '#collapseTarjetas')"><i class="bi bi-collection me-1"></i>Inventario</a></li>
+                            </ul>
+                        </div>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'movimientos') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
-                           th:attr="aria-current=${#strings.equals(seccion,'movimientos') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/movimientos'}">Movimientos</a>
+
+                    <!-- MOVIMIENTOS - Desplegable -->
+                    <li class="nav-item dropdown-menu-container">
+                        <a class="nav-link w-100 text-start d-flex align-items-center justify-content-between gap-2 px-3 py-2"
+                           th:classappend="${#strings.equals(seccion,'movimientos') ? 'bg-white text-success fw-semibold border-start border-4 border-success' : 'text-white'}"
+                           th:href="@{'/punto-eca/'+${gestor}+'/'+${usuario.usuarioId}+'/movimientos'}">
+                            <span class="flex-grow-1"><i class="bi bi-arrow-left-right me-2"></i>Movimientos</span>
+                            <i class="bi bi-chevron-down fs-6"
+                               data-bs-toggle="collapse"
+                               data-bs-target="#movimientosMenu"
+                               style="cursor: pointer;"></i>
+                        </a>
+                        <div class="collapse" id="movimientosMenu" data-bs-parent="#sidebarMenu"
+                             th:classappend="${#strings.equals(seccion,'movimientos') ? 'show' : ''}">
+                            <ul class="list-unstyled ps-3 py-1 border-start border-2 border-opacity-50 border-white">
+                                <li><a class="nav-link small text-white-50 px-2 py-1 rounded-1" href="javascript:void(0)" onclick="scrollToAccordion(event, '#recibidosPanel')"><i class="bi bi-inbox me-1"></i>Recibidos</a></li>
+                                <li><a class="nav-link small text-white-50 px-2 py-1 rounded-1" href="javascript:void(0)" onclick="scrollToAccordion(event, '#despachosPanel')"><i class="bi bi-box-seam me-1"></i>Despachos</a></li>
+                                <li><a class="nav-link small text-white-50 px-2 py-1 rounded-1" href="javascript:void(0)" onclick="scrollToAccordion(event, '#transferenciaPanel')"><i class="bi bi-shuffle me-1"></i>Transferencias</a></li>
+                            </ul>
+                        </div>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'historial') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
-                           th:attr="aria-current=${#strings.equals(seccion,'historial') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/historial'}">Historial</a>
+
+                    <!-- HISTORIAL - Desplegable -->
+                    <li class="nav-item dropdown-menu-container">
+                        <a class="nav-link w-100 text-start d-flex align-items-center justify-content-between gap-2 px-3 py-2"
+                           th:classappend="${#strings.equals(seccion,'historial') ? 'bg-white text-success fw-semibold border-start border-4 border-success' : 'text-white'}"
+                           th:href="@{'/punto-eca/'+${gestor}+'/'+${usuario.usuarioId}+'/historial'}">
+                            <span class="flex-grow-1"><i class="bi bi-clock-history me-2"></i>Historial</span>
+                            <i class="bi bi-chevron-down fs-6"
+                               data-bs-toggle="collapse"
+                               data-bs-target="#historialMenu"
+                               style="cursor: pointer;"></i>
+                        </a>
+                        <div class="collapse" id="historialMenu" data-bs-parent="#sidebarMenu"
+                             th:classappend="${#strings.equals(seccion,'historial') ? 'show' : ''}">
+                            <ul class="list-unstyled ps-3 py-1 border-start border-2 border-opacity-50 border-white">
+                                <li><a class="nav-link small text-white-50 px-2 py-1 rounded-1" href="javascript:void(0)" onclick="scrollToAccordion(event, '#registrosPanel')"><i class="bi bi-list-check me-1"></i>Registros</a></li>
+                                <li><a class="nav-link small text-white-50 px-2 py-1 rounded-1" href="javascript:void(0)" onclick="scrollToAccordion(event, '#auditPanel')"><i class="bi bi-shield-check me-1"></i>Auditoría</a></li>
+                            </ul>
+                        </div>
                     </li>
+
+                    <!-- CALENDARIO - Simple -->
                     <li class="nav-item">
-                        <a class="nav-link"
+                        <a class="nav-link d-flex align-items-center"
                            th:classappend="${#strings.equals(seccion,'calendario') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'calendario') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/calendario'}">Calendario</a>
+                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/calendario'}">
+                            <i class="bi bi-calendar-event me-2"></i>Calendario
+                        </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'centros') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
-                           th:attr="aria-current=${#strings.equals(seccion,'centros') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/centros'}">Centros
-                            de Acopio</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'configuracion') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
-                           th:attr="aria-current=${#strings.equals(seccion,'configuracion') ? 'page' : null}"
-                           th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/configuracion'}">Configuración</a>
 
+                    <!-- CENTROS DE ACOPIO - Desplegable -->
+                    <li class="nav-item dropdown-menu-container">
+                        <a class="nav-link w-100 text-start d-flex align-items-center justify-content-between gap-2 px-3 py-2"
+                           th:classappend="${#strings.equals(seccion,'centros') ? 'bg-white text-success fw-semibold border-start border-4 border-success' : 'text-white'}"
+                           th:href="@{'/punto-eca/'+${gestor}+'/'+${usuario.usuarioId}+'/centros'}">
+                            <span class="flex-grow-1"><i class="bi bi-building me-2"></i>Centros</span>
+                            <i class="bi bi-chevron-down fs-6"
+                               data-bs-toggle="collapse"
+                               data-bs-target="#centrosMenu"
+                               style="cursor: pointer;"></i>
+                        </a>
+                        <div class="collapse" id="centrosMenu" data-bs-parent="#sidebarMenu"
+                             th:classappend="${#strings.equals(seccion,'centros') ? 'show' : ''}">
+                            <ul class="list-unstyled ps-3 py-1 border-start border-2 border-opacity-50 border-white">
+                                <li><a class="nav-link small text-white-50 px-2 py-1 rounded-1" href="javascript:void(0)" onclick="scrollToAccordion(event, '#listadoPanel')"><i class="bi bi-list-ul me-1"></i>Listado</a></li>
+                                <li><a class="nav-link small text-white-50 px-2 py-1 rounded-1" href="javascript:void(0)" onclick="scrollToAccordion(event, '#mapasPanel')"><i class="bi bi-map me-1"></i>Mapa</a></li>
+                                <li><a class="nav-link small text-white-50 px-2 py-1 rounded-1" href="javascript:void(0)" onclick="scrollToAccordion(event, '#contactoPanel')"><i class="bi bi-telephone me-1"></i>Contacto</a></li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <!-- CONFIGURACIÓN - Desplegable -->
+                    <li class="nav-item dropdown-menu-container">
+                        <a class="nav-link w-100 text-start d-flex align-items-center justify-content-between gap-2 px-3 py-2"
+                           th:classappend="${#strings.equals(seccion,'configuracion') ? 'bg-white text-success fw-semibold border-start border-4 border-success' : 'text-white'}"
+                           th:href="@{'/punto-eca/'+${gestor}+'/'+${usuario.usuarioId}+'/configuracion'}">
+                            <span class="flex-grow-1"><i class="bi bi-gear me-2"></i>Configuración</span>
+                            <i class="bi bi-chevron-down fs-6"
+                               data-bs-toggle="collapse"
+                               data-bs-target="#configuracionMenu"
+                               style="cursor: pointer;"></i>
+                        </a>
+                        <div class="collapse" id="configuracionMenu" data-bs-parent="#sidebarMenu"
+                             th:classappend="${#strings.equals(seccion,'configuracion') ? 'show' : ''}">
+                            <ul class="list-unstyled ps-3 py-1 border-start border-2 border-opacity-50 border-white">
+                                <li><a class="nav-link small text-white-50 px-2 py-1 rounded-1" href="javascript:void(0)" onclick="scrollToAccordion(event, '#parametrosPanel')"><i class="bi bi-sliders me-1"></i>Parámetros</a></li>
+                                <li><a class="nav-link small text-white-50 px-2 py-1 rounded-1" href="javascript:void(0)" onclick="scrollToAccordion(event, '#notificacionesPanel')"><i class="bi bi-bell me-1"></i>Notificaciones</a></li>
+                                <li><a class="nav-link small text-white-50 px-2 py-1 rounded-1" href="javascript:void(0)" onclick="scrollToAccordion(event, '#seguridadPanel')"><i class="bi bi-lock me-1"></i>Seguridad</a></li>
+                            </ul>
+                        </div>
                     </li>
                 </ul>
             </nav>
@@ -163,906 +255,292 @@
     </div>
 </div>
 
-<!-- MODAL GLOBAL - DISPONIBLE EN TODAS LAS PÁGINAS -->
-<div class="modal fade" id="detallesModal" tabindex="-1" aria-labelledby="detallesModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg rounded-3">
-            <!-- Header con fondo verde -->
-            <div class="modal-header border-0 bg-success text-white p-4 rounded-top-3">
-                <div>
-                    <h5 class="modal-title fw-bold fs-5" id="detallesModalLabel">
-                        <i class="bi bi-box-seam me-2"></i><span id="modalHeaderNombre">Detalles del Material</span>
-                    </h5>
-                    <small class="text-white-50"><i class="bi bi-info-circle me-1"></i>Información completa del inventario</small>
-                </div>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <div class="modal-body p-0">
-                <!-- Sección 1: Información Básica -->
-                <div class="p-4 border-bottom bg-light">
-                    <h6 class="text-success mb-3 fw-bold"><i class="bi bi-info-circle me-2"></i>Información Básica</h6>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-light border-start border-4 border-success">
-                                <small class="text-muted d-block mb-1"><i class="bi bi-tag me-1"></i>Nombre del Material</small>
-                                <p class="h6 text-success fw-bold mb-0" id="modalNombreMaterial">-</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6 d-none">
-                            <div class="p-3 rounded-2 bg-light border-start border-4 border-primary">
-                                <small class="text-muted d-block mb-1"><i class="bi bi-code-square me-1"></i>ID del Material</small>
-                                <p class="h6 font-monospace text-primary fw-bold mb-0" id="modalMaterialId">-</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-warning bg-opacity-10 border-start border-4 border-warning">
-                                <small class="text-muted d-block mb-1"><i class="bi bi-rulers me-1"></i>Unidad de Medida</small>
-                                <p class="h6 fw-bold mb-0" id="modalUnidadMedida">-</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-danger bg-opacity-10 border-start border-4 border-danger">
-                                <small class="text-muted d-block mb-1"><i class="bi bi-circle-fill me-1" id="modalEstadoIcon"></i>Estado Actual</small>
-                                <p class="h6 fw-bold mb-0" id="modalEstadoText">-</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sección 2: Ocupación -->
-                <div class="p-4 border-bottom">
-                    <h6 class="text-success mb-3 fw-bold"><i class="bi bi-pie-chart me-2"></i>Ocupación del Inventario <span class="badge bg-success" id="modalOcupacionPorcentaje">0%</span></h6>
-                    <div class="progress rounded-pill" style="height: 40px;">
-                        <div id="modalOcupacionBar" class="progress-bar d-flex align-items-center justify-content-center fw-bold text-white fs-6">
-                            <small id="modalOcupacionText">0%</small>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sección 3: Stock e Inventario -->
-                <div class="p-4 border-bottom bg-light">
-                    <h6 class="text-success mb-3 fw-bold"><i class="bi bi-inbox me-2"></i>Inventario</h6>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-white border border-success border-opacity-25 border-start border-4 border-success">
-                                <small class="text-muted d-block mb-1"><i class="bi bi-inbox me-1"></i>Stock Actual</small>
-                                <p class="h5 text-success fw-bold mb-1" id="modalStockActual">0.00</p>
-                                <small class="text-muted" id="modalStockUnidad">unidades</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-white border border-primary border-opacity-25 border-start border-4 border-primary">
-                                <small class="text-muted d-block mb-1"><i class="bi bi-archive me-1"></i>Capacidad Máxima</small>
-                                <p class="h5 text-primary fw-bold mb-1" id="modalCapacidadMaxima">0.00</p>
-                                <small class="text-muted" id="modalCapacidadUnidad">unidades</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-white border border-info border-opacity-25 border-start border-4 border-info">
-                                <small class="text-muted d-block mb-1"><i class="bi bi-diagram-3 me-1"></i>Espacio Usado</small>
-                                <p class="h5 text-info fw-bold mb-0" id="modalEspacioUsado">0.00</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-white border border-warning border-opacity-25 border-start border-4 border-warning">
-                                <small class="text-muted d-block mb-1"><i class="bi bi-diagram-3 me-1"></i>Espacio Disponible</small>
-                                <p class="h5 text-warning fw-bold mb-0" id="modalEspacioDisponible">0.00</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sección 4: Precios y Márgenes -->
-                <div class="p-4 border-bottom">
-                    <h6 class="text-success mb-3 fw-bold"><i class="bi bi-tag-fill me-2"></i>Análisis de Precios</h6>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-primary bg-opacity-10 border-start border-4 border-primary">
-                                <small class="text-muted d-block mb-1"><i class="bi bi-cart-plus me-1"></i>Precio de Compra</small>
-                                <p class="h5 text-primary fw-bold mb-0" id="modalPrecioCompra">$ 0.00</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-warning bg-opacity-10 border-start border-4 border-warning">
-                                <small class="text-muted d-block mb-1"><i class="bi bi-cart-check me-1"></i>Precio de Venta</small>
-                                <p class="h5 text-warning fw-bold mb-0" id="modalPrecioVenta">$ 0.00</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-danger bg-opacity-10 border-start border-4 border-danger">
-                                <small class="text-muted d-block mb-1"><i class="bi bi-percent me-1"></i>Margen de Ganancia</small>
-                                <p class="h5 text-danger fw-bold mb-0" id="modalMargenGanancia">$ 0.00</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-success bg-opacity-10 border-start border-4 border-success">
-                                <small class="text-muted d-block mb-1"><i class="bi bi-percent me-1"></i>% Margen</small>
-                                <p class="h5 text-success fw-bold mb-0" id="modalPorcentajeMargen">0%</p>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="p-3 rounded-2 bg-white border-3 border-success">
-                                <small class="text-muted d-block mb-1"><i class="bi bi-calculator me-1 text-success"></i>Valor Total en Inventario</small>
-                                <p class="h4 text-success fw-bold mb-0" id="modalValorTotal">$ 0.00</p>
-                                <small class="text-muted">(Stock Actual × Precio Compra)</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Sección 5: Umbrales y Alertas -->
-                <div class="p-4 border-bottom bg-light">
-                    <h6 class="text-success mb-3 fw-bold"><i class="bi bi-exclamation-triangle me-2"></i>Umbrales y Alertas</h6>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-warning bg-opacity-10 border-start border-4 border-warning">
-                                <small class="text-muted d-block mb-1"><i class="bi bi-exclamation-triangle me-1"></i>Umbral de Alerta</small>
-                                <p class="h5 text-warning fw-bold mb-0" id="modalUmbralAlerta">0%</p>
-                                <small class="text-muted">Se activa al superar este %</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-danger bg-opacity-10 border-start border-4 border-danger">
-                                <small class="text-muted d-block mb-1"><i class="bi bi-exclamation-octagon me-1"></i>Umbral Crítico</small>
-                                <p class="h5 text-danger fw-bold mb-0" id="modalUmbralCritico">0%</p>
-                                <small class="text-muted">Requiere atención inmediata</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Indicador de Estado -->
-                <div class="p-4 border-bottom" id="modalEstadoIndicador"></div>
-
-                <!-- Resumen de Alertas -->
-                <div class="p-4" id="modalResumenAlertas"></div>
-            </div>
-
-            <div class="modal-footer bg-light border-top">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i>Cerrar
-                </button>
-                <button type="button" class="btn btn-warning" id="btnEditarMaterial">
-                    <i class="bi bi-pencil me-1"></i>Editar
-                </button>
-                <button type="button" class="btn btn-danger" id="btnBorrarMaterial">
-                    <i class="bi bi-trash me-1"></i>Borrar
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL EDITAR - PARA EDITAR DATOS DEL INVENTARIO -->
-<div class="modal fade" id="editarModal" tabindex="-1" aria-labelledby="editarModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow-lg rounded-3">
-            <!-- Header -->
-            <div class="modal-header border-0 bg-warning text-dark p-4 rounded-top-3">
-                <div>
-                    <h5 class="modal-title fw-bold fs-5" id="editarModalLabel">
-                        <i class="bi bi-pencil-square me-2"></i>Editar Inventario
-                    </h5>
-                    <small class="text-secondary"><i class="bi bi-info-circle me-1"></i>Actualiza los datos del material</small>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <div class="modal-body p-4">
-                <form id="formularioEditarInventario">
-                    <!-- Material ID (oculto) -->
-                    <input type="hidden" id="editarMaterialId" value="">
-
-                    <!-- Row 1: Stock y Capacidad -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label for="editarStockActual" class="form-label fw-bold">
-                                <i class="bi bi-inbox text-success me-2"></i>Stock Actual
-                            </label>
-                            <div class="input-group">
-                                <input type="number" class="form-control" id="editarStockActual" step="0.01" required>
-                                <span class="input-group-text" id="editarStockUnidad">un.</span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="editarCapacidadMaxima" class="form-label fw-bold">
-                                <i class="bi bi-archive text-primary me-2"></i>Capacidad Máxima
-                            </label>
-                            <div class="input-group">
-                                <input type="number" class="form-control" id="editarCapacidadMaxima" step="0.01" required>
-                                <span class="input-group-text" id="editarCapacidadUnidad">un.</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Row 1.5: Unidad de Medida -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label for="editarUnidadMedida" class="form-label fw-bold">
-                                <i class="bi bi-rulers text-warning me-2"></i>Unidad de Medida
-                            </label>
-                            <select class="form-select" id="editarUnidadMedida" required>
-                                <option value="">-- Seleccionar unidad --</option>
-                            </select>
-                            <small class="text-muted d-block mt-2">Selecciona la unidad de medida del material</small>
-                        </div>
-                    </div>
-
-                    <!-- Row 2: Precios -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label for="editarPrecioCompra" class="form-label fw-bold">
-                                <i class="bi bi-cart-plus text-info me-2"></i>Precio de Compra
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input type="number" class="form-control" id="editarPrecioCompra" step="0.01" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="editarPrecioVenta" class="form-label fw-bold">
-                                <i class="bi bi-cart-check text-warning me-2"></i>Precio de Venta
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input type="number" class="form-control" id="editarPrecioVenta" step="0.01" required>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Row 3: Umbrales -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label for="editarUmbralAlerta" class="form-label fw-bold">
-                                <i class="bi bi-exclamation-triangle text-warning me-2"></i>Umbral de Alerta (%)
-                            </label>
-                            <input type="number" class="form-control" id="editarUmbralAlerta" min="0" max="100" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="editarUmbralCritico" class="form-label fw-bold">
-                                <i class="bi bi-exclamation-octagon text-danger me-2"></i>Umbral Crítico (%)
-                            </label>
-                            <input type="number" class="form-control" id="editarUmbralCritico" min="0" max="100" required>
-                        </div>
-                    </div>
-
-                    <!-- Resumen de cambios -->
-                    <div class="alert alert-info rounded-2" role="alert">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <strong>Nota:</strong> Los cambios se guardarán en la base de datos. Asegúrate de verificar los datos antes de guardar.
-                    </div>
-                </form>
-            </div>
-
-            <div class="modal-footer bg-light border-top">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-circle me-1"></i>Cancelar
-                </button>
-                <button type="button" class="btn btn-warning" id="btnGuardarCambios">
-                    <i class="bi bi-check-circle me-1"></i>Guardar Cambios
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de Éxito en Actualización -->
-<div class="modal fade" id="modalExitoActualizacion" tabindex="-1" aria-labelledby="modalExitoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-body p-4 text-center">
-                <div class="mb-3">
-                    <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
-                </div>
-                <h5 class="modal-title fw-bold text-success mb-2" id="modalExitoLabel">¡Operación Exitosa!</h5>
-                <p class="text-muted mb-0">Los cambios se han guardado correctamente en la base de datos.</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de Resumen de Actualización -->
-<div class="modal fade" id="modalResumenActualizacion" tabindex="-1" aria-labelledby="modalResumenLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-success text-white border-0">
-                <h5 class="modal-title fw-bold" id="modalResumenLabel">
-                    <i class="bi bi-info-circle me-2"></i>Datos Actualizados
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <div class="modal-body p-4">
-                <!-- Información del Material -->
-                <div class="mb-4">
-                    <h6 class="text-success fw-bold mb-3">
-                        <i class="bi bi-tag me-2"></i>Información del Material
-                    </h6>
-                    <div class="alert alert-light border-start border-4 border-success">
-                        <p class="mb-1">
-                            <strong>Nombre:</strong>
-                            <span id="resumenNombreMaterial">-</span>
-                        </p>
-                        <p class="mb-0">
-                            <strong>Ubicación:</strong>
-                            <span id="resumenNombrePunto">-</span>
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Stock e Inventario -->
-                <div class="mb-4">
-                    <h6 class="text-info fw-bold mb-3">
-                        <i class="bi bi-boxes me-2"></i>Stock e Inventario
-                    </h6>
-                    <div class="row g-2">
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-info bg-opacity-10 border-start border-4 border-info">
-                                <small class="text-muted">Stock Actual</small>
-                                <p class="h6 fw-bold mb-0" id="resumenStockActual">-</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-warning bg-opacity-10 border-start border-4 border-warning">
-                                <small class="text-muted">Capacidad Máxima</small>
-                                <p class="h6 fw-bold mb-0" id="resumenCapacidadMaxima">-</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-2">
-                        <div class="p-3 rounded-2 bg-secondary bg-opacity-10 border-start border-4 border-secondary">
-                            <small class="text-muted">Unidad de Medida</small>
-                            <p class="h6 fw-bold mb-0" id="resumenUnidadMedida">-</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Precios -->
-                <div class="mb-4">
-                    <h6 class="text-danger fw-bold mb-3">
-                        <i class="bi bi-currency-dollar me-2"></i>Precios
-                    </h6>
-                    <div class="row g-2">
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-danger bg-opacity-10 border-start border-4 border-danger">
-                                <small class="text-muted">Precio de Compra</small>
-                                <p class="h6 fw-bold mb-0" id="resumenPrecioCompra">-</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-success bg-opacity-10 border-start border-4 border-success">
-                                <small class="text-muted">Precio de Venta</small>
-                                <p class="h6 fw-bold mb-0" id="resumenPrecioVenta">-</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Umbrales -->
-                <div>
-                    <h6 class="text-warning fw-bold mb-3">
-                        <i class="bi bi-exclamation-triangle me-2"></i>Umbrales de Alerta
-                    </h6>
-                    <div class="row g-2">
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-warning bg-opacity-10 border-start border-4 border-warning">
-                                <small class="text-muted">Umbral Alerta</small>
-                                <p class="h6 fw-bold mb-0" id="resumenUmbralAlerta">-</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded-2 bg-danger bg-opacity-10 border-start border-4 border-danger">
-                                <small class="text-muted">Umbral Crítico</small>
-                                <p class="h6 fw-bold mb-0" id="resumenUmbralCritico">-</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-footer bg-light border-top">
-                <button type="button" class="btn btn-success" data-bs-dismiss="modal">
-                    <i class="bi bi-check-circle me-1"></i>Cerrar
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Modals movidos a views/PuntoECA/section-materiales.html -->
+<!-- Los modales de detalles, editar, éxito y resumen se trasladaron a la sección de materiales para evitar duplicados y problemas de scope. -->
 
 <!-- Bootstrap JS Bundle con Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
-<!-- Verificar que Bootstrap cargó correctamente -->
+<!-- Script para manejar botones de guardar en la sección de perfil -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Verificar que Bootstrap esté disponible
-        if (typeof bootstrap === 'undefined') {
-            console.error('ERROR: Bootstrap no se cargó correctamente');
-        } else {
-            console.log('✓ Bootstrap cargado correctamente', bootstrap.Modal);
-        }
-    });
-</script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Pequeño delay para asegurar que Bootstrap y el DOM estén completamente cargados
+    setTimeout(function() {
+        // ===== PREVIEW FOTO DE PERFIL =====
+        const inputFotoPerfil = document.getElementById('inputFotoPerfil');
+        if (inputFotoPerfil) {
+            inputFotoPerfil.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
 
-<!-- Script del Modal - GLOBAL EN EL LAYOUT -->
-<script>
-    console.log('INICIANDO SCRIPT DEL MODAL');
-
-    function iniciarModalScript(intento = 0) {
-        console.log('Intento', intento, 'buscando modal...');
-
-        const modal = document.getElementById('detallesModal');
-        const botones = document.querySelectorAll('.detallesBtn');
-
-        console.log('Modal:', modal ? 'ENCONTRADO' : 'NO ENCONTRADO');
-        console.log('Botones encontrados:', botones.length);
-
-        if (!modal) {
-            if (intento < 20) {
-                console.log('Reintentando en 500ms...');
-                setTimeout(() => iniciarModalScript(intento + 1), 500);
-            }
-            return;
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const previewImg = document.getElementById('previewFotoPerfil');
+                    if (previewImg) previewImg.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
         }
 
-        if (botones.length === 0) {
-            if (intento < 20) {
-                setTimeout(() => iniciarModalScript(intento + 1), 500);
-            }
-            return;
+        // ===== PREVIEW FOTO DEL PUNTO ECA =====
+        const inputFotoPunto = document.getElementById('inputFotoPunto');
+        if (inputFotoPunto) {
+            inputFotoPunto.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const previewImg = document.getElementById('previewFotoPunto');
+                    if (previewImg) previewImg.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
         }
 
-        console.log('✓ Modal y botones LISTOS');
-
-        botones.forEach((boton, idx) => {
-            boton.addEventListener('click', function(e) {
+        // ===== GUARDAR ENCARGADO =====
+        const btnGuardarEncargado = document.getElementById('btnGuardarEncargado');
+        if (btnGuardarEncargado) {
+            btnGuardarEncargado.addEventListener('click', async function(e) {
                 e.preventDefault();
-                console.log('✓ CLICK EN BOTÓN', idx + 1);
 
-                const md = document.getElementById('detallesModal');
-                if (!md) {
-                    console.error('Modal no encontrado');
+                const nombres = document.getElementById('nombres')?.value.trim();
+                const apellidos = document.getElementById('apellidos')?.value.trim();
+                const email = document.getElementById('email')?.value.trim();
+                const celular = document.getElementById('celular')?.value.trim();
+                const tipoDocumento = document.getElementById('tipoDocumento')?.value;
+                const numeroDocumento = document.getElementById('numeroDocumento')?.value.trim();
+                const fechaNacimiento = document.getElementById('fechaNacimiento')?.value;
+                const biografia = document.getElementById('biografia')?.value.trim();
+
+                if (!nombres || nombres.length < 3) { alert('Nombres: mín 3 caracteres'); return; }
+                if (!apellidos || apellidos.length < 2) { alert('Apellidos: mín 2 caracteres'); return; }
+                if (!email || !email.includes('@')) { alert('Email inválido'); return; }
+                if (!celular || celular.length !== 10 || !/^\d{10}$/.test(celular)) { alert('Celular: 10 dígitos'); return; }
+
+                try {
+                    const pathname = window.location.pathname;
+                    const match = pathname.match(/\/punto-eca\/([^\/]+)\/([^\/]+)\/perfil/);
+                    if (!match) throw new Error('No se encontraron los IDs en la URL');
+
+                    const usuarioId = match[2];
+
+                    const params = new URLSearchParams({
+                        nombres, apellidos, email, celular, tipoDocumento, numeroDocumento, fechaNacimiento, biografia
+                    });
+
+                    const url = `/punto-eca/${usuarioId}/perfil/encargado`;
+
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params
+                    });
+
+                    if (!response.ok) {
+                        const data = await response.json();
+                        throw new Error(data.error || 'Error');
+                    }
+
+                    alert('✅ Encargado guardado correctamente');
+                    location.reload();
+                } catch (e) {
+                    alert('❌ Error: ' + e.message);
+                }
+            });
+        }
+
+        // ===== GUARDAR PUNTO ECA =====
+        const btnGuardarPunto = document.getElementById('btnGuardarPunto');
+        if (btnGuardarPunto) {
+            btnGuardarPunto.addEventListener('click', async function(e) {
+                e.preventDefault();
+
+                const nombrePunto = document.getElementById('nombrePunto')?.value.trim();
+                const direccionPunto = document.getElementById('direccionPunto')?.value.trim();
+                const localidadPuntoId = document.getElementById('localidadPuntoId')?.value;
+                const celularPunto = document.getElementById('celularPunto')?.value.trim();
+                const emailPunto = document.getElementById('emailPunto')?.value.trim();
+                const telefonoPunto = document.getElementById('telefonoPunto')?.value.trim();
+                const latitud = document.getElementById('latitud')?.value || '0';
+                const longitud = document.getElementById('longitud')?.value || '0';
+                const descripcionPunto = document.getElementById('descripcionPunto')?.value.trim();
+                const logoUrlPunto = document.getElementById('logoUrlPunto')?.value.trim();
+                const sitioWebPunto = document.getElementById('sitioWebPunto')?.value.trim();
+                const horarioAtencionPunto = document.getElementById('horarioAtencionPunto')?.value.trim();
+
+                if (!nombrePunto || nombrePunto.length < 3) { alert('Nombre: mín 3 caracteres'); return; }
+                if (!direccionPunto) { alert('Dirección: obligatoria'); return; }
+                if (!localidadPuntoId) { alert('Localidad: obligatoria'); return; }
+                if (!celularPunto || celularPunto.length !== 10 || !/^\d{10}$/.test(celularPunto)) { alert('Celular: 10 dígitos'); return; }
+                if (!emailPunto || !emailPunto.includes('@')) { alert('Email inválido'); return; }
+                if (telefonoPunto && !/^60\d{8}$/.test(telefonoPunto)) { alert('Teléfono: formato 60 + 8 dígitos (opcional)'); return; }
+
+                try {
+                    const pathname = window.location.pathname;
+                    const match = pathname.match(/\/punto-eca\/([^\/]+)\/([^\/]+)\/perfil/);
+                    if (!match) throw new Error('No se encontraron los IDs en la URL');
+
+                    const usuarioId = match[2];
+                    const puntoEcaId = document.querySelector('input[name="puntoEcaId"]')?.value;
+
+                    if (!puntoEcaId) throw new Error('No se encontró el ID del Punto ECA');
+
+                    const params = new URLSearchParams({
+                        nombrePunto, direccionPunto, localidadPuntoId, latitud, longitud,
+                        telefonoPunto, celularPunto, emailPunto, descripcionPunto, logoUrlPunto,
+                        sitioWebPunto, horarioAtencionPunto
+                    });
+
+                    const url = `/punto-eca/${usuarioId}/perfil/punto/${puntoEcaId}`;
+
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params
+                    });
+
+                    if (!response.ok) {
+                        const data = await response.json();
+                        throw new Error(data.error || 'Error');
+                    }
+
+                    alert('✅ Punto ECA guardado correctamente');
+                    location.reload();
+                } catch (e) {
+                    alert('❌ Error: ' + e.message);
+                }
+            });
+        }
+
+        // ===== GPS =====
+        const btnGPS = document.getElementById('btnGPS');
+        if (btnGPS) {
+            btnGPS.addEventListener('click', function() {
+                if (!navigator.geolocation) {
+                    alert('Geolocalización no disponible');
                     return;
                 }
 
-                try {
-                    // Capturar todos los atributos del botón para debug
-                    const nombreMaterial = this.getAttribute('data-nombre-material') || '-';
-                    const stockActual = parseFloat(this.getAttribute('data-stock-actual')) || 0;
-                    const capacidadMaxima = parseFloat(this.getAttribute('data-capacidad-maxima')) || 1;
-                    const precioCompra = parseFloat(this.getAttribute('data-precio-compra')) || 0;
-                    const precioVenta = parseFloat(this.getAttribute('data-precio-venta')) || 0;
-                    const umbralAlerta = parseInt(this.getAttribute('data-umbral-alerta')) || 0;
-                    const umbralCritico = parseInt(this.getAttribute('data-umbral-critico')) || 0;
-                    const unidadMedida = this.getAttribute('data-unidad-medida') || '-';
-                    const materialId = this.getAttribute('data-material-id') || '';
-                    const inventarioId = this.getAttribute('data-inventario-id') || '';
-
-                    // Debug: mostrar todos los atributos data del botón
-                    console.log('🔍 TODOS LOS ATRIBUTOS DEL BOTÓN:');
-                    for (let i = 0; i < this.attributes.length; i++) {
-                        const attr = this.attributes[i];
-                        if (attr.name.startsWith('data-')) {
-                            console.log(`  ${attr.name}: "${attr.value}"`);
-                        }
-                    }
-
-                    // Validar que tenemos los IDs necesarios
-                    if (!inventarioId || inventarioId === '' || inventarioId === '-') {
-                        console.error('❌ Error: inventarioId no válido:', inventarioId);
-                        console.error('❌ Valor raw del atributo:', this.getAttribute('data-inventario-id'));
-                        alert('Error: No se pudo obtener el ID del inventario. Revise la consola para más detalles.');
-                        return;
-                    }
-
-                    console.log('📋 Datos capturados correctamente:', {
-                        inventarioId: inventarioId,
-                        materialId: materialId,
-                        nombreMaterial: nombreMaterial
-                    });
-
-                    const ocupacion = Math.round((stockActual / capacidadMaxima) * 100);
-                    const espacioDisponible = capacidadMaxima - stockActual;
-                    const margenGanancia = precioVenta - precioCompra;
-                    const porcentajeMargen = precioCompra > 0 ? Math.round((margenGanancia / precioCompra) * 100) : 0;
-                    const valorTotalInventario = stockActual * precioCompra;
-
-                    let colorClase = 'bg-success', estadoTexto = '✓ OK', estadoColor = '#28a745';
-                    if (ocupacion >= umbralCritico) {
-                        colorClase = 'bg-danger';
-                        estadoTexto = '✕ Crítico';
-                        estadoColor = '#dc3545';
-                    } else if (ocupacion >= umbralAlerta) {
-                        colorClase = 'bg-warning';
-                        estadoTexto = '⚠ Alerta';
-                        estadoColor = '#ffc107';
-                    }
-
-                    const f = (n) => n.toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                    const el = (id) => document.getElementById(id);
-                    const set = (id, value) => { const e = el(id); if (e) e.textContent = value; };
-                    const setHtml = (id, value) => { const e = el(id); if (e) e.innerHTML = value; };
-                    const setColor = (id, color) => { const e = el(id); if (e) e.style.color = color; };
-
-                    set('modalNombreMaterial', nombreMaterial);
-                    set('modalHeaderNombre', nombreMaterial);
-                    set('modalUnidadMedida', unidadMedida);
-                    set('modalEstadoText', estadoTexto);
-                    setColor('modalEstadoText', estadoColor);
-                    setColor('modalEstadoIcon', estadoColor);
-                    set('modalOcupacionPorcentaje', ocupacion + '%');
-                    set('modalOcupacionText', ocupacion + '%');
-
-                    const bar = el('modalOcupacionBar');
-                    if (bar) {
-                        bar.style.width = ocupacion + '%';
-                        bar.className = 'progress-bar d-flex align-items-center justify-content-center fw-bold text-dark ' + colorClase;
-                    }
-
-                    set('modalStockActual', f(stockActual));
-                    set('modalCapacidadMaxima', f(capacidadMaxima));
-                    set('modalStockUnidad', unidadMedida);
-                    set('modalCapacidadUnidad', unidadMedida);
-                    set('modalEspacioUsado', f(stockActual));
-                    set('modalEspacioDisponible', f(espacioDisponible));
-                    set('modalPrecioCompra', '$ ' + f(precioCompra));
-                    set('modalPrecioVenta', '$ ' + f(precioVenta));
-                    set('modalMargenGanancia', '$ ' + f(margenGanancia));
-                    set('modalPorcentajeMargen', porcentajeMargen + '%');
-                    set('modalValorTotal', '$ ' + f(valorTotalInventario));
-                    set('modalUmbralAlerta', umbralAlerta + '%');
-                    set('modalUmbralCritico', umbralCritico + '%');
-                    setHtml('modalEstadoIndicador', '<h5 class="mb-3" style="color:' + estadoColor + '"><i class="bi bi-circle-fill me-2"></i>' + estadoTexto + '</h5>');
-                    set('detallesModalLabel', 'Detalles: ' + nombreMaterial);
-
-                    console.log('Abriendo modal...');
-                    const m = new bootstrap.Modal(md);
-                    m.show();
-                    console.log('✓✓✓ MODAL ABIERTO');
-
-                    // Almacenar datos para el modal de edición
-                    window.datosEditarInventario = {
-                        materialId: materialId,
-                        inventarioId: inventarioId,
-                        nombreMaterial: nombreMaterial,
-                        stockActual: stockActual,
-                        capacidadMaxima: capacidadMaxima,
-                        precioCompra: precioCompra,
-                        precioVenta: precioVenta,
-                        umbralAlerta: umbralAlerta,
-                        umbralCritico: umbralCritico,
-                        unidadMedida: unidadMedida
-                    };
-
-                    // Evento: Click en botón Editar
-                    document.getElementById('btnEditarMaterial').onclick = function() {
-                        abrirModalEditar();
-                    };
-
-                    // Evento: Click en botón Borrar
-                    document.getElementById('btnBorrarMaterial').onclick = function() {
-                        const datos = window.datosEditarInventario;
-                        if (!datos || !datos.inventarioId) {
-                            alert('Error: No se pudo obtener el ID del inventario');
-                            return;
-                        }
-
-                        // Confirmar antes de borrar
-                        if (!confirm('¿Estás seguro de que deseas borrar este material del inventario?\n\nMaterial: ' + datos.nombreMaterial)) {
-                            return;
-                        }
-
-                        // Hacer petición al servidor para borrar
-                        console.log('Borrando inventario con ID:', datos.inventarioId);
-
-                        // Obtener información de la URL
-                        const pathSegments = window.location.pathname.split('/').filter(s => s);
-                        const nombrePunto = pathSegments[1];
-                        const gestorId = pathSegments[2];
-
-                        // Enviar solicitud DELETE al servidor
-                        fetch(`/punto-eca/${nombrePunto}/${gestorId}/eliminar-inventario/${datos.inventarioId}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Error al eliminar: ' + response.statusText);
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            console.log('✓ Material eliminado correctamente');
-                            alert('Material eliminado del inventario correctamente');
-
-                            // Cerrar modal y recargar página
-                            const detallesModal = bootstrap.Modal.getInstance(document.getElementById('detallesModal'));
-                            if (detallesModal) detallesModal.hide();
-
-                            // Recargar página después de un pequeño delay
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 500);
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Error al eliminar el material: ' + error.message);
-                        });
-                    };
-                } catch (err) {
-                    console.error('ERROR:', err);
-                }
+                navigator.geolocation.getCurrentPosition(pos => {
+                    const lat = pos.coords.latitude.toFixed(6);
+                    const lon = pos.coords.longitude.toFixed(6);
+                    const latInput = document.getElementById('latitud');
+                    const lonInput = document.getElementById('longitud');
+                    if (latInput) latInput.value = lat;
+                    if (lonInput) lonInput.value = lon;
+                    alert('✅ Coordenadas obtenidas');
+                }, () => {
+                    alert('❌ Error al obtener ubicación');
+                });
             });
+        }
+    }, 500);
+});
+</script>
+
+<!-- Nota: El script específico del modal global fue movido a la plantilla de materiales. -->
+
+<!-- Estilos CSS para el menú desplegable lateral -->
+<style>
+    /* Contenedor de desplegable */
+    .dropdown-menu-container {
+        position: relative;
+    }
+
+    /* Icono de chevron con transición suave */
+    .dropdown-menu-container .bi-chevron-down {
+        transition: transform 0.3s ease-in-out;
+        display: inline-block;
+    }
+
+    /* Cuando el chevron tiene la clase rotated */
+    .dropdown-menu-container .bi-chevron-down.rotated {
+        transform: rotate(180deg);
+    }
+
+    /* Animación suave de collapse */
+    .dropdown-menu-container .collapse {
+        transition: all 0.3s ease-in-out;
+    }
+
+    /* Efecto hover en submenu */
+    .dropdown-menu-container .collapse .nav-link:hover {
+        padding-left: 1.5rem !important;
+    }
+
+    /* Scroll suave en toda la página */
+    html {
+        scroll-behavior: smooth;
+    }
+</style>
+
+<!-- Script para navegar a acordeones específicos -->
+<script>
+/**
+ * Función para hacer scroll a un acordeón específico y expandirlo
+ * @param {Event} event - El evento del click
+ * @param {string} selectorAccordion - El ID del acordeón a expandir (ej: #encargadoPanel)
+ */
+function scrollToAccordion(event, selectorAccordion) {
+    event.preventDefault();
+
+    // Obtener el elemento del acordeón (el div collapse)
+    const accordionElement = document.querySelector(selectorAccordion);
+    if (!accordionElement) {
+        return;
+    }
+
+    // Verificar si ya está expandido
+    const isCollapsed = accordionElement.classList.contains('collapse') &&
+                       !accordionElement.classList.contains('show');
+
+    if (isCollapsed) {
+        // Usar Bootstrap Collapse API para expandir
+        new bootstrap.Collapse(accordionElement, {
+            toggle: true
         });
     }
 
-    // Función para abrir el modal de edición
-    function abrirModalEditar() {
-        const datos = window.datosEditarInventario;
-        if (!datos) {
-            console.error('No hay datos para editar');
-            return;
-        }
+    // Hacer scroll suave hacia el acordeón (después de un pequeño delay para permitir animación)
+    setTimeout(() => {
+        accordionElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }, 350);
+}
 
-        // Llenar el formulario con los datos actuales
-        document.getElementById('editarMaterialId').value = datos.materialId;
-        document.getElementById('editarStockActual').value = datos.stockActual;
-        document.getElementById('editarCapacidadMaxima').value = datos.capacidadMaxima;
-        document.getElementById('editarPrecioCompra').value = datos.precioCompra;
-        document.getElementById('editarPrecioVenta').value = datos.precioVenta;
-        document.getElementById('editarUmbralAlerta').value = datos.umbralAlerta;
-        document.getElementById('editarUmbralCritico').value = datos.umbralCritico;
-        document.getElementById('editarStockUnidad').textContent = datos.unidadMedida;
-        document.getElementById('editarCapacidadUnidad').textContent = datos.unidadMedida;
+/**
+ * Inicializar el menú desplegable del sidebar
+ */
+document.addEventListener('DOMContentLoaded', function() {
 
-        // Cargar opciones de unidad de medida desde el servidor
-        cargarOpcionesUnidadMedida(datos.unidadMedida);
+    // Inicializar chevrons según el estado actual
+    document.querySelectorAll('.dropdown-menu-container [data-bs-toggle="collapse"]').forEach(chevron => {
+        const targetId = chevron.getAttribute('data-bs-target');
+        const target = document.querySelector(targetId);
 
-        // Cerrar el modal de detalles
-        const detallesModal = bootstrap.Modal.getInstance(document.getElementById('detallesModal'));
-        if (detallesModal) detallesModal.hide();
-
-        // Abrir el modal de edición
-        const editarModal = new bootstrap.Modal(document.getElementById('editarModal'));
-        editarModal.show();
-
-        console.log('✓ Modal de edición abierto');
-    }
-
-    // Función para cargar las opciones de unidad de medida desde el servidor
-    function cargarOpcionesUnidadMedida(unidadActual) {
-        const select = document.getElementById('editarUnidadMedida');
-
-        // Realizar llamada al servidor para obtener todas las unidades de medida disponibles
-        fetch('/api/unidades-medida')
-            .then(response => {
-                if (!response.ok) {
-                    console.error('Error al obtener unidades de medida:', response.status);
-                    // Si falla, mostrar unidad actual como opción
-                    select.innerHTML = '<option value="">-- Seleccionar unidad --</option>';
-                    select.innerHTML += `<option value="${unidadActual}" selected>${unidadActual}</option>`;
-                    return;
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (!data) return;
-
-                // Limpiar opciones previas
-                select.innerHTML = '<option value="">-- Seleccionar unidad --</option>';
-
-                // Agregar opciones desde el servidor
-                data.forEach(unidad => {
-                    const option = document.createElement('option');
-                    option.value = unidad.clave;  // El value será la clave (KG, UNI, etc)
-                    option.textContent = unidad.nombre;  // El texto visible será el nombre (Kilogramo, Unidad, etc)
-                    if (unidad.clave === unidadActual) {
-                        option.selected = true;
-                    }
-                    select.appendChild(option);
-                });
-
-                console.log('✓ Unidades de medida cargadas:', data);
-            })
-            .catch(error => {
-                console.error('Error cargando unidades de medida:', error);
-                // Mostrar unidad actual como opción si hay error
-                select.innerHTML = '<option value="">-- Seleccionar unidad --</option>';
-                select.innerHTML += `<option value="${unidadActual}" selected>${unidadActual}</option>`;
-            });
-    }
-
-    // Evento: Click en botón Guardar Cambios
-    document.addEventListener('DOMContentLoaded', function() {
-        const btnGuardar = document.getElementById('btnGuardarCambios');
-        if (btnGuardar) {
-            btnGuardar.addEventListener('click', function() {
-                const formulario = document.getElementById('formularioEditarInventario');
-                if (formulario.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    formulario.classList.add('was-validated');
-                    return;
-                }
-
-                // Recolectar datos del formulario
-                const datosActualizados = {
-                    materialId: document.getElementById('editarMaterialId').value,
-                    stockActual: parseFloat(document.getElementById('editarStockActual').value),
-                    capacidadMaxima: parseFloat(document.getElementById('editarCapacidadMaxima').value),
-                    unidadMedida: document.getElementById('editarUnidadMedida').value,
-                    precioCompra: parseFloat(document.getElementById('editarPrecioCompra').value),
-                    precioVenta: parseFloat(document.getElementById('editarPrecioVenta').value),
-                    umbralAlerta: parseInt(document.getElementById('editarUmbralAlerta').value),
-                    umbralCritico: parseInt(document.getElementById('editarUmbralCritico').value)
-                };
-
-                console.log('📝 Datos a guardar:', datosActualizados);
-
-                // Deshabilitar el botón mientras se envía
-                btnGuardar.disabled = true;
-                btnGuardar.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Guardando...';
-
-                // Validar que tenemos los datos necesarios
-                if (!window.datosEditarInventario || !window.datosEditarInventario.inventarioId) {
-                    console.error('❌ Error: No hay datos de inventario disponibles');
-                    alert('Error: No se pudieron obtener los datos del inventario');
-                    btnGuardar.disabled = false;
-                    btnGuardar.innerHTML = '<i class="bi bi-check-circle me-1"></i>Guardar Cambios';
-                    return;
-                }
-
-                const inventarioId = window.datosEditarInventario.inventarioId;
-
-                // Validar que inventarioId es un UUID válido
-                const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-                if (!uuidRegex.test(inventarioId)) {
-                    console.error('❌ Error: inventarioId no es un UUID válido:', inventarioId);
-                    alert('Error: ID de inventario no válido');
-                    btnGuardar.disabled = false;
-                    btnGuardar.innerHTML = '<i class="bi bi-check-circle me-1"></i>Guardar Cambios';
-                    return;
-                }
-
-                // Obtener datos de la URL actual para construir la ruta correcta
-                const rutaActual = window.location.pathname;
-                console.log('🌐 URL actual:', rutaActual);
-
-                const partes = rutaActual.split('/').filter(parte => parte !== '');
-                console.log('🔍 Partes de la URL:', partes);
-
-                // La estructura esperada es: /punto-eca/{nombrePunto}/{usuarioId}
-                if (partes.length < 3 || partes[0] !== 'punto-eca') {
-                    console.error('❌ Estructura de URL incorrecta:', rutaActual);
-                    alert('Error: URL no válida para esta operación');
-                    btnGuardar.disabled = false;
-                    btnGuardar.innerHTML = '<i class="bi bi-check-circle me-1"></i>Guardar Cambios';
-                    return;
-                }
-
-                const nombrePunto = decodeURIComponent(partes[1]); // Decodificar en caso de espacios u otros caracteres
-                const usuarioId = partes[2];
-
-                // Validar que usuarioId no esté vacío
-                if (!usuarioId || usuarioId.trim() === '') {
-                    console.error('❌ Error: usuarioId está vacío:', usuarioId);
-                    alert('Error: ID de usuario no válido (está vacío)');
-                    btnGuardar.disabled = false;
-                    btnGuardar.innerHTML = '<i class="bi bi-check-circle me-1"></i>Guardar Cambios';
-                    return;
-                }
-
-                // Logging detallado del usuarioId
-                console.log('🔍 Análisis del usuarioId:', {
-                    valor: usuarioId,
-                    longitud: usuarioId.length,
-                    tienGuiones: usuarioId.includes('-'),
-                    esUUID: uuidRegex.test(usuarioId)
-                });
-
-                // Debug: Solo log del usuarioId, sin validaciones que bloqueen
-                console.log('✅ usuarioId obtenido:', usuarioId, '(tipo:', typeof usuarioId, ')');
-
-                // Comentario temporal: Validación UUID deshabilitada para debug
-                // if (!uuidRegex.test(usuarioId)) { ... }
-
-                // Construir la ruta con el patrón: /punto-eca/{nombrePunto}/{usuarioId}/actualizar-inventario/{inventarioId}
-                const rutaActualizacion = `/punto-eca/${encodeURIComponent(nombrePunto)}/${usuarioId}/actualizar-inventario/${inventarioId}`;
-
-                console.log('📍 Datos para envío:', {
-                    inventarioId: inventarioId,
-                    nombrePunto: nombrePunto,
-                    usuarioId: usuarioId,
-                    rutaActualizacion: rutaActualizacion,
-                    urlCompleta: window.location.href,
-                    pathname: window.location.pathname,
-                    partesURL: partes
-                });
-
-                // Enviar datos al servidor
-                fetch(rutaActualizacion, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(datosActualizados)
-                })
-                .then(response => {
-                    console.log('📡 Respuesta HTTP:', response.status, response.statusText);
-
-                    if (!response.ok) {
-                        // Intentar obtener el mensaje de error del servidor
-                        return response.text().then(text => {
-                            console.error('❌ Error del servidor:', text);
-                            let errorMessage = `Error ${response.status}: ${response.statusText}`;
-                            try {
-                                const errorJson = JSON.parse(text);
-                                errorMessage = errorJson.message || errorJson.error || errorMessage;
-                            } catch (e) {
-                                if (text) errorMessage = text;
-                            }
-                            throw new Error(errorMessage);
-                        });
-                    }
-
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('✓ Respuesta del servidor:', data);
-
-                    // Cerrar el modal de edición
-                    const editarModal = bootstrap.Modal.getInstance(document.getElementById('editarModal'));
-                    if (editarModal) editarModal.hide();
-
-                    // Mostrar modal de éxito
-                    const modalExito = new bootstrap.Modal(document.getElementById('modalExitoActualizacion'));
-                    modalExito.show();
-
-                    // Después de 1.5 segundos, cerrar el modal de éxito y mostrar el resumen
-                    setTimeout(() => {
-                        modalExito.hide();
-
-                        // Llenar los datos del resumen con la respuesta del servidor
-                        document.getElementById('resumenNombreMaterial').textContent = data.nombreMaterial || '-';
-                        document.getElementById('resumenNombrePunto').textContent = data.nombrePuntoEca || '-';
-                        document.getElementById('resumenStockActual').textContent = data.stockActual + ' ' + data.unidadMedida;
-                        document.getElementById('resumenCapacidadMaxima').textContent = data.capacidadMaxima + ' ' + data.unidadMedida;
-                        document.getElementById('resumenUnidadMedida').textContent = data.unidadMedida;
-                        document.getElementById('resumenPrecioCompra').textContent = '$ ' + data.precioCompra.toFixed(2);
-                        document.getElementById('resumenPrecioVenta').textContent = '$ ' + data.precioVenta.toFixed(2);
-                        document.getElementById('resumenUmbralAlerta').textContent = data.umbralAlerta + '%';
-                        document.getElementById('resumenUmbralCritico').textContent = data.umbralCritico + '%';
-
-                        // Mostrar modal de resumen
-                        const modalResumen = new bootstrap.Modal(document.getElementById('modalResumenActualizacion'));
-                        modalResumen.show();
-
-                        // Cuando se cierre el modal de resumen, recargar la página
-                        document.getElementById('modalResumenActualizacion').addEventListener('hidden.bs.modal', function() {
-                            window.location.reload();
-                        }, { once: true });
-                    }, 1500);
-                })
-                .catch(error => {
-                    console.error('❌ Error al guardar:', error);
-                    alert('❌ Error al guardar los cambios: ' + error.message);
-
-                    // Re-habilitar el botón en caso de error
-                    btnGuardar.disabled = false;
-                    btnGuardar.innerHTML = '<i class="bi bi-check-circle me-1"></i>Guardar Cambios';
-                });
-            });
+        if (target && target.classList.contains('show')) {
+            chevron.classList.add('rotated');
+        } else {
+            chevron.classList.remove('rotated');
         }
     });
+});
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => setTimeout(iniciarModalScript, 100));
-    } else {
-        setTimeout(iniciarModalScript, 100);
+// Bootstrap Collapse event listeners para actualizar chevron
+document.addEventListener('show.bs.collapse', function(e) {
+    const chevron = document.querySelector(`[data-bs-target="#${e.target.id}"]`);
+    if (chevron) {
+        chevron.classList.add('rotated');
     }
+});
+
+document.addEventListener('hide.bs.collapse', function(e) {
+    const chevron = document.querySelector(`[data-bs-target="#${e.target.id}"]`);
+    if (chevron) {
+        chevron.classList.remove('rotated');
+    }
+});
 </script>
-
-

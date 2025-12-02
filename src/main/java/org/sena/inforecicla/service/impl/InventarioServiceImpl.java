@@ -62,9 +62,23 @@ public class InventarioServiceImpl implements InventarioService {
         inventario.setUmbralAlerta(invUpdate.umbralAlerta());
         inventario.setUmbralCritico(invUpdate.umbralCritico());
 
-        Inventario guardado = inventarioRepository.save(inventario);
+        // Calcular estado de alerta basado en ocupación y umbrales actualizados
+        BigDecimal ocupacion = invUpdate.stockActual()
+                .divide(invUpdate.capacidadMaxima(), 2, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100));
 
-        return InventarioResponseDTO.derivado(guardado);
+        Alerta estadoAlerta = Alerta.OK;
+        if (ocupacion.compareTo(BigDecimal.valueOf(invUpdate.umbralCritico())) >= 0) {
+            estadoAlerta = Alerta.Critico;
+        } else if (ocupacion.compareTo(BigDecimal.valueOf(invUpdate.umbralAlerta())) >= 0) {
+            estadoAlerta = Alerta.Alerta;
+        }
+
+        inventario.setAlerta(estadoAlerta);
+
+        Inventario actualizado = inventarioRepository.save(inventario);
+
+        return InventarioResponseDTO.derivado(actualizado);
     }
 
     @Override
@@ -156,6 +170,18 @@ public class InventarioServiceImpl implements InventarioService {
         PuntoECA punto = puntoEcaRepository.findById(dto.puntoEcaId())
                 .orElseThrow(() -> new PuntoEcaNotFoundException("Punto ECA no encontrado"));
 
+        // Calcular estado de alerta basado en ocupación y umbrales
+        BigDecimal ocupacion = dto.stockActual()
+                .divide(dto.capacidadMaxima(), 2, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100));
+
+        Alerta estadoAlerta = Alerta.OK;
+        if (ocupacion.compareTo(BigDecimal.valueOf(dto.umbralCritico())) >= 0) {
+            estadoAlerta = Alerta.Critico;
+        } else if (ocupacion.compareTo(BigDecimal.valueOf(dto.umbralAlerta())) >= 0) {
+            estadoAlerta = Alerta.Alerta;
+        }
+
         Inventario inv = Inventario.builder()
                 .capacidadMaxima(dto.capacidadMaxima())
                 .unidadMedida(dto.unidadMedida())
@@ -166,6 +192,7 @@ public class InventarioServiceImpl implements InventarioService {
                 .precioCompra(dto.precioCompra())
                 .material(material)
                 .puntoEca(punto)
+                .alerta(estadoAlerta)
                 .build();
 
         // Asignar estado automáticamente en el servidor

@@ -2,6 +2,8 @@ package org.sena.inforecicla.controller;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.sena.inforecicla.dto.puntoEca.gestor.GestorUpdateDTO;
+import org.sena.inforecicla.dto.puntoEca.gestor.PuntoEcaUpdateDTO;
 import org.sena.inforecicla.dto.puntoEca.inventario.InventarioGuardarDTO;
 import org.sena.inforecicla.dto.puntoEca.inventario.InventarioUpdateDTO;
 import org.sena.inforecicla.dto.puntoEca.materiales.MaterialInvResponseDTO;
@@ -10,10 +12,13 @@ import org.sena.inforecicla.exception.InventarioFoundExistException;
 import org.sena.inforecicla.exception.InventarioNotFoundException;
 import org.sena.inforecicla.exception.MaterialNotFoundException;
 import org.sena.inforecicla.exception.PuntoEcaNotFoundException;
+import org.sena.inforecicla.model.Localidad;
 import org.sena.inforecicla.model.enums.Alerta;
+import org.sena.inforecicla.model.enums.TipoDocumento;
 import org.sena.inforecicla.model.enums.UnidadMedida;
 import org.sena.inforecicla.service.GestorEcaService;
 import org.sena.inforecicla.service.InventarioService;
+import org.sena.inforecicla.service.LocalidadService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -22,13 +27,19 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Controller
 @AllArgsConstructor
 @RequestMapping("/punto-eca")
 public class PuntoEcaController {
 
+    private static final Logger logger = LoggerFactory.getLogger(PuntoEcaController.class);
+
     private final GestorEcaService gestorEcaService;
     private final InventarioService inventarioService;
+    private final LocalidadService localidadService;
 
     // Vista principal con usuarioId
     @GetMapping("/{nombrePunto}/{gestorId}")
@@ -56,20 +67,47 @@ public class PuntoEcaController {
             @RequestParam(required = false) String ocupacion,
             Model model
     ) {
-        // Normalizar sección a minúsculas para que coincida con los casos del layout
+        // Normalizar sección a minúsculas
         seccion = seccion != null ? seccion.toLowerCase() : "resumen";
-
-        // Referencia de path variables para evitar warnings
         Objects.requireNonNull(nombrePunto);
 
-        // Obtener información del usuario/gestor
+        // Obtener usuario
         UsuarioGestorResponseDTO usuario = gestorEcaService.buscarGestorPuntoEca(gestorId);
 
-        // Aquí filtras el inventario según los parámetros
+        // Agregar datos básicos siempre
+        model.addAttribute("usuario", usuario);
+        model.addAttribute("gestor", nombrePunto);
+        model.addAttribute("seccion", seccion);
+
+        // Cargar datos condicionales según la sección
+        switch (seccion) {
+            case "materiales" -> cargarSeccionMateriales(usuario, texto, categoria, tipo, alerta, unidad, ocupacion, model);
+            case "perfil" -> cargarSeccionPerfil(usuario, model);
+            case "movimientos" -> cargarSeccionMovimientos(usuario, model);
+            case "historial" -> cargarSeccionHistorial(usuario, model);
+            case "centros" -> cargarSeccionCentros(usuario, model);
+            case "configuracion" -> cargarSeccionConfiguracion(usuario, model);
+            default -> cargarSeccionResumen(usuario, model);
+        }
+
+        return "views/PuntoECA/puntoECA-layout";
+    }
+
+    /**
+     * Carga datos para la sección de Resumen
+     */
+    private void cargarSeccionResumen(UsuarioGestorResponseDTO usuario, Model model) {
+        model.addAttribute("inventarios", inventarioService.mostrarInventarioPuntoEca(usuario.puntoEcaId()));
+    }
+
+    /**
+     * Carga datos para la sección de Materiales con filtros
+     */
+    private void cargarSeccionMateriales(UsuarioGestorResponseDTO usuario, String texto, String categoria,
+            String tipo, Alerta alerta, String unidad, String ocupacion, Model model) {
         List<?> inventarioFiltrado = Collections.emptyList();
         String mensajeAlerta = null;
 
-        // Verificar si hay algún filtro activo
         boolean hayFiltros = (texto != null && !texto.trim().isEmpty()) ||
                              (categoria != null && !categoria.trim().isEmpty()) ||
                              (tipo != null && !tipo.trim().isEmpty()) ||
@@ -79,53 +117,237 @@ public class PuntoEcaController {
 
         try {
             if (hayFiltros) {
-                // Si hay filtros, aplicar búsqueda filtrada
                 List<?> resultado = inventarioService.filtraInventario(usuario.puntoEcaId(), texto, categoria, tipo, alerta, unidad, ocupacion);
-
                 if (resultado == null || resultado.isEmpty()) {
                     mensajeAlerta = "No se encontraron coincidencias con los filtros aplicados.";
                 } else {
                     inventarioFiltrado = resultado;
                 }
             } else {
-                // Si NO hay filtros, mostrar todos los materiales del inventario
                 inventarioFiltrado = inventarioService.mostrarInventarioPuntoEca(usuario.puntoEcaId());
             }
         } catch (Exception e) {
-            // Error en la búsqueda
+            // En caso de error al obtener los datos tratamos como "sin resultados"
             mensajeAlerta = "No se encontraron coincidencias con los filtros aplicados.";
         }
 
-        Map<String, Object> atributos = Map.of(
-                "usuario", usuario,
-                "gestor", nombrePunto,
-                "seccion", seccion,
-                "inventario", inventarioFiltrado,
-                "categoriaMateriales", inventarioService.listarCategoriasMateriales(),
-                "tiposMateriales", inventarioService.listarTiposMateriales(),
-                "unidadesMedida", Arrays.stream(UnidadMedida.values()).map(unidadMd -> {
+        model.addAttribute("inventario", inventarioFiltrado);
+        model.addAttribute("unidadesMedida", construirUnidadesMedida());
+        model.addAttribute("alerta", construirAlertas());
+
+        if (mensajeAlerta != null) {
+            model.addAttribute("mensajeAlerta", mensajeAlerta);
+        }
+        model.addAttribute("categoriaMateriales", inventarioService.listarCategoriasMateriales());
+        model.addAttribute("tiposMateriales", inventarioService.listarTiposMateriales());
+    }
+
+    /**
+     * Carga datos para la sección de Perfil
+     */
+    private void cargarSeccionPerfil(UsuarioGestorResponseDTO usuario, Model model) {
+        // Aseguramos que la vista de perfil tenga lo mínimo necesario: el usuario y catálogos si se requieren
+        model.addAttribute("usuario", usuario);
+        model.addAttribute("localidades", construirLocalidades());
+        model.addAttribute("tiposDocumentos", TipoDocumento.values());
+        // Añade otros atributos necesarios para perfil cuando estén disponibles
+    }
+
+    /**
+     * Carga datos para la sección de Movimientos
+     */
+    private void cargarSeccionMovimientos(UsuarioGestorResponseDTO usuario, Model model) {
+        // Evitar warnings de parámetros no usados hasta que se implementen
+        Objects.requireNonNull(usuario);
+        Objects.requireNonNull(model);
+        // TODO: Implementar cuando haya servicio de movimientos
+    }
+
+    /**
+     * Carga datos para la sección de Historial
+     */
+    private void cargarSeccionHistorial(UsuarioGestorResponseDTO usuario, Model model) {
+        Objects.requireNonNull(usuario);
+        Objects.requireNonNull(model);
+        // TODO: Implementar cuando haya servicio de auditoría/historial
+    }
+
+    /**
+     * Carga datos para la sección de Centros de Acopio
+     */
+    private void cargarSeccionCentros(UsuarioGestorResponseDTO usuario, Model model) {
+        Objects.requireNonNull(usuario);
+        Objects.requireNonNull(model);
+        // TODO: Implementar cuando haya servicio de centros
+    }
+
+    /**
+     * Construye lista de unidades de medida
+     */
+    private List<Map<String, String>> construirUnidadesMedida() {
+        return Arrays.stream(UnidadMedida.values())
+                .map(unidadMd -> {
                     Map<String, String> map = new HashMap<>();
                     map.put("clave", unidadMd.name());
                     map.put("nombre", unidadMd.getNombre());
                     return map;
-                }).toList(),
-                "alerta", Arrays.stream(Alerta.values()).map(alertaTp -> {
-                    Map<String, String> map2 = new HashMap<>();
-                    map2.put("clave", alertaTp.name());
-                    map2.put("tipo", alertaTp.getTipo());
-                    return map2;
-                }).toList()
-        );
+                })
+                .toList();
+    }
 
-        // Y cargas los materiales filtrados
-        model.addAllAttributes(atributos);
+    private List<Localidad> construirLocalidades(){
+        return localidadService.listadoLocalidades();
+    }
 
-        // Agregar mensaje de alerta si existe
-        if (mensajeAlerta != null) {
-            model.addAttribute("mensajeAlerta", mensajeAlerta);
+    /**
+     * Construye lista de alertas
+     */
+    private List<Map<String, String>> construirAlertas() {
+        return Arrays.stream(Alerta.values())
+                .map(alertaTp -> {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("clave", alertaTp.name());
+                    map.put("tipo", alertaTp.getTipo());
+                    return map;
+                })
+                .toList();
+    }
+    /**
+     * Carga datos para la sección de Configuración
+     */
+    private void cargarSeccionConfiguracion(UsuarioGestorResponseDTO usuario, Model model) {
+        Objects.requireNonNull(usuario);
+        Objects.requireNonNull(model);
+        // Datos necesarios para configuración
+        // TODO: Implementar cuando haya servicio de configuración
+    }
+
+    @PostMapping("/{usuarioId}/perfil/encargado")
+    @ResponseBody
+    public ResponseEntity<?> actualizarGestor(
+            @PathVariable UUID usuarioId,
+            @RequestParam String nombres,
+            @RequestParam String apellidos,
+            @RequestParam String email,
+            @RequestParam String celular,
+            @RequestParam(defaultValue = "CC") String tipoDocumento,
+            @RequestParam(defaultValue = "") String numeroDocumento,
+            @RequestParam(defaultValue = "") String fechaNacimiento,
+            @RequestParam(defaultValue = "") String biografia
+    ){
+        try {
+            // Validaciones
+            if (nombres == null || nombres.trim().isEmpty() || nombres.length() < 3) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Nombres: mínimo 3 caracteres"));
+            }
+            if (apellidos == null || apellidos.trim().isEmpty() || apellidos.length() < 2) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Apellidos: mínimo 2 caracteres"));
+            }
+            if (email == null || email.trim().isEmpty() || !email.contains("@")) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Email inválido"));
+            }
+            if (celular == null || celular.trim().isEmpty() || celular.length() != 10) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Celular: 10 dígitos"));
+            }
+
+            var dto = new GestorUpdateDTO(
+                nombres.trim(),
+                apellidos.trim(),
+                TipoDocumento.valueOf(tipoDocumento),
+                numeroDocumento.trim(),
+                fechaNacimiento.trim(),
+                celular.trim(),
+                email.trim(),
+                biografia.trim()
+            );
+            var resultado = gestorEcaService.actualizarGestor(usuarioId, dto);
+            return ResponseEntity.ok(resultado);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Tipo de documento inválido"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", "Error interno: " + e.getMessage()));
         }
+    }
 
-        return "views/PuntoECA/puntoECA-layout";
+    @PostMapping("/{usuarioId}/perfil/punto/{puntoEcaId}")
+    @ResponseBody
+    public ResponseEntity<?> actualizarPunto(
+            @PathVariable UUID usuarioId,
+            @PathVariable UUID puntoEcaId,
+            @RequestParam String nombrePunto,
+            @RequestParam String direccionPunto,
+            @RequestParam UUID localidadPuntoId,
+            @RequestParam(defaultValue = "0") Double latitud,
+            @RequestParam(defaultValue = "0") Double longitud,
+            @RequestParam(defaultValue = "") String telefonoPunto,
+            @RequestParam(defaultValue = "") String celularPunto,
+            @RequestParam(defaultValue = "") String emailPunto,
+            @RequestParam(defaultValue = "") String descripcionPunto,
+            @RequestParam(defaultValue = "") String sitioWebPunto,
+            @RequestParam(defaultValue = "") String horarioAtencionPunto
+    ){
+        try {
+            logger.info("========== GUARDAR PUNTO ECA ==========");
+            logger.info("usuarioId: {}", usuarioId);
+            logger.info("puntoEcaId: {}", puntoEcaId);
+            logger.info("nombrePunto (RAW): '{}' | trim(): '{}'", nombrePunto, nombrePunto != null ? nombrePunto.trim() : "null");
+            logger.info("direccionPunto (RAW): '{}' | trim(): '{}'", direccionPunto, direccionPunto != null ? direccionPunto.trim() : "null");
+            logger.info("localidadPuntoId: {}", localidadPuntoId);
+            logger.info("celularPunto (RAW): '{}' | trim(): '{}' | length: {}", celularPunto, celularPunto != null ? celularPunto.trim() : "null", celularPunto != null ? celularPunto.length() : 0);
+            logger.info("emailPunto (RAW): '{}' | trim(): '{}'", emailPunto, emailPunto != null ? emailPunto.trim() : "null");
+            logger.info("telefonoPunto (RAW): '{}'", telefonoPunto);
+            logger.info("latitud: {} | longitud: {}", latitud, longitud);
+            logger.info("descripcionPunto: {}", descripcionPunto);
+            logger.info("sitioWebPunto: {}", sitioWebPunto);
+            logger.info("horarioAtencionPunto: {}", horarioAtencionPunto);
+
+            // Validaciones básicas
+            if (nombrePunto == null || nombrePunto.trim().isEmpty() || nombrePunto.length() < 3) {
+                logger.warn("Validación fallida: nombrePunto");
+                return ResponseEntity.badRequest().body(Map.of("error", "Nombre: mínimo 3 caracteres"));
+            }
+            if (direccionPunto == null || direccionPunto.trim().isEmpty()) {
+                logger.warn("Validación fallida: direccionPunto");
+                return ResponseEntity.badRequest().body(Map.of("error", "Dirección: obligatoria"));
+            }
+            if (celularPunto == null || celularPunto.trim().isEmpty() || celularPunto.length() != 10) {
+                logger.warn("Validación fallida: celularPunto - length: {}", celularPunto != null ? celularPunto.length() : 0);
+                return ResponseEntity.badRequest().body(Map.of("error", "Celular: 10 dígitos"));
+            }
+            if (emailPunto == null || emailPunto.trim().isEmpty() || !emailPunto.contains("@")) {
+                logger.warn("Validación fallida: emailPunto");
+                return ResponseEntity.badRequest().body(Map.of("error", "Email inválido"));
+            }
+            if (localidadPuntoId == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Localidad es obligatoria"));
+            }
+
+            // Crear DTO con datos validados
+            var dto = new PuntoEcaUpdateDTO(
+                nombrePunto.trim(),
+                descripcionPunto.trim(),
+                telefonoPunto.trim(),
+                celularPunto.trim(),
+                emailPunto.trim(),
+                direccionPunto.trim(),
+                localidadPuntoId,
+                latitud,
+                longitud,
+                sitioWebPunto.trim(),
+                horarioAtencionPunto.trim()
+            );
+
+            var resultado = gestorEcaService.actualizarPunto(usuarioId, puntoEcaId, dto);
+            return ResponseEntity.ok(resultado);
+        } catch (IllegalArgumentException e) {
+            logger.error("❌ Datos inválidos: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body(Map.of("error", "Datos inválidos: " + e.getMessage()));
+        } catch (Exception e) {
+            logger.error("❌ Error al guardar punto: {}", e.getMessage(), e);
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", "Error interno: " + e.getMessage()));
+        }
     }
 
     // Endpoint REST: búsqueda de materiales - Devuelve JSON
@@ -183,16 +405,13 @@ public class PuntoEcaController {
                     "mensaje", "Inventario guardado exitosamente"
             ));
         } catch (MaterialNotFoundException | PuntoEcaNotFoundException e) {
-            System.err.println("❌ Entidad no encontrada: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Entidad no encontrada: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
                     "error", true,
                     "mensaje", e.getMessage()
             ));
         } catch (Exception e) {
-            System.err.println("❌ Error al guardar inventario: " + e.getMessage());
-            System.err.println("Stack trace:");
-            e.printStackTrace();
+            logger.error("Error al guardar inventario: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().body(Map.of(
                     "error", true,
                     "mensaje", "Error al guardar inventario: " + e.getMessage(),
@@ -209,6 +428,9 @@ public class PuntoEcaController {
             @PathVariable UUID gestorId,
             @PathVariable UUID inventarioId
     ) {
+        // Evitar warnings por parámetros no usados
+        Objects.requireNonNull(nombrePunto);
+        Objects.requireNonNull(gestorId);
         try {
             inventarioService.eliminarInventario(inventarioId);
             return ResponseEntity.ok(Map.of(
@@ -216,11 +438,13 @@ public class PuntoEcaController {
                     "mensaje", "Material eliminado del inventario correctamente"
             ));
         } catch (InventarioNotFoundException e) {
+            logger.warn("Inventario no encontrado al eliminar: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
                     "error", true,
                     "mensaje", "Inventario no encontrado: " + e.getMessage()
             ));
         } catch (Exception e) {
+            logger.error("Error al eliminar inventario: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
                     "error", true,
                     "mensaje", "Error al eliminar inventario: " + e.getMessage()

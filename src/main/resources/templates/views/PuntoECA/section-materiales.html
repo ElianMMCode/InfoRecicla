@@ -1,5 +1,7 @@
 <!-- Fragment: Materiales -->
-<section th:fragment="materiales" class="container py-4">
+<section th:fragment="materiales" class="container py-4"
+         th:data-gestor="${gestor}"
+         th:data-usuario-id="${usuario.usuarioId}">
     <h2 class="h5 mb-3">Materiales</h2>
 
     <!-- ACORDEÓN PRINCIPAL CON TODO -->
@@ -589,14 +591,6 @@
 
                     console.log('Datos a enviar:', datosInventario);
 
-                    // Mostrar estado
-                    const mensajeEstado = document.getElementById('mensajeEstado');
-                    const textoMensaje = document.getElementById('textoMensaje');
-
-                    mensajeEstado.style.display = 'block';
-                    mensajeEstado.className = 'alert alert-info mt-4';
-                    textoMensaje.textContent = 'Guardando...';
-
                     // Enviar al backend
                     fetch('/punto-eca/inventario/agregar', {
                         method: 'POST',
@@ -617,37 +611,33 @@
                     .then(({ status, ok, data }) => {
                         console.log('Datos recibidos:', data);
 
+                        // Cerrar modal de agregar
+                        const modalAgregar = bootstrap.Modal.getInstance(document.getElementById('agregarInventarioModal'));
+                        if (modalAgregar) modalAgregar.hide();
+
                         if (!ok) {
                             // Error del servidor
                             const mensajeError = data?.mensaje || 'Error desconocido';
                             console.warn('⚠️ Error del servidor (status ' + status + '):', mensajeError);
-                            mensajeEstado.style.display = 'block';
-                            mensajeEstado.className = 'alert alert-danger mt-4';
-                            textoMensaje.innerHTML = '<i class="bi bi-exclamation-circle me-2"></i>' + mensajeError;
+                            mostrarModalResultado(false, 'Error al guardar', mensajeError);
                             return;
                         }
 
                         // Éxito (status 201)
                         console.log('✓ Material guardado exitosamente');
-                        mensajeEstado.style.display = 'block';
-                        mensajeEstado.className = 'alert alert-success mt-4';
-                        textoMensaje.innerHTML = '<i class="bi bi-check-circle me-2"></i>Material guardado exitosamente';
+                        mostrarModalResultado(true, '¡Material Guardado!', 'El material se ha agregado exitosamente al inventario.');
 
-                        // Cerrar modal después de 2 segundos
+                        // Limpiar formulario después de cerrar el modal
                         setTimeout(() => {
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('agregarInventarioModal'));
-                            if (modal) modal.hide();
-
-                            // Limpiar formulario
                             document.getElementById('formAgregarInventario').reset();
-                            mensajeEstado.style.display = 'none';
-                        }, 2000);
+                        }, 500);
                     })
                     .catch(err => {
                         console.error('❌ Error en la solicitud:', err);
-                        mensajeEstado.style.display = 'block';
-                        mensajeEstado.className = 'alert alert-danger mt-4';
-                        textoMensaje.innerHTML = '<i class="bi bi-exclamation-circle me-2"></i>Error de conexión. Intenta de nuevo.';
+                        // Cerrar modal de agregar
+                        const modalAgregar = bootstrap.Modal.getInstance(document.getElementById('agregarInventarioModal'));
+                        if (modalAgregar) modalAgregar.hide();
+                        mostrarModalResultado(false, 'Error de conexión', 'No se pudo conectar con el servidor. Intenta de nuevo.');
                     });
                 });
                 console.log('✓ Handler GUARDAR INVENTARIO vinculado');
@@ -981,7 +971,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
 
                     <div th:if="${mensajeAlerta != null and !#strings.isEmpty(mensajeAlerta)}" class="alert alert-warning" role="alert">
                         <i class="bi bi-exclamation-triangle me-2"></i>
@@ -994,116 +983,1012 @@
                     </div>
 
                     <div class="row g-4" th:if="${not #lists.isEmpty(inventario)}" id="contenedorMateriales">
-            <div class="col-12 col-md-6 col-lg-4 tarjeta-material"
-                 th:each="inventario : ${inventario}"
-                 th:data-nombre-material="${inventario.nombreMaterial()}"
-                 th:data-unidad-medida="${inventario.unidadMedida()}"
-                 th:with="ocupacion = ${(inventario.stockActual() / inventario.capacidadMaxima() * 100).intValue()}">
-                <!-- Tarjeta de Material -->
-                <div class="card h-100 shadow-sm border-0 transition"
-                     style="transition: all 0.3s ease;"
-                     th:classappend="${ocupacion >= inventario.umbralCritico() ? 'estado-critico' : (ocupacion >= inventario.umbralAlerta() ? 'estado-alerta' : 'estado-ok')}"
-                     th:data-ocupacion="${ocupacion}"
-                     th:data-estado="${ocupacion >= inventario.umbralCritico() ? 'critico' : (ocupacion >= inventario.umbralAlerta() ? 'alerta' : 'ok')}"
-                     th:data-stock-actual="${inventario.stockActual()}"
-                     th:data-capacidad-maxima="${inventario.capacidadMaxima()}">
-                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-start">
-                        <div>
-                            <h5 class="card-title mb-1" th:text="${inventario.nombreMaterial()}">Material</h5>
-                            <small class="text-light" th:text="${inventario.unidadMedida()}">Unidad</small>
-                        </div>
-                        <span class="badge bg-info" th:text="${inventario.unidadMedida()}">Unidad</span>
-                    </div>
+                        <div class="col-12 col-md-6 col-lg-4 tarjeta-material"
+                             th:each="inventario : ${inventario}"
+                             th:data-nombre-material="${inventario.nombreMaterial()}"
+                             th:data-unidad-medida="${inventario.unidadMedida()}"
+                             th:with="ocupacion = ${(inventario.stockActual() / inventario.capacidadMaxima() * 100).intValue()}">
+                            <!-- Tarjeta de Material -->
+                            <div class="card h-100 shadow-sm border-0 transition"
+                                 style="transition: all 0.3s ease;"
+                                 th:classappend="${ocupacion >= inventario.umbralCritico() ? 'estado-critico' : (ocupacion >= inventario.umbralAlerta() ? 'estado-alerta' : 'estado-ok')}"
+                                 th:data-ocupacion="${ocupacion}"
+                                 th:data-estado="${ocupacion >= inventario.umbralCritico() ? 'critico' : (ocupacion >= inventario.umbralAlerta() ? 'alerta' : 'ok')}"
+                                 th:data-stock-actual="${inventario.stockActual()}"
+                                 th:data-capacidad-maxima="${inventario.capacidadMaxima()}">
+                                <div class="card-header bg-success text-white d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5 class="card-title mb-1" th:text="${inventario.nombreMaterial()}">Material</h5>
+                                        <small class="text-light" th:text="${inventario.unidadMedida()}">Unidad</small>
+                                    </div>
+                                    <span class="badge bg-info" th:text="${inventario.unidadMedida()}">Unidad</span>
+                                </div>
 
-                    <div class="card-body">
-                        <!-- Datos principales -->
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <small class="text-muted">Stock Actual</small>
-                                <p class="fw-bold text-success" th:text="${#numbers.formatDecimal(inventario.stockActual(), 1, 'COMMA', 2, 'POINT')}">0.00</p>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted">Capacidad Máxima</small>
-                                <p class="fw-bold text-primary" th:text="${#numbers.formatDecimal(inventario.capacidadMaxima(), 1, 'COMMA', 2, 'POINT')}">0.00</p>
-                            </div>
-                        </div>
+                                <div class="card-body">
+                                    <!-- Datos principales -->
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <small class="text-muted">Stock Actual</small>
+                                            <p class="fw-bold text-success" th:text="${#numbers.formatDecimal(inventario.stockActual(), 1, 'COMMA', 2, 'POINT')}">0.00</p>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Capacidad Máxima</small>
+                                            <p class="fw-bold text-primary" th:text="${#numbers.formatDecimal(inventario.capacidadMaxima(), 1, 'COMMA', 2, 'POINT')}">0.00</p>
+                                        </div>
+                                    </div>
 
-                        <!-- Indicador de ocupación con código de color -->
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <small class="text-muted">% Ocupación</small>
-                                <th:block th:with="ocupacion = ${(inventario.stockActual() / inventario.capacidadMaxima() * 100).intValue()}">
-                                    <small class="fw-bold"
-                                           th:classappend="${ocupacion >= inventario.umbralCritico() ? 'text-danger' : (ocupacion >= inventario.umbralAlerta() ? 'text-warning' : 'text-success')}"
-                                           th:text="${ocupacion} + '%'">
-                                        0%
-                                    </small>
-                                </th:block>
-                            </div>
-                            <th:block th:with="ocupacion = ${(inventario.stockActual() / inventario.capacidadMaxima() * 100).intValue()}">
-                                <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar"
-                                         th:classappend="${ocupacion >= inventario.umbralCritico() ? 'bg-danger' : (ocupacion >= inventario.umbralAlerta() ? 'bg-warning' : 'bg-success')}"
-                                         role="progressbar"
-                                         th:attr="aria-valuenow=${ocupacion}, aria-valuemin='0', aria-valuemax='100'"
-                                         th:style="'width: ' + ${ocupacion} + '%'">
-                                        <small class="d-flex align-items-center justify-content-center h-100 text-dark fw-bold" th:text="${ocupacion} + '%'">0%</small>
+                                    <!-- Indicador de ocupación con código de color -->
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <small class="text-muted">% Ocupación</small>
+                                            <th:block th:with="ocupacion = ${(inventario.stockActual() / inventario.capacidadMaxima() * 100).intValue()}">
+                                                <small class="fw-bold"
+                                                       th:classappend="${ocupacion >= inventario.umbralCritico() ? 'text-danger' : (ocupacion >= inventario.umbralAlerta() ? 'text-warning' : 'text-success')}"
+                                                       th:text="${ocupacion} + '%'">
+                                                    0%
+                                                </small>
+                                            </th:block>
+                                        </div>
+                                        <th:block th:with="ocupacion = ${(inventario.stockActual() / inventario.capacidadMaxima() * 100).intValue()}">
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar"
+                                                     th:classappend="${ocupacion >= inventario.umbralCritico() ? 'bg-danger' : (ocupacion >= inventario.umbralAlerta() ? 'bg-warning' : 'bg-success')}"
+                                                     role="progressbar"
+                                                     th:attr="aria-valuenow=${ocupacion}, aria-valuemin='0', aria-valuemax='100'"
+                                                     th:style="'width: ' + ${ocupacion} + '%'">
+                                                    <small class="d-flex align-items-center justify-content-center h-100 text-dark fw-bold" th:text="${ocupacion} + '%'">0%</small>
+                                                </div>
+                                            </div>
+                                        </th:block>
+                                    </div>
+
+                                    <!-- Información de precios -->
+                                    <hr class="my-2">
+                                    <div class="row small mb-3">
+                                        <div class="col-6">
+                                            <small class="text-muted">Precio Compra</small>
+                                            <p class="text-dark mb-0" th:text="${inventario.precioCompra() != null ? '$ ' + #numbers.formatDecimal(inventario.precioCompra(), 1, 'COMMA', 2, 'POINT') : 'N/A'}">$ 0.00</p>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Precio Venta</small>
+                                            <p class="text-dark mb-0" th:text="${inventario.precioVenta() != null ? '$ ' + #numbers.formatDecimal(inventario.precioVenta(), 1, 'COMMA', 2, 'POINT') : 'N/A'}">$ 0.00</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Umbral de alerta -->
+                                    <div class="alert alert-light border border-warning p-2 mb-0" role="alert">
+                                        <small class="text-muted">Umbrales:</small>
+                                        <div class="d-flex justify-content-between mt-1">
+                                            <small>
+                                                <span class="badge bg-warning">Alerta: <span th:text="${inventario.umbralAlerta()}">0</span>%</span>
+                                            </small>
+                                            <small>
+                                                <span class="badge bg-danger">Crítico: <span th:text="${inventario.umbralCritico()}">0</span>%</span>
+                                            </small>
+                                        </div>
                                     </div>
                                 </div>
-                            </th:block>
-                        </div>
 
-                        <!-- Información de precios -->
-                        <hr class="my-2">
-                        <div class="row small mb-3">
-                            <div class="col-6">
-                                <small class="text-muted">Precio Compra</small>
-                                <p class="text-dark mb-0" th:text="${inventario.precioCompra() != null ? '$ ' + #numbers.formatDecimal(inventario.precioCompra(), 1, 'COMMA', 2, 'POINT') : 'N/A'}">$ 0.00</p>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted">Precio Venta</small>
-                                <p class="text-dark mb-0" th:text="${inventario.precioVenta() != null ? '$ ' + #numbers.formatDecimal(inventario.precioVenta(), 1, 'COMMA', 2, 'POINT') : 'N/A'}">$ 0.00</p>
-                            </div>
-                        </div>
-
-                        <!-- Umbral de alerta -->
-                        <div class="alert alert-light border border-warning p-2 mb-0" role="alert">
-                            <small class="text-muted">Umbrales:</small>
-                            <div class="d-flex justify-content-between mt-1">
-                                <small>
-                                    <span class="badge bg-warning">Alerta: <span th:text="${inventario.umbralAlerta()}">0</span>%</span>
-                                </small>
-                                <small>
-                                    <span class="badge bg-danger">Crítico: <span th:text="${inventario.umbralCritico()}">0</span>%</span>
-                                </small>
+                                <!-- Botón de detalles -->
+                                <div class="card-footer bg-light border-top d-grid gap-2">
+                                    <button type="button" class="btn btn-success btn-sm detallesBtn"
+                                            th:data-inventario-id="${inventario.inventarioId() != null ? inventario.inventarioId() : ''}"
+                                            th:data-material-id="${inventario.materialId() != null ? inventario.materialId() : ''}"
+                                            th:data-nombre-material="${inventario.nombreMaterial()}"
+                                            th:data-stock-actual="${inventario.stockActual()}"
+                                            th:data-capacidad-maxima="${inventario.capacidadMaxima()}"
+                                            th:data-precio-compra="${inventario.precioCompra() != null ? inventario.precioCompra() : 0}"
+                                            th:data-precio-venta="${inventario.precioVenta() != null ? inventario.precioVenta() : 0}"
+                                            th:data-umbral-alerta="${inventario.umbralAlerta()}"
+                                            th:data-umbral-critico="${inventario.umbralCritico()}"
+                                            th:data-unidad-medida="${inventario.unidadMedida()}">
+                                        <i class="bi bi-eye me-1"></i> Ver Detalles
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Botón de detalles -->
-                    <div class="card-footer bg-light border-top d-grid gap-2">
-                        <button type="button" class="btn btn-success btn-sm detallesBtn"
-                                th:data-inventario-id="${inventario.inventarioId() != null ? inventario.inventarioId() : ''}"
-                                th:data-material-id="${inventario.materialId() != null ? inventario.materialId() : ''}"
-                                th:data-nombre-material="${inventario.nombreMaterial()}"
-                                th:data-stock-actual="${inventario.stockActual()}"
-                                th:data-capacidad-maxima="${inventario.capacidadMaxima()}"
-                                th:data-precio-compra="${inventario.precioCompra() != null ? inventario.precioCompra() : 0}"
-                                th:data-precio-venta="${inventario.precioVenta() != null ? inventario.precioVenta() : 0}"
-                                th:data-umbral-alerta="${inventario.umbralAlerta()}"
-                                th:data-umbral-critico="${inventario.umbralCritico()}"
-                                th:data-unidad-medida="${inventario.unidadMedida()}">
-                            <i class="bi bi-eye me-1"></i> Ver Detalles
-                        </button>
                     </div>
                 </div>
             </div>
         </div>
-                </div>
-            </div>
-        </div>
+    </div>
 
     </div>
 
-</section>
+    <!-- MODALS: reemplazo por la versión global solicitada -->
 
+    <!-- MODAL GLOBAL - DISPONIBLE EN TODAS LAS PÁGINAS -->
+    <div class="modal fade" id="detallesModal" tabindex="-1" aria-labelledby="detallesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg rounded-3">
+                <!-- Header con fondo verde -->
+                <div class="modal-header border-0 bg-success text-white p-4 rounded-top-3">
+                    <div>
+                        <h5 class="modal-title fw-bold fs-5" id="detallesModalLabel">
+                            <i class="bi bi-box-seam me-2"></i><span id="modalHeaderNombre">Detalles del Material</span>
+                        </h5>
+                        <small class="text-white-50"><i class="bi bi-info-circle me-1"></i>Información completa del inventario</small>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-0">
+                    <!-- Sección 1: Información Básica -->
+                    <div class="p-4 border-bottom bg-light">
+                        <h6 class="text-success mb-3 fw-bold"><i class="bi bi-info-circle me-2"></i>Información Básica</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-light border-start border-4 border-success">
+                                    <small class="text-muted d-block mb-1"><i class="bi bi-tag me-1"></i>Nombre del Material</small>
+                                    <p class="h6 text-success fw-bold mb-0" id="modalNombreMaterial">-</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 d-none">
+                                <div class="p-3 rounded-2 bg-light border-start border-4 border-primary">
+                                    <small class="text-muted d-block mb-1"><i class="bi bi-code-square me-1"></i>ID del Material</small>
+                                    <p class="h6 font-monospace text-primary fw-bold mb-0" id="modalMaterialId">-</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-warning bg-opacity-10 border-start border-4 border-warning">
+                                    <small class="text-muted d-block mb-1"><i class="bi bi-rulers me-1"></i>Unidad de Medida</small>
+                                    <p class="h6 fw-bold mb-0" id="modalUnidadMedida">-</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-danger bg-opacity-10 border-start border-4 border-danger">
+                                    <small class="text-muted d-block mb-1"><i class="bi bi-circle-fill me-1" id="modalEstadoIcon"></i>Estado Actual</small>
+                                    <p class="h6 fw-bold mb-0" id="modalEstadoText">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección 2: Ocupación -->
+                    <div class="p-4 border-bottom">
+                        <h6 class="text-success mb-3 fw-bold"><i class="bi bi-pie-chart me-2"></i>Ocupación del Inventario <span class="badge bg-success" id="modalOcupacionPorcentaje">0%</span></h6>
+                        <div class="progress rounded-pill" style="height: 40px;">
+                            <div id="modalOcupacionBar" class="progress-bar d-flex align-items-center justify-content-center fw-bold text-white fs-6">
+                                <small id="modalOcupacionText">0%</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección 3: Stock e Inventario -->
+                    <div class="p-4 border-bottom bg-light">
+                        <h6 class="text-success mb-3 fw-bold"><i class="bi bi-inbox me-2"></i>Inventario</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-white border border-success border-opacity-25 border-start border-4 border-success">
+                                    <small class="text-muted d-block mb-1"><i class="bi bi-inbox me-1"></i>Stock Actual</small>
+                                    <p class="h5 text-success fw-bold mb-1" id="modalStockActual">0.00</p>
+                                    <small class="text-muted" id="modalStockUnidad">unidades</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-white border border-primary border-opacity-25 border-start border-4 border-primary">
+                                    <small class="text-muted d-block mb-1"><i class="bi bi-archive me-1"></i>Capacidad Máxima</small>
+                                    <p class="h5 text-primary fw-bold mb-1" id="modalCapacidadMaxima">0.00</p>
+                                    <small class="text-muted" id="modalCapacidadUnidad">unidades</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-white border border-info border-opacity-25 border-start border-4 border-info">
+                                    <small class="text-muted d-block mb-1"><i class="bi bi-diagram-3 me-1"></i>Espacio Usado</small>
+                                    <p class="h5 text-info fw-bold mb-0" id="modalEspacioUsado">0.00</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-white border border-warning border-opacity-25 border-start border-4 border-warning">
+                                    <small class="text-muted d-block mb-1"><i class="bi bi-diagram-3 me-1"></i>Espacio Disponible</small>
+                                    <p class="h5 text-warning fw-bold mb-0" id="modalEspacioDisponible">0.00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección 4: Precios y Márgenes -->
+                    <div class="p-4 border-bottom">
+                        <h6 class="text-success mb-3 fw-bold"><i class="bi bi-tag-fill me-2"></i>Análisis de Precios</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-primary bg-opacity-10 border-start border-4 border-primary">
+                                    <small class="text-muted d-block mb-1"><i class="bi bi-cart-plus me-1"></i>Precio de Compra</small>
+                                    <p class="h5 text-primary fw-bold mb-0" id="modalPrecioCompra">$ 0.00</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-warning bg-opacity-10 border-start border-4 border-warning">
+                                    <small class="text-muted d-block mb-1"><i class="bi bi-cart-check me-1"></i>Precio de Venta</small>
+                                    <p class="h5 text-warning fw-bold mb-0" id="modalPrecioVenta">$ 0.00</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-danger bg-opacity-10 border-start border-4 border-danger">
+                                    <small class="text-muted d-block mb-1"><i class="bi bi-percent me-1"></i>Margen de Ganancia</small>
+                                    <p class="h5 text-danger fw-bold mb-0" id="modalMargenGanancia">$ 0.00</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-success bg-opacity-10 border-start border-4 border-success">
+                                    <small class="text-muted d-block mb-1"><i class="bi bi-percent me-1"></i>% Margen</small>
+                                    <p class="h5 text-success fw-bold mb-0" id="modalPorcentajeMargen">0%</p>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="p-3 rounded-2 bg-white border-3 border-success">
+                                    <small class="text-muted d-block mb-1"><i class="bi bi-calculator me-1 text-success"></i>Valor Total en Inventario</small>
+                                    <p class="h4 text-success fw-bold mb-0" id="modalValorTotal">$ 0.00</p>
+                                    <small class="text-muted">(Stock Actual × Precio Compra)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección 5: Umbrales y Alertas -->
+                    <div class="p-4 border-bottom bg-light">
+                        <h6 class="text-success mb-3 fw-bold"><i class="bi bi-exclamation-triangle me-2"></i>Umbrales y Alertas</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-warning bg-opacity-10 border-start border-4 border-warning">
+                                    <small class="text-muted d-block mb-1"><i class="bi bi-exclamation-triangle me-1"></i>Umbral de Alerta</small>
+                                    <p class="h5 text-warning fw-bold mb-0" id="modalUmbralAlerta">0%</p>
+                                    <small class="text-muted">Se activa al superar este %</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-danger bg-opacity-10 border-start border-4 border-danger">
+                                    <small class="text-muted d-block mb-1"><i class="bi bi-exclamation-octagon me-1"></i>Umbral Crítico</small>
+                                    <p class="h5 text-danger fw-bold mb-0" id="modalUmbralCritico">0%</p>
+                                    <small class="text-muted">Requiere atención inmediata</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Indicador de Estado -->
+                    <div class="p-4 border-bottom" id="modalEstadoIndicador"></div>
+
+                    <!-- Resumen de Alertas -->
+                    <div class="p-4" id="modalResumenAlertas"></div>
+                </div>
+
+                <div class="modal-footer bg-light border-top">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cerrar
+                    </button>
+                    <button type="button" class="btn btn-warning" id="btnEditarMaterial">
+                        <i class="bi bi-pencil me-1"></i>Editar
+                    </button>
+                    <button type="button" class="btn btn-danger" id="btnBorrarMaterial">
+                        <i class="bi bi-trash me-1"></i>Borrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDITAR - PARA EDITAR DATOS DEL INVENTARIO -->
+    <div class="modal fade" id="editarModal" tabindex="-1" aria-labelledby="editarModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow-lg rounded-3">
+                <!-- Header -->
+                <div class="modal-header border-0 bg-warning text-dark p-4 rounded-top-3">
+                    <div>
+                        <h5 class="modal-title fw-bold fs-5" id="editarModalLabel">
+                            <i class="bi bi-pencil-square me-2"></i>Editar Inventario
+                        </h5>
+                        <small class="text-secondary"><i class="bi bi-info-circle me-1"></i>Actualiza los datos del material</small>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <form id="formularioEditarInventario">
+                        <!-- Material ID (oculto) -->
+                        <input type="hidden" id="editarMaterialId" value="">
+
+                        <!-- Row 1: Stock y Capacidad -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="editarStockActual" class="form-label fw-bold">
+                                    <i class="bi bi-inbox text-success me-2"></i>Stock Actual
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="editarStockActual" step="0.01" required>
+                                    <span class="input-group-text" id="editarStockUnidad">un.</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editarCapacidadMaxima" class="form-label fw-bold">
+                                    <i class="bi bi-archive text-primary me-2"></i>Capacidad Máxima
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="editarCapacidadMaxima" step="0.01" required>
+                                    <span class="input-group-text" id="editarCapacidadUnidad">un.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 1.5: Unidad de Medida -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="editarUnidadMedida" class="form-label fw-bold">
+                                    <i class="bi bi-rulers text-warning me-2"></i>Unidad de Medida
+                                </label>
+                                <select class="form-select" id="editarUnidadMedida" required>
+                                    <option value="">-- Seleccionar unidad --</option>
+                                    <th:block th:if="${not #lists.isEmpty(unidadesMedida)}">
+                                        <option th:each="unidad : ${unidadesMedida}"
+                                                th:value="${unidad.clave}"
+                                                th:text="${unidad.nombre}">Unidad</option>
+                                    </th:block>
+                                </select>
+                                <small class="text-muted d-block mt-2">Selecciona la unidad de medida del material</small>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Precios -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="editarPrecioCompra" class="form-label fw-bold">
+                                    <i class="bi bi-cart-plus text-info me-2"></i>Precio de Compra
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="editarPrecioCompra" step="0.01" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editarPrecioVenta" class="form-label fw-bold">
+                                    <i class="bi bi-cart-check text-warning me-2"></i>Precio de Venta
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="editarPrecioVenta" step="0.01" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Umbrales -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="editarUmbralAlerta" class="form-label fw-bold">
+                                    <i class="bi bi-exclamation-triangle text-warning me-2"></i>Umbral de Alerta (%)
+                                </label>
+                                <input type="number" class="form-control" id="editarUmbralAlerta" min="0" max="100" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editarUmbralCritico" class="form-label fw-bold">
+                                    <i class="bi bi-exclamation-octagon text-danger me-2"></i>Umbral Crítico (%)
+                                </label>
+                                <input type="number" class="form-control" id="editarUmbralCritico" min="0" max="100" required>
+                            </div>
+                        </div>
+
+                        <!-- Resumen de cambios -->
+                        <div class="alert alert-info rounded-2" role="alert">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Nota:</strong> Los cambios se guardarán en la base de datos. Asegúrate de verificar los datos antes de guardar.
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer bg-light border-top">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-warning" id="btnGuardarCambios">
+                        <i class="bi bi-check-circle me-1"></i>Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resultado del Guardado (Éxito o Error) -->
+    <div class="modal fade" id="modalResultadoGuardado" tabindex="-1" aria-labelledby="modalResultadoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-body p-5 text-center">
+                    <!-- Icono dinámico -->
+                    <div class="mb-4">
+                        <i id="iconoResultado" class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <!-- Título dinámico -->
+                    <h5 id="tituloResultado" class="fw-bold mb-3 text-success" style="font-size: 1.5rem;">
+                        ¡Operación Exitosa!
+                    </h5>
+                    <!-- Mensaje dinámico -->
+                    <p id="mensajeResultado" class="text-muted mb-0" style="font-size: 1rem;">
+                        Los cambios se han guardado correctamente en la base de datos.
+                    </p>
+                </div>
+                <div class="modal-footer bg-light border-top">
+                    <button type="button" class="btn btn-success" id="btnOkResultado">
+                        <i class="bi bi-check-circle me-1"></i>OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Éxito en Actualización -->
+    <div class="modal fade" id="modalExitoActualizacion" tabindex="-1" aria-labelledby="modalExitoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="modal-title fw-bold text-success mb-2" id="modalExitoLabel">¡Operación Exitosa!</h5>
+                    <p class="text-muted mb-0">Los cambios se han guardado correctamente en la base de datos.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Resumen de Actualización -->
+    <div class="modal fade" id="modalResumenActualizacion" tabindex="-1" aria-labelledby="modalResumenLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-success text-white border-0">
+                    <h5 class="modal-title fw-bold" id="modalResumenLabel">
+                        <i class="bi bi-info-circle me-2"></i>Datos Actualizados
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <!-- Información del Material -->
+                    <div class="mb-4">
+                        <h6 class="text-success fw-bold mb-3">
+                            <i class="bi bi-tag me-2"></i>Información del Material
+                        </h6>
+                        <div class="alert alert-light border-start border-4 border-success">
+                            <p class="mb-1">
+                                <strong>Nombre:</strong>
+                                <span id="resumenNombreMaterial">-</span>
+                            </p>
+                            <p class="mb-0">
+                                <strong>Ubicación:</strong>
+                                <span id="resumenNombrePunto">-</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Stock e Inventario -->
+                    <div class="mb-4">
+                        <h6 class="text-info fw-bold mb-3">
+                            <i class="bi bi-boxes me-2"></i>Stock e Inventario
+                        </h6>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-info bg-opacity-10 border-start border-4 border-info">
+                                    <small class="text-muted">Stock Actual</small>
+                                    <p class="h6 fw-bold mb-0" id="resumenStockActual">-</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-warning bg-opacity-10 border-start border-4 border-warning">
+                                    <small class="text-muted">Capacidad Máxima</small>
+                                    <p class="h6 fw-bold mb-0" id="resumenCapacidadMaxima">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <div class="p-3 rounded-2 bg-secondary bg-opacity-10 border-start border-4 border-secondary">
+                                <small class="text-muted">Unidad de Medida</small>
+                                <p class="h6 fw-bold mb-0" id="resumenUnidadMedida">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Precios -->
+                    <div class="mb-4">
+                        <h6 class="text-danger fw-bold mb-3">
+                            <i class="bi bi-currency-dollar me-2"></i>Precios
+                        </h6>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-danger bg-opacity-10 border-start border-4 border-danger">
+                                    <small class="text-muted">Precio de Compra</small>
+                                    <p class="h6 fw-bold mb-0" id="resumenPrecioCompra">-</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-success bg-opacity-10 border-start border-4 border-success">
+                                    <small class="text-muted">Precio de Venta</small>
+                                    <p class="h6 fw-bold mb-0" id="resumenPrecioVenta">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Umbrales -->
+                    <div>
+                        <h6 class="text-warning fw-bold mb-3">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Umbrales de Alerta
+                        </h6>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-warning bg-opacity-10 border-start border-4 border-warning">
+                                    <small class="text-muted">Umbral Alerta</small>
+                                    <p class="h6 fw-bold mb-0" id="resumenUmbralAlerta">-</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 rounded-2 bg-danger bg-opacity-10 border-start border-4 border-danger">
+                                    <small class="text-muted">Umbral Crítico</small>
+                                    <p class="h6 fw-bold mb-0" id="resumenUmbralCritico">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light border-top">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal" id="btnCerrarResumen">
+                        <i class="bi bi-check-circle me-1"></i>Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT PARA MANEJO DE MODALES -->
+    <script>
+        // ====================================================================
+        // FUNCIÓN GLOBAL: Mostrar Modal de Resultado
+        // ====================================================================
+        function mostrarModalResultado(esExito, titulo, mensaje) {
+            console.log('🔔 Mostrando modal de resultado:', { esExito, titulo, mensaje });
+
+            const modalEl = document.getElementById('modalResultadoGuardado');
+            if (!modalEl) {
+                console.error('❌ Modal de resultado no encontrado');
+                alert(titulo + '\n' + mensaje);
+                return;
+            }
+
+            // Actualizar contenido
+            const icono = document.getElementById('iconoResultado');
+            const tituloEl = document.getElementById('tituloResultado');
+            const mensajeEl = document.getElementById('mensajeResultado');
+
+            if (icono) {
+                if (esExito) {
+                    icono.className = 'bi bi-check-circle text-success';
+                } else {
+                    icono.className = 'bi bi-exclamation-circle text-danger';
+                }
+                icono.style.fontSize = '4rem';
+            }
+
+            if (tituloEl) {
+                tituloEl.textContent = titulo;
+                tituloEl.style.fontSize = '1.5rem';
+                tituloEl.className = esExito ? 'fw-bold mb-3 text-success' : 'fw-bold mb-3 text-danger';
+            }
+
+            if (mensajeEl) {
+                mensajeEl.textContent = mensaje;
+            }
+
+            // Configurar botón OK
+            const btnOkResultado = document.getElementById('btnOkResultado');
+            if (btnOkResultado) {
+                // Limpiar eventos previos
+                btnOkResultado.onclick = null;
+                btnOkResultado.onclick = function() {
+                    console.log('✓ Botón OK presionado. Recargando página...');
+                    // Cerrar modal usando Bootstrap
+                    const bsModal = bootstrap.Modal.getInstance(modalEl);
+                    if (bsModal) {
+                        bsModal.hide();
+                    } else {
+                        modalEl.classList.remove('show');
+                        const backdrop = document.querySelector('.modal-backdrop');
+                        if (backdrop) backdrop.remove();
+                    }
+                    // Recargar página
+                    setTimeout(() => {
+                        window.location.reload(true);
+                    }, 300);
+                };
+            }
+
+            // Mostrar modal
+            try {
+                const modal = new bootstrap.Modal(modalEl, {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                console.log('✓ Modal creado, mostrando...');
+                modal.show();
+                console.log('✓ Modal mostrado exitosamente');
+            } catch (err) {
+                console.error('❌ Error mostrando modal:', err);
+                alert(titulo + '\n' + mensaje);
+            }
+        }
+
+        // ====================================================================
+        // IIFE: Sistema de Modales
+        // ====================================================================
+        (function() {
+            let detallesModalInstance = null;
+            let editarModalInstance = null;
+            let isInitialized = false;
+
+            function inicializarModales() {
+                // Esperar a que bootstrap esté disponible
+                if (typeof bootstrap === 'undefined') {
+                    console.warn('⚠ Bootstrap no está disponible aún, reintentando...');
+                    setTimeout(inicializarModales, 100);
+                    return;
+                }
+
+                const detallesModalEl = document.getElementById('detallesModal');
+                const editarModalEl = document.getElementById('editarModal');
+
+                if (detallesModalEl) {
+                    detallesModalInstance = new bootstrap.Modal(detallesModalEl, { backdrop: 'static' });
+                    console.log('✓ Modal de detalles inicializado');
+                }
+                if (editarModalEl) {
+                    editarModalInstance = new bootstrap.Modal(editarModalEl, { backdrop: 'static' });
+                    console.log('✓ Modal de editar inicializado');
+                }
+            }
+
+            function configurarEventListeners() {
+                // Usar delegación de eventos a nivel de documento para mayor robustez
+                document.removeEventListener('click', manejarClickGlobal);
+                document.addEventListener('click', manejarClickGlobal);
+                console.log('✓ Event listeners configurados globalmente');
+            }
+
+            function manejarClickGlobal(e) {
+                const btn = e.target.closest('.detallesBtn');
+                if (!btn) return;
+
+                console.log('✓ Clic en botón de detalles detectado');
+                manejarClickTarjeta(btn);
+            }
+
+            function manejarClickTarjeta(btn) {
+                const nombre = btn.dataset.nombreMaterial || '-';
+                const materialId = btn.dataset.materialId || '';
+                const stock = parseFloat(btn.dataset.stockActual || 0) || 0;
+                const capacidad = parseFloat(btn.dataset.capacidadMaxima || 0) || 0;
+                const precioCompra = btn.dataset.precioCompra || '0';
+                const precioVenta = btn.dataset.precioVenta || '0';
+                const umbralAlerta = parseInt(btn.dataset.umbralAlerta || 0) || 0;
+                const umbralCritico = parseInt(btn.dataset.umbralCritico || 0) || 0;
+                const unidad = btn.dataset.unidadMedida || '';
+                const inventarioId = btn.dataset.inventarioId || '';
+
+                console.log('Material:', { nombre, stock, capacidad, inventarioId });
+
+                // Rellenar campos del modal detalles
+                const setText = (id, text) => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.textContent = text;
+                    }
+                };
+
+                setText('modalHeaderNombre', 'Detalles del Material');
+                setText('modalNombreMaterial', nombre);
+                setText('modalMaterialId', materialId);
+                setText('modalUnidadMedida', unidad || '-');
+                setText('modalStockActual', Number(stock).toFixed(2));
+                setText('modalStockUnidad', unidad || 'unidades');
+                setText('modalCapacidadMaxima', Number(capacidad).toFixed(2));
+                setText('modalCapacidadUnidad', unidad || 'unidades');
+                const espacioUsado = (capacidad > 0) ? (stock).toFixed(2) : '0.00';
+                const espacioDisp = (capacidad > 0) ? (Math.max(capacidad - stock, 0)).toFixed(2) : '0.00';
+                setText('modalEspacioUsado', espacioUsado);
+                setText('modalEspacioDisponible', espacioDisp);
+                setText('modalPrecioCompra', '$ ' + Number(precioCompra).toFixed(2));
+                setText('modalPrecioVenta', '$ ' + Number(precioVenta).toFixed(2));
+                const margen = (Number(precioVenta) - Number(precioCompra)) || 0;
+                setText('modalMargenGanancia', '$ ' + margen.toFixed(2));
+                const pctMargen = (Number(precioCompra) > 0) ? Math.round((margen / Number(precioCompra)) * 100) + '%' : '0%';
+                setText('modalPorcentajeMargen', pctMargen);
+                const valorTotal = (Number(stock) * Number(precioCompra)) || 0;
+                setText('modalValorTotal', '$ ' + Number(valorTotal).toFixed(2));
+                setText('modalUmbralAlerta', umbralAlerta + '%');
+                setText('modalUmbralCritico', umbralCritico + '%');
+
+                // Ocupación
+                const porcentaje = ponerEstadoOcupacion(stock, capacidad);
+                setText('modalOcupacionPorcentaje', porcentaje + '%');
+                const barra = document.getElementById('modalOcupacionBar');
+                const textoBar = document.getElementById('modalOcupacionText');
+                if (barra && textoBar) {
+                    const estado = aplicarColorBarra(barra, porcentaje, umbralAlerta, umbralCritico);
+                    textoBar.textContent = porcentaje + '%';
+                    const estadoTextEl = document.getElementById('modalEstadoText');
+                    const estadoIconEl = document.getElementById('modalEstadoIcon');
+                    if (estadoTextEl) estadoTextEl.textContent = estado;
+                    if (estadoIconEl) {
+                        estadoIconEl.className = 'bi bi-circle-fill me-1';
+                        if (estado === 'Crítico') estadoIconEl.classList.add('text-danger');
+                        else if (estado === 'Alerta') estadoIconEl.classList.add('text-warning');
+                        else estadoIconEl.classList.add('text-success');
+                    }
+                }
+
+                // Guardar id en botones del modal
+                const btnEditar = document.getElementById('btnEditarMaterial');
+                const btnBorrar = document.getElementById('btnBorrarMaterial');
+                if (btnEditar) {
+                    btnEditar.dataset.inventarioId = inventarioId;
+                    btnEditar.dataset.materialId = materialId;
+                    btnEditar.dataset.stock = stock;
+                    btnEditar.dataset.capacidad = capacidad;
+                    btnEditar.dataset.unidad = unidad;
+                    btnEditar.dataset.precioCompra = precioCompra;
+                    btnEditar.dataset.precioVenta = precioVenta;
+                    btnEditar.dataset.umbralAlerta = umbralAlerta;
+                    btnEditar.dataset.umbralCritico = umbralCritico;
+                }
+                if (btnBorrar) {
+                    btnBorrar.dataset.inventarioId = inventarioId;
+                }
+
+                // Mostrar modal detalles
+                if (detallesModalInstance) {
+                    console.log('✓ Abriendo modal de detalles');
+                    detallesModalInstance.show();
+                } else {
+                    console.error('✗ detallesModalInstance no está inicializado');
+                }
+            }
+
+            function ponerEstadoOcupacion(stock, capacidad) {
+                const pct = (capacidad && capacidad > 0) ? Math.round((stock / capacidad) * 100) : 0;
+                return Math.min(Math.max(pct, 0), 100);
+            }
+
+            function aplicarColorBarra(barEl, porcentaje, umbralAlerta, umbralCritico) {
+                barEl.style.width = porcentaje + '%';
+                barEl.className = 'progress-bar d-flex align-items-center justify-content-center fw-bold text-white fs-6';
+                if (porcentaje >= (umbralCritico || 100)) {
+                    barEl.classList.add('bg-danger');
+                    return 'Crítico';
+                }
+                if (porcentaje >= (umbralAlerta || 50)) {
+                    barEl.classList.add('bg-warning');
+                    return 'Alerta';
+                }
+                barEl.classList.add('bg-success');
+                return 'OK';
+            }
+
+            // Abrir modal editar y rellenar campos
+            function configurarBtnEditar() {
+                const btnEditarModal = document.getElementById('btnEditarMaterial');
+                if (btnEditarModal) {
+                    btnEditarModal.removeEventListener('click', abrirModalEditar);
+                    btnEditarModal.addEventListener('click', abrirModalEditar);
+                }
+            }
+
+            function abrirModalEditar() {
+                const inventarioId = this.dataset.inventarioid || this.dataset.inventarioId || '';
+                const materialId = this.dataset.materialid || this.dataset.materialId || '';
+                const stock = this.dataset.stock || '';
+                const capacidad = this.dataset.capacidad || '';
+                const unidad = this.dataset.unidad || '';
+                const precioCompra = this.dataset.preciocompra || this.dataset.precioCompra || '0';
+                const precioVenta = this.dataset.precioventa || this.dataset.precioVenta || '0';
+                const umbralAlerta = this.dataset.umbralalerta || this.dataset.umbralAlerta || '0';
+                const umbralCritico = this.dataset.umbralcritico || this.dataset.umbralCritico || '0';
+
+                console.log('Abriendo modal editar con inventarioId:', inventarioId);
+
+                const inputHidden = document.getElementById('editarMaterialId');
+                if (inputHidden) inputHidden.value = inventarioId || materialId || '';
+
+                const inputStock = document.getElementById('editarStockActual');
+                if (inputStock) inputStock.value = stock;
+
+                const inputCapacidad = document.getElementById('editarCapacidadMaxima');
+                if (inputCapacidad) inputCapacidad.value = capacidad;
+
+                const selectUnidad = document.getElementById('editarUnidadMedida');
+                if (selectUnidad && unidad) {
+                    const opt = Array.from(selectUnidad.options).find(o => o.value === unidad || o.text === unidad);
+                    if (opt) selectUnidad.value = opt.value;
+                }
+
+                const inputPrecioCompra = document.getElementById('editarPrecioCompra');
+                if (inputPrecioCompra) inputPrecioCompra.value = precioCompra;
+
+                const inputPrecioVenta = document.getElementById('editarPrecioVenta');
+                if (inputPrecioVenta) inputPrecioVenta.value = precioVenta;
+
+                const inputUmbralAlerta = document.getElementById('editarUmbralAlerta');
+                if (inputUmbralAlerta) inputUmbralAlerta.value = umbralAlerta;
+
+                const inputUmbralCritico = document.getElementById('editarUmbralCritico');
+                if (inputUmbralCritico) inputUmbralCritico.value = umbralCritico;
+
+                if (detallesModalInstance) detallesModalInstance.hide();
+                if (editarModalInstance) {
+                    console.log('✓ Abriendo modal de editar');
+                    editarModalInstance.show();
+                }
+            }
+
+            // Configurar botón de guardar cambios
+            function configurarBtnGuardar() {
+                const btnGuardarModal = document.getElementById('btnGuardarCambios');
+                if (btnGuardarModal) {
+                    btnGuardarModal.removeEventListener('click', guardarCambios);
+                    btnGuardarModal.addEventListener('click', guardarCambios);
+                }
+            }
+
+            function guardarCambios() {
+                const inventarioId = document.getElementById('editarMaterialId').value;
+                const stockActual = parseFloat(document.getElementById('editarStockActual').value) || 0;
+                const capacidadMaxima = parseFloat(document.getElementById('editarCapacidadMaxima').value) || 0;
+                const unidadMedida = document.getElementById('editarUnidadMedida').value;
+                const precioCompra = parseFloat(document.getElementById('editarPrecioCompra').value) || 0;
+                const precioVenta = parseFloat(document.getElementById('editarPrecioVenta').value) || 0;
+                const umbralAlerta = parseInt(document.getElementById('editarUmbralAlerta').value) || 0;
+                const umbralCritico = parseInt(document.getElementById('editarUmbralCritico').value) || 0;
+
+                const section = document.querySelector('section[th\\:fragment="materiales"]') || document.querySelector('section.container');
+                const gestor = section.dataset.gestor || section.getAttribute('data-gestor');
+                const usuarioId = section.dataset.usuarioId || section.getAttribute('data-usuario-id');
+
+                console.log('💾 Guardando cambios de inventario:', { inventarioId, stockActual, capacidadMaxima, unidadMedida, precioCompra, precioVenta, umbralAlerta, umbralCritico });
+                console.log('📍 Ruta datos:', { gestor, usuarioId });
+
+                if (!inventarioId) {
+                    mostrarModalResultado(false, 'Error', 'No se encontró el ID del inventario');
+                    return;
+                }
+
+                if (!gestor || !usuarioId) {
+                    mostrarModalResultado(false, 'Error', 'No se encontraron los datos de usuario. Por favor recarga la página.');
+                    return;
+                }
+
+                if (!stockActual || !capacidadMaxima || !unidadMedida || !precioCompra || !precioVenta) {
+                    mostrarModalResultado(false, 'Error', 'Por favor completa todos los campos requeridos');
+                    return;
+                }
+
+                const datosActualizacion = {
+                    stockActual: stockActual,
+                    capacidadMaxima: capacidadMaxima,
+                    unidadMedida: unidadMedida,
+                    precioCompra: precioCompra,
+                    precioVenta: precioVenta,
+                    umbralAlerta: umbralAlerta,
+                    umbralCritico: umbralCritico
+                };
+
+                this.disabled = true;
+                const textoOriginal = this.innerHTML;
+                this.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Guardando...';
+                const btnGuardar = this;
+
+                const url = `/punto-eca/${gestor}/${usuarioId}/actualizar-inventario/${inventarioId}`;
+                console.log('🔗 URL de actualización:', url);
+
+                fetch(url, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datosActualizacion)
+                })
+                    .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, data })))
+                    .then(({ status, ok, data }) => {
+                        // Cerrar modales previos
+                        if (editarModalInstance) editarModalInstance.hide();
+
+                        if (!ok) {
+                            // Mostrar error
+                            mostrarModalResultado(false, 'Error al guardar', data.mensaje || 'Hubo un error al guardar los cambios');
+                            btnGuardar.disabled = false;
+                            btnGuardar.innerHTML = textoOriginal;
+                        } else {
+                            console.log('✅ Actualización exitosa:', data);
+                            // Mostrar éxito
+                            mostrarModalResultado(true, '¡Operación Exitosa!', 'Los cambios se han guardado correctamente en la base de datos.');
+                            btnGuardar.disabled = false;
+                            btnGuardar.innerHTML = textoOriginal;
+                        }
+                    })
+                    .catch(err => {
+                        console.error('❌ Error:', err);
+                        if (editarModalInstance) editarModalInstance.hide();
+                        mostrarModalResultado(false, 'Error', 'Error al guardar cambios: ' + err.message);
+                        btnGuardar.disabled = false;
+                        btnGuardar.innerHTML = textoOriginal;
+                    });
+            }
+
+            // Función para mostrar el modal de resultado
+            // YA DEFINIDA GLOBALMENTE ARRIBA
+
+            // Borrar: confirmación simple
+            function configurarBtnBorrar() {
+                const btnBorrarModal = document.getElementById('btnBorrarMaterial');
+                if (btnBorrarModal) {
+                    btnBorrarModal.removeEventListener('click', confirmarBorrado);
+                    btnBorrarModal.addEventListener('click', confirmarBorrado);
+                }
+            }
+
+            function confirmarBorrado() {
+                const inventarioId = this.dataset.inventarioid || this.dataset.inventarioId || '';
+
+                // Obtener datos del usuario desde el atributo data-* de la sección
+                const section = document.querySelector('section[th\\:fragment="materiales"]') || document.querySelector('section.container');
+                const gestor = section.dataset.gestor || section.getAttribute('data-gestor');
+                const usuarioId = section.dataset.usuarioId || section.getAttribute('data-usuario-id');
+
+                if (!gestor || !usuarioId) {
+                    alert('Error: No se encontraron los datos de usuario. Por favor recarga la página.');
+                    return;
+                }
+
+                if (!inventarioId) {
+                    if (!confirm('¿Deseas borrar este material del inventario?')) return;
+                } else {
+                    if (!confirm('¿Confirma eliminar el inventario con id ' + inventarioId + ' ?')) return;
+                }
+
+                // Construir URL correcta: /punto-eca/{nombrePunto}/{usuarioId}/eliminar-inventario/{inventarioId}
+                const url = `/punto-eca/${gestor}/${usuarioId}/eliminar-inventario/${inventarioId}`;
+                console.log('🗑️ URL de eliminación:', url);
+
+                fetch(url, { method: 'DELETE' })
+                    .then(res => {
+                        if (res.ok) {
+                            alert('Elemento eliminado');
+                            if (detallesModalInstance) detallesModalInstance.hide();
+                            window.location.reload();
+                        } else {
+                            return res.json().then(j => { throw new Error(j?.mensaje || j?.message || 'Error al borrar'); });
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error borrando:', err);
+                        alert('No fue posible borrar: ' + (err.message || err));
+                    });
+            }
+
+            function inicializar() {
+                if (isInitialized) return;
+                console.log('📌 Inicializando sistema de modales de materiales');
+                inicializarModales();
+                configurarEventListeners();
+                configurarBtnEditar();
+                configurarBtnGuardar();
+                configurarBtnBorrar();
+                isInitialized = true;
+            }
+
+            // Inicializar cuando el DOM está listo
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', inicializar);
+            } else {
+                inicializar();
+            }
+
+            // Re-inicializar si el contenedor cambia (para actualizaciones dinámicas)
+            window.addEventListener('reinicializarModales', inicializar);
+
+            console.log('✓ Script de modales cargado');
+        })();
+    </script>
+
+</section>
