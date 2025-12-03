@@ -154,38 +154,48 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Tipo</label>
-                                    <input id="entradaMaterialTipo" type="text" class="form-control form-control-sm bg-white" readonly>
+                                    <input id="entradaMaterialTipo" type="text" class="form-control form-control-sm bg-light" readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Categoría</label>
-                                    <input id="entradaMaterialCategoria" type="text" class="form-control form-control-sm bg-white" readonly>
+                                    <input id="entradaMaterialCategoria" type="text" class="form-control form-control-sm bg-light" readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Descripción</label>
-                                    <input id="entradaMaterialDescripcion" type="text" class="form-control form-control-sm bg-white" readonly>
+                                    <input id="entradaMaterialDescripcion" type="text" class="form-control form-control-sm bg-light" readonly>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold small">Cantidad (kg) <span class="text-danger">*</span></label>
-                                    <input id="entradaCantidad" name="cantidad" type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00" required>
+                                    <label class="form-label fw-semibold small">Unidad de Medida</label>
+                                    <input id="entradaMaterialUnidad" type="text" class="form-control form-control-sm bg-light" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Stock Actual</label>
+                                    <input id="entradaStockActual" type="number" step="0.01" class="form-control form-control-sm bg-light" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Capacidad Máxima</label>
+                                    <input id="entradaCapacidadMaxima" type="number" step="0.01" class="form-control form-control-sm bg-light" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Cantidad a Agregar (kg) <span class="text-danger">*</span></label>
+                                    <input id="entradaCantidad" name="cantidad" type="number" step="0.01" min="0" class="form-control form-control-sm border-primary border-2" placeholder="0.00" required>
+                                    <small class="text-muted d-block mt-1">Stock después: <strong id="entradaStockResultante">-</strong></small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Fecha <span class="text-danger">*</span></label>
-                                    <input type="datetime-local" class="form-control form-control-sm" required>
+                                    <input id="entradaFecha" type="datetime-local" class="form-control form-control-sm border-primary border-2" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold small">Precio de Compra Unitario (COP)</label>
-                                    <input type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00">
+                                    <label class="form-label fw-semibold small">Precio de Compra Unitario (COP) <span class="text-danger">*</span></label>
+                                    <input id="entradaPrecioCompra" type="number" step="0.01" min="0" class="form-control form-control-sm border-primary border-2" placeholder="0.00" required>
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label fw-semibold small">Observaciones</label>
-                                    <textarea class="form-control form-control-sm" rows="2" placeholder="Notas adicionales..."></textarea>
+                                    <textarea id="entradaObservaciones" class="form-control form-control-sm border-primary border-2" rows="2" placeholder="Notas adicionales..."></textarea>
                                 </div>
                                 <div class="col-12">
                                     <button type="submit" class="btn btn-success btn-sm fw-semibold">
                                         <i class="bi bi-check-circle me-2"></i>Guardar Entrada
-                                    </button>
-                                    <button type="reset" class="btn btn-outline-secondary btn-sm fw-semibold">
-                                        <i class="bi bi-eraser me-2"></i>Limpiar
                                     </button>
                                     <button type="button" class="btn btn-outline-primary btn-sm fw-semibold" onclick="cambiarMaterial()">
                                         <i class="bi bi-arrow-counterclockwise me-2"></i>Cambiar Material
@@ -297,31 +307,44 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Tipo</label>
-                                    <input id="salidaMaterialTipo" type="text" class="form-control form-control-sm bg-white" readonly>
+                                    <input id="salidaMaterialTipo" type="text" class="form-control form-control-sm bg-light" readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Categoría</label>
-                                    <input id="salidaMaterialCategoria" type="text" class="form-control form-control-sm bg-white" readonly>
+                                    <input id="salidaMaterialCategoria" type="text" class="form-control form-control-sm bg-light" readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Descripción</label>
-                                    <input id="salidaMaterialDescripcion" type="text" class="form-control form-control-sm bg-white" readonly>
+                                    <input id="salidaMaterialDescripcion" type="text" class="form-control form-control-sm bg-light" readonly>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold small">Cantidad (kg) <span class="text-danger">*</span></label>
-                                    <input id="salidaCantidad" name="cantidad" type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00" required>
+                                    <label class="form-label fw-semibold small">Unidad de Medida</label>
+                                    <input id="salidaMaterialUnidad" type="text" class="form-control form-control-sm bg-light" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Stock Actual (NO EDITABLE)</label>
+                                    <input id="salidaStockActual" type="number" step="0.01" class="form-control form-control-sm bg-secondary bg-opacity-10" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Capacidad Máxima</label>
+                                    <input id="salidaCapacidadMaxima" type="number" step="0.01" class="form-control form-control-sm bg-light" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Cantidad a Descontar (kg) <span class="text-danger">*</span></label>
+                                    <input id="salidaCantidad" name="cantidad" type="number" step="0.01" min="0" class="form-control form-control-sm border-danger border-2" placeholder="0.00" required>
+                                    <small class="text-muted d-block mt-1">Stock restante: <strong id="salidaStockRestante" class="text-danger">-</strong></small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Fecha <span class="text-danger">*</span></label>
-                                    <input type="datetime-local" class="form-control form-control-sm" required>
+                                    <input id="salidaFecha" type="datetime-local" class="form-control form-control-sm border-danger border-2" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold small">Precio de Venta Unitario (COP)</label>
-                                    <input type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00">
+                                    <label class="form-label fw-semibold small">Precio de Venta Unitario (COP) <span class="text-danger">*</span></label>
+                                    <input id="salidaPrecioVenta" type="number" step="0.01" min="0" class="form-control form-control-sm border-danger border-2" placeholder="0.00" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Centro de Acopio</label>
-                                    <select class="form-select form-select-sm" required>
+                                    <select id="salidaCentroAcopio" class="form-select form-select-sm border-danger border-2" required>
                                         <option value="">Selecciona un centro...</option>
                                         <th:block th:if="${not #lists.isEmpty(centrosAcopio)}">
                                             <option th:each="centro : ${centrosAcopio}"
@@ -335,16 +358,13 @@
                                         </th:block>
                                     </select>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-12">
                                     <label class="form-label fw-semibold small">Observaciones</label>
-                                    <input type="text" class="form-control form-control-sm" placeholder="Notas adicionales...">
+                                    <textarea id="salidaObservaciones" class="form-control form-control-sm border-danger border-2" rows="2" placeholder="Notas adicionales..."></textarea>
                                 </div>
                                 <div class="col-12">
                                     <button type="submit" class="btn btn-danger btn-sm fw-semibold">
                                         <i class="bi bi-check-circle me-2"></i>Guardar Salida
-                                    </button>
-                                    <button type="reset" class="btn btn-outline-secondary btn-sm fw-semibold">
-                                        <i class="bi bi-eraser me-2"></i>Limpiar
                                     </button>
                                     <button type="button" class="btn btn-outline-primary btn-sm fw-semibold" onclick="cambiarMaterial()">
                                         <i class="bi bi-arrow-counterclockwise me-2"></i>Cambiar Material
@@ -605,7 +625,11 @@
                 item.dataset.descripcion = material.dscMaterial || '';
                 item.dataset.tipo = material.nmbTipo || '';
                 item.dataset.categoria = material.nmbCategoria || '';
-                item.dataset.unidad = material.unidad || '';
+                item.dataset.unidad = material.unidadMedida || '';
+                item.dataset.stockActual = material.stockActual || '0';
+                item.dataset.capacidadMaxima = material.capacidadMaxima || '0';
+                item.dataset.precioCompra = material.precioCompra || '0';
+                item.dataset.precioVenta = material.precioVenta || '0';
 
                 // Crear imagen
                 const img = document.createElement('img');
@@ -670,31 +694,88 @@
 
                     console.log('📦 Material seleccionado:', materialId, '-', materialNombre);
 
-                    // Llenar campos del formulario de entrada
+                    // Obtener datos del material
+                    const unidad = this.dataset.unidad || 'N/A';
+                    const stockActual = parseFloat(this.dataset.stockActual) || 0;
+                    const capacidadMax = parseFloat(this.dataset.capacidadMaxima) || 0;
+                    const precioCompra = parseFloat(this.dataset.precioCompra) || 0;
+                    const precioVenta = parseFloat(this.dataset.precioVenta) || 0;
+
+                    // Llenar campos del formulario de ENTRADA
                     const inputEntrada = document.getElementById('entradaMaterialSeleccionado');
                     const idEntrada = document.getElementById('entradaMaterialId');
                     const tipoEntrada = document.getElementById('entradaMaterialTipo');
                     const categoriaEntrada = document.getElementById('entradaMaterialCategoria');
                     const descripcionEntrada = document.getElementById('entradaMaterialDescripcion');
+                    const unidadEntrada = document.getElementById('entradaMaterialUnidad');
+                    const stockActualEntrada = document.getElementById('entradaStockActual');
+                    const capacidadMaxEntrada = document.getElementById('entradaCapacidadMaxima');
+                    const precioCompraEntrada = document.getElementById('entradaPrecioCompra');
 
                     if (inputEntrada) inputEntrada.value = materialNombre;
                     if (idEntrada) idEntrada.value = materialId;
                     if (tipoEntrada) tipoEntrada.value = materialTipo;
                     if (categoriaEntrada) categoriaEntrada.value = materialCategoria;
                     if (descripcionEntrada) descripcionEntrada.value = materialDescripcion;
+                    if (unidadEntrada) unidadEntrada.value = unidad;
+                    if (stockActualEntrada) stockActualEntrada.value = stockActual.toFixed(2);
+                    if (capacidadMaxEntrada) capacidadMaxEntrada.value = capacidadMax.toFixed(2);
+                    if (precioCompraEntrada) precioCompraEntrada.value = precioCompra.toFixed(2);
 
-                    // Llenar campos del formulario de salida
+                    // Llenar campos del formulario de SALIDA
                     const inputSalida = document.getElementById('salidaMaterialSeleccionado');
                     const idSalida = document.getElementById('salidaMaterialId');
                     const tipoSalida = document.getElementById('salidaMaterialTipo');
                     const categoriaSalida = document.getElementById('salidaMaterialCategoria');
                     const descripcionSalida = document.getElementById('salidaMaterialDescripcion');
+                    const unidadSalida = document.getElementById('salidaMaterialUnidad');
+                    const stockActualSalida = document.getElementById('salidaStockActual');
+                    const capacidadMaxSalida = document.getElementById('salidaCapacidadMaxima');
+                    const precioVentaSalida = document.getElementById('salidaPrecioVenta');
 
                     if (inputSalida) inputSalida.value = materialNombre;
                     if (idSalida) idSalida.value = materialId;
                     if (tipoSalida) tipoSalida.value = materialTipo;
                     if (categoriaSalida) categoriaSalida.value = materialCategoria;
                     if (descripcionSalida) descripcionSalida.value = materialDescripcion;
+                    if (unidadSalida) unidadSalida.value = unidad;
+                    if (stockActualSalida) stockActualSalida.value = stockActual.toFixed(2);
+                    if (capacidadMaxSalida) capacidadMaxSalida.value = capacidadMax.toFixed(2);
+                    if (precioVentaSalida) precioVentaSalida.value = precioVenta.toFixed(2);
+
+                    // Configurar listeners para calcular stock resultante en ENTRADA
+                    const entradaCantidadInput = document.getElementById('entradaCantidad');
+                    const entradaStockResultante = document.getElementById('entradaStockResultante');
+                    if (entradaCantidadInput && entradaStockResultante) {
+                        entradaCantidadInput.addEventListener('input', function() {
+                            const cantidadAgregada = parseFloat(this.value) || 0;
+                            const nuevoStock = stockActual + cantidadAgregada;
+                            entradaStockResultante.textContent = nuevoStock.toFixed(2) + ' ' + unidad;
+                            if (nuevoStock > capacidadMax) {
+                                entradaStockResultante.classList.add('text-danger');
+                                entradaStockResultante.innerHTML += ' ⚠️ (Excede capacidad)';
+                            } else {
+                                entradaStockResultante.classList.remove('text-danger');
+                            }
+                        });
+                    }
+
+                    // Configurar listeners para calcular stock restante en SALIDA
+                    const salidaCantidadInput = document.getElementById('salidaCantidad');
+                    const salidaStockRestante = document.getElementById('salidaStockRestante');
+                    if (salidaCantidadInput && salidaStockRestante) {
+                        salidaCantidadInput.addEventListener('input', function() {
+                            const cantidadDescontada = parseFloat(this.value) || 0;
+                            const stockRestante = stockActual - cantidadDescontada;
+                            salidaStockRestante.textContent = stockRestante.toFixed(2) + ' ' + unidad;
+                            if (stockRestante < 0) {
+                                salidaStockRestante.classList.add('text-danger');
+                                salidaStockRestante.innerHTML += ' ⚠️ (Insuficiente)';
+                            } else {
+                                salidaStockRestante.classList.remove('text-danger');
+                            }
+                        });
+                    }
 
                     // Mostrar ambos formularios (entrada y salida)
                     const formEntradaContainer = document.getElementById('formEntradaContainer');

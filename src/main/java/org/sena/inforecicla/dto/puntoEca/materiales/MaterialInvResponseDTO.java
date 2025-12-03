@@ -18,6 +18,8 @@ public record MaterialInvResponseDTO(
     UnidadMedida unidadMedida,
     BigDecimal stockActual,
     BigDecimal capacidadMaxima,
+    BigDecimal precioCompra,
+    BigDecimal precioVenta,
     //Categoria Material
     String nmbCategoria,
     //Tipo Material
@@ -35,6 +37,8 @@ public record MaterialInvResponseDTO(
             i.getUnidadMedida(),
             i.getStockActual(),
             i.getCapacidadMaxima(),
+            i.getPrecioCompra(),
+            i.getPrecioVenta(),
             m.getCtgMaterial().getNombre(),
             m.getTipoMaterial().getNombre()
         );
