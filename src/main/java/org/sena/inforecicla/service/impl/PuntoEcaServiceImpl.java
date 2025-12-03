@@ -20,9 +20,5 @@ public class PuntoEcaServiceImpl implements PuntoEcaService {
         return puntoEcaRepository.findById(puntoId);
     }
 
-    @Override
-    public Optional<PuntoECA> mostrarPuntoEca(UUID puntoId) {
-        return buscarPuntoEca(puntoId);
-    }
 }
 

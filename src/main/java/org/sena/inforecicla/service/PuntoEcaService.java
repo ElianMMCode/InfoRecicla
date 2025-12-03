@@ -9,5 +9,4 @@ public interface PuntoEcaService {
 
     Optional<PuntoECA> buscarPuntoEca(UUID puntoId);
 
-    Optional<PuntoECA> mostrarPuntoEca(UUID puntoId);
 }

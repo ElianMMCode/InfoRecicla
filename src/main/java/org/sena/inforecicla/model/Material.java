@@ -26,7 +26,7 @@ public class Material extends EntidadDescripcion {
     private String imagenUrl;
 
     @OneToMany(mappedBy = "material")
-    private List<Inventario> inventarios;
+    private List<Inventario> inventario;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(

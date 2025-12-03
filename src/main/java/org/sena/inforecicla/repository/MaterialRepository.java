@@ -5,4 +5,6 @@ import java.util.UUID;
 
 public interface MaterialRepository extends BaseRepository<Material, UUID> {
 
+//    List<Material> findAllByInventario
+
 }

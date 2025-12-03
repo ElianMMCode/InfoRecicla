@@ -1,6 +1,7 @@
 package org.sena.inforecicla.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.sena.inforecicla.model.base.EntidadCreacionModificacion;
@@ -36,8 +37,13 @@ public class CompraInventario extends EntidadCreacionModificacion {
     )
     private LocalDateTime fechaCompra;
 
+    @NotNull
+    @Column(precision = 12, scale = 2, nullable = false)
+    private BigDecimal cantidad;
+
     @Column(precision = 12, scale = 2)
     private BigDecimal precioCompra;
+
 
     @Column(length = 500)
     private String observaciones;

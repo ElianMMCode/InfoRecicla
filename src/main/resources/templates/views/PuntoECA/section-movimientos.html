@@ -1,7 +1,8 @@
 <!-- Fragment: Movimientos -->
 <section th:fragment="movimientos" class="py-4"
          th:data-gestor="${gestor}"
-         th:data-usuario-id="${usuario.usuarioId}">
+         th:data-usuario-id="${usuario.usuarioId}"
+         th:data-punto-eca-id="${puntoEcaId}">
     <!-- Título principal -->
     <div class="mb-4">
         <h2 class="h4 fw-bold text-dark mb-1">
@@ -12,7 +13,7 @@
     <!-- ═════════════════════════════════════════════════════════════ -->
     <!-- SECCIÓN 1: BARRA DE BÚSQUEDA Y SELECCIÓN DE MATERIAL -->
     <!-- ═════════════════════════════════════════════════════════════ -->
-    <div class="card shadow-sm mb-4">
+    <div class="card shadow-sm mb-4" id="seccionBusquedaMaterial">
         <div class="card-header bg-primary-subtle border-0 px-4 py-3">
             <h6 class="mb-0 fw-bold text-primary">
                 <i class="bi bi-search me-2"></i>Seleccionar Material para Registrar Movimiento
@@ -152,8 +153,20 @@
                                     <input id="entradaMaterialId" type="hidden">
                                 </div>
                                 <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Tipo</label>
+                                    <input id="entradaMaterialTipo" type="text" class="form-control form-control-sm bg-white" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Categoría</label>
+                                    <input id="entradaMaterialCategoria" type="text" class="form-control form-control-sm bg-white" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Descripción</label>
+                                    <input id="entradaMaterialDescripcion" type="text" class="form-control form-control-sm bg-white" readonly>
+                                </div>
+                                <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Cantidad (kg) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00" required>
+                                    <input id="entradaCantidad" name="cantidad" type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Fecha <span class="text-danger">*</span></label>
@@ -173,6 +186,9 @@
                                     </button>
                                     <button type="reset" class="btn btn-outline-secondary btn-sm fw-semibold">
                                         <i class="bi bi-eraser me-2"></i>Limpiar
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm fw-semibold" onclick="cambiarMaterial()">
+                                        <i class="bi bi-arrow-counterclockwise me-2"></i>Cambiar Material
                                     </button>
                                 </div>
                             </form>
@@ -280,8 +296,20 @@
                                     <input id="salidaMaterialId" type="hidden">
                                 </div>
                                 <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Tipo</label>
+                                    <input id="salidaMaterialTipo" type="text" class="form-control form-control-sm bg-white" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Categoría</label>
+                                    <input id="salidaMaterialCategoria" type="text" class="form-control form-control-sm bg-white" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Descripción</label>
+                                    <input id="salidaMaterialDescripcion" type="text" class="form-control form-control-sm bg-white" readonly>
+                                </div>
+                                <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Cantidad (kg) <span class="text-danger">*</span></label>
-                                    <input type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00" required>
+                                    <input id="salidaCantidad" name="cantidad" type="number" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Fecha <span class="text-danger">*</span></label>
@@ -317,6 +345,9 @@
                                     </button>
                                     <button type="reset" class="btn btn-outline-secondary btn-sm fw-semibold">
                                         <i class="bi bi-eraser me-2"></i>Limpiar
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm fw-semibold" onclick="cambiarMaterial()">
+                                        <i class="bi bi-arrow-counterclockwise me-2"></i>Cambiar Material
                                     </button>
                                 </div>
                             </form>
@@ -502,10 +533,350 @@
     (function() {
         console.log('📌 Script inline de movimientos ejecutándose...');
 
-        // ...existing code...
+        const puntoEcaSection = document.querySelector('section[data-usuario-id]');
+        const usuarioId = puntoEcaSection?.dataset.usuarioId;
+        const puntoEcaId = puntoEcaSection?.dataset.puntoEcaId;
+        const gestor = puntoEcaSection?.dataset.gestor;
+
+        const inputBusqueda = document.getElementById('buscarMaterialMovimientos');
+        const btnBuscar = document.getElementById('btnBuscarMaterialMov');
+        const btnLimpiar = document.getElementById('btnLimpiarBusquedaMov');
+        const modalBusqueda = document.getElementById('buscarMaterialMovimientosModal');
+        const resultadosDiv = document.getElementById('resultadosBusquedaMov');
+        const estadoDiv = document.getElementById('estadoBusquedaMov');
+
+        console.log('✓ Variables inicializadas - Usuario:', usuarioId, 'PuntoECA:', puntoEcaId, 'Gestor:', gestor);
+
+        // Función para mostrar estado
+        function mostrarEstadoBusquedaMov(estado) {
+            if (!estadoDiv) return;
+
+            const estados = {
+                idle: '<i class="bi bi-search display-6 d-block mb-2"></i><p class="mb-0">Buscando materiales...</p>',
+                loading: '<div class="spinner-border spinner-border-sm me-2" role="status"><span class="visually-hidden">Cargando...</span></div><span>Buscando...</span>',
+                ready: '',
+                error: '<div class="alert alert-danger">Error al cargar los resultados. Intenta nuevamente.</div>'
+            };
+
+            estadoDiv.innerHTML = estados[estado] || estados.idle;
+            estadoDiv.style.display = estado === 'ready' ? 'none' : 'block';
+        }
+
+        // Función para actualizar resumen de filtros
+        function actualizarResumenFiltros(texto, categoria, tipo) {
+            const resumenTexto = document.getElementById('resumenMaterialTexto');
+            const resumenCat = document.getElementById('resumenMaterialCategoria');
+            const resumenTipo = document.getElementById('resumenMaterialTipo');
+
+            if (resumenTexto) resumenTexto.textContent = texto || 'Sin filtro';
+            if (resumenCat) resumenCat.textContent = categoria || 'Sin filtro';
+            if (resumenTipo) resumenTipo.textContent = tipo || 'Sin filtro';
+        }
+
+        // Función para renderizar resultados
+        function renderResultadosBusqueda(materiales, opciones = {}) {
+            if (!resultadosDiv) return;
+
+            resultadosDiv.innerHTML = '';
+
+            if (opciones.modoCarga) {
+                const skeleton = document.createElement('div');
+                skeleton.className = 'list-group-item py-3 text-muted d-flex align-items-center gap-3';
+                skeleton.innerHTML = '<span class="placeholder col-2"></span><span class="placeholder col-5"></span><span class="placeholder col-3 ms-auto"></span>';
+                resultadosDiv.appendChild(skeleton);
+                return;
+            }
+
+            if (!materiales || materiales.length === 0) {
+                const emptyItem = document.createElement('div');
+                emptyItem.className = 'list-group-item text-muted text-center py-4';
+                emptyItem.textContent = 'Sin resultados disponibles. Ejecuta una búsqueda para comenzar.';
+                resultadosDiv.appendChild(emptyItem);
+                mostrarEstadoBusquedaMov('idle');
+                return;
+            }
+
+            materiales.forEach(material => {
+                const item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'list-group-item list-group-item-action resultado-material-item d-flex align-items-start gap-3';
+                item.dataset.materialId = material.materialId || '';
+                item.dataset.nombre = material.nmbMaterial || '';
+                item.dataset.descripcion = material.dscMaterial || '';
+                item.dataset.tipo = material.nmbTipo || '';
+                item.dataset.categoria = material.nmbCategoria || '';
+                item.dataset.unidad = material.unidad || '';
+
+                // Crear imagen
+                const img = document.createElement('img');
+                img.src = material.imagenUrl || '/imagenes/materiales.png';
+                img.alt = material.nmbMaterial || 'Imagen material';
+                img.className = 'rounded';
+                img.style.width = '64px';
+                img.style.height = '64px';
+                img.style.objectFit = 'cover';
+                img.style.flexShrink = '0';
+
+                // Contenido textual
+                const content = document.createElement('div');
+                content.className = 'flex-grow-1 text-start';
+
+                const title = document.createElement('div');
+                title.className = 'fw-semibold';
+                title.textContent = material.nmbMaterial || 'Material sin nombre';
+
+                const desc = document.createElement('small');
+                desc.className = 'text-muted d-block mb-2';
+                desc.textContent = material.dscMaterial || 'Sin descripción';
+
+                const badges = document.createElement('div');
+                const tipoBadge = document.createElement('span');
+                tipoBadge.className = 'badge bg-primary me-1';
+                tipoBadge.textContent = material.nmbTipo || 'Tipo';
+                const catBadge = document.createElement('span');
+                catBadge.className = 'badge bg-secondary';
+                catBadge.textContent = material.nmbCategoria || 'Categoría';
+
+                badges.appendChild(tipoBadge);
+                badges.appendChild(catBadge);
+
+                content.appendChild(title);
+                content.appendChild(desc);
+                content.appendChild(badges);
+
+                const actionBadge = document.createElement('span');
+                actionBadge.className = 'badge bg-primary rounded-pill align-self-start';
+                actionBadge.textContent = 'Seleccionar';
+
+                item.appendChild(img);
+                item.appendChild(content);
+                item.appendChild(actionBadge);
+
+                resultadosDiv.appendChild(item);
+            });
+
+            mostrarEstadoBusquedaMov('ready');
+
+            // Manejadores de clic para seleccionar material
+            document.querySelectorAll('.resultado-material-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const materialId = this.dataset.materialId;
+                    const materialNombre = this.dataset.nombre;
+                    const materialTipo = this.dataset.tipo;
+                    const materialCategoria = this.dataset.categoria;
+                    const materialDescripcion = this.dataset.descripcion;
+
+                    console.log('📦 Material seleccionado:', materialId, '-', materialNombre);
+
+                    // Llenar campos del formulario de entrada
+                    const inputEntrada = document.getElementById('entradaMaterialSeleccionado');
+                    const idEntrada = document.getElementById('entradaMaterialId');
+                    const tipoEntrada = document.getElementById('entradaMaterialTipo');
+                    const categoriaEntrada = document.getElementById('entradaMaterialCategoria');
+                    const descripcionEntrada = document.getElementById('entradaMaterialDescripcion');
+
+                    if (inputEntrada) inputEntrada.value = materialNombre;
+                    if (idEntrada) idEntrada.value = materialId;
+                    if (tipoEntrada) tipoEntrada.value = materialTipo;
+                    if (categoriaEntrada) categoriaEntrada.value = materialCategoria;
+                    if (descripcionEntrada) descripcionEntrada.value = materialDescripcion;
+
+                    // Llenar campos del formulario de salida
+                    const inputSalida = document.getElementById('salidaMaterialSeleccionado');
+                    const idSalida = document.getElementById('salidaMaterialId');
+                    const tipoSalida = document.getElementById('salidaMaterialTipo');
+                    const categoriaSalida = document.getElementById('salidaMaterialCategoria');
+                    const descripcionSalida = document.getElementById('salidaMaterialDescripcion');
+
+                    if (inputSalida) inputSalida.value = materialNombre;
+                    if (idSalida) idSalida.value = materialId;
+                    if (tipoSalida) tipoSalida.value = materialTipo;
+                    if (categoriaSalida) categoriaSalida.value = materialCategoria;
+                    if (descripcionSalida) descripcionSalida.value = materialDescripcion;
+
+                    // Mostrar ambos formularios (entrada y salida)
+                    const formEntradaContainer = document.getElementById('formEntradaContainer');
+                    const formSalidaContainer = document.getElementById('formSalidaContainer');
+                    if (formEntradaContainer) formEntradaContainer.style.display = 'block';
+                    if (formSalidaContainer) formSalidaContainer.style.display = 'block';
+
+                    // Ocultar sección de búsqueda de material
+                    const seccionBusquedaMaterial = document.getElementById('seccionBusquedaMaterial');
+                    if (seccionBusquedaMaterial) seccionBusquedaMaterial.style.display = 'none';
+
+                    // Expandir ambas secciones del acordeón
+                    const collapseEntradas = document.getElementById('collapseEntradas');
+                    const collapseSalidas = document.getElementById('collapseSalidas');
+                    if (collapseEntradas) {
+                        collapseEntradas.classList.add('show');
+                        collapseEntradas.setAttribute('aria-expanded', 'true');
+                        const buttonEntradas = document.querySelector('[data-bs-target="#collapseEntradas"]');
+                        if (buttonEntradas) buttonEntradas.classList.remove('collapsed');
+                    }
+                    if (collapseSalidas) {
+                        collapseSalidas.classList.add('show');
+                        collapseSalidas.setAttribute('aria-expanded', 'true');
+                        const buttonSalidas = document.querySelector('[data-bs-target="#collapseSalidas"]');
+                        if (buttonSalidas) buttonSalidas.classList.remove('collapsed');
+                    }
+
+                    // Mostrar mensaje de éxito mejorado
+                    const respuestaDiv = document.createElement('div');
+                    respuestaDiv.className = 'alert alert-success alert-dismissible fade show';
+                    respuestaDiv.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle me-2" style="font-size: 1.2rem;"></i>
+                            <div>
+                                <strong>¡Material agregado!</strong>
+                                <div class="small">El material "<strong>${materialNombre}</strong>" ha sido cargado. Ahora puedes registrar una <strong>entrada</strong> o una <strong>salida</strong> de este material.</div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    `;
+
+                    const formEntrada = document.getElementById('formEntrada');
+                    if (formEntrada && formEntrada.parentNode) {
+                        formEntrada.parentNode.insertBefore(respuestaDiv, formEntrada);
+                    }
+
+                    // Cerrar modal
+                    const modalInstance = bootstrap.Modal.getInstance(modalBusqueda);
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
+
+                    console.log('✓ Material cargado en ambos formularios');
+                });
+            });
+        }
+
+        // Función para buscar materiales
+        function buscarMateriales() {
+            const texto = inputBusqueda?.value || '';
+            const categoria = document.querySelector('input[name="radioCategoriaMov"]:checked')?.value || '';
+            const tipo = document.querySelector('input[name="radioTipoMov"]:checked')?.value || '';
+
+            console.log('🔍 Buscando con:', { texto, categoria, tipo });
+
+            mostrarEstadoBusquedaMov('loading');
+            actualizarResumenFiltros(texto, categoria, tipo);
+
+            // Llamar al endpoint del controller
+            const url = `/punto-eca/catalogo/inventario/materiales/buscar?` +
+                        `puntoId=${puntoEcaId}&texto=${encodeURIComponent(texto)}&categoria=${encodeURIComponent(categoria)}&tipo=${encodeURIComponent(tipo)}`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error('Error en la búsqueda');
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('✓ Resultados recibidos:', data);
+                    renderResultadosBusqueda(data);
+                })
+                .catch(error => {
+                    console.error('✗ Error:', error);
+                    mostrarEstadoBusquedaMov('error');
+                });
+        }
+
+        // Event listeners
+        if (btnBuscar) {
+            btnBuscar.addEventListener('click', function() {
+                console.log('✓ Botón Buscar clickeado');
+                buscarMateriales();
+                const modal = new bootstrap.Modal(modalBusqueda);
+                modal.show();
+            });
+        }
+
+        if (btnLimpiar) {
+            btnLimpiar.addEventListener('click', function() {
+                console.log('✓ Botón Limpiar clickeado');
+                if (inputBusqueda) inputBusqueda.value = '';
+                document.querySelectorAll('input[name="radioCategoriaMov"]').forEach(r => r.checked = r.id.includes('none'));
+                document.querySelectorAll('input[name="radioTipoMov"]').forEach(r => r.checked = r.id.includes('none'));
+                if (resultadosDiv) resultadosDiv.innerHTML = '';
+                mostrarEstadoBusquedaMov('idle');
+            });
+        }
 
         // Mostrar estado inicial
         mostrarEstadoBusquedaMov('idle');
+        console.log('✓ Script de movimientos inicializado');
+
+        // Función para cambiar el material seleccionado
+        window.cambiarMaterial = function() {
+            console.log('🔄 Cambiando material...');
+
+            // Limpiar campos del formulario de entrada
+            const inputEntrada = document.getElementById('entradaMaterialSeleccionado');
+            const idEntrada = document.getElementById('entradaMaterialId');
+            const tipoEntrada = document.getElementById('entradaMaterialTipo');
+            const categoriaEntrada = document.getElementById('entradaMaterialCategoria');
+            const descripcionEntrada = document.getElementById('entradaMaterialDescripcion');
+
+            if (inputEntrada) inputEntrada.value = '';
+            if (idEntrada) idEntrada.value = '';
+            if (tipoEntrada) tipoEntrada.value = '';
+            if (categoriaEntrada) categoriaEntrada.value = '';
+            if (descripcionEntrada) descripcionEntrada.value = '';
+
+            // Limpiar campos del formulario de salida
+            const inputSalida = document.getElementById('salidaMaterialSeleccionado');
+            const idSalida = document.getElementById('salidaMaterialId');
+            const tipoSalida = document.getElementById('salidaMaterialTipo');
+            const categoriaSalida = document.getElementById('salidaMaterialCategoria');
+            const descripcionSalida = document.getElementById('salidaMaterialDescripcion');
+
+            if (inputSalida) inputSalida.value = '';
+            if (idSalida) idSalida.value = '';
+            if (tipoSalida) tipoSalida.value = '';
+            if (categoriaSalida) categoriaSalida.value = '';
+            if (descripcionSalida) descripcionSalida.value = '';
+
+            // Limpiar alertas de éxito anterior
+            const alertas = document.querySelectorAll('.alert-success');
+            alertas.forEach(alerta => alerta.remove());
+
+            // Ocultar formularios de entrada y salida
+            const formEntradaContainer = document.getElementById('formEntradaContainer');
+            const formSalidaContainer = document.getElementById('formSalidaContainer');
+            if (formEntradaContainer) formEntradaContainer.style.display = 'none';
+            if (formSalidaContainer) formSalidaContainer.style.display = 'none';
+
+            // Contraer secciones del acordeón
+            const collapseEntradas = document.getElementById('collapseEntradas');
+            const collapseSalidas = document.getElementById('collapseSalidas');
+            if (collapseEntradas) {
+                collapseEntradas.classList.remove('show');
+                collapseEntradas.setAttribute('aria-expanded', 'false');
+                const buttonEntradas = document.querySelector('[data-bs-target="#collapseEntradas"]');
+                if (buttonEntradas) buttonEntradas.classList.add('collapsed');
+            }
+            if (collapseSalidas) {
+                collapseSalidas.classList.remove('show');
+                collapseSalidas.setAttribute('aria-expanded', 'false');
+                const buttonSalidas = document.querySelector('[data-bs-target="#collapseSalidas"]');
+                if (buttonSalidas) buttonSalidas.classList.add('collapsed');
+            }
+
+            // Mostrar sección de búsqueda nuevamente
+            const seccionBusquedaMaterial = document.getElementById('seccionBusquedaMaterial');
+            if (seccionBusquedaMaterial) seccionBusquedaMaterial.style.display = 'block';
+
+            // Limpiar búsqueda anterior
+            if (inputBusqueda) inputBusqueda.value = '';
+            document.querySelectorAll('input[name="radioCategoriaMov"]').forEach(r => r.checked = r.id.includes('none'));
+            document.querySelectorAll('input[name="radioTipoMov"]').forEach(r => r.checked = r.id.includes('none'));
+            const resultadosDiv = document.getElementById('resultadosBusquedaMov');
+            if (resultadosDiv) resultadosDiv.innerHTML = '';
+            mostrarEstadoBusquedaMov('idle');
+
+            console.log('✓ Material cambiado, sección de búsqueda mostrada nuevamente');
+        };
     })();
     </script>
 
@@ -539,12 +910,13 @@
 
             tbody.innerHTML = entradasData.map(entrada => {
                 const fecha = entrada.fechaCompra ? new Date(entrada.fechaCompra).toLocaleDateString('es-CO') : '-';
+                const cantidad = parseFloat(entrada.cantidad || 0);
                 const precio = parseFloat(entrada.precioCompra || 0);
                 return `
                     <tr>
                         <td class="small">${fecha}</td>
                         <td class="small">${entrada.nombreMaterial || '-'}</td>
-                        <td class="text-end small">-</td>
+                        <td class="text-end small">${cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td class="text-end small">$${precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td class="small">${entrada.observaciones || '-'}</td>
                     </tr>
@@ -571,12 +943,13 @@
 
             tbody.innerHTML = salidasData.map(salida => {
                 const fecha = salida.fechaVenta ? new Date(salida.fechaVenta).toLocaleDateString('es-CO') : '-';
+                const cantidad = parseFloat(salida.cantidad || 0);
                 const precio = parseFloat(salida.precioVenta || 0);
                 return `
                     <tr>
                         <td class="small">${fecha}</td>
                         <td class="small">${salida.nombreMaterial || '-'}</td>
-                        <td class="text-end small">-</td>
+                        <td class="text-end small">${cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td class="text-end small">$${precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td class="small">${salida.nombreCentroAcopio || '-'}</td>
                     </tr>

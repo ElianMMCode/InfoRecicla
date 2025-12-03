@@ -359,21 +359,59 @@
                 materiales.forEach(material => {
                     const item = document.createElement('button');
                     item.type = 'button';
-                    item.className = 'list-group-item list-group-item-action resultado-material-item d-flex justify-content-between align-items-start';
-                    item.dataset.materialId = material.id || '';
-                    item.dataset.nombre = material.nombre || '';
+                    item.className = 'list-group-item list-group-item-action resultado-material-item d-flex align-items-start gap-3';
+                    // Usar los nombres correctos del DTO
+                    item.dataset.materialId = material.materialId || '';
+                    item.dataset.nombre = material.nmbMaterial || '';
+                    item.dataset.descripcion = material.dscMaterial || '';
+                    item.dataset.tipo = material.nmbTipo || '';
+                    item.dataset.categoria = material.nmbCategoria || '';
                     item.dataset.unidad = material.unidad || '';
-                    item.dataset.categoria = material.categoria || '';
 
-                    item.innerHTML = `
-                        <div class="ms-2 me-auto">
-                            <div class="fw-semibold">${material.nombre || 'Material sin nombre'}</div>
-                            <small class="text-muted">
-                                ${material.id || 'ID n/d'} · ${material.unidad || 'Unidad n/d'} · ${material.categoria || 'Categoría n/d'}
-                            </small>
-                        </div>
-                        <span class="badge bg-success rounded-pill">Seleccionar</span>
-                    `;
+                    // Crear imagen
+                    const img = document.createElement('img');
+                    img.src = material.imagenUrl || '/imagenes/materiales.png';
+                    img.alt = material.nmbMaterial || 'Imagen material';
+                    img.className = 'rounded';
+                    img.style.width = '64px';
+                    img.style.height = '64px';
+                    img.style.objectFit = 'cover';
+                    img.style.flexShrink = '0';
+
+                    // Contenido textual
+                    const content = document.createElement('div');
+                    content.className = 'flex-grow-1 text-start';
+
+                    const title = document.createElement('div');
+                    title.className = 'fw-semibold';
+                    title.textContent = material.nmbMaterial || 'Material sin nombre';
+
+                    const desc = document.createElement('small');
+                    desc.className = 'text-muted d-block mb-2';
+                    desc.textContent = material.dscMaterial || 'Sin descripción';
+
+                    const badges = document.createElement('div');
+                    const tipoBadge = document.createElement('span');
+                    tipoBadge.className = 'badge bg-primary me-1';
+                    tipoBadge.textContent = material.nmbTipo || 'Tipo';
+                    const catBadge = document.createElement('span');
+                    catBadge.className = 'badge bg-secondary';
+                    catBadge.textContent = material.nmbCategoria || 'Categoría';
+
+                    badges.appendChild(tipoBadge);
+                    badges.appendChild(catBadge);
+
+                    content.appendChild(title);
+                    content.appendChild(desc);
+                    content.appendChild(badges);
+
+                    const actionBadge = document.createElement('span');
+                    actionBadge.className = 'badge bg-success rounded-pill align-self-start';
+                    actionBadge.textContent = 'Seleccionar';
+
+                    item.appendChild(img);
+                    item.appendChild(content);
+                    item.appendChild(actionBadge);
 
                     listaResultadosEl.appendChild(item);
                 });

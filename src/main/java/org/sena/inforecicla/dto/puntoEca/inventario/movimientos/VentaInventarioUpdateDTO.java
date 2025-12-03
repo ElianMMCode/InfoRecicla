@@ -18,6 +18,11 @@ public record VentaInventarioUpdateDTO(
         @Digits(integer = 12, fraction = 2, message = "Formato inválido para precio de venta")
         BigDecimal precioVenta,
 
+        @NotNull
+        @DecimalMin(value = "0.1", message = "La cantidad no puede ser negativo")
+        @Digits(integer = 10, fraction = 2, message = "Formato inválido para cantidad actual")
+        BigDecimal cantidad,
+
         @NotNull(message = "El centro de acopio es obligatorio")
         UUID centroAcopioId,
 
