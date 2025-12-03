@@ -1,7 +1,6 @@
 package org.sena.inforecicla.service;
 
 import lombok.RequiredArgsConstructor;
-import org.sena.inforecicla.dto.puntoEca.InventarioRequestDTO;
 import org.sena.inforecicla.dto.puntoEca.InventarioResponseDTO;
 import org.sena.inforecicla.model.Inventario;
 import org.sena.inforecicla.repository.InventarioRepository;
