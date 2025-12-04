@@ -43,7 +43,7 @@ public class Publicaciones extends EntidadCreacionModificacion {
     //llave foranea tabla usuarios
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
-    private Usuario usuarioId;
+    private Usuario usuario;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
