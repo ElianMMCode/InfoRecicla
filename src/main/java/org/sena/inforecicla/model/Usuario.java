@@ -80,7 +80,7 @@ public class Usuario extends EntidadLocalizacion {
     @ManyToMany(mappedBy = "creadores")
     private List<Conversaciones> conversaciones;
 
-    @OneToMany(mappedBy = "usuario_id", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Publicaciones> publicaciones = new ArrayList<>();
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)

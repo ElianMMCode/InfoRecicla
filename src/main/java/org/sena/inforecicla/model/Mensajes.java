@@ -27,7 +27,7 @@ public class Mensajes extends EntidadCreacionModificacion {
 
     @ManyToOne
     @JoinColumn(name = "conversacion_id") // Nombre de la columna en la BD
-    private Conversaciones conversaciones;
+    private Conversaciones conversacion;
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")

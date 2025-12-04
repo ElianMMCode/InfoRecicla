@@ -30,8 +30,8 @@ public record PuntoEcaResponseDTO(
                 p.getTelefonoPunto(),
                 p.getDireccion(),
                 p.getLocalidad() != null ? p.getLocalidad().getLocalidadId() : null,
-                p.getLatitud(),
-                p.getLongitud(),
+                p.getLatitud() != null ? p.getLatitud() : 0.0,
+                p.getLongitud() != null ? p.getLongitud() : 0.0,
                 p.getSitioWeb(),
                 p.getHorarioAtencion()
         );

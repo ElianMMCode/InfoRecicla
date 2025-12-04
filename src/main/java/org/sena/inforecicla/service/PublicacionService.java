@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -53,6 +54,11 @@ public class PublicacionService {
         Publicacion publicacionGuardada = publicacionRepository.save(publicacion);
 
         return convertirAResponseDTO(publicacionGuardada);
+    }
+
+    public Optional<PublicacionResponseDTO> buscarPublicacionPorId(UUID id) {
+        return publicacionRepository.findById(id)
+                .map(this::convertirAResponseDTO);
     }
 
     public PublicacionResponseDTO mostrarPublicacionPorId(UUID id) {
@@ -117,7 +123,7 @@ public class PublicacionService {
             publicacion.setCategoriaPublicacion(categoria);
         }
 
-        publicacion.setFechaActualizacion(LocalDateTime.now());
+        publicacion.setActualizado(LocalDateTime.now());
         Publicacion publicacionActualizada = publicacionRepository.save(publicacion);
 
         return convertirAResponseDTO(publicacionActualizada);
@@ -129,9 +135,9 @@ public class PublicacionService {
                 .orElseThrow(() -> new PublicacionNotFoundException("Publicación no encontrada"));
 
         try {
-            EstadoPublicacion nuevoEstado = EstadoPublicacion.valueOf(estado);
+            EstadoPublicacion nuevoEstado = EstadoPublicacion.valueOf(estado.toUpperCase());
             publicacion.setEstado(nuevoEstado);
-            publicacion.setFechaActualizacion(LocalDateTime.now());
+            publicacion.setActualizado(LocalDateTime.now());
             publicacionRepository.save(publicacion);
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Estado inválido: " + estado);
@@ -150,13 +156,6 @@ public class PublicacionService {
         return publicacionRepository.countByUsuarioId(usuarioId);
     }
 
-    public long contarPublicacionesPorUsuarioYEstado(UUID usuarioId, EstadoPublicacion estado) {
-        return publicacionRepository.findAll()
-                .stream()
-                .filter(p -> p.getUsuario().getUsuarioId().equals(usuarioId) && p.getEstado() == estado)
-                .count();
-    }
-
     private PublicacionResponseDTO convertirAResponseDTO(Publicacion publicacion) {
         return PublicacionResponseDTO.builder()
                 .publicacionId(publicacion.getPublicacionId())
@@ -169,8 +168,8 @@ public class PublicacionService {
                 .nombreUsuario(publicacion.getUsuario().getNombre() + " " + publicacion.getUsuario().getApellido())
                 .categoriaPublicacionId(publicacion.getCategoriaPublicacion().getCategoiraPublicacionId())
                 .nombreCategoria(publicacion.getCategoriaPublicacion().getNombre())
-                .creado(publicacion.getFechaCreacion())
-                .actualizado(publicacion.getFechaActualizacion())
+                .creado(publicacion.getCreado())
+                .actualizado(publicacion.getActualizado())
                 .build();
     }
 }
