@@ -1,3 +1,194 @@
+<!--DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - InfoRecicla</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+    <!-- Navbar >
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success shadow">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center fw-semibold" href="../../inicio">
+                <img src="/images/logo.png" alt="Logo InfoRecicla" height="40" class="me-2">
+                InfoRecicla
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="admin.html">
+                            <i class="fas fa-tachometer-alt me-1"></i> Panel
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../inicio">
+                            <i class="fas fa-home me-1"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../inicio">
+                            <i class="fas fa-sign-out-alt me-1"></i> Cerrar sesión
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content >
+    <main class="container py-5">
+        <!-- Welcome Section >
+        <div class="bg-gradient bg-light bg-opacity-75 rounded-3 p-4 p-md-5 shadow-sm mb-5">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center">
+                    <h1 class="display-5 fw-bold text-success mb-3">Panel de Administración</h1>
+                    <p class="lead text-muted mb-0">Gestiona todos los aspectos de InfoRecicla desde un solo lugar.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modules Grid >
+        <div class="row g-4">
+            <!-- Usuarios >
+            <div class="col-md-6 col-lg-4">
+                <a href="../Administracion/Usuarios/section-indexUsuario.html" class="text-decoration-none text-dark">
+                    <div class="card h-100 shadow-sm border-0 transition-all duration-200 hover-shadow hover-lift">
+                        <div class="card-body text-center p-4 p-md-5">
+                            <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
+                                <i class="fas fa-users text-white fs-2"></i>
+                            </div>
+                            <h3 class="h5 mb-3 text-success fw-semibold">Gestión de Usuarios</h3>
+                            <p class="text-muted mb-0 lh-base">Administra usuarios, roles y permisos del sistema.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Tipos de Material >
+            <div class="col-md-6 col-lg-4">
+                <a href="../Administracion/TiposMaterial/section-indexTipoMaterial.html" class="text-decoration-none text-dark">
+                    <div class="card h-100 shadow-sm border-0 transition-all duration-200 hover-shadow hover-lift">
+                        <div class="card-body text-center p-4 p-md-5">
+                            <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
+                                <i class="fas fa-recycle text-white fs-2"></i>
+                            </div>
+                            <h3 class="h5 mb-3 text-success fw-semibold">Tipos de Material</h3>
+                            <p class="text-muted mb-0 lh-base">Gestiona los tipos de materiales reciclables.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Puntos ECA >
+            <div class="col-md-6 col-lg-4">
+                <a href="../Administracion/PuntosECA/section-indexPuntoECA.html" class="text-decoration-none text-dark">
+                    <div class="card h-100 shadow-sm border-0 transition-all duration-200 hover-shadow hover-lift">
+                        <div class="card-body text-center p-4 p-md-5">
+                            <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
+                                <i class="fas fa-map-marker-alt text-white fs-2"></i>
+                            </div>
+                            <h3 class="h5 mb-3 text-success fw-semibold">Puntos ECA</h3>
+                            <p class="text-muted mb-0 lh-base">Administra las estaciones de clasificación y aprovechamiento.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Materiales >
+            <div class="col-md-6 col-lg-4">
+                <a href="../Administracion/Materiales/section-indexMaterial.html" class="text-decoration-none text-dark">
+                    <div class="card h-100 shadow-sm border-0 transition-all duration-200 hover-shadow hover-lift">
+                        <div class="card-body text-center p-4 p-md-5">
+                            <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
+                                <i class="fas fa-box text-white fs-2"></i>
+                            </div>
+                            <h3 class="h5 mb-3 text-success fw-semibold">Materiales</h3>
+                            <p class="text-muted mb-0 lh-base">Gestiona los materiales reciclables del sistema.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Categorías >
+            <div class="col-md-6 col-lg-4">
+                <a href="../Administracion/CategoriasMateriales/section-indexCategoriaMaterial.html" class="text-decoration-none text-dark">
+                    <div class="card h-100 shadow-sm border-0 transition-all duration-200 hover-shadow hover-lift">
+                        <div class="card-body text-center p-4 p-md-5">
+                            <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
+                                <i class="fas fa-tags text-white fs-2"></i>
+                            </div>
+                            <h3 class="h5 mb-3 text-success fw-semibold">Categorías de Materiales</h3>
+                            <p class="text-muted mb-0 lh-base">Gestiona las categorías de materiales.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Reportes >
+            <div class="col-md-6 col-lg-4">
+                <a href="../Administracion/Reportes/indexReporte.html" class="text-decoration-none text-dark">
+                    <div class="card h-100 shadow-sm border-0 transition-all duration-200 hover-shadow hover-lift">
+                        <div class="card-body text-center p-4 p-md-5">
+                            <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
+                                <i class="fas fa-chart-bar text-white fs-2"></i>
+                            </div>
+                            <h3 class="h5 mb-3 text-success fw-semibold">Reportes y Estadísticas</h3>
+                            <p class="text-muted mb-0 lh-base">Consulta reportes y métricas del sistema.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer >
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0">© 2025 InfoRecicla. Todos los derechos reservados.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end mt-2 mt-md-0">
+                    <p class="mb-0">Sistema de Gestión de Reciclaje</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Pequeño script para efectos hover (opcional) >
+    <script>
+        // Agregar clases de hover dinámicamente
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.hover-shadow');
+            
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.classList.add('shadow-lg');
+                    this.style.transform = 'translateY(-5px)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.classList.remove('shadow-lg');
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+</body>
+
+</html-->
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -13,8 +204,8 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-success shadow">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center fw-semibold" href="../Inicio/inicio.html">
-                <img src="../static/images/logo.png" alt="Logo InfoRecicla" height="40" class="me-2">
+            <a class="navbar-brand d-flex align-items-center fw-semibold" href="../../inicio">
+                <img src="/images/logo.png" alt="Logo InfoRecicla" height="40" class="me-2">
                 InfoRecicla
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -23,19 +214,19 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="../Admin/admin.html">
+                        <a class="nav-link active" href="admin.html">
                             <i class="fas fa-tachometer-alt me-1"></i> Panel
                         </a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="../Inicio/inicio.html">
+                        <a class="nav-link" href="../../inicio">
                             <i class="fas fa-home me-1"></i> Inicio
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../Registro/inicioSesion.html">
+                        <a class="nav-link" href="../../inicio">
                             <i class="fas fa-sign-out-alt me-1"></i> Cerrar sesión
                         </a>
                     </li>
@@ -60,7 +251,7 @@
         <div class="row g-4">
             <!-- Usuarios -->
             <div class="col-md-6 col-lg-4">
-                <a href="../Admin/Usuarios/section-indexUsuario.html" class="text-decoration-none text-dark">
+                <a href="../Administracion/Usuarios/indexUsuario.html" class="text-decoration-none text-dark">
                     <div class="card h-100 shadow-sm border-0 transition-all">
                         <div class="card-body text-center p-4 p-md-5">
                             <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
@@ -75,7 +266,7 @@
 
             <!-- Puntos ECA -->
             <div class="col-md-6 col-lg-4">
-                <a href="../Admin/PuntoECA/section-indexPuntoECA.html" class="text-decoration-none text-dark">
+                <a href="../Administracion/PuntosECA/indexPuntoECA.html" class="text-decoration-none text-dark">
                     <div class="card h-100 shadow-sm border-0 transition-all">
                         <div class="card-body text-center p-4 p-md-5">
                             <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
@@ -90,7 +281,7 @@
 
             <!-- Materiales -->
             <div class="col-md-6 col-lg-4">
-                <a href="../Admin/Materiales/section-indexMaterial.html" class="text-decoration-none text-dark">
+                <a href="../Administracion/Materiales/indexMaterial.html" class="text-decoration-none text-dark">
                     <div class="card h-100 shadow-sm border-0 transition-all">
                         <div class="card-body text-center p-4 p-md-5">
                             <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
@@ -105,7 +296,7 @@
 
             <!-- Tipos de Material -->
             <div class="col-md-6 col-lg-4">
-                <a href="../Admin/TiposMateriales/section-indexTipoMaterial.html" class="text-decoration-none text-dark">
+                <a href="../Administracion/TiposMaterial/indexTipoMaterial.html" class="text-decoration-none text-dark">
                     <div class="card h-100 shadow-sm border-0 transition-all">
                         <div class="card-body text-center p-4 p-md-5">
                             <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
@@ -120,7 +311,7 @@
 
             <!-- Categorías de Materiales -->
             <div class="col-md-6 col-lg-4">
-                <a href="../Admin/CategoriasMateriales/section-indexCategoriaMaterial.html" class="text-decoration-none text-dark">
+                <a href="../Administracion/CategoriasMateriales/indexCategoria.html" class="text-decoration-none text-dark">
                     <div class="card h-100 shadow-sm border-0 transition-all">
                         <div class="card-body text-center p-4 p-md-5">
                             <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
@@ -135,7 +326,7 @@
 
             <!-- Publicaciones -->
             <div class="col-md-6 col-lg-4">
-                <a href="../Admin/Publicaciones/section-indexPublicacion.html" class="text-decoration-none text-dark">
+                <a href="../Administracion/Publicaciones/indexPublicacion.html" class="text-decoration-none text-dark">
                     <div class="card h-100 shadow-sm border-0 transition-all">
                         <div class="card-body text-center p-4 p-md-5">
                             <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
@@ -150,7 +341,7 @@
 
             <!-- Categorías de Publicaciones -->
             <div class="col-md-6 col-lg-4">
-                <a href="../Admin/CategoriasPublicaciones/section-indexCategoriaPublicacion.html" class="text-decoration-none text-dark">
+                <a href="../Administracion/CategoriasPublicaciones/indexCategoriaPublicacion.html" class="text-decoration-none text-dark">
                     <div class="card h-100 shadow-sm border-0 transition-all">
                         <div class="card-body text-center p-4 p-md-5">
                             <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
@@ -163,9 +354,9 @@
                 </a>
             </div>
 
-            <!-- Reportes y Estadísticas >
+            <!-- Reportes y Estadísticas -->
             <div class="col-md-6 col-lg-4">
-                <a href="../Admin/Reportes/indexReporte.html" class="text-decoration-none text-dark">
+                <a href="../Administracion/Reportes/indexReporte.html" class="text-decoration-none text-dark">
                     <div class="card h-100 shadow-sm border-0 transition-all">
                         <div class="card-body text-center p-4 p-md-5">
                             <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
@@ -176,11 +367,11 @@
                         </div>
                     </div>
                 </a>
-            </div-->
+            </div>
 
-            <!-- Configuración del Sistema >
+            <!-- Configuración del Sistema -->
             <div class="col-md-6 col-lg-4">
-                <a href="../Admin/Configuracion/indexConfiguracion.html" class="text-decoration-none text-dark">
+                <a href="../Administracion/Configuracion/indexConfiguracion.html" class="text-decoration-none text-dark">
                     <div class="card h-100 shadow-sm border-0 transition-all">
                         <div class="card-body text-center p-4 p-md-5">
                             <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
@@ -191,11 +382,11 @@
                         </div>
                     </div>
                 </a>
-            </div-->
+            </div>
 
-            <!-- Gestión de Contenido >
+            <!-- Gestión de Contenido -->
             <div class="col-md-6 col-lg-4">
-                <a href="../Admin/Contenido/indexContenido.html" class="text-decoration-none text-dark">
+                <a href="../Administracion/Contenido/indexContenido.html" class="text-decoration-none text-dark">
                     <div class="card h-100 shadow-sm border-0 transition-all">
                         <div class="card-body text-center p-4 p-md-5">
                             <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
@@ -206,11 +397,11 @@
                         </div>
                     </div>
                 </a>
-            </div-->
+            </div>
 
-            <!-- Notificaciones >
+            <!-- Notificaciones -->
             <div class="col-md-6 col-lg-4">
-                <a href="../Admin/Notificaciones/indexNotificacion.html" class="text-decoration-none text-dark">
+                <a href="../Administracion/Notificaciones/indexNotificacion.html" class="text-decoration-none text-dark">
                     <div class="card h-100 shadow-sm border-0 transition-all">
                         <div class="card-body text-center p-4 p-md-5">
                             <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
@@ -221,11 +412,11 @@
                         </div>
                     </div>
                 </a>
-            </div-->
+            </div>
 
-            <!-- Auditoría >
+            <!-- Auditoría -->
             <div class="col-md-6 col-lg-4">
-                <a href="../Admin/Auditoria/indexAuditoria.html" class="text-decoration-none text-dark">
+                <a href="../Administracion/Auditoria/indexAuditoria.html" class="text-decoration-none text-dark">
                     <div class="card h-100 shadow-sm border-0 transition-all">
                         <div class="card-body text-center p-4 p-md-5">
                             <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
@@ -236,11 +427,11 @@
                         </div>
                     </div>
                 </a>
-            </div-->
+            </div>
 
-            <!-- Backup y Restauración >
+            <!-- Backup y Restauración -->
             <div class="col-md-6 col-lg-4">
-                <a href="../Admin/Backup/indexBackup.html" class="text-decoration-none text-dark">
+                <a href="../Administracion/Backup/indexBackup.html" class="text-decoration-none text-dark">
                     <div class="card h-100 shadow-sm border-0 transition-all">
                         <div class="card-body text-center p-4 p-md-5">
                             <div class="bg-success rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 4rem; height: 4rem;">
@@ -252,7 +443,7 @@
                     </div>
                 </a>
             </div>
-        </div-->
+        </div>
 
         <!-- Estadísticas Rápidas -->
         <div class="row mt-5">
@@ -319,22 +510,22 @@
                     <div class="card-body">
                         <div class="row g-2">
                             <div class="col-md-3 col-6">
-                                <a href="../Admin/Usuarios/section-createUsuario.html" class="btn btn-outline-success w-100">
+                                <a href="../Administracion/Usuarios/createUsuario.html" class="btn btn-outline-success w-100">
                                     <i class="fas fa-user-plus me-1"></i>Nuevo Usuario
                                 </a>
                             </div>
                             <div class="col-md-3 col-6">
-                                <a href="../Admin/PuntoECA/section-createPuntoECA.html" class="btn btn-outline-info w-100">
+                                <a href="../Administracion/PuntosECA/createPuntoECA.html" class="btn btn-outline-info w-100">
                                     <i class="fas fa-plus-circle me-1"></i>Nuevo Punto ECA
                                 </a>
                             </div>
                             <div class="col-md-3 col-6">
-                                <a href="../Admin/Publicaciones/section-createPublicacion.html" class="btn btn-outline-primary w-100">
+                                <a href="../Administracion/Publicaciones/createPublicacion.html" class="btn btn-outline-primary w-100">
                                     <i class="fas fa-edit me-1"></i>Nueva Publicación
                                 </a>
                             </div>
                             <div class="col-md-3 col-6">
-                                <a href="../Admin/Materiales/section-createMaterial.html" class="btn btn-outline-warning w-100">
+                                <a href="../Administracion/Materiales/createMaterial.html" class="btn btn-outline-warning w-100">
                                     <i class="fas fa-box me-1"></i>Nuevo Material
                                 </a>
                             </div>

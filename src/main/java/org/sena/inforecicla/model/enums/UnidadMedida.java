@@ -12,5 +12,5 @@ public enum UnidadMedida {
     T("Tonelada"),
     M3("Metro Cubico");
 
-    private final String tipo;
+    private final String nombre;
 }

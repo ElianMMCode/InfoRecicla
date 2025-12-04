@@ -1,62 +1,92 @@
+# /* =========================================================
+#    LIMPIAR DATOS DUPLICADOS - EJECUTAR PRIMERO
+#    ========================================================= */
+# -- Eliminar registros duplicados manteniendo solo el primero por ID
+# DELETE FROM `venta_inventario` WHERE `venta_id` IN (
+#     SELECT `venta_id` FROM (
+#         SELECT `venta_id`, ROW_NUMBER() OVER (PARTITION BY `venta_id` ORDER BY `fecha_creacion` ASC) as rn
+#         FROM `venta_inventario`
+#     ) t WHERE t.rn > 1
+# );
+#
+# DELETE FROM `compra_inventario` WHERE `compra_id` IN (
+#     SELECT `compra_id` FROM (
+#         SELECT `compra_id`, ROW_NUMBER() OVER (PARTITION BY `compra_id` ORDER BY `fecha_creacion` ASC) as rn
+#         FROM `compra_inventario`
+#     ) t WHERE t.rn > 1
+# );
+#
+# DELETE FROM `inventario` WHERE `inventario_id` IN (
+#     SELECT `inventario_id` FROM (
+#         SELECT `inventario_id`, ROW_NUMBER() OVER (PARTITION BY `inventario_id` ORDER BY `fecha_creacion` ASC) as rn
+#         FROM `inventario`
+#     ) t WHERE t.rn > 1
+# );
+#
+# DELETE FROM `centro_acopio` WHERE `cnt_acp_id` IN (
+#     SELECT `cnt_acp_id` FROM (
+#         SELECT `cnt_acp_id`, ROW_NUMBER() OVER (PARTITION BY `cnt_acp_id` ORDER BY `fecha_creacion` ASC) as rn
+#         FROM `centro_acopio`
+#     ) t WHERE t.rn > 1
+# );
+#
+# DELETE FROM `punto_eca` WHERE `punto_eca_id` IN (
+#     SELECT `punto_eca_id` FROM (
+#         SELECT `punto_eca_id`, ROW_NUMBER() OVER (PARTITION BY `punto_eca_id` ORDER BY `fecha_creacion` ASC) as rn
+#         FROM `punto_eca`
+#     ) t WHERE t.rn > 1
+# );
+#
+# DELETE FROM `material` WHERE `material_id` IN (
+#     SELECT `material_id` FROM (
+#         SELECT `material_id`, ROW_NUMBER() OVER (PARTITION BY `material_id` ORDER BY `fecha_creacion` ASC) as rn
+#         FROM `material`
+#     ) t WHERE t.rn > 1
+# );
+#
+# DELETE FROM `categoria_material` WHERE `categoria_material_id` IN (
+#     SELECT `categoria_material_id` FROM (
+#         SELECT `categoria_material_id`, ROW_NUMBER() OVER (PARTITION BY `categoria_material_id` ORDER BY `fecha_creacion` ASC) as rn
+#         FROM `categoria_material`
+#     ) t WHERE t.rn > 1
+# );
+#
+# DELETE FROM `tipo_material` WHERE `tipo_material_id` IN (
+#     SELECT `tipo_material_id` FROM (
+#         SELECT `tipo_material_id`, ROW_NUMBER() OVER (PARTITION BY `tipo_material_id` ORDER BY `fecha_creacion` ASC) as rn
+#         FROM `tipo_material`
+#     ) t WHERE t.rn > 1
+# );
+
 /* =========================================================
-   LIMPIAR DATOS DUPLICADOS - EJECUTAR PRIMERO
-   ========================================================= */
--- Eliminar registros duplicados manteniendo solo el primero por ID
-DELETE FROM `venta_inventario` WHERE `venta_id` IN (
-    SELECT `venta_id` FROM (
-        SELECT `venta_id`, ROW_NUMBER() OVER (PARTITION BY `venta_id` ORDER BY `fecha_creacion` ASC) as rn
-        FROM `venta_inventario`
-    ) t WHERE t.rn > 1
-);
-
-DELETE FROM `compra_inventario` WHERE `compra_id` IN (
-    SELECT `compra_id` FROM (
-        SELECT `compra_id`, ROW_NUMBER() OVER (PARTITION BY `compra_id` ORDER BY `fecha_creacion` ASC) as rn
-        FROM `compra_inventario`
-    ) t WHERE t.rn > 1
-);
-
-DELETE FROM `inventario` WHERE `inventario_id` IN (
-    SELECT `inventario_id` FROM (
-        SELECT `inventario_id`, ROW_NUMBER() OVER (PARTITION BY `inventario_id` ORDER BY `fecha_creacion` ASC) as rn
-        FROM `inventario`
-    ) t WHERE t.rn > 1
-);
-
-DELETE FROM `centro_acopio` WHERE `centro_acopio_id` IN (
-    SELECT `centro_acopio_id` FROM (
-        SELECT `centro_acopio_id`, ROW_NUMBER() OVER (PARTITION BY `centro_acopio_id` ORDER BY `fecha_creacion` ASC) as rn
-        FROM `centro_acopio`
-    ) t WHERE t.rn > 1
-);
-
-DELETE FROM `punto_eca` WHERE `punto_id` IN (
-    SELECT `punto_id` FROM (
-        SELECT `punto_id`, ROW_NUMBER() OVER (PARTITION BY `punto_id` ORDER BY `fecha_creacion` ASC) as rn
-        FROM `punto_eca`
-    ) t WHERE t.rn > 1
-);
-
-DELETE FROM `material` WHERE `material_id` IN (
-    SELECT `material_id` FROM (
-        SELECT `material_id`, ROW_NUMBER() OVER (PARTITION BY `material_id` ORDER BY `fecha_creacion` ASC) as rn
-        FROM `material`
-    ) t WHERE t.rn > 1
-);
-
-DELETE FROM `categoria_material` WHERE `categoria_material_id` IN (
-    SELECT `categoria_material_id` FROM (
-        SELECT `categoria_material_id`, ROW_NUMBER() OVER (PARTITION BY `categoria_material_id` ORDER BY `fecha_creacion` ASC) as rn
-        FROM `categoria_material`
-    ) t WHERE t.rn > 1
-);
-
-DELETE FROM `tipo_material` WHERE `tipo_material_id` IN (
-    SELECT `tipo_material_id` FROM (
-        SELECT `tipo_material_id`, ROW_NUMBER() OVER (PARTITION BY `tipo_material_id` ORDER BY `fecha_creacion` ASC) as rn
-        FROM `tipo_material`
-    ) t WHERE t.rn > 1
-);
+  LOCALIDAD - LOCALIDADES DE BOGOTÁ
+  - 20 localidades oficiales del Distrito Capital
+  ========================================================= */
+INSERT IGNORE INTO `localidad` (
+    `localidad_id`,
+    `nombre`,
+    `descripcion`
+) VALUES
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef01234501', 'Usaquén', 'Localidad de Usaquén'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef01234502', 'Chapinero', 'Localidad de Chapinero'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef01234503', 'Santa Fe', 'Localidad de Santa Fe'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef01234504', 'San Cristóbal', 'Localidad de San Cristóbal'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef01234505', 'Usme', 'Localidad de Usme'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef01234506', 'Tunjuelito', 'Localidad de Tunjuelito'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef01234507', 'Bosa', 'Localidad de Bosa'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef01234508', 'Kennedy', 'Localidad de Kennedy'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef01234509', 'Fontibón', 'Localidad de Fontibón'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef0123450a', 'Engativá', 'Localidad de Engativá'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef0123450b', 'Suba', 'Localidad de Suba'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef0123450c', 'Barrios Unidos', 'Localidad de Barrios Unidos'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef0123450d', 'Teusaquillo', 'Localidad de Teusaquillo'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef0123450e', 'Los Mártires', 'Localidad de Los Mártires'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef0123450f', 'Antonio Nariño', 'Localidad de Antonio Nariño'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef01234510', 'Puente Aranda', 'Localidad de Puente Aranda'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef01234511', 'La Candelaria', 'Localidad de La Candelaria'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef01234512', 'Rafael Uribe Uribe', 'Localidad de Rafael Uribe Uribe'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef01234513', 'Ciudad Bolívar', 'Localidad de Ciudad Bolívar'),
+      ('a1b2c3d4-e5f6-47a9-b12d-cdef01234514', 'Sumapaz', 'Localidad de Sumapaz');
 
 /* =========================================================
   TIPO_MATERIAL
@@ -424,7 +454,7 @@ INSERT IGNORE INTO `usuario` (
     `celular`,
     `email`,
     `ciudad`,
-    `localidad`,
+    `localidad_id`,
     `foto_perfil`,
     `biografia`,
     `latitud`,
@@ -444,7 +474,7 @@ INSERT IGNORE INTO `usuario` (
        '3000000000',
        'admin@inforecicla.org',
        'BOGOTA',
-       'USAQUEN',
+       'a1b2c3d4-e5f6-47a9-b12d-cdef01234501',
        NULL,
        'Cuenta administrativa principal del sistema InfoRecicla.',
        NULL,
@@ -464,7 +494,7 @@ INSERT IGNORE INTO `usuario` (
        '3011111111',
        'laura.garcia@inforecicla.org',
        'BOGOTA',
-       'TUNJUELITO',
+       'a1b2c3d4-e5f6-47a9-b12d-cdef01234506',
        NULL,
        'Gestora ECA responsable de los puntos de reciclaje del sur de Bogotá.',
        NULL,
@@ -484,7 +514,7 @@ INSERT IGNORE INTO `usuario` (
        '3022222222',
        'carlos.perez@inforecicla.org',
        'BOGOTA',
-       'USAQUEN',
+       'a1b2c3d4-e5f6-47a9-b12d-cdef01234501',
        NULL,
        'Gestor ECA asignado a zonas del norte de la ciudad.',
        NULL,
@@ -504,7 +534,7 @@ INSERT IGNORE INTO `usuario` (
        '3033333333',
        'ana.rodriguez@example.com',
        'BOGOTA',
-       'BOSA',
+       'a1b2c3d4-e5f6-47a9-b12d-cdef01234507',
        NULL,
        'Ciudadana que lleva sus residuos aprovechables a los puntos ECA cercanos.',
        NULL,
@@ -517,12 +547,11 @@ INSERT IGNORE INTO `usuario` (
    PUNTO_ECA (principal asociado al GestorECA 3333...)
    ========================================================= */
 INSERT IGNORE INTO `punto_eca` (
-    `punto_id`,
+    `punto_ecaid`,
     `nombre_punto`,
     `descripcion`,
     `telefono_punto`,
     `direccion`,
-    `coordenadas`,
     `logo_url_punto`,
     `foto_url_punto`,
     `celular_punto`,
@@ -530,7 +559,7 @@ INSERT IGNORE INTO `punto_eca` (
     `sitio_web_punto`,
     `horario_atencion_punto`,
     `ciudad`,
-    `localidad`,
+    `localidad_id`,
     `latitud`,
     `longitud`,
     `gestor_id`,
@@ -543,7 +572,6 @@ INSERT IGNORE INTO `punto_eca` (
        'Punto ECA ubicado en zona residencial de Tunjuelito, recibe plásticos, papel, cartón y metales.',
        '6011234567',
        'Calle 38 Sur # 52-10',
-       '4.5912,-74.1281',
        NULL,
        NULL,
        '3101111111',
@@ -551,7 +579,7 @@ INSERT IGNORE INTO `punto_eca` (
        NULL,
        'Lunes a sábado 08:00-17:00',
        'BOGOTA',
-       'TUNJUELITO',
+       'a1b2c3d4-e5f6-47a9-b12d-cdef01234506',
        4.5912,
        -74.1281,
        '33333333-3333-3333-3333-333333333333',
@@ -564,7 +592,6 @@ INSERT IGNORE INTO `punto_eca` (
        'Punto ECA aliado en Usaquén, recibe principalmente papel, cartón y RAEE en jornadas programadas.',
        '6017654321',
        'Carrera 7 # 120-15',
-       '4.7125,-74.0369',
        NULL,
        NULL,
        '3102222222',
@@ -572,7 +599,7 @@ INSERT IGNORE INTO `punto_eca` (
        'https://www.eca-usaquen.org',
        'Lunes a viernes 09:00-18:00',
        'BOGOTA',
-       'USAQUEN',
+       'a1b2c3d4-e5f6-47a9-b12d-cdef01234501',
        4.7125,
        -74.0369,
        '61906cf2-122d-43f7-abbf-8baecfb396de',
@@ -597,7 +624,7 @@ INSERT IGNORE INTO `centro_acopio` (
     `sitio_web_centro_copio`,
     `horario_atencion_centro_acopio`,
     `ciudad`,
-    `localidad`,
+    `localidad_id`,
     `latitud`,
     `longitud`,
     `estado`,
@@ -617,7 +644,7 @@ INSERT IGNORE INTO `centro_acopio` (
        'https://centro-sur.inforecicla.org',
        'Lunes a sábado 07:30-16:30',
        'BOGOTA',
-       'TUNJUELITO',
+       'a1b2c3d4-e5f6-47a9-b12d-cdef01234506',
        4.5920,
        -74.1290,
        'Activo',
@@ -637,7 +664,7 @@ INSERT IGNORE INTO `centro_acopio` (
        'https://centro-norte.inforecicla.org',
        'Lunes a viernes 08:00-17:30',
        'BOGOTA',
-       'USAQUEN',
+       'a1b2c3d4-e5f6-47a9-b12d-cdef01234501',
        4.7150,
        -74.0385,
        'Activo',

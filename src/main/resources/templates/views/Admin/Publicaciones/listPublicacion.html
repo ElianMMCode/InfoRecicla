@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listado de Publicaciones</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-success">
+                <i class="fas fa-newspaper me-2"></i>Listado de Publicaciones
+            </h2>
+            <a th:href="@{/publicaciones}" class="btn btn-outline-success">
+                <i class="fas fa-arrow-left me-1"></i>Volver al Dashboard
+            </a>
+        </div>
+
+        <!-- Filtros de búsqueda -->
+        <div class="card border-success mb-3">
+            <div class="card-body">
+                <form class="row g-2" method="GET" th:action="@{/publicaciones/listado}">
+                    <div class="col-12 col-md">
+                        <label class="form-label text-success">Buscar</label>
+                        <input class="form-control" name="buscar" 
+                               th:value="${param.buscar}" placeholder="título, contenido…">
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label text-success">Estado</label>
+                        <select class="form-select" name="estado">
+                            <option value="">Todos</option>
+                            <option value="publicado" th:selected="${param.estado == 'publicado'}">Publicado</option>
+                            <option value="borrador" th:selected="${param.estado == 'borrador'}">Borrador</option>
+                            <option value="archivado" th:selected="${param.estado == 'archivado'}">Archivado</option>
+                        </select>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label text-success">Categoría</label>
+                        <select class="form-select" name="categoria">
+                            <option value="">Todas</option>
+                            <option th:each="categoria : ${categorias}" 
+                                    th:value="${categoria.id}"
+                                    th:text="${categoria.nombre}"
+                                    th:selected="${param.categoria == categoria.id.toString()}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-auto d-flex align-items-end">
+                        <button class="btn btn-outline-success" type="submit">
+                            <i class="fas fa-filter me-1"></i>Aplicar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabla de publicaciones -->
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-list me-2"></i>Publicaciones del Sistema
+                </h6>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle m-0">
+                    <thead class="table-success">
+                        <tr>
+                            <th>Título</th>
+                            <th>Autor</th>
+                            <th>Categoría</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="publicacion : ${publicaciones}">
+                            <td>
+                                <div>
+                                    <strong th:text="${publicacion.titulo}">Título</strong>
+                                    <div class="small text-muted" th:if="${publicacion.contenido}">
+                                        <span th:text="${#strings.abbreviate(publicacion.contenido, 100)}">Resumen del contenido...</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <small th:text="${publicacion.usuario.nombre + ' ' + publicacion.usuario.apellido}">Autor</small>
+                            </td>
+                            <td>
+                                <span th:if="${publicacion.categoria}" class="badge bg-info" th:text="${publicacion.categoria.nombre}"></span>
+                                <span th:unless="${publicacion.categoria}" class="badge bg-secondary">Sin categoría</span>
+                            </td>
+                            <td>
+                                <span th:switch="${publicacion.estado}" class="badge">
+                                    <span th:case="'publicado'" class="badge bg-success">Publicado</span>
+                                    <span th:case="'borrador'" class="badge bg-warning">Borrador</span>
+                                    <span th:case="'archivado'" class="badge bg-secondary">Archivado</span>
+                                </span>
+                            </td>
+                            <td>
+                                <small th:text="${#temporals.format(publicacion.creado, 'dd/MM/yyyy')}">01/01/2024</small>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a th:href="@{/publicaciones/ver/{id}(id=${publicacion.id})}" 
+                                       class="btn btn-outline-success">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a th:href="@{/publicaciones/editar/{id}(id=${publicacion.id})}" 
+                                       class="btn btn-outline-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="POST" th:action="@{/publicaciones/eliminar/{id}(id=${publicacion.id})}" 
+                                          class="d-inline"
+                                          onsubmit="return confirm('¿Está seguro de eliminar esta publicación?')">
+                                        <button type="submit" class="btn btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${publicaciones.empty}">
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                                No se encontraron publicaciones
+                                <div class="mt-2">
+                                    <a th:href="@{/publicaciones/crear}" class="btn btn-success btn-sm">
+                                        <i class="fas fa-plus me-1"></i>Crear primera publicación
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Paginación -->
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <span class="small text-success">
+                    Mostrando <span th:text="${publicaciones.size()}">0</span> publicaciones
+                    <span th:if="${param.buscar}"> para "<span th:text="${param.buscar}"></span>"</span>
+                </span>
+                <div th:if="${totalPaginas > 1}">
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item" th:classappend="${paginaActual == 1} ? 'disabled'">
+                                <a class="page-link" 
+                                   th:href="@{/publicaciones/listado(buscar=${param.buscar}, estado=${param.estado}, categoria=${param.categoria}, pagina=1)}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item" th:classappend="${paginaActual == 1} ? 'disabled'">
+                                <a class="page-link" 
+                                   th:href="@{/publicaciones/listado(buscar=${param.buscar}, estado=${param.estado}, categoria=${param.categoria}, pagina=${paginaActual-1})}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                            
+                            <li th:each="i : ${#numbers.sequence(1, totalPaginas)}" 
+                                class="page-item" th:classappend="${i == paginaActual} ? 'active'">
+                                <a class="page-link" 
+                                   th:href="@{/publicaciones/listado(buscar=${param.buscar}, estado=${param.estado}, categoria=${param.categoria}, pagina=${i})}" 
+                                   th:text="${i}">1</a>
+                            </li>
+                            
+                            <li class="page-item" th:classappend="${paginaActual == totalPaginas} ? 'disabled'">
+                                <a class="page-link" 
+                                   th:href="@{/publicaciones/listado(buscar=${param.buscar}, estado=${param.estado}, categoria=${param.categoria}, pagina=${paginaActual+1})}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item" th:classappend="${paginaActual == totalPaginas} ? 'disabled'">
+                                <a class="page-link" 
+                                   th:href="@{/publicaciones/listado(buscar=${param.buscar}, estado=${param.estado}, categoria=${param.categoria}, pagina=${totalPaginas})}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas del listado -->
+        <div class="row mt-3">
+            <div class="col-md-3">
+                <div class="card border-success">
+                    <div class="card-body text-center py-2">
+                        <small class="text-success">Total encontradas</small>
+                        <div class="h5 mb-0" th:text="${publicaciones.size()}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-success">
+                    <div class="card-body text-center py-2">
+                        <small class="text-success">Publicadas</small>
+                        <div class="h5 mb-0" th:text="${totalPublicadas}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-warning">
+                    <div class="card-body text-center py-2">
+                        <small class="text-warning">Borradores</small>
+                        <div class="h5 mb-0" th:text="${totalBorradores}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-secondary">
+                    <div class="card-body text-center py-2">
+                        <small class="text-secondary">Archivadas</small>
+                        <div class="h5 mb-0" th:text="${totalArchivadas}">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones adicionales -->
+        <div class="text-center mt-4">
+            <a th:href="@{/publicaciones/crear}" class="btn btn-success me-2">
+                <i class="fas fa-plus-circle me-2"></i>Crear Nueva Publicación
+            </a>
+            <a th:href="@{/publicaciones}" class="btn btn-outline-secondary">
+                <i class="fas fa-chart-bar me-2"></i>Ver Dashboard
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Confirmación para eliminación
+        document.addEventListener('DOMContentLoaded', function() {
+            const formsEliminar = document.querySelectorAll('form[onsubmit]');
+            formsEliminar.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    if (!confirm('¿Está seguro de eliminar esta publicación? Esta acción no se puede deshacer.')) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

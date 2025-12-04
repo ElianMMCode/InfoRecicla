@@ -1,0 +1,175 @@
+<!--DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="indexPublicacion">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-primary">Dashboard de Publicaciones</h1>
+        <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=createPublicacion'}"
+           class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nueva Publicación
+        </a>
+    </div>
+
+    <!-- Estadísticas >
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary h-100">
+                <div class="card-body text-center">
+                    <div class="text-primary mb-2">Publicadas</div>
+                    <div class="h2 text-primary" th:text="${totalPublicadas}">0</div>
+                    <small class="text-muted">Visibles al público</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning h-100">
+                <div class="card-body text-center">
+                    <div class="text-warning mb-2">Borradores</div>
+                    <div class="h2 text-warning" th:text="${totalBorradores}">0</div>
+                    <small class="text-muted">En preparación</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-secondary h-100">
+                <div class="card-body text-center">
+                    <div class="text-secondary mb-2">Archivadas</div>
+                    <div class="h2 text-secondary" th:text="${totalArchivadas}">0</div>
+                    <small class="text-muted">No visibles</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success h-100">
+                <div class="card-body text-center">
+                    <div class="text-success mb-2">Total</div>
+                    <div class="h2 text-success" th:text="${totalPublicaciones}">0</div>
+                    <small class="text-muted">Todas las publicaciones</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Publicaciones Recientes >
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Publicaciones Recientes</h5>
+            <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion'}"
+               class="btn btn-sm btn-light">Ver Todas</a>
+        </div>
+        <div class="card-body">
+            <div th:if="${publicacionesRecientes.empty}" class="text-center text-muted py-4">
+                <p>No hay publicaciones recientes.</p>
+                <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=createPublicacion'}"
+                   class="btn btn-primary">Crear Primera Publicación</a>
+            </div>
+            <div th:unless="${publicacionesRecientes.empty}" class="row g-3">
+                <div th:each="publicacion : ${publicacionesRecientes}" class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title" th:text="${publicacion.titulo}">Título</h6>
+                            <p class="card-text small text-muted" th:text="${#strings.abbreviate(publicacion.contenido, 100)}">Contenido...</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span th:classappend="'badge bg-' + ${publicacion.estado == 'publicado' ? 'success' : (publicacion.estado == 'borrador' ? 'warning' : 'secondary')}"
+                                      th:text="${publicacion.estado}">Estado</span>
+                                <small class="text-muted" th:text="${#temporals.format(publicacion.creado, 'dd/MM/yyyy')}">Fecha</small>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/show/' + ${publicacion.id}}"
+                               class="btn btn-sm btn-outline-primary">Ver</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html-->
+
+<!-- Fragment: Inicio Publicaciones -->
+<div th:fragment="indexPublicacion">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-primary">Dashboard de Publicaciones</h1>
+        <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=createPublicacion'}"
+           class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Nueva Publicación
+        </a>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary h-100">
+                <div class="card-body text-center">
+                    <div class="text-primary mb-2">Publicadas</div>
+                    <div class="h2 text-primary" th:text="${totalPublicadas}">0</div>
+                    <small class="text-muted">Visibles al público</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning h-100">
+                <div class="card-body text-center">
+                    <div class="text-warning mb-2">Borradores</div>
+                    <div class="h2 text-warning" th:text="${totalBorradores}">0</div>
+                    <small class="text-muted">En preparación</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-secondary h-100">
+                <div class="card-body text-center">
+                    <div class="text-secondary mb-2">Archivadas</div>
+                    <div class="h2 text-secondary" th:text="${totalArchivadas}">0</div>
+                    <small class="text-muted">No visibles</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success h-100">
+                <div class="card-body text-center">
+                    <div class="text-success mb-2">Total</div>
+                    <div class="h2 text-success" th:text="${totalPublicaciones}">0</div>
+                    <small class="text-muted">Todas las publicaciones</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Publicaciones Recientes -->
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Publicaciones Recientes</h5>
+            <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion'}"
+               class="btn btn-sm btn-light">Ver Todas</a>
+        </div>
+        <div class="card-body">
+            <div th:if="${publicacionesRecientes.empty}" class="text-center text-muted py-4">
+                <p>No hay publicaciones recientes.</p>
+                <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=createPublicacion'}"
+                   class="btn btn-primary">Crear Primera Publicación</a>
+            </div>
+            <div th:unless="${publicacionesRecientes.empty}" class="row g-3">
+                <div th:each="publicacion : ${publicacionesRecientes}" class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title" th:text="${publicacion.titulo}">Título</h6>
+                            <p class="card-text small text-muted" th:text="${#strings.abbreviate(publicacion.contenido, 100)}">Contenido...</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span th:classappend="'badge bg-' + ${publicacion.estado == 'publicado' ? 'success' : (publicacion.estado == 'borrador' ? 'warning' : 'secondary')}"
+                                      th:text="${publicacion.estado}">Estado</span>
+                                <small class="text-muted" th:text="${#temporals.format(publicacion.creado, 'dd/MM/yyyy')}">Fecha</small>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/show/' + ${publicacion.id} + '?seccion=showPublicacion'}"
+                               class="btn btn-sm btn-outline-primary">Ver</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.sena.inforecicla.model.base.EntidadLocalizacionWebHorario;
-import org.sena.inforecicla.model.enums.Estado;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +25,7 @@ public class PuntoECA extends EntidadLocalizacionWebHorario {
 
     @Id
     @GeneratedValue
-    @Column(name = "punto_id")
+    @Column(nullable = false, updatable = false)
     private UUID puntoEcaID;
 
     @Column(name = "nombre_punto", nullable = false, length = 30)
@@ -52,19 +51,11 @@ public class PuntoECA extends EntidadLocalizacionWebHorario {
     @Column(length = 150)
     private String direccion;
 
-    @Column(name = "coordenadas", length = 50)
-    private String coordenadas;
-
     @Column(name = "logo_url_punto")
     private String logoUrlPunto;
 
     @Column(name = "foto_url_punto")
     private String fotoUrlPunto;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 15)
-    private Estado estado;
 
     @OneToOne
     @JoinColumn(name = "gestor_id", nullable = false, foreignKey = @ForeignKey(name = "fk_puntoeca_gestor"))

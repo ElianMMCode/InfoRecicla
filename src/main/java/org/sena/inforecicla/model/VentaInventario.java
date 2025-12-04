@@ -20,7 +20,7 @@ public class VentaInventario extends EntidadCreacionModificacion {
 
     @Id
     @GeneratedValue
-    @Column(name = "venta_id")
+    @Column(nullable = false, updatable = false)
     private UUID ventaId;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public enum TipoDocumento {
 
     CC("Cédula de ciudadanía"),
@@ -18,6 +17,10 @@ public enum TipoDocumento {
     DIE("Documento de Identidad Extranjero");
 
     private final String descripcion;
+
+    TipoDocumento(String descripcion) {
+        this.descripcion = descripcion;
+    }
 
     public static TipoDocumento porCodigo(String codigo) {
         for (TipoDocumento tipo : values()) {
