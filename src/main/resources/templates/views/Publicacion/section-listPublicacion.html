@@ -2,7 +2,7 @@
 <div th:fragment="listPublicacion">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 text-primary">Mis Publicaciones</h1>
-        <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=createPublicacion'}"
+        <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/crear'}"
            class="btn btn-primary">
             <i class="fas fa-plus-circle"></i> Nueva Publicación
         </a>
@@ -11,14 +11,14 @@
     <!-- Filtros -->
     <div class="card mb-4">
         <div class="card-body">
-            <form th:action="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion'}" method="get" class="row g-3">
+            <form th:action="@{'/publicaciones/' + ${usuario.usuarioId} + '/listar'}" method="get" class="row g-3">
                 <div class="col-md-4">
                     <label for="estado" class="form-label">Estado</label>
                     <select id="estado" name="estado" class="form-select">
                         <option value="">Todos los estados</option>
-                        <option value="publicado">Publicado</option>
-                        <option value="borrador">Borrador</option>
-                        <option value="archivado">Archivado</option>
+                        <option value="PUBLICADO">Publicado</option>
+                        <option value="BORRADOR">Borrador</option>
+                        <option value="ARCHIVADO">Archivado</option>
                     </select>
                 </div>
                 <div class="col-md-4">
@@ -26,13 +26,13 @@
                     <select id="categoria" name="categoria" class="form-select">
                         <option value="">Todas las categorías</option>
                         <option th:each="categoria : ${categorias}"
-                                th:value="${categoria.id}"
+                                th:value="${categoria.categoiraPublicacionId}"
                                 th:text="${categoria.nombre}">Categoría</option>
                     </select>
                 </div>
                 <div class="col-md-4 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary me-2">Filtrar</button>
-                    <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion'}"
+                    <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/listar'}"
                        class="btn btn-outline-secondary">Limpiar</a>
                 </div>
             </form>
@@ -47,7 +47,7 @@
         <div class="card-body p-0">
             <div th:if="${publicaciones.empty}" class="text-center text-muted py-5">
                 <p>No hay publicaciones creadas.</p>
-                <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=createPublicacion'}"
+                <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/crear'}"
                    class="btn btn-primary">Crear Primera Publicación</a>
             </div>
 
@@ -69,20 +69,23 @@
                             <br>
                             <small class="text-muted" th:text="${#strings.abbreviate(publicacion.contenido, 50)}">Contenido breve...</small>
                         </td>
-                        <td th:text="${publicacion.categoria?.nombre} ?: 'Sin categoría'">Categoría</td>
+                        <td th:text="${publicacion.nombreCategoria} ?: 'Sin categoría'">Categoría</td>
                         <td>
-                                <span th:classappend="'badge bg-' + ${publicacion.estado == 'publicado' ? 'success' : (publicacion.estado == 'borrador' ? 'warning' : 'secondary')}"
-                                      th:text="${publicacion.estado}">Estado</span>
+                            <span th:classappend="'badge bg-' + ${publicacion.estado == 'PUBLICADO' ? 'success' : (publicacion.estado == 'BORRADOR' ? 'warning' : 'secondary')}"
+                                  th:text="${publicacion.estado}">Estado</span>
                         </td>
                         <td th:text="${#temporals.format(publicacion.creado, 'dd/MM/yyyy HH:mm')}">Fecha</td>
                         <td>
                             <div class="btn-group btn-group-sm">
-                                <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/show/' + ${publicacion.id} + '?seccion=showPublicacion'}"
+                                <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/mostrar/' + ${publicacion.publicacionId}}"
                                    class="btn btn-outline-primary">Ver</a>
-                                <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/edit/' + ${publicacion.id} + '?seccion=editPublicacion'}"
+                                <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/editar/' + ${publicacion.publicacionId}}"
                                    class="btn btn-outline-warning">Editar</a>
-                                <button type="button" class="btn btn-outline-danger"
-                                        th:onclick="|confirmarEliminar('${publicacion.id}')|">Eliminar</button>
+                                <form th:action="@{'/publicaciones/' + ${usuario.usuarioId} + '/eliminar/' + ${publicacion.publicacionId}}"
+                                      method="post" class="d-inline"
+                                      th:onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta publicación?');">
+                                    <button type="submit" class="btn btn-outline-danger">Eliminar</button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -95,26 +98,22 @@
         <div th:if="${totalPaginas > 1}" class="card-footer">
             <nav aria-label="Paginación de publicaciones">
                 <ul class="pagination justify-content-center mb-0">
-                    <li class="page-item" th:classappend="${paginaActual == 1} ? 'disabled'">
-                        <a class="page-link" th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion&page=' + ${paginaActual - 1}}">Anterior</a>
+                    <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/listar?page=' + (paginaActual - 1)}">Anterior</a>
                     </li>
-                    <li th:each="i : ${#numbers.sequence(1, totalPaginas)}"
+                    <li th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
                         class="page-item" th:classappend="${i == paginaActual} ? 'active'">
-                        <a class="page-link" th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion&page=' + ${i}}" th:text="${i}">1</a>
+                        <a class="page-link"
+                           th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/listar?page=' + i}"
+                           th:text="${i + 1}">1</a>
                     </li>
-                    <li class="page-item" th:classappend="${paginaActual == totalPaginas} ? 'disabled'">
-                        <a class="page-link" th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion&page=' + ${paginaActual + 1}}">Siguiente</a>
+                    <li class="page-item" th:classappend="${paginaActual == totalPaginas - 1} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/listar?page=' + (paginaActual + 1)}">Siguiente</a>
                     </li>
                 </ul>
             </nav>
         </div>
     </div>
-
-    <script>
-        function confirmarEliminar(publicacionId) {
-            if (confirm('¿Estás seguro de que deseas eliminar esta publicación?')) {
-                window.location.href = '/publicaciones/eliminar/' + publicacionId;
-            }
-        }
-    </script>
 </div>

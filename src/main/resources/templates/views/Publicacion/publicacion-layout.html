@@ -15,7 +15,7 @@
 
         <!-- Vertical sidebar (fixed on md+) -->
         <aside class="d-none d-md-flex col-md-2 position-fixed top-0 start-0 vh-100 bg-success text-white p-3 flex-column z-3 shadow-sm">
-            <a class="navbar-brand d-flex align-items-center gap-2 text-white mb-3" th:href="@{../Inicio/inicio.html}">
+            <a class="navbar-brand d-flex align-items-center gap-2 text-white mb-3" th:href="@{/}">
                 <img th:src="@{/imagenes/logo.png}" src="/imagenes/logo.png" alt="Logo" width="48" height="48"
                      class="rounded">
                 <span class="fw-semibold">InfoRecicla</span>
@@ -27,25 +27,25 @@
                         <a class="nav-link"
                            th:classappend="${(#strings.equals(seccion,'indexPublicacion') or #strings.isEmpty(seccion)) ? 'text-white fw-semibold border-start border-4 border-primary rounded-start' : 'text-white'}"
                            th:attr="aria-current=${(#strings.equals(seccion,'indexPublicacion') or #strings.isEmpty(seccion)) ? 'page' : null}"
-                           th:href="@{'/Publicacion/' + ${usuario.usuarioId} + '?seccion=indexPublicacion'}">Inicio</a>
+                           th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/inicio'}">Inicio</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'listPublicacion') ? 'text-white fw-semibold border-start border-4 border-primary rounded-start' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'listPublicacion') ? 'page' : null}"
-                           th:href="@{'/Publicacion/' + ${usuario.usuarioId} + '?seccion=listPublicacion'}">Mis Publicaciones</a>
+                           th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/listar'}">Mis Publicaciones</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'createPublicacion') ? 'text-white fw-semibold border-start border-4 border-primary rounded-start' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'createPublicacion') ? 'page' : null}"
-                           th:href="@{'/Publicacion/' + ${usuario.usuarioId} + '?seccion=createPublicacion'}">Crear Publicación</a>
+                           th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/crear'}">Crear Publicación</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'categorias') ? 'text-white fw-semibold border-start border-4 border-primary rounded-start' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'categorias') ? 'page' : null}"
-                           th:href="@{'/Publicacion/' + ${usuario.usuarioId} + '?seccion=categorias'}">Categorías</a>
+                           th:href="@{/categorias}">Categorías</a>
                     </li>
                 </ul>
             </nav>
@@ -70,25 +70,25 @@
                         <a class="nav-link"
                            th:classappend="${(#strings.equals(seccion,'indexPublicacion') or #strings.isEmpty(seccion)) ? 'text-white fw-semibold border-bottom border-3 border-primary rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${(#strings.equals(seccion,'indexPublicacion') or #strings.isEmpty(seccion)) ? 'page' : null}"
-                           th:href="@{'/Publicacion/' + ${usuario.usuarioId} + '?seccion=indexPublicacion'}">Inicio</a>
+                           th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/inicio'}">Inicio</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'listPublicacion') ? 'text-white fw-semibold border-bottom border-3 border-primary rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'listPublicacion') ? 'page' : null}"
-                           th:href="@{'/Publicacion/' + ${usuario.usuarioId} + '?seccion=listPublicacion'}">Mis Publicaciones</a>
+                           th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/listar'}">Mis Publicaciones</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'createPublicacion') ? 'text-white fw-semibold border-bottom border-3 border-primary rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'createPublicacion') ? 'page' : null}"
-                           th:href="@{'/Publicacion/' + ${usuario.usuarioId} + '?seccion=createPublicacion'}">Crear</a>
+                           th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/crear'}">Crear</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'indexCategoriaPublicacion') ? 'text-white fw-semibold border-bottom border-3 border-primary rounded-bottom' : 'text-white'}"
-                           th:attr="aria-current=${#strings.equals(seccion,'indexCategoriaPublicacion') ? 'page' : null}"
-                           th:href="@{'/Publicacion/' + ${usuario.usuarioId} + '?seccion=indexCategoriaPublicacion'}">Categorías</a>
+                           th:classappend="${#strings.equals(seccion,'categorias') ? 'text-white fw-semibold border-bottom border-3 border-primary rounded-bottom' : 'text-white'}"
+                           th:attr="aria-current=${#strings.equals(seccion,'categorias') ? 'page' : null}"
+                           th:href="@{/categorias}">Categorías</a>
                     </li>
                 </ul>
             </nav>
@@ -96,14 +96,27 @@
 
         <!-- Main content -->
         <main class="col offset-md-2 p-4 pt-5 pt-md-0">
-            <div th:switch="${#strings.isEmpty(seccion) ? 'indexPublicacion' : seccion}">
-                <div th:case="'indexPublicacion'" th:insert="~{views/Publicacion/section-indexPublicacion :: indexPublicacion}"></div>
-                <div th:case="'listPublicacion'" th:insert="~{views/Publicacion/section-listPublicacion :: listPublicacion}"></div>
-                <div th:case="'createPublicacion'" th:insert="~{views/Publicacion/section-createPublicacion :: createPublicacion}"></div>
-                <div th:case="'editPublicacion'" th:insert="~{views/Publicacion/section-editPublicacion :: editPublicacion}"></div>
-                <div th:case="'showPublicacion'" th:insert="~{views/Publicacion/section-showPublicacion :: showPublicacion}"></div>
-                <div th:case="'indexCategoriaPublicacion'" th:insert="~{views/Admin/section-indexCategoriaPublicacion :: indexCategoriaPublicacion}"></div>
-                <div th:case="*" class="text-center text-muted">Sección no encontrada.</div>
+            <!-- Mensajes flash -->
+            <div th:if="${#strings.isEmpty(seccion) ? 'indexPublicacion' : seccion} == 'indexPublicacion'">
+                <div th:replace="~{section-indexPublicacion :: indexPublicacion}"></div>
+            </div>
+            <div th:if="${#strings.isEmpty(seccion) ? 'indexPublicacion' : seccion} == 'listPublicacion'">
+                <div th:replace="~{section-listPublicacion :: listPublicacion}"></div>
+            </div>
+            <div th:if="${#strings.isEmpty(seccion) ? 'indexPublicacion' : seccion} == 'createPublicacion'">
+                <div th:replace="~{section-createPublicacion :: createPublicacion}"></div>
+            </div>
+            <div th:if="${#strings.isEmpty(seccion) ? 'indexPublicacion' : seccion} == 'editPublicacion'">
+                <div th:replace="~{section-editPublicacion :: editPublicacion}"></div>
+            </div>
+            <div th:if="${#strings.isEmpty(seccion) ? 'indexPublicacion' : seccion} == 'showPublicacion'">
+                <div th:replace="~{section-showPublicacion :: showPublicacion}"></div>
+            </div>
+
+            <!-- Mensajes de éxito -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         </main>
     </div>

@@ -1,0 +1,164 @@
+<!-- Fragment: Mostrar Categoría -->
+<div th:fragment="showCategoriaPublicacion">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-primary">Detalle de Categoría</h1>
+        <div>
+            <a th:href="@{'/categorias/' + ${usuario.usuarioId} + '/listar'}"
+               class="btn btn-outline-secondary me-2">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+            <a th:href="@{'/categorias/' + ${usuario.usuarioId} + '/editar/' + ${categoria.categoiraPublicacionId}}"
+               class="btn btn-warning me-2">
+                <i class="fas fa-pencil-alt me-1"></i> Editar
+            </a>
+            <button type="button" class="btn btn-outline-danger"
+                    th:onclick="'confirmarEliminar(\'' + ${categoria.categoiraPublicacionId} + '\', \'' + ${categoria.nombre} + '\')'">
+                <i class="fas fa-trash me-1"></i> Eliminar
+            </button>
+        </div>
+    </div>
+
+    <!-- Mensajes flash -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="card">
+        <div class="card-header" th:classappend="'bg-' + ${categoria.estado == 'ACTIVO' ? 'success' : 'secondary'} + ' text-white'">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0" th:text="${categoria.nombre}">Nombre de la categoría</h5>
+                <span class="badge bg-light text-dark" th:text="${categoria.estado}">Estado</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Metadatos -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <strong><i class="fas fa-calendar-plus me-1"></i>Fecha de creación:</strong>
+                    <span th:text="${#temporals.format(categoria.fechaCreacion, 'dd/MM/yyyy HH:mm')}" class="text-muted">Fecha</span>
+                </div>
+                <div class="col-md-6">
+                    <strong><i class="fas fa-calendar-check me-1"></i>Última actualización:</strong>
+                    <span th:text="${#temporals.format(categoria.fechaActualizacion, 'dd/MM/yyyy HH:mm')}" class="text-muted">Fecha</span>
+                </div>
+            </div>
+
+            <!-- Descripción -->
+            <div class="border-top pt-3 mb-4">
+                <h6 class="text-primary mb-3"><i class="fas fa-align-left me-2"></i>Descripción:</h6>
+                <div class="categoria-descripcion" th:text="${categoria.descripcion}">
+                    Descripción de la categoría...
+                </div>
+            </div>
+
+            <!-- Estadísticas -->
+            <div class="border-top pt-3 mb-4">
+                <h6 class="text-primary mb-3"><i class="fas fa-chart-bar me-2"></i>Estadísticas:</h6>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center py-3">
+                                <div class="h4 mb-1" th:text="${categoria.publicaciones != null ? categoria.publicaciones.size() : 0}">0</div>
+                                <small class="text-muted">Publicaciones totales</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center py-3">
+                                <div class="h4 mb-1" th:text="${publicacionesPublicadas != null ? publicacionesPublicadas : 0}">0</div>
+                                <small class="text-muted">Publicadas</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center py-3">
+                                <div class="h4 mb-1" th:text="${publicacionesBorradores != null ? publicacionesBorradores : 0}">0</div>
+                                <small class="text-muted">Borradores</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Publicaciones asociadas -->
+            <div th:if="${categoria.publicaciones != null && !categoria.publicaciones.empty}" class="border-top pt-3">
+                <h6 class="text-primary mb-3"><i class="fas fa-file-alt me-2"></i>Publicaciones en esta categoría:</h6>
+                <div class="list-group">
+                    <a th:each="publicacion : ${categoria.publicaciones}"
+                       th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/mostrar/' + ${publicacion.publicacionId}}"
+                       class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-1" th:text="${publicacion.titulo}">Título</h6>
+                                <p class="mb-1 small text-muted" th:text="${#strings.abbreviate(publicacion.contenido, 100)}">Contenido...</p>
+                            </div>
+                            <div class="text-end">
+                                <small class="d-block mb-1" th:text="${#temporals.format(publicacion.creado, 'dd/MM/yyyy')}">Fecha</small>
+                                <span th:classappend="'badge bg-' + ${publicacion.estado == 'PUBLICADO' ? 'success' : (publicacion.estado == 'BORRADOR' ? 'warning' : 'secondary')}"
+                                      th:text="${publicacion.estado}">Estado</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div th:if="${categoria.publicaciones == null || categoria.publicaciones.empty}" class="border-top pt-3">
+                <h6 class="text-primary mb-3"><i class="fas fa-file-alt me-2"></i>Publicaciones en esta categoría:</h6>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>No hay publicaciones en esta categoría.
+                    <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/crear'}" class="alert-link ms-1">
+                        Crear una publicación ahora
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-transparent">
+            <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    <i class="fas fa-fingerprint me-1"></i>ID: <code th:text="${categoria.categoiraPublicacionId}">UUID</code>
+                </small>
+                <div>
+                    <a th:href="@{'/categorias/' + ${usuario.usuarioId} + '/listar'}"
+                       class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-list me-1"></i> Volver al Listado
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario oculto para eliminar -->
+    <form th:id="formEliminar" method="post" style="display: none;">
+        <input type="hidden" name="_method" value="DELETE">
+    </form>
+
+    <script>
+        function confirmarEliminar(id, nombre) {
+            if (confirm('¿Estás seguro de que deseas eliminar la categoría "' + nombre + '"? Esta acción no se puede deshacer.')) {
+                const form = document.getElementById('formEliminar');
+                form.action = '/categorias/' + id;
+                form.submit();
+            }
+        }
+    </script>
+
+    <style>
+        .categoria-descripcion {
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+            transition: all 0.3s ease;
+        }
+    </style>
+</div>

@@ -1,0 +1,153 @@
+<!-- Fragment: Inicio Categorías -->
+<div th:fragment="indexCategoriaPublicacion">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-primary">Inicio de Categorías</h1>
+        <a th:href="@{'/categorias/' + ${usuario.usuarioId} + '/crear'}"
+           class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Nueva Categoría
+        </a>
+    </div>
+
+    <!-- Mensajes flash -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-primary h-100">
+                <div class="card-body text-center">
+                    <div class="text-primary mb-2">Total Categorías</div>
+                    <div class="h2 text-primary" th:text="${totalCategorias != null ? totalCategorias : 0}">0</div>
+                    <small class="text-muted">Categorías creadas</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-success h-100">
+                <div class="card-body text-center">
+                    <div class="text-success mb-2">Categorías Activas</div>
+                    <div class="h2 text-success" th:text="${categoriasActivas != null ? categoriasActivas : 0}">0</div>
+                    <small class="text-muted">Disponibles para uso</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-warning h-100">
+                <div class="card-body text-center">
+                    <div class="text-warning mb-2">Publicaciones Asociadas</div>
+                    <div class="h2 text-warning" th:text="${totalPublicacionesAsociadas != null ? totalPublicacionesAsociadas : 0}">0</div>
+                    <small class="text-muted">Total en todas las categorías</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones rápidas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-tag fa-2x text-primary mb-3"></i>
+                    <h5>Crear Categoría</h5>
+                    <p class="text-muted small">Crea nuevas categorías para organizar tus publicaciones</p>
+                    <a th:href="@{'/categorias/' + ${usuario.usuarioId} + '/crear'}"
+                       class="btn btn-primary btn-sm">Comenzar</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-list fa-2x text-success mb-3"></i>
+                    <h5>Ver Todas</h5>
+                    <p class="text-muted small">Gestiona todas tus categorías en un solo lugar</p>
+                    <a th:href="@{'/categorias/' + ${usuario.usuarioId} + '/listar'}"
+                       class="btn btn-success btn-sm">Explorar</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-alt fa-2x text-warning mb-3"></i>
+                    <h5>Publicaciones</h5>
+                    <p class="text-muted small">Gestiona las publicaciones por categoría</p>
+                    <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/inicio'}"
+                       class="btn btn-warning btn-sm">Ir a Publicaciones</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categorías Recientes -->
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Categorías Recientes</h5>
+            <a th:href="@{'/categorias/' + ${usuario.usuarioId} + '/listar'}"
+               class="btn btn-sm btn-light">Ver Todas</a>
+        </div>
+        <div class="card-body">
+            <div th:if="${categoriasRecientes != null && categoriasRecientes.empty}" class="text-center text-muted py-4">
+                <p class="mb-3">No hay categorías creadas.</p>
+                <a th:href="@{'/categorias/' + ${usuario.usuarioId} + '/crear'}"
+                   class="btn btn-primary">Crear Primera Categoría</a>
+            </div>
+            <div th:if="${categoriasRecientes != null && !categoriasRecientes.empty}" class="row g-3">
+                <div th:each="categoria : ${categoriasRecientes}" class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title" th:text="${categoria.nombre}">Nombre</h6>
+                            <p class="card-text small text-muted mb-2"
+                               th:text="${#strings.abbreviate(categoria.descripcion, 100)}">Descripción...</p>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span th:classappend="'badge bg-' + ${categoria.estado == 'ACTIVO' ? 'success' : 'secondary'}"
+                                      th:text="${categoria.estado}">Estado</span>
+                                <small class="text-muted" th:text="${#temporals.format(categoria.fechaCreacion, 'dd/MM/yyyy')}">Fecha</small>
+                            </div>
+                            <small class="text-muted d-block">
+                                <i class="fas fa-file me-1"></i>
+                                <span th:text="${categoria.publicaciones != null ? categoria.publicaciones.size() : 0}">0</span> publicaciones
+                            </small>
+                        </div>
+                        <div class="card-footer bg-transparent d-flex justify-content-between">
+                            <a th:href="@{'/categorias/' + ${usuario.usuarioId} + '/mostrar/' + ${categoria.categoiraPublicacionId}}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye me-1"></i> Ver
+                            </a>
+                            <a th:href="@{'/categorias/' + ${usuario.usuarioId} + '/editar/' + ${categoria.categoiraPublicacionId}}"
+                               class="btn btn-sm btn-outline-warning">
+                                <i class="fas fa-edit me-1"></i> Editar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="card mt-4">
+        <div class="card-header bg-light">
+            <h6 class="mb-0">Beneficios de organizar por categorías</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <h6><i class="fas fa-search text-primary me-2"></i>Búsqueda fácil</h6>
+                    <p class="small text-muted">Los usuarios encuentran rápidamente lo que buscan.</p>
+                </div>
+                <div class="col-md-4">
+                    <h6><i class="fas fa-sitemap text-success me-2"></i>Organización</h6>
+                    <p class="small text-muted">Mantén tu contenido estructurado y ordenado.</p>
+                </div>
+                <div class="col-md-4">
+                    <h6><i class="fas fa-chart-line text-warning me-2"></i>Análisis</h6>
+                    <p class="small text-muted">Analiza qué categorías tienen más interacción.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

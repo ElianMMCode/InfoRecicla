@@ -1,0 +1,91 @@
+<!-- Fragment: Crear Categoría -->
+<div th:fragment="createCategoriaPublicacion">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-primary">Crear Nueva Categoría</h1>
+        <a th:href="@{'/categorias/' + ${usuario.usuarioId} + '/listar'}"
+           class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Volver al Listado
+        </a>
+    </div>
+
+    <!-- Mensajes flash -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Información de la Categoría</h5>
+        </div>
+        <div class="card-body">
+            <form th:action="@{'/categorias/' + ${usuario.usuarioId} + '/crear'}"
+                  method="post"
+                  th:object="${categoria}">
+                <div class="row g-3">
+                    <!-- Nombre -->
+                    <div class="col-md-6">
+                        <label for="nombre" class="form-label">Nombre <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="nombre" th:field="*{nombre}"
+                               placeholder="Ingresa el nombre de la categoría" required maxlength="30">
+                        <div class="form-text">Máximo 30 caracteres</div>
+                        <div th:if="${#fields.hasErrors('nombre')}" class="text-danger">
+                            <small th:errors="*{nombre}"></small>
+                        </div>
+                    </div>
+
+                    <!-- Estado -->
+                    <div class="col-md-6">
+                        <label for="estado" class="form-label">Estado <span class="text-danger">*</span></label>
+                        <select class="form-select" id="estado" th:field="*{estado}" required>
+                            <option value="ACTIVO">Activo</option>
+                            <option value="INACTIVO">Inactivo</option>
+                        </select>
+                        <div th:if="${#fields.hasErrors('estado')}" class="text-danger">
+                            <small th:errors="*{estado}"></small>
+                        </div>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="col-12">
+                        <label for="descripcion" class="form-label">Descripción <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="descripcion" th:field="*{descripcion}"
+                                  rows="5" placeholder="Describe la categoría..." required maxlength="500"></textarea>
+                        <div class="form-text">Máximo 500 caracteres</div>
+                        <div th:if="${#fields.hasErrors('descripcion')}" class="text-danger">
+                            <small th:errors="*{descripcion}"></small>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="col-12">
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a th:href="@{'/categorias/' + ${usuario.usuarioId} + '/listar'}"
+                               class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-1"></i> Crear Categoría
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ayuda -->
+    <div class="card mt-4">
+        <div class="card-header bg-light">
+            <h6 class="mb-0">Consejos para una buena categoría</h6>
+        </div>
+        <div class="card-body">
+            <ul class="mb-0">
+                <li><strong>Nombre descriptivo:</strong> Usa un nombre que describa claramente el contenido de la categoría.</li>
+                <li><strong>Descripción completa:</strong> Explica qué tipo de publicaciones deben ir en esta categoría.</li>
+                <li><strong>Estado apropiado:</strong> Usa "Inactivo" para categorías que no quieres que sean visibles temporalmente.</li>
+                <li><strong>Evita duplicados:</strong> Revisa que no exista ya una categoría similar antes de crear una nueva.</li>
+            </ul>
+        </div>
+    </div>
+</div>
