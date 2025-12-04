@@ -39,5 +39,5 @@ public class Votos extends EntidadCreacionModificacion {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "publicacion_id", nullable = false)
-    private Publicaciones publicacion;
+    private Publicacion publicacion;
 }
