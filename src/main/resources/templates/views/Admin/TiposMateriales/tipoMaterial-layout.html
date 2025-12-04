@@ -13,8 +13,8 @@
     <div class="row g-0">
 
         <!-- Vertical sidebar -->
-        <aside class="d-none d-md-flex col-md-2 position-fixed top-0 start-0 vh-100 bg-warning text-dark p-3 flex-column z-3 shadow-sm">
-            <a class="navbar-brand d-flex align-items-center gap-2 text-dark mb-3" th:href="@{/}">
+        <aside class="d-none d-md-flex col-md-2 position-fixed top-0 start-0 vh-100 bg-success text-white p-3 flex-column z-3 shadow-sm">
+            <a class="navbar-brand d-flex align-items-center gap-2 text-white mb-3" th:href="@{../Inicio/inicio.html}">
                 <img th:src="@{/imagenes/logo.png}" src="/imagenes/logo.png" alt="Logo" width="48" height="48" class="rounded">
                 <span class="fw-semibold">InfoRecicla</span>
             </a>
@@ -23,15 +23,15 @@
                 <ul class="nav nav-pills flex-column gap-2 w-100">
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${(#strings.equals(seccion,'indexTipoMaterial') or #strings.isEmpty(seccion)) ? 'bg-dark text-warning fw-semibold border-start border-4 border-warning rounded-start' : 'text-dark'}"
+                           th:classappend="${(#strings.equals(seccion,'indexTipoMaterial') or #strings.isEmpty(seccion)) ? 'bg-dark text-warning fw-semibold border-start border-4 border-warning rounded-start' : 'text-white'}"
                            th:attr="aria-current=${(#strings.equals(seccion,'indexTipoMaterial') or #strings.isEmpty(seccion)) ? 'page' : null}"
                            th:href="@{'/tipos-material/' + ${usuario.usuarioId} + '?seccion=indexTipoMaterial'}">
-                            <i class="fas fa-chart-bar me-2"></i>Dashboard
+                            <i class="fas fa-chart-bar me-2"></i>Inicio
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'listTipoMaterial') ? 'bg-dark text-warning fw-semibold border-start border-4 border-warning rounded-start' : 'text-dark'}"
+                           th:classappend="${#strings.equals(seccion,'listTipoMaterial') ? 'bg-dark text-warning fw-semibold border-start border-4 border-warning rounded-start' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'listTipoMaterial') ? 'page' : null}"
                            th:href="@{'/tipos-material/' + ${usuario.usuarioId} + '?seccion=listTipoMaterial'}">
                             <i class="fas fa-list me-2"></i>Listado
@@ -39,7 +39,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'createTipoMaterial') ? 'bg-dark text-warning fw-semibold border-start border-4 border-warning rounded-start' : 'text-dark'}"
+                           th:classappend="${#strings.equals(seccion,'createTipoMaterial') ? 'bg-dark text-warning fw-semibold border-start border-4 border-warning rounded-start' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'createTipoMaterial') ? 'page' : null}"
                            th:href="@{'/tipos-material/' + ${usuario.usuarioId} + '?seccion=createTipoMaterial'}">
                             <i class="fas fa-plus-circle me-2"></i>Crear Tipo
@@ -48,7 +48,7 @@
                 </ul>
             </nav>
 
-            <div class="mt-auto small text-dark-50">
+            <div class="mt-auto small text-white-50">
                 <span>&copy; 2025 InfoRecicla</span>
             </div>
         </aside>
@@ -56,7 +56,7 @@
         <!-- Top horizontal nav for small screens -->
         <div class="d-md-none w-100 bg-warning py-2 fixed-top z-3 shadow-sm">
             <div class="d-flex align-items-center justify-content-between px-3">
-                <a class="navbar-brand d-flex align-items-center gap-2 text-dark" th:href="@{/}">
+                <a class="navbar-brand d-flex align-items-center gap-2 text-white" th:href="@{../Inicio/inicio.html}">
                     <img th:src="@{/imagenes/logo.png}" src="/imagenes/logo.png" alt="Logo" width="32" height="32" class="rounded">
                     <span class="fw-semibold">InfoRecicla</span>
                 </a>
@@ -65,15 +65,15 @@
                 <ul class="nav nav-pills flex-row gap-2 overflow-auto px-3">
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${(#strings.equals(seccion,'indexTipoMaterial') or #strings.isEmpty(seccion)) ? 'bg-dark text-warning fw-semibold border-bottom border-3 border-warning rounded-bottom' : 'text-dark'}"
+                           th:classappend="${(#strings.equals(seccion,'indexTipoMaterial') or #strings.isEmpty(seccion)) ? 'bg-dark text-warning fw-semibold border-bottom border-3 border-warning rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${(#strings.equals(seccion,'indexTipoMaterial') or #strings.isEmpty(seccion)) ? 'page' : null}"
                            th:href="@{'/tipos-material/' + ${usuario.usuarioId} + '?seccion=indexTipoMaterial'}">
-                            <i class="fas fa-chart-bar me-1"></i>Dashboard
+                            <i class="fas fa-chart-bar me-1"></i>Inicio
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'listTipoMaterial') ? 'bg-dark text-warning fw-semibold border-bottom border-3 border-warning rounded-bottom' : 'text-dark'}"
+                           th:classappend="${#strings.equals(seccion,'listTipoMaterial') ? 'bg-dark text-warning fw-semibold border-bottom border-3 border-warning rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'listTipoMaterial') ? 'page' : null}"
                            th:href="@{'/tipos-material/' + ${usuario.usuarioId} + '?seccion=listTipoMaterial'}">
                             <i class="fas fa-list me-1"></i>Listado
@@ -81,7 +81,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'createTipoMaterial') ? 'bg-dark text-warning fw-semibold border-bottom border-3 border-warning rounded-bottom' : 'text-dark'}"
+                           th:classappend="${#strings.equals(seccion,'createTipoMaterial') ? 'bg-dark text-warning fw-semibold border-bottom border-3 border-warning rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'createTipoMaterial') ? 'page' : null}"
                            th:href="@{'/tipos-material/' + ${usuario.usuarioId} + '?seccion=createTipoMaterial'}">
                             <i class="fas fa-plus-circle me-1"></i>Crear
@@ -94,11 +94,11 @@
         <!-- Main content -->
         <main class="col offset-md-2 p-4 pt-5 pt-md-0">
             <div th:switch="${#strings.isEmpty(seccion) ? 'indexTipoMaterial' : seccion}">
-                <div th:case="'indexTipoMaterial'" th:insert="~{views/TiposMaterial/section-indexTipoMaterial :: indexTipoMaterial}"></div>
-                <div th:case="'listTipoMaterial'" th:insert="~{views/TiposMaterial/section-listTipoMaterial :: listTipoMaterial}"></div>
-                <div th:case="'createTipoMaterial'" th:insert="~{views/TiposMaterial/section-createTipoMaterial :: createTipoMaterial}"></div>
-                <div th:case="'editTipoMaterial'" th:insert="~{views/TiposMaterial/section-editTipoMaterial :: editTipoMaterial}"></div>
-                <div th:case="'showTipoMaterial'" th:insert="~{views/TiposMaterial/section-showTipoMaterial :: showTipoMaterial}"></div>
+                <div th:case="'indexTipoMaterial'" th:insert="~{views/Admin/TiposMaterial/section-indexTipoMaterial :: indexTipoMaterial}"></div>
+                <div th:case="'listTipoMaterial'" th:insert="~{views/Admin/TiposMaterial/section-listTipoMaterial :: listTipoMaterial}"></div>
+                <div th:case="'createTipoMaterial'" th:insert="~{views/Admin/TiposMaterial/section-createTipoMaterial :: createTipoMaterial}"></div>
+                <div th:case="'editTipoMaterial'" th:insert="~{views/Admin/TiposMaterial/section-editTipoMaterial :: editTipoMaterial}"></div>
+                <div th:case="'showTipoMaterial'" th:insert="~{views/Admin/TiposMaterial/section-showTipoMaterial :: showTipoMaterial}"></div>
                 <div th:case="*" class="text-center text-muted">Sección no encontrada.</div>
             </div>
         </main>

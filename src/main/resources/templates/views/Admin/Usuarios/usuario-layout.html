@@ -13,8 +13,8 @@
     <div class="row g-0">
 
         <!-- Vertical sidebar -->
-        <aside class="d-none d-md-flex col-md-2 position-fixed top-0 start-0 vh-100 bg-dark text-white p-3 flex-column z-3 shadow-sm">
-            <a class="navbar-brand d-flex align-items-center gap-2 text-white mb-3" th:href="@{/}">
+        <aside class="d-none d-md-flex col-md-2 position-fixed top-0 start-0 vh-100 bg-success text-white p-3 flex-column z-3 shadow-sm">
+            <a class="navbar-brand d-flex align-items-center gap-2 text-white mb-3" th:href="@{../Inicio/inicio.html}">
                 <img th:src="@{/imagenes/logo.png}" src="/imagenes/logo.png" alt="Logo" width="48" height="48" class="rounded">
                 <span class="fw-semibold">InfoRecicla</span>
             </a>
@@ -26,7 +26,7 @@
                            th:classappend="${(#strings.equals(seccion,'indexUsuario') or #strings.isEmpty(seccion)) ? 'bg-white text-dark fw-semibold border-start border-4 border-dark rounded-start' : 'text-white'}"
                            th:attr="aria-current=${(#strings.equals(seccion,'indexUsuario') or #strings.isEmpty(seccion)) ? 'page' : null}"
                            th:href="@{'/usuarios/' + ${usuario.usuarioId} + '?seccion=indexUsuario'}">
-                            <i class="fas fa-chart-bar me-2"></i>Dashboard
+                            <i class="fas fa-chart-bar me-2"></i>Inicio
                         </a>
                     </li>
                     <li class="nav-item">
@@ -56,7 +56,7 @@
         <!-- Top horizontal nav for small screens -->
         <div class="d-md-none w-100 bg-dark py-2 fixed-top z-3 shadow-sm">
             <div class="d-flex align-items-center justify-content-between px-3">
-                <a class="navbar-brand d-flex align-items-center gap-2 text-white" th:href="@{/}">
+                <a class="navbar-brand d-flex align-items-center gap-2 text-white" th:href="@{../Inico/inicio.html}">
                     <img th:src="@{/imagenes/logo.png}" src="/imagenes/logo.png" alt="Logo" width="32" height="32" class="rounded">
                     <span class="fw-semibold">InfoRecicla</span>
                 </a>
@@ -68,7 +68,7 @@
                            th:classappend="${(#strings.equals(seccion,'indexUsuario') or #strings.isEmpty(seccion)) ? 'bg-white text-dark fw-semibold border-bottom border-3 border-dark rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${(#strings.equals(seccion,'indexUsuario') or #strings.isEmpty(seccion)) ? 'page' : null}"
                            th:href="@{'/usuarios/' + ${usuario.usuarioId} + '?seccion=indexUsuario'}">
-                            <i class="fas fa-chart-bar me-1"></i>Dashboard
+                            <i class="fas fa-chart-bar me-1"></i>Inicio
                         </a>
                     </li>
                     <li class="nav-item">
@@ -94,11 +94,11 @@
         <!-- Main content -->
         <main class="col offset-md-2 p-4 pt-5 pt-md-0">
             <div th:switch="${#strings.isEmpty(seccion) ? 'indexUsuario' : seccion}">
-                <div th:case="'indexUsuario'" th:insert="~{views/Usuarios/section-indexUsuario :: indexUsuario}"></div>
-                <div th:case="'listUsuario'" th:insert="~{views/Usuarios/section-listUsuario :: listUsuario}"></div>
-                <div th:case="'createUsuario'" th:insert="~{views/Usuarios/section-createUsuario :: createUsuario}"></div>
-                <div th:case="'editUsuario'" th:insert="~{views/Usuarios/section-editUsuario :: editUsuario}"></div>
-                <div th:case="'showUsuario'" th:insert="~{views/Usuarios/section-showUsuario :: showUsuario}"></div>
+                <div th:case="'indexUsuario'" th:insert="~{views/Admin/Usuarios/section-indexUsuario :: indexUsuario}"></div>
+                <div th:case="'listUsuario'" th:insert="~{views/Admin/Usuarios/section-listUsuario :: listUsuario}"></div>
+                <div th:case="'createUsuario'" th:insert="~{views/Admin/Usuarios/section-createUsuario :: createUsuario}"></div>
+                <div th:case="'editUsuario'" th:insert="~{views/Admin/Usuarios/section-editUsuario :: editUsuario}"></div>
+                <div th:case="'showUsuario'" th:insert="~{views/Admin/Usuarios/section-showUsuario :: showUsuario}"></div>
                 <div th:case="*" class="text-center text-muted">Sección no encontrada.</div>
             </div>
         </main>
