@@ -32,129 +32,52 @@
             <div id="collapseAgregar" class="accordion-collapse collapse" aria-labelledby="headingAgregar"
                  data-bs-parent="#acordeonMateriales">
                 <div class="accordion-body p-4 bg-light">
-                    <!-- Barra de búsqueda principal -->
+                    <!-- Barra de búsqueda principal con Select2 AJAX -->
                     <div class="row g-3 mb-4">
                         <div class="col-12">
-                            <label class="form-label fw-semibold text-muted mb-1" for="buscarMaterialInput">Buscar Material</label>
-                            <div class="input-group input-group-lg flex-nowrap">
-                                <span class="input-group-text bg-light border-2 border-success">
-                                    <i class="bi bi-search text-success"></i>
-                                </span>
-                                <input id="buscarMaterialInput" type="text" class="form-control form-control-lg border-2 border-success"
-                                       placeholder="Nombre, código, categoría..." aria-label="Buscar material">
-                            </div>
+                            <label class="form-label fw-semibold text-muted mb-1" for="buscarMaterialSelect">Buscar Material</label>
+                            <select id="buscarMaterialSelect" class="form-select form-select-lg border-2 border-success js-select2-material" style="width: 100%;">
+                                <option></option>
+                            </select>
+                            <small class="text-muted">Comienza a escribir o haz clic para ver todos los materiales disponibles</small>
                         </div>
                     </div>
 
-                    <!-- Radios de categoría -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-12">
-                            <span class="form-label fw-semibold text-muted d-block mb-2">Categoría</span>
-                            <div class="btn-group flex-wrap gap-2" role="group" aria-label="Filtro categoría">
-                                <input type="radio" class="btn-check" name="radioCategoriaBusqueda" id="radioCategoriaNone" value="" autocomplete="off" checked>
-                                <label class="btn btn-outline-success" for="radioCategoriaNone">Ninguno</label>
+                    <!-- Categoría, Tipo y Limpiar lado a lado -->
+                    <div class="row g-3 align-items-end mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold text-muted mb-1" for="selectCategoriaBusqueda">Categoría</label>
+                            <select id="selectCategoriaBusqueda" class="form-select border-2 border-success js-select2-categoria" style="width: 100%;">
+                                <option value="">-- Ninguno --</option>
                                 <th:block th:if="${not #lists.isEmpty(categoriaMateriales)}">
-                                    <th:block th:each="cat, iter : ${categoriaMateriales}">
-                                        <input type="radio" class="btn-check" name="radioCategoriaBusqueda"
-                                               th:id="${'radioCategoria_' + iter.index}" th:value="${cat.nmbCategoria}" autocomplete="off">
-                                        <label class="btn btn-outline-success"
-                                               th:for="${'radioCategoria_' + iter.index}" th:text="${cat.nmbCategoria}"
-                                               data-bs-toggle="tooltip" data-bs-placement="top"
-                                               th:attr="title=${cat.dscCategoria}">
-                                            Categoría
-                                        </label>
-                                    </th:block>
+                                    <option th:each="cat : ${categoriaMateriales}"
+                                            th:value="${cat.nmbCategoria}"
+                                            th:text="${cat.nmbCategoria}">
+                                        Categoría
+                                    </option>
                                 </th:block>
-                                <th:block th:if="${#lists.isEmpty(categoriaMateriales)}">
-                                    <span class="text-muted small">No hay categorías registradas</span>
-                                </th:block>
-                            </div>
+                            </select>
                         </div>
-                    </div>
 
-                    <!-- Radios de tipo -->
-                    <div class="row g-3 mb-3">
-                        <div class="col-12">
-                            <span class="form-label fw-semibold text-muted d-block mb-2">Tipo</span>
-                            <div class="btn-group flex-wrap gap-2" role="group" aria-label="Filtro tipo">
-                                <input type="radio" class="btn-check" name="radioTipoBusqueda" id="radioTipoNone" value="" autocomplete="off" checked>
-                                <label class="btn btn-outline-success" for="radioTipoNone">Ninguno</label>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold text-muted mb-1" for="selectTipoBusqueda">Tipo</label>
+                            <select id="selectTipoBusqueda" class="form-select border-2 border-success js-select2-tipo" style="width: 100%;">
+                                <option value="">-- Ninguno --</option>
                                 <th:block th:if="${not #lists.isEmpty(tiposMateriales)}">
-                                    <th:block th:each="tipo, iter : ${tiposMateriales}">
-                                        <input type="radio" class="btn-check" name="radioTipoBusqueda"
-                                               th:id="${'radioTipo_' + iter.index}" th:value="${tipo.nmbCategoria}" autocomplete="off">
-                                        <label class="btn btn-outline-success"
-                                               th:for="${'radioTipo_' + iter.index}" th:text="${tipo.nmbCategoria}"
-                                               data-bs-toggle="tooltip" data-bs-placement="top"
-                                               th:attr="title=${tipo.dscCategoria}">
-                                            Tipo
-                                        </label>
-                                    </th:block>
+                                    <option th:each="tipo : ${tiposMateriales}"
+                                            th:value="${tipo.nmbCategoria}"
+                                            th:text="${tipo.nmbCategoria}">
+                                        Tipo
+                                    </option>
                                 </th:block>
-                                <th:block th:if="${#lists.isEmpty(tiposMateriales)}">
-                                    <span class="text-muted small">No hay tipos registrados</span>
-                                </th:block>
-                            </div>
+                            </select>
                         </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-auto">
-                            <small class="text-muted">Selecciona opcionalmente categoría y tipo o deja "Ninguno" para no filtrar.</small>
-                        </div>
-                    </div>
-
-                    <!-- Botones de acción -->
-                    <div class="row mt-4">
-                        <div class="col-12 d-flex flex-wrap gap-3 justify-content-end">
-                            <button id="btnAbrirBuscar" class="btn btn-success" type="button" data-endpoint="/punto-eca/catalogo/materiales/buscar">
-                                <i class="bi bi-plus-circle me-1"></i>Agregar
-                            </button>
-                            <button id="btnLimpiarBusquedaAgregar" class="btn btn-outline-secondary" type="button">
+                        <div class="col-md-4">
+                            <button id="btnLimpiarBusquedaAgregar" class="btn btn-outline-secondary w-100" type="button">
                                 <i class="bi bi-eraser me-1"></i>Limpiar
                             </button>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- MODAL: RESULTADOS DE BÚSQUEDA DE MATERIALES -->
-        <div class="modal fade" id="buscarMaterialModal" tabindex="-1" aria-labelledby="buscarMaterialModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title" id="buscarMaterialModalLabel">
-                            <i class="bi bi-search me-2"></i>Resultados de Búsqueda
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                    </div>
-                    <div class="modal-body">
-                        <!-- Resumen de filtros aplicados -->
-                        <div class="alert alert-info mb-3" role="alert">
-                            <strong>Filtros aplicados:</strong>
-                            <div class="mt-2">
-                                <span class="badge bg-info-subtle text-info">Texto: <strong id="resumenBusquedaTexto">Sin filtro</strong></span>
-                                <span class="badge bg-info-subtle text-info ms-2">Categoría: <strong id="resumenBusquedaCategoria">Sin filtro</strong></span>
-                                <span class="badge bg-info-subtle text-info ms-2">Tipo: <strong id="resumenBusquedaTipo">Sin filtro</strong></span>
-                            </div>
-                        </div>
-
-                        <!-- Estado de búsqueda (loading, ready, etc) -->
-                        <div id="estadoBusquedaMateriales" class="text-center text-muted py-4 mb-3">
-                            <i class="bi bi-search display-6 d-block mb-2"></i>
-                            <p class="mb-0">Buscando materiales...</p>
-                        </div>
-
-                        <!-- Lista de resultados -->
-                        <div id="resultadosBusqueda" class="list-group">
-                            <!-- Los resultados se renderizarán aquí -->
-                        </div>
-                    </div>
-                    <div class="modal-footer border-top bg-light">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="bi bi-x-circle me-1"></i>Cerrar
-                        </button>
                     </div>
                 </div>
             </div>
@@ -284,497 +207,37 @@
             </div>
         </div>
 
-        <!-- SCRIPT INLINE PARA VINCULACIÓN DIRECTA DE BOTONES Y BÚSQUEDA -->
+        <!-- SCRIPT INLINE PARA MANEJAR BOTÓN LIMPIAR -->
         <script>
         (function() {
-            console.log('📌 Script inline de búsqueda ejecutándose...');
-
-            // ============================================================
-            // ELEMENTOS DEL DOM
-            // ============================================================
-            const btnAbrirBuscar = document.getElementById('btnAbrirBuscar');
-            const btnLimpiarAgregar = document.getElementById('btnLimpiarBusquedaAgregar');
-            const inputBusquedaAgregar = document.getElementById('buscarMaterialInput');
-            const modalBuscarMaterial = document.getElementById('buscarMaterialModal');
-            const resumenTextoEl = document.getElementById('resumenBusquedaTexto');
-            const resumenCategoriaEl = document.getElementById('resumenBusquedaCategoria');
-            const resumenTipoEl = document.getElementById('resumenBusquedaTipo');
-            const estadoBusquedaEl = document.getElementById('estadoBusquedaMateriales');
-            const listaResultadosEl = document.getElementById('resultadosBusqueda');
-
-            console.log('✓ Elementos encontrados:', {btnAbrirBuscar: !!btnAbrirBuscar, btnLimpiarAgregar: !!btnLimpiarAgregar, modalBuscarMaterial: !!modalBuscarMaterial});
-
-            // ============================================================
-            // FUNCIONES DE UTILIDAD
-            // ============================================================
-            function obtenerFiltrosAgregarMaterial() {
-                const categoriaSeleccionada = document.querySelector('input[name="radioCategoriaBusqueda"]:checked');
-                const tipoSeleccionado = document.querySelector('input[name="radioTipoBusqueda"]:checked');
-
-                return {
-                    texto: (inputBusquedaAgregar?.value || '').trim(),
-                    categoria: categoriaSeleccionada ? categoriaSeleccionada.value : '',
-                    tipo: tipoSeleccionado ? tipoSeleccionado.value : ''
-                };
-            }
-
-            function actualizarResumenBusqueda(filtros) {
-                if (resumenTextoEl) resumenTextoEl.textContent = filtros.texto || 'Sin filtro';
-                if (resumenCategoriaEl) resumenCategoriaEl.textContent = filtros.categoria || 'Sin filtro';
-                if (resumenTipoEl) resumenTipoEl.textContent = filtros.tipo || 'Sin filtro';
-            }
-
-            function mostrarEstadoBusqueda(estado) {
-                if (!estadoBusquedaEl) return;
-                const estados = {
-                    idle: '<i class="bi bi-search display-6 d-block mb-2"></i><p class="mb-0">Marca tus filtros y haz clic en <strong>Agregar</strong> para consultar el catálogo.</p>',
-                    loading: '<div class="d-flex flex-column align-items-center"><div class="spinner-border text-success mb-3" role="status"></div><p class="mb-0">Buscando materiales disponibles...</p></div>',
-                    ready: '<i class="bi bi-check-circle text-success display-6 d-block mb-2"></i><p class="mb-0">Selecciona un material para continuar.</p>'
-                };
-                estadoBusquedaEl.innerHTML = estados[estado] || estados.idle;
-            }
-
-            function renderResultadosBusqueda(materiales, opciones = {}) {
-                if (!listaResultadosEl) return;
-
-                listaResultadosEl.innerHTML = '';
-
-                if (opciones.modoCarga) {
-                    const skeleton = document.createElement('div');
-                    skeleton.className = 'list-group-item py-3 text-muted d-flex align-items-center gap-3';
-                    skeleton.innerHTML = '<span class="placeholder col-2"></span><span class="placeholder col-5"></span><span class="placeholder col-3 ms-auto"></span>';
-                    listaResultadosEl.appendChild(skeleton);
-                    return;
-                }
-
-                if (!materiales || materiales.length === 0) {
-                    const emptyItem = document.createElement('div');
-                    emptyItem.className = 'list-group-item text-muted text-center py-4';
-                    emptyItem.textContent = 'Sin resultados disponibles. Ejecuta una búsqueda para comenzar.';
-                    listaResultadosEl.appendChild(emptyItem);
-                    mostrarEstadoBusqueda('idle');
-                    return;
-                }
-
-                materiales.forEach(material => {
-                    const item = document.createElement('button');
-                    item.type = 'button';
-                    item.className = 'list-group-item list-group-item-action resultado-material-item d-flex align-items-start gap-3';
-                    // Usar los nombres correctos del DTO
-                    item.dataset.materialId = material.materialId || '';
-                    item.dataset.nombre = material.nmbMaterial || '';
-                    item.dataset.descripcion = material.dscMaterial || '';
-                    item.dataset.tipo = material.nmbTipo || '';
-                    item.dataset.categoria = material.nmbCategoria || '';
-                    item.dataset.unidad = material.unidad || '';
-
-                    // Crear imagen
-                    const img = document.createElement('img');
-                    img.src = material.imagenUrl || '/imagenes/materiales.png';
-                    img.alt = material.nmbMaterial || 'Imagen material';
-                    img.className = 'rounded';
-                    img.style.width = '64px';
-                    img.style.height = '64px';
-                    img.style.objectFit = 'cover';
-                    img.style.flexShrink = '0';
-
-                    // Contenido textual
-                    const content = document.createElement('div');
-                    content.className = 'flex-grow-1 text-start';
-
-                    const title = document.createElement('div');
-                    title.className = 'fw-semibold';
-                    title.textContent = material.nmbMaterial || 'Material sin nombre';
-
-                    const desc = document.createElement('small');
-                    desc.className = 'text-muted d-block mb-2';
-                    desc.textContent = material.dscMaterial || 'Sin descripción';
-
-                    const badges = document.createElement('div');
-                    const tipoBadge = document.createElement('span');
-                    tipoBadge.className = 'badge bg-primary me-1';
-                    tipoBadge.textContent = material.nmbTipo || 'Tipo';
-                    const catBadge = document.createElement('span');
-                    catBadge.className = 'badge bg-secondary';
-                    catBadge.textContent = material.nmbCategoria || 'Categoría';
-
-                    badges.appendChild(tipoBadge);
-                    badges.appendChild(catBadge);
-
-                    content.appendChild(title);
-                    content.appendChild(desc);
-                    content.appendChild(badges);
-
-                    const actionBadge = document.createElement('span');
-                    actionBadge.className = 'badge bg-success rounded-pill align-self-start';
-                    actionBadge.textContent = 'Seleccionar';
-
-                    item.appendChild(img);
-                    item.appendChild(content);
-                    item.appendChild(actionBadge);
-
-                    listaResultadosEl.appendChild(item);
-                });
-
-                mostrarEstadoBusqueda('ready');
-
-                // ✨ Agregar manejadores de clic a cada material
-                document.querySelectorAll('.resultado-material-item').forEach(item => {
-                    item.addEventListener('click', function(e) {
-                        e.preventDefault();
-
-                        const materialId = this.dataset.materialId;
-                        const materialNombre = this.dataset.nombre;
-
-                        console.log('📦 Material seleccionado:', materialId, '-', materialNombre);
-
-                        // Llenar los campos del formulario
-                        document.getElementById('agregarMaterialId').value = materialId;
-                        document.getElementById('agregarMaterialNombre').value = materialNombre;
-
-                        // Limpiar campos de entrada
-                        document.getElementById('stockInicial').value = '';
-                        document.getElementById('capacidadMaxima').value = '';
-                        document.getElementById('precioCompra').value = '';
-                        document.getElementById('precioVenta').value = '';
-                        document.getElementById('umbralAlerta').value = '';
-                        document.getElementById('umbralCritico').value = '';
-                        document.getElementById('unidadMedida').value = '';
-
-                        // Limpiar mensaje de estado
-                        const mensajeEstado = document.getElementById('mensajeEstado');
-                        if (mensajeEstado) {
-                            mensajeEstado.style.display = 'none';
-                        }
-
-                        // Cerrar modal de búsqueda
-                        const modalBusquedaInstance = bootstrap.Modal.getInstance(document.getElementById('buscarMaterialModal'));
-                        if (modalBusquedaInstance) {
-                            modalBusquedaInstance.hide();
-                        }
-
-                        // Abrir modal de agregar inventario
-                        const modalAgregar = document.getElementById('agregarInventarioModal');
-                        if (modalAgregar) {
-                            const modal = new bootstrap.Modal(modalAgregar);
-                            modal.show();
-                            console.log('✓ Modal de agregar inventario abierto');
-                        }
-                    });
-                });
-            }
-
-            // ============================================================
-            // HANDLER: BOTÓN AGREGAR
-            // ============================================================
-            if (btnAbrirBuscar) {
-                btnAbrirBuscar.addEventListener('click', function() {
-                    console.log('🔍 Click en AGREGAR');
-                    const filtros = obtenerFiltrosAgregarMaterial();
-                    console.log('Filtros:', filtros);
-
-                    actualizarResumenBusqueda(filtros);
-                    mostrarEstadoBusqueda('loading');
-
-                    // Abrir modal
-                    if (modalBuscarMaterial) {
-                        const modal = new bootstrap.Modal(modalBuscarMaterial);
-                        modal.show();
-                    }
-
-                    // Disparar búsqueda al backend
-                    const endpoint = btnAbrirBuscar.dataset.endpoint || '/punto-eca/catalogo/materiales/buscar';
-                    const params = new URLSearchParams();
-
-                    // Obtener el puntoId del input hidden
-                    const puntoId = document.getElementById('agregarPuntoId').value;
-                    console.log('PuntoId obtenido:', puntoId);
-
-                    // Agregar puntoId como parámetro obligatorio
-                    if (puntoId) {
-                        params.append('puntoId', puntoId);
-                    } else {
-                        console.error('❌ Error: puntoId no disponible');
-                        alert('Error: ID del punto ECA no disponible');
-                        return;
-                    }
-
-                    if (filtros.texto) params.append('texto', filtros.texto);
-                    if (filtros.categoria) params.append('categoria', filtros.categoria);
-                    if (filtros.tipo) params.append('tipo', filtros.tipo);
-
-                    const url = endpoint + (params.toString() ? ('?' + params.toString()) : '');
-                    console.log('Buscando en:', url);
-
-                    fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } })
-                        .then(res => {
-                            console.log('Respuesta status:', res.status);
-                            return res.json().then(data => ({
-                                status: res.status,
-                                ok: res.ok,
-                                data: data
-                            }));
-                        })
-                        .then(({ status, ok, data }) => {
-                            console.log('Datos recibidos:', data);
-                            console.log('Response OK:', ok, 'Status:', status);
-
-                            // Si hay error en la respuesta (status 400, 500, etc.)
-                            if (!ok) {
-                                const mensajeError = data?.mensaje || data?.message || 'Error desconocido';
-                                console.warn('⚠️ Error del servidor (status ' + status + '):', mensajeError);
-                                mostrarEstadoBusqueda('idle');
-                                const listaResultadosEl = document.getElementById('resultadosBusqueda');
-                                if (listaResultadosEl) {
-                                    listaResultadosEl.innerHTML = `
-                                        <div class="list-group-item text-muted py-4">
-                                            <div class="alert alert-warning mb-0" role="alert">
-                                                <i class="bi bi-exclamation-triangle me-2"></i>
-                                                <strong>${mensajeError}</strong>
-                                            </div>
-                                        </div>
-                                    `;
-                                }
-                                return;
-                            }
-
-                            if (!Array.isArray(data)) data = [];
-
-                            // Normalizar datos según el DTO
-                            const materiales = data.map(m => ({
-                                id: m.materialId ?? '',
-                                nombre: m.nmbMaterial ?? '',
-                                descripcion: m.dscMaterial ?? '',
-                                imagen: m.imagenUrl ?? '',
-                                categoria: m.nmbCategoria ?? '',
-                                descCategoria: m.dscCategoria ?? '',
-                                tipo: m.nmbTipo ?? '',
-                                descTipo: m.dscTipo ?? ''
-                            }));
-
-                            renderResultadosBusqueda(materiales);
-                        })
-                        .catch(err => {
-                            console.error('❌ Error en búsqueda:', err);
-                            mostrarEstadoBusqueda('idle');
-                            const listaResultadosEl = document.getElementById('resultadosBusqueda');
-                            if (listaResultadosEl) {
-                                listaResultadosEl.innerHTML = `
-                                    <div class="list-group-item text-muted py-4">
-                                        <div class="alert alert-danger mb-0" role="alert">
-                                            <i class="bi bi-exclamation-octagon me-2"></i>
-                                            <strong>Error de conexión</strong><br>
-                                            <small>No se pudo conectar con el servidor. Intenta de nuevo.</small>
-                                        </div>
-                                    </div>
-                                `;
-                            }
-                        });
-                });
-                console.log('✓ Handler AGREGAR vinculado');
-            }
+            console.log('📌 Script inline de limpiar ejecutándose...');
 
             // ============================================================
             // HANDLER: BOTÓN LIMPIAR
             // ============================================================
+            const btnLimpiarAgregar = document.getElementById('btnLimpiarBusquedaAgregar');
             if (btnLimpiarAgregar) {
                 btnLimpiarAgregar.addEventListener('click', function() {
-                    console.log('🧹 Click en LIMPIAR');
+                    console.log('🧹 Limpiando búsqueda y filtros del acordeón agregar...');
 
-                    if (inputBusquedaAgregar) inputBusquedaAgregar.value = '';
+                    // Limpiar Select2 de Buscar Material
+                    $('#buscarMaterialSelect').val(null).trigger('change');
+                    console.log('✓ Limpiado: Buscar Material');
 
-                    document.querySelectorAll('input[name="radioCategoriaBusqueda"]').forEach(r => {
-                        if (r.id === 'radioCategoriaNone') r.checked = true;
-                    });
+                    // Limpiar Select2 de Categoría
+                    $('#selectCategoriaBusqueda').val('').trigger('change');
+                    console.log('✓ Limpiado: Categoría');
 
-                    document.querySelectorAll('input[name="radioTipoBusqueda"]').forEach(r => {
-                        if (r.id === 'radioTipoNone') r.checked = true;
-                    });
+                    // Limpiar Select2 de Tipo
+                    $('#selectTipoBusqueda').val('').trigger('change');
+                    console.log('✓ Limpiado: Tipo');
 
-                    actualizarResumenBusqueda({ texto: '', categoria: '', tipo: '' });
-                    renderResultadosBusqueda([]);
-                    mostrarEstadoBusqueda('idle');
-
-                    console.log('✓ Campos limpiados');
+                    console.log('✓ Todos los campos limpiados correctamente');
                 });
                 console.log('✓ Handler LIMPIAR vinculado');
             }
 
-            // ============================================================
-            // HANDLER: BOTÓN GUARDAR INVENTARIO
-            // ============================================================
-            const btnGuardarInventario = document.getElementById('btnGuardarInventario');
-            if (btnGuardarInventario) {
-                btnGuardarInventario.addEventListener('click', function() {
-                    console.log('💾 Click en GUARDAR INVENTARIO');
-
-                    // Recolectar datos del formulario
-                    const materialId = document.getElementById('agregarMaterialId').value;
-                    const nombreMaterial = document.getElementById('agregarMaterialNombre').value;
-                    const stockInicial = document.getElementById('stockInicial').value;
-                    const capacidadMaxima = document.getElementById('capacidadMaxima').value;
-                    const precioCompra = document.getElementById('precioCompra').value;
-                    const precioVenta = document.getElementById('precioVenta').value;
-                    const umbralAlerta = document.getElementById('umbralAlerta').value;
-                    const umbralCritico = document.getElementById('umbralCritico').value;
-                    const unidadMedida = document.getElementById('unidadMedida').value;
-
-                    // Validar campos obligatorios
-                    const puntoId = document.getElementById('agregarPuntoId').value;
-                    if (!materialId || !stockInicial || !capacidadMaxima || !precioCompra || !precioVenta || !umbralAlerta || !umbralCritico || !unidadMedida || !puntoId) {
-                        alert('Por favor completa todos los campos obligatorios');
-                        return;
-                    }
-
-                    // Preparar datos para enviar
-                    const datosInventario = {
-                        materialId: materialId,
-                        puntoEcaId: puntoId,
-                        stockActual: parseFloat(stockInicial) || 0,
-                        capacidadMaxima: parseFloat(capacidadMaxima) || 0,
-                        precioCompra: parseFloat(precioCompra) || 0,
-                        precioVenta: parseFloat(precioVenta) || 0,
-                        umbralAlerta: parseInt(umbralAlerta) || 25,
-                        umbralCritico: parseInt(umbralCritico) || 10,
-                        unidadMedida: unidadMedida
-                    };
-
-                    console.log('Datos a enviar:', datosInventario);
-
-                    // Enviar al backend
-                    fetch('/punto-eca/inventario/agregar', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify(datosInventario)
-                    })
-                    .then(res => {
-                        console.log('Respuesta del servidor:', res.status);
-                        return res.json().then(data => ({
-                            status: res.status,
-                            ok: res.ok,
-                            data: data
-                        }));
-                    })
-                    .then(({ status, ok, data }) => {
-                        console.log('Datos recibidos:', data);
-
-                        // Cerrar modal de agregar
-                        const modalAgregar = bootstrap.Modal.getInstance(document.getElementById('agregarInventarioModal'));
-                        if (modalAgregar) modalAgregar.hide();
-
-                        if (!ok) {
-                            // Error del servidor
-                            const mensajeError = data?.mensaje || 'Error desconocido';
-                            console.warn('⚠️ Error del servidor (status ' + status + '):', mensajeError);
-                            mostrarModalResultado(false, 'Error al guardar', mensajeError);
-                            return;
-                        }
-
-                        // Éxito (status 201)
-                        console.log('✓ Material guardado exitosamente');
-                        mostrarModalResultado(true, '¡Material Guardado!', 'El material se ha agregado exitosamente al inventario.');
-
-                        // Limpiar formulario después de cerrar el modal
-                        setTimeout(() => {
-                            document.getElementById('formAgregarInventario').reset();
-                        }, 500);
-                    })
-                    .catch(err => {
-                        console.error('❌ Error en la solicitud:', err);
-                        // Cerrar modal de agregar
-                        const modalAgregar = bootstrap.Modal.getInstance(document.getElementById('agregarInventarioModal'));
-                        if (modalAgregar) modalAgregar.hide();
-                        mostrarModalResultado(false, 'Error de conexión', 'No se pudo conectar con el servidor. Intenta de nuevo.');
-                    });
-                });
-                console.log('✓ Handler GUARDAR INVENTARIO vinculado');
-            }
-
-            // ============================================================
-            // HANDLER: BOTÓN APLICAR FILTROS (RECARGAR PÁGINA CON FILTROS)
-            // Usando event delegation para que funcione incluso si el elemento se carga después
-            // ============================================================
-            document.addEventListener('click', function(e) {
-                if (e.target.id === 'btnAplicarFiltros' || e.target.closest('#btnAplicarFiltros')) {
-                    console.log('🔎 Click en APLICAR filtros (Inventario)');
-
-                    // Recolectar filtros desde el formulario de inventario
-                    const texto = (document.getElementById('busquedaMaterial')?.value || '').trim();
-                    const categoria = (document.querySelector('input[name="filtroCategoria"]:checked')?.value || '').trim();
-                    const tipo = (document.querySelector('input[name="filtroTipo"]:checked')?.value || '').trim();
-                    const alerta = (document.getElementById('filtroAlerta')?.value || '').trim();
-                    const unidad = (document.getElementById('filtroUnidad')?.value || '').trim();
-                    const ocupacion = (document.getElementById('filtroOcupacion')?.value || '').trim();
-
-                    const filtros = { texto, categoria, tipo, alerta, unidad, ocupacion };
-                    console.log('Filtros aplicados:', filtros);
-
-                    // Construir query parameters
-                    const params = new URLSearchParams();
-                    if (texto) params.append('texto', texto);
-                    if (categoria) params.append('categoria', categoria);
-                    if (tipo) params.append('tipo', tipo);
-                    if (alerta) params.append('alerta', alerta);
-                    if (unidad) params.append('unidad', unidad);
-                    if (ocupacion) params.append('ocupacion', ocupacion);
-
-                    // Obtener nombrePunto y gestorId de la URL actual
-                    const pathSegments = window.location.pathname.split('/').filter(s => s);
-                    // Formato esperado: /punto-eca/{nombrePunto}/{gestorId}/Materiales
-                    const nombrePunto = pathSegments[1];
-                    const gestorId = pathSegments[2];
-
-                    console.log('nombrePunto:', nombrePunto, 'gestorId:', gestorId);
-
-                    if (!nombrePunto || !gestorId) {
-                        console.error('❌ No se pudieron obtener nombrePunto o gestorId de la URL');
-                        alert('Error: No se pudo obtener la información del punto ECA');
-                        return;
-                    }
-
-                    // Construir URL: /punto-eca/{nombrePunto}/{gestorId}/Materiales?filtros
-                    const url = `/punto-eca/${nombrePunto}/${gestorId}/Materiales${params.toString() ? ('?' + params.toString()) : ''}`;
-                    console.log('🚀 Recargando página con URL:', url);
-
-                    // Recargar página con los filtros como parámetros de URL
-                    window.location.href = url;
-                }
-            }, true); // Usar captura para asegurar que se dispare antes
-            console.log('✓ Handler APLICAR FILTROS vinculado (recarga página con filtros)');
-
-            // ============================================================
-            // HANDLER: BOTÓN RESTABLECER FILTROS
-            // ============================================================
-            document.addEventListener('click', function(e) {
-                if (e.target.id === 'btnRestablecerFiltros' || e.target.closest('#btnRestablecerFiltros')) {
-                    // Limpiar búsqueda de texto
-                    document.getElementById('busquedaMaterial').value = '';
-
-                    // Limpiar radio buttons de categoría (seleccionar "Ninguno")
-                    document.getElementById('filtroCategoriaNone').checked = true;
-
-                    // Limpiar radio buttons de tipo (seleccionar "Ninguno")
-                    document.getElementById('filtroTipoNone').checked = true;
-
-                    // Limpiar selects
-                    document.getElementById('filtroAlerta').value = '';
-                    document.getElementById('filtroUnidad').value = '';
-                    document.getElementById('filtroOcupacion').value = '';
-
-                    // Recargar la página sin filtros
-                    const pathSegments = window.location.pathname.split('/').filter(s => s);
-                    const nombrePunto = pathSegments[1];
-                    const gestorId = pathSegments[2];
-                    const url = `/punto-eca/${nombrePunto}/${gestorId}/Materiales`;
-                    window.location.href = url;
-                }
-            }, true);
-            console.log('✓ Handler RESTABLECER FILTROS vinculado');
-
-            console.log('📌 Script inline completado ✓');
+            console.log('✓ Script inline completado');
         })();
         </script>
 
@@ -860,49 +323,65 @@
                  aria-labelledby="headingTarjetas" data-bs-parent="#acordeonMateriales">
                 <div class="accordion-body p-4 bg-light">
                     <div class="accordion mb-4" id="acordeonFiltrosTarjetas">
-                        <div class="accordion-item border-0 shadow-sm">
-                            <h2 class="accordion-header" id="headingBusquedaTarjetas">
-                                <button class="accordion-button bg-light text-dark fw-semibold collapsed" type="button"
+                        <div class="accordion-item border-bottom border-2 border-secondary-subtle">
+                            <h2 class="accordion-header bg-light" id="headingBusquedaTarjetas">
+                                <button class="accordion-button fw-semibold collapsed" type="button"
                                         data-bs-toggle="collapse" data-bs-target="#collapseBusquedaTarjetas"
                                         aria-expanded="false" aria-controls="collapseBusquedaTarjetas">
-                                    <i class="bi bi-search text-success me-2"></i>Búsqueda y Filtros
+                                    <i class="bi bi-funnel text-muted me-2"></i>
+                                    <span>Búsqueda y Filtros</span>
                                 </button>
                             </h2>
                             <div id="collapseBusquedaTarjetas" class="accordion-collapse collapse"
                                  aria-labelledby="headingBusquedaTarjetas" data-bs-parent="#acordeonFiltrosTarjetas">
-                                <div class="accordion-body p-4">
+                                <div class="accordion-body p-4 bg-white">
+                                    <!-- Select2: Buscar Material - Solo para seleccionar -->
                                     <div class="row g-3 mb-4">
                                         <div class="col-12">
-                                            <label for="busquedaMaterial" class="form-label fw-semibold text-muted mb-2">
-                                                <i class="bi bi-search me-1"></i>Buscar Material
-                                            </label>
-                                            <div class="input-group input-group-lg">
-                                                <span class="input-group-text bg-light border-2 border-success">
-                                                    <i class="bi bi-search text-success"></i>
-                                                </span>
-                                                <input type="text"
-                                                       class="form-control form-control-lg border-2 border-success"
-                                                       id="busquedaMaterial"
-                                                       placeholder="Buscar por nombre de material..."
-                                                       style="transition: all 0.3s ease;">
-                                                <button class="btn btn-outline-success border-2"
-                                                        type="button"
-                                                        id="btnLimpiarBusqueda"
-                                                        title="Limpiar búsqueda">
-                                                    <i class="bi bi-x-circle"></i> Limpiar
-                                                </button>
-                                            </div>
+                                            <label class="form-label fw-semibold text-muted mb-1" for="busquedaMaterialInventario">Buscar Material</label>
+                                            <select id="busquedaMaterialInventario" class="form-select border-2 border-success js-select2-busqueda-inventario" style="width: 100%;">
+                                                <option></option>
+                                            </select>
                                         </div>
                                     </div>
 
+                                    <!-- Categoría, Tipo, Alerta, Unidad, Ocupación -->
                                     <div class="row g-3 mb-3">
-                                        <div class="col-md-6 col-lg-4">
-                                            <label for="filtroAlerta" class="form-label fw-semibold text-muted mb-2">
+                                        <div class="col-md-6 col-lg-3">
+                                            <label class="form-label fw-semibold text-muted mb-1" for="filtroCategoriaSelectInventario">Categoría</label>
+                                            <select id="filtroCategoriaSelectInventario" class="form-select border-2 border-success js-select2-filtro-categoria-inventario" style="width: 100%;">
+                                                <option value="">-- Ninguno --</option>
+                                                <th:block th:if="${not #lists.isEmpty(categoriaMateriales)}">
+                                                    <option th:each="cat : ${categoriaMateriales}"
+                                                            th:value="${cat.nmbCategoria}"
+                                                            th:text="${cat.nmbCategoria}">
+                                                        Categoría
+                                                    </option>
+                                                </th:block>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6 col-lg-3">
+                                            <label class="form-label fw-semibold text-muted mb-1" for="filtroTipoSelectInventario">Tipo</label>
+                                            <select id="filtroTipoSelectInventario" class="form-select border-2 border-success js-select2-filtro-tipo-inventario" style="width: 100%;">
+                                                <option value="">-- Ninguno --</option>
+                                                <th:block th:if="${not #lists.isEmpty(tiposMateriales)}">
+                                                    <option th:each="tipo : ${tiposMateriales}"
+                                                            th:value="${tipo.nmbCategoria}"
+                                                            th:text="${tipo.nmbCategoria}">
+                                                        Tipo
+                                                    </option>
+                                                </th:block>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6 col-lg-3">
+                                            <label for="filtroAlerataInventario" class="form-label fw-semibold text-muted mb-1">
                                                 <i class="bi bi-exclamation-triangle me-1"></i>Alerta
                                             </label>
-                                            <select class="form-select form-select-sm border-2 border-success filtro-select"
-                                                    id="filtroAlerta"
-                                                    data-tipo="alerta">
+                                            <select class="form-select border-2 border-success js-select2-filtro-alerta-inventario"
+                                                    id="filtroAlerataInventario"
+                                                    style="width: 100%;">
                                                 <option value="">Todas las alertas</option>
                                                 <th:block th:if="${not #lists.isEmpty(alerta)}">
                                                     <option th:each="alert : ${alerta}"
@@ -914,29 +393,34 @@
                                             </select>
                                         </div>
 
-                                        <div class="col-md-6 col-lg-4">
-                                            <label for="filtroUnidad" class="form-label fw-semibold text-muted mb-2">
+                                        <div class="col-md-6 col-lg-3">
+                                            <label for="filtroUnidadInventario" class="form-label fw-semibold text-muted mb-1">
                                                 <i class="bi bi-ruler me-1"></i>Unidad de Medida
                                             </label>
-                                            <select class="form-select form-select-sm border-2 border-success filtro-select"
-                                                    id="filtroUnidad"
-                                                    data-tipo="unidad">
+                                            <select class="form-select border-2 border-success js-select2-filtro-unidad-inventario"
+                                                    id="filtroUnidadInventario"
+                                                    style="width: 100%;">
                                                 <option value="">Todas las unidades</option>
-                                                <option value="kg">Kilogramos (kg)</option>
-                                                <option value="l">Litros (l)</option>
-                                                <option value="m">Metros (m)</option>
-                                                <option value="m2">Metros cuadrados (m²)</option>
-                                                <option value="unidad">Unidades</option>
+                                                <th:block th:if="${not #lists.isEmpty(unidadesMedida)}">
+                                                    <option th:each="unidad : ${unidadesMedida}"
+                                                            th:value="${unidad.clave}"
+                                                            th:text="${unidad.nombre}">
+                                                        Unidad
+                                                    </option>
+                                                </th:block>
                                             </select>
                                         </div>
+                                    </div>
 
-                                        <div class="col-md-6 col-lg-4">
-                                            <label for="filtroOcupacion" class="form-label fw-semibold text-muted mb-2">
+                                    <!-- Ocupación y Botones -->
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-6 col-lg-3">
+                                            <label for="filtroOcupacionInventario" class="form-label fw-semibold text-muted mb-1">
                                                 <i class="bi bi-percent me-1"></i>Ocupación
                                             </label>
-                                            <select class="form-select form-select-sm border-2 border-success filtro-select"
-                                                    id="filtroOcupacion"
-                                                    data-tipo="ocupacion">
+                                            <select class="form-select border-2 border-success js-select2-filtro-ocupacion-inventario"
+                                                    id="filtroOcupacionInventario"
+                                                    style="width: 100%;">
                                                 <option value="">Cualquier ocupación</option>
                                                 <option value="0-25">0% - 25%</option>
                                                 <option value="25-50">25% - 50%</option>
@@ -944,93 +428,22 @@
                                                 <option value="75-100">75% - 100%</option>
                                             </select>
                                         </div>
-                                    </div>
 
-                                        <!-- Filtro de Categoría con radio buttons -->
-                                    <div class="row g-3 mb-3">
-                                        <div class="col-12">
-                                            <span class="form-label fw-semibold text-muted d-block mb-2">
-                                                <i class="bi bi-tags me-1"></i>Categoría
-                                            </span>
-                                            <div class="btn-group flex-wrap gap-2" role="group" aria-label="Filtro categoría">
-                                                <input type="radio" class="btn-check" name="filtroCategoria" id="filtroCategoriaNone" value="" autocomplete="off" checked>
-                                                <label class="btn btn-outline-success" for="filtroCategoriaNone">Ninguno</label>
-                                                <th:block th:if="${not #lists.isEmpty(categoriaMateriales)}">
-                                                    <th:block th:each="cat, iter : ${categoriaMateriales}">
-                                                        <input type="radio" class="btn-check" name="filtroCategoria"
-                                                               th:id="${'filtroCategoria_' + iter.index}" th:value="${cat.nmbCategoria}" autocomplete="off">
-                                                        <label class="btn btn-outline-success"
-                                                               th:for="${'filtroCategoria_' + iter.index}" th:text="${cat.nmbCategoria}">
-                                                            Categoría
-                                                        </label>
-                                                    </th:block>
-                                                </th:block>
-                                                <th:block th:if="${#lists.isEmpty(categoriaMateriales)}">
-                                                    <span class="text-muted small">No hay categorías registradas</span>
-                                                </th:block>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Filtro de Tipo con radio buttons -->
-                                    <div class="row g-3 mb-3">
-                                        <div class="col-12">
-                                            <span class="form-label fw-semibold text-muted d-block mb-2">
-                                                <i class="bi bi-shuffle me-1"></i>Tipo
-                                            </span>
-                                            <div class="btn-group flex-wrap gap-2" role="group" aria-label="Filtro tipo">
-                                                <input type="radio" class="btn-check" name="filtroTipo" id="filtroTipoNone" value="" autocomplete="off" checked>
-                                                <label class="btn btn-outline-success" for="filtroTipoNone">Ninguno</label>
-                                                <th:block th:if="${not #lists.isEmpty(tiposMateriales)}">
-                                                    <th:block th:each="tipo, iter : ${tiposMateriales}">
-                                                        <input type="radio" class="btn-check" name="filtroTipo"
-                                                               th:id="${'filtroTipo_' + iter.index}" th:value="${tipo.nmbCategoria}" autocomplete="off">
-                                                        <label class="btn btn-outline-success"
-                                                               th:for="${'filtroTipo_' + iter.index}" th:text="${tipo.nmbCategoria}">
-                                                            Tipo
-                                                        </label>
-                                                    </th:block>
-                                                </th:block>
-                                                <th:block th:if="${#lists.isEmpty(tiposMateriales)}">
-                                                    <span class="text-muted small">No hay tipos registrados</span>
-                                                </th:block>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <small class="text-muted">Selecciona los filtros que desees aplicar o deja en "Ninguno" para no filtrar por esa opción.</small>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mt-4">
-                                        <div class="col-12 d-flex flex-wrap gap-3 justify-content-between align-items-center">
-                                            <div>
-                                                <span class="badge bg-info text-dark" id="resultadosInfo" style="display:none;">
-                                                    <i class="bi bi-funnel me-1"></i>Filtros Activos: <span id="contadorFiltros">0</span>
-                                                </span>
-                                                <span class="badge bg-success" id="resultadosCount" style="display:none;">
-                                                    Mostrando <span id="resultadosCountNum">0</span> de <span id="totalCount">0</span>
-                                                </span>
-                                            </div>
-                                            <div class="d-flex gap-2">
-                                                <button class="btn btn-success"
-                                                        type="button"
-                                                        id="btnAplicarFiltros">
-                                                    <i class="bi bi-check-circle me-1"></i>Aplicar Filtros
-                                                </button>
-                                                <button class="btn btn-outline-secondary"
-                                                        type="button"
-                                                        id="btnRestablecerFiltros">
-                                                    <i class="bi bi-arrow-clockwise me-1"></i>Restablecer
-                                                </button>
-                                            </div>
+                                        <div class="col-md-6 col-lg-3 d-flex align-items-end gap-2">
+                                            <button id="btnBuscarInventario" class="btn btn-success flex-grow-1" type="button">
+                                                <i class="bi bi-search me-1"></i>Buscar
+                                            </button>
+                                            <button id="btnLimpiarTodosFiltraInventario" class="btn btn-outline-secondary" type="button" title="Limpiar todos los filtros">
+                                                <i class="bi bi-eraser me-1"></i>Limpiar
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                    <!-- Espaciador entre acordeón y tarjetas -->
+                    <div class="my-4"></div>
 
                     <div th:if="${mensajeAlerta != null and !#strings.isEmpty(mensajeAlerta)}" class="alert alert-warning" role="alert">
                         <i class="bi bi-exclamation-triangle me-2"></i>
@@ -2094,4 +1507,750 @@
         })();
     </script>
 
+    <!-- ============================================================ -->
+    <!-- SELECT2 ASSETS (jQuery + Select2 CSS/JS) -->
+    <!-- ============================================================ -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- ============================================================ -->
+    <!-- SELECT2 INICIALIZACIÓN CON FORMATSTATE PERSONALIZADO -->
+    <!-- ============================================================ -->
+    <script>
+    (function() {
+        console.log('📌 Inicializando Select2 - Acordeón Agregar Material...');
+
+        // Esperar a que jQuery y Select2 estén listos
+        function inicializarSelect2() {
+            if (typeof $ === 'undefined' || typeof $.fn.select2 === 'undefined') {
+                console.warn('⚠️ Select2 o jQuery no disponibles, reintentando...');
+                setTimeout(inicializarSelect2, 100);
+                return;
+            }
+
+            console.log('✓ jQuery y Select2 están disponibles');
+
+            // ========================================================
+            // FUNCIÓN PARA FORMATEAR EL ESTADO (Selección)
+            // ========================================================
+            function formatState(state) {
+                if (!state.id) {
+                    return state.text;
+                }
+
+                // Extraer datos del objeto
+                var imagenUrl = state.element?.getAttribute('data-imagen') || '/imagenes/materiales.png';
+                var nmbTipo = state.element?.getAttribute('data-tipo') || '';
+                var nmbCategoria = state.element?.getAttribute('data-categoria') || '';
+
+                // Construir elemento HTML con imagen
+                var $state = $(
+                    '<span class="select2-state"><img class="img-material-select2" style="width: 24px; height: 24px; margin-right: 8px; border-radius: 4px; object-fit: cover;" /> ' +
+                    '<span class="state-text"></span>' +
+                    '<small class="state-meta" style="margin-left: 4px; color: #999; font-size: 0.85em;"></small></span>'
+                );
+
+                // Usar .text() para evitar inyecciones
+                $state.find(".state-text").text(state.text);
+                $state.find("img").attr("src", imagenUrl);
+
+                // Agregar badges de tipo y categoría si están disponibles
+                if (nmbTipo || nmbCategoria) {
+                    var metaText = [];
+                    if (nmbTipo) metaText.push(nmbTipo);
+                    if (nmbCategoria) metaText.push(nmbCategoria);
+                    $state.find(".state-meta").text('(' + metaText.join(' • ') + ')');
+                }
+
+                return $state;
+            }
+
+            // ========================================================
+            // INICIALIZAR SELECT2 EN BUSCAR MATERIAL (ACORDEÓN AGREGAR)
+            // ========================================================
+            var $buscarMaterial = $('#buscarMaterialSelect');
+            if ($buscarMaterial.length) {
+                console.log('✓ Encontrado #buscarMaterialSelect');
+
+                // Obtener endpoint y puntoId
+                var endpoint = '/punto-eca/catalogo/materiales/buscar';
+                var puntoId = document.getElementById('agregarPuntoId')?.value || '';
+
+                console.log('🔗 Endpoint:', endpoint);
+                console.log('📍 PuntoId:', puntoId);
+
+                $buscarMaterial.select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    placeholder: 'Selecciona un material para continuar...',
+                    minimumInputLength: 0,  // ✅ Mostrar materiales al abrir
+                    allowClear: true,
+                        ajax: {
+                            url: endpoint,
+                            dataType: 'json',
+                            delay: 300,
+                            data: function(params) {
+                                var searchTerm = params.term || '';
+
+                                // Obtener categoría y tipo desde los Select2 (no radio buttons)
+                                var categoria = $('#selectCategoriaBusqueda').val() || '';
+                                var tipo = $('#selectTipoBusqueda').val() || '';
+
+                                console.log('Buscando:', searchTerm || 'SIN FILTRO - TRAER TODOS');
+                                console.log('Categoria:', categoria || 'Sin filtro');
+                                console.log('Tipo:', tipo || 'Sin filtro');
+
+                                // Enviar parámetros tal como están (incluso vacíos)
+                                var requestData = {
+                                    texto: searchTerm,      // Puede estar vacío
+                                    puntoId: puntoId
+                                };
+
+                                // Solo agregar categoria si está seleccionada
+                                if (categoria) {
+                                    requestData.categoria = categoria;
+                                }
+
+                                // Solo agregar tipo si está seleccionado
+                                if (tipo) {
+                                    requestData.tipo = tipo;
+                                }
+
+                                console.log('Enviando al backend:', requestData);
+
+                                return requestData;
+                            },
+                            processResults: function(data, params) {
+                                console.log('Respuesta AJAX recibida:', data);
+
+                                // Si la respuesta es un error, mostrar el mensaje
+                                if (data.error) {
+                                    console.error('Error del backend:', data.mensaje);
+                                    return { results: [] };
+                                }
+
+                                if (!Array.isArray(data)) {
+                                    console.warn('La respuesta no es un array, conviriendo...');
+                                    data = [];
+                                }
+
+                                console.log('Total de resultados:', data.length);
+
+                                var results = data.map(function(m) {
+                                    console.log('Procesando material:', m.nmbMaterial);
+                                    return {
+                                        id: m.materialId || m.id || '',
+                                        text: m.nmbMaterial || m.nombre || 'Material sin nombre',
+                                        // Guardar atributos extra en el elemento para acceso en formatState
+                                        element: $('<option>')
+                                            .attr('data-imagen', m.imagenUrl || '/imagenes/materiales.png')
+                                            .attr('data-tipo', m.nmbTipo || '')
+                                            .attr('data-categoria', m.nmbCategoria || '')[0],
+                                        dto: m
+                                    };
+                                });
+
+                                return {
+                                    results: results
+                                };
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error AJAX:', error);
+                                console.error('Status:', status);
+                                console.error('Response:', xhr.responseText);
+                            },
+                            cache: false  // Desabilitar cache para debugging
+                        },
+                    // Aplicar formatState a la selección y resultados
+                    templateSelection: formatState,
+                    templateResult: formatState
+                });
+
+                // Evento al abrir dropdown - Disparar búsqueda automática
+                $buscarMaterial.on('select2:opening', function(e) {
+                    console.log('Abriendo dropdown de materiales...');
+
+                    // Esperar a que Select2 renderice el campo de búsqueda
+                    setTimeout(function() {
+                        var searchInput = $('.select2-search__field');
+                        if (searchInput && searchInput.length > 0) {
+                            console.log('Campo de búsqueda encontrado');
+                            console.log('Disparando búsqueda automática...');
+                            searchInput.trigger('input');
+                        } else {
+                            console.warn('Campo de búsqueda no encontrado');
+                        }
+                    }, 100);
+                });
+
+                // Evento al seleccionar material
+                $buscarMaterial.on('select2:select', function(e) {
+                    var data = e.params.data;
+                    console.log('Material seleccionado:', data);
+
+                    if (data && data.id) {
+                        var dto = data.dto || {};
+                        document.getElementById('agregarMaterialId').value = data.id;
+                        document.getElementById('agregarMaterialNombre').value = data.text;
+
+                        // Limpiar campos numéricos del formulario
+                        ['stockInicial', 'capacidadMaxima', 'precioCompra', 'precioVenta', 'umbralAlerta', 'umbralCritico'].forEach(function(id) {
+                            var el = document.getElementById(id);
+                            if (el) el.value = '';
+                        });
+
+                        // Si trae unidad, ponerla en el select
+                        if (dto.unidad) {
+                            console.log('Preseleccionando unidad:', dto.unidad);
+                            $('#unidadMedida').val(dto.unidad).trigger('change');
+                        }
+
+                        // Abrir modal de agregar
+                        var modalAgregar = document.getElementById('agregarInventarioModal');
+                        if (modalAgregar) {
+                            console.log('Abriendo modal de agregar inventario...');
+                            var modal = new bootstrap.Modal(modalAgregar);
+                            modal.show();
+                        }
+                    }
+                });
+
+                console.log('Select2 inicializado en #buscarMaterialSelect');
+
+                // ========================================================
+                // INICIALIZAR SELECT2 EN CATEGORÍA
+                // ========================================================
+                var $selectCategoria = $('#selectCategoriaBusqueda');
+                if ($selectCategoria.length) {
+                    console.log('Encontrado #selectCategoriaBusqueda');
+
+                    $selectCategoria.select2({
+                        theme: 'bootstrap4',
+                        width: '100%',
+                        allowClear: true,
+                        placeholder: 'Selecciona una categoría...',
+                        minimumInputLength: 0
+                    });
+
+                    // Al cambiar categoría, abre modal con búsqueda
+                    $selectCategoria.on('select2:select', function(e) {
+                        var categoria = e.params.data.id;
+                        console.log('Categoria seleccionada:', categoria);
+
+                        // Disparar búsqueda automática con la categoría
+                        dispararBusquedaYAbrirModal({
+                            texto: '',
+                            categoria: categoria,
+                            tipo: $('#selectTipoBusqueda').val() || ''
+                        });
+                    });
+
+                    // Al limpiar categoría
+                    $selectCategoria.on('select2:unselect', function(e) {
+                        console.log('Categoria limpiada');
+                    });
+
+                    console.log('✓ Select2 inicializado en #selectCategoriaBusqueda');
+                }
+
+                // ========================================================
+                // INICIALIZAR SELECT2 EN TIPO
+                // ========================================================
+                var $selectTipo = $('#selectTipoBusqueda');
+                if ($selectTipo.length) {
+                    console.log('✓ Encontrado #selectTipoBusqueda');
+
+                    $selectTipo.select2({
+                        theme: 'bootstrap4',
+                        width: '100%',
+                        allowClear: true,
+                        placeholder: 'Selecciona un tipo...',
+                        minimumInputLength: 0
+                    });
+
+                    // Al cambiar tipo, abre modal con búsqueda
+                    $selectTipo.on('select2:select', function(e) {
+                        var tipo = e.params.data.id;
+                        console.log('Tipo seleccionado:', tipo);
+
+                        // Disparar búsqueda automática con el tipo
+                        dispararBusquedaYAbrirModal({
+                            texto: '',
+                            categoria: $('#selectCategoriaBusqueda').val() || '',
+                            tipo: tipo
+                        });
+                    });
+
+                    // Al limpiar tipo
+                    $selectTipo.on('select2:unselect', function(e) {
+                        console.log('Tipo limpiado');
+                    });
+
+                    console.log('✓ Select2 inicializado en #selectTipoBusqueda');
+                }
+
+                // ========================================================
+                // FUNCIÓN AUXILIAR: Disparar búsqueda y abrir modal
+                // ========================================================
+                function dispararBusquedaYAbrirModal(filtros) {
+                    console.log('Disparando búsqueda con filtros:', filtros);
+
+                    var modalBuscarMaterial = document.getElementById('buscarMaterialModal');
+                    if (!modalBuscarMaterial) {
+                        console.error('Modal de búsqueda no encontrado');
+                        return;
+                    }
+
+                    // Mostrar estado loading
+                    var estadoBusquedaEl = document.getElementById('estadoBusquedaMateriales');
+                    estadoBusquedaEl.innerHTML = '<div class="d-flex flex-column align-items-center"><div class="spinner-border text-success mb-3" role="status"></div><p class="mb-0">Buscando materiales...</p></div>';
+
+                    // Limpiar resultados
+                    var listaResultadosEl = document.getElementById('resultadosBusqueda');
+                    listaResultadosEl.innerHTML = '';
+
+                    // Abrir modal
+                    var modal = new bootstrap.Modal(modalBuscarMaterial);
+                    modal.show();
+
+                    // Ejecutar búsqueda AJAX
+                    var endpoint = '/punto-eca/catalogo/materiales/buscar';
+                    var puntoId = document.getElementById('agregarPuntoId')?.value || '';
+
+                    var params = new URLSearchParams();
+                    if (filtros.texto) params.append('texto', filtros.texto);
+                    if (filtros.categoria) params.append('categoria', filtros.categoria);
+                    if (filtros.tipo) params.append('tipo', filtros.tipo);
+                    if (puntoId) params.append('puntoId', puntoId);
+
+                    var url = endpoint + (params.toString() ? ('?' + params.toString()) : '');
+                    console.log('Buscando en:', url);
+
+                    fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } })
+                        .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, data: data })))
+                        .then(({ status, ok, data }) => {
+                            console.log('Respuesta recibida:', data);
+
+                            if (!ok) {
+                                var mensajeError = data?.mensaje || data?.message || 'Error desconocido';
+                                console.error('Error:', mensajeError);
+                                estadoBusquedaEl.innerHTML = '<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-2"></i>' + mensajeError + '</div>';
+                                return;
+                            }
+
+                            if (!Array.isArray(data)) data = [];
+
+                            console.log('Total de resultados:', data.length);
+
+                            // Renderizar resultados
+                            renderResultadosBusquedaModal(data);
+                        })
+                        .catch(err => {
+                            console.error('Error en búsqueda:', err);
+                            estadoBusquedaEl.innerHTML = '<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-exclamation-octagon me-2"></i>Error de conexión</div>';
+                        });
+                }
+
+                // ========================================================
+                // FUNCIÓN AUXILIAR: Renderizar resultados en modal
+                // ========================================================
+                function renderResultadosBusquedaModal(materiales) {
+                    console.log('🎨 Renderizando', materiales.length, 'resultados');
+
+                    var listaResultadosEl = document.getElementById('resultadosBusqueda');
+                    var estadoBusquedaEl = document.getElementById('estadoBusquedaMateriales');
+
+                    listaResultadosEl.innerHTML = '';
+
+                    if (!materiales || materiales.length === 0) {
+                        listaResultadosEl.innerHTML = '<div class="list-group-item text-muted text-center py-4">Sin resultados disponibles</div>';
+                        estadoBusquedaEl.innerHTML = '<i class="bi bi-search display-6 d-block mb-2"></i><p class="mb-0">No se encontraron materiales con estos filtros</p>';
+                        return;
+                    }
+
+                    materiales.forEach(material => {
+                        var item = document.createElement('button');
+                        item.type = 'button';
+                        item.className = 'list-group-item list-group-item-action resultado-material-item d-flex align-items-start gap-3';
+                        item.dataset.materialId = material.materialId || '';
+                        item.dataset.nombre = material.nmbMaterial || '';
+                        item.dataset.descripcion = material.dscMaterial || '';
+                        item.dataset.tipo = material.nmbTipo || '';
+                        item.dataset.categoria = material.nmbCategoria || '';
+                        item.dataset.unidad = material.unidad || '';
+
+                        var img = document.createElement('img');
+                        img.src = material.imagenUrl || '/imagenes/materiales.png';
+                        img.alt = material.nmbMaterial || 'Material';
+                        img.className = 'rounded';
+                        img.style.width = '64px';
+                        img.style.height = '64px';
+                        img.style.objectFit = 'cover';
+                        img.style.flexShrink = '0';
+
+                        var content = document.createElement('div');
+                        content.className = 'flex-grow-1 text-start';
+
+                        var title = document.createElement('div');
+                        title.className = 'fw-semibold';
+                        title.textContent = material.nmbMaterial || 'Material sin nombre';
+
+                        var desc = document.createElement('small');
+                        desc.className = 'text-muted d-block mb-2';
+                        desc.textContent = material.dscMaterial || 'Sin descripción';
+
+                        var badges = document.createElement('div');
+                        var tipoBadge = document.createElement('span');
+                        tipoBadge.className = 'badge bg-primary me-1';
+                        tipoBadge.textContent = material.nmbTipo || 'Tipo';
+                        var catBadge = document.createElement('span');
+                        catBadge.className = 'badge bg-secondary';
+                        catBadge.textContent = material.nmbCategoria || 'Categoría';
+
+                        badges.appendChild(tipoBadge);
+                        badges.appendChild(catBadge);
+
+                        content.appendChild(title);
+                        content.appendChild(desc);
+                        content.appendChild(badges);
+
+                        var actionBadge = document.createElement('span');
+                        actionBadge.className = 'badge bg-success rounded-pill align-self-start';
+                        actionBadge.textContent = 'Seleccionar';
+
+                        item.appendChild(img);
+                        item.appendChild(content);
+                        item.appendChild(actionBadge);
+
+                        listaResultadosEl.appendChild(item);
+                    });
+
+                    estadoBusquedaEl.innerHTML = '<i class="bi bi-check-circle text-success display-6 d-block mb-2"></i><p class="mb-0">Selecciona un material para continuar</p>';
+
+                    // Agregar manejadores de clic a cada material
+                    document.querySelectorAll('.resultado-material-item').forEach(item => {
+                        item.addEventListener('click', function(e) {
+                            e.preventDefault();
+
+                            var materialId = this.dataset.materialId;
+                            var materialNombre = this.dataset.nombre;
+
+                            console.log('📦 Material seleccionado:', materialId, '-', materialNombre);
+
+                            // Llenar los campos del formulario
+                            document.getElementById('agregarMaterialId').value = materialId;
+                            document.getElementById('agregarMaterialNombre').value = materialNombre;
+
+                            // Limpiar campos de entrada
+                            document.getElementById('stockInicial').value = '';
+                            document.getElementById('capacidadMaxima').value = '';
+                            document.getElementById('precioCompra').value = '';
+                            document.getElementById('precioVenta').value = '';
+                            document.getElementById('umbralAlerta').value = '';
+                            document.getElementById('umbralCritico').value = '';
+                            document.getElementById('unidadMedida').value = '';
+
+                            // Cerrar modal de búsqueda
+                            var modalBusquedaInstance = bootstrap.Modal.getInstance(document.getElementById('buscarMaterialModal'));
+                            if (modalBusquedaInstance) {
+                                modalBusquedaInstance.hide();
+                            }
+
+                            // Abrir modal de agregar inventario
+                            var modalAgregar = document.getElementById('agregarInventarioModal');
+                            if (modalAgregar) {
+                                var modal = new bootstrap.Modal(modalAgregar);
+                                modal.show();
+                                console.log('✓ Modal de agregar inventario abierto');
+                            }
+                        });
+                    });
+                }
+
+            } else {
+                console.error('❌ No se encontró #buscarMaterialSelect');
+            }
+
+            // ========================================================
+            // INICIALIZAR SELECT2 EN UNIDAD MEDIDA DEL MODAL
+            // ========================================================
+            var $unidadMedida = $('#unidadMedida');
+            if ($unidadMedida.length) {
+                console.log('✓ Encontrado #unidadMedida');
+
+                $unidadMedida.select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    allowClear: true,
+                    placeholder: '📐 Selecciona una unidad...',
+                    minimumInputLength: 0
+                });
+
+                console.log('Select2 inicializado en #unidadMedida');
+            }
+
+            // ========================================================
+            // SELECT2 BÚSQUEDA DE MATERIAL EN INVENTARIO - CON AJAX
+            // ========================================================
+            var $busquedaMaterialInventario = $('#busquedaMaterialInventario');
+            if ($busquedaMaterialInventario.length) {
+                console.log('✓ Encontrado #busquedaMaterialInventario');
+
+                var endpoint = '/punto-eca/catalogo/inventario/materiales/buscar';
+                var puntoIdElement = document.getElementById('agregarPuntoId');
+                var puntoId = puntoIdElement ? puntoIdElement.value : '';
+
+                console.log('PuntoId para búsqueda:', puntoId);
+
+                $busquedaMaterialInventario.select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    placeholder: 'Busca o selecciona un material...',
+                    allowClear: true,
+                    minimumInputLength: 0,
+                    ajax: {
+                        url: endpoint,
+                        dataType: 'json',
+                        delay: 300,
+                        data: function(params) {
+                            var searchTerm = params.term || '';
+                            var categoria = $('#filtroCategoriaSelectInventario').val() || '';
+                            var tipo = $('#filtroTipoSelectInventario').val() || '';
+
+                            var requestData = {
+                                puntoId: puntoId,
+                                texto: searchTerm,
+                                categoria: categoria,
+                                tipo: tipo
+                            };
+
+                            console.log('🔍 Parámetros AJAX búsqueda:', requestData);
+                            return requestData;
+                        },
+                        processResults: function(data) {
+                            console.log('📦 Respuesta búsqueda:', data);
+
+                            if (!Array.isArray(data)) {
+                                console.warn('Respuesta no es array');
+                                return { results: [] };
+                            }
+
+                            var results = data.map(function(m) {
+                                return {
+                                    id: m.nmbMaterial,  // Usar el nombre del material como ID
+                                    text: m.nmbMaterial,
+                                    materialId: m.materialId,
+                                    category: m.nmbCategoria || '',
+                                    type: m.nmbTipo || ''
+                                };
+                            });
+
+                            console.log('✓ Materiales procesados:', results.length);
+                            return { results: results };
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('❌ Error AJAX búsqueda:', error);
+                        }
+                    }
+                });
+
+                // Evento cuando se selecciona un material
+                $busquedaMaterialInventario.on('select2:select', function(e) {
+                    console.log('Material seleccionado:', e.params.data);
+                    // El valor guardado es el nombre del material (nmbMaterial)
+                });
+
+                // Disparar búsqueda al abrir sin escritura
+                $busquedaMaterialInventario.on('select2:opening', function() {
+                    setTimeout(function() {
+                        var searchField = $busquedaMaterialInventario.data('select2').$dropdown.find('.select2-search__field');
+                        if (searchField) {
+                            searchField.trigger('input');
+                        }
+                    }, 50);
+                });
+
+                console.log('✓ Select2 búsqueda inicializado');
+            }
+
+            // ========================================================
+            // MANEJADOR: Botón Buscar Inventario
+            // ========================================================
+            var btnBuscarInventario = document.getElementById('btnBuscarInventario');
+            if (btnBuscarInventario) {
+                btnBuscarInventario.addEventListener('click', function() {
+                    console.log('Click en Buscar Inventario');
+
+                    // Obtener valores de los filtros
+                    var materialSeleccionado = $('#busquedaMaterialInventario').val() || '';
+                    var categoria = $('#filtroCategoriaSelectInventario').val() || '';
+                    var tipo = $('#filtroTipoSelectInventario').val() || '';
+                    var alerta = $('#filtroAlerataInventario').val() || '';
+                    var unidad = $('#filtroUnidadInventario').val() || '';
+                    var ocupacion = $('#filtroOcupacionInventario').val() || '';
+
+                    console.log('Filtros seleccionados:', {
+                        material: materialSeleccionado,
+                        categoria: categoria,
+                        tipo: tipo,
+                        alerta: alerta,
+                        unidad: unidad,
+                        ocupacion: ocupacion
+                    });
+
+                    // Construir URL con parámetros
+                    var params = new URLSearchParams();
+                    var pathSegments = window.location.pathname.split('/').filter(s => s);
+                    var nombrePunto = pathSegments[1];
+                    var gestorId = pathSegments[2];
+
+                    // Agregar parámetros a la URL
+                    if (materialSeleccionado) params.append('texto', materialSeleccionado);
+                    if (categoria) params.append('categoria', categoria);
+                    if (tipo) params.append('tipo', tipo);
+                    if (alerta) params.append('alerta', alerta);
+                    if (unidad) params.append('unidad', unidad);
+                    if (ocupacion) params.append('ocupacion', ocupacion);
+
+                    var url = `/punto-eca/${nombrePunto}/${gestorId}/Materiales${params.toString() ? ('?' + params.toString()) : ''}`;
+                    console.log('URL de búsqueda:', url);
+
+                    // Recargar página con filtros
+                    window.location.href = url;
+                });
+
+                console.log('Manejador botón buscar vinculado');
+            }
+
+            // ========================================================
+            // MANEJADOR: Botón Limpiar Filtros Inventario
+            // ========================================================
+            var btnLimpiarTodosFiltraInventario = document.getElementById('btnLimpiarTodosFiltraInventario');
+            if (btnLimpiarTodosFiltraInventario) {
+                btnLimpiarTodosFiltraInventario.addEventListener('click', function() {
+                    console.log('Click en Limpiar Filtros');
+
+                    // Limpiar todos los Select2 usando jQuery
+                    $('#busquedaMaterialInventario').val(null).trigger('change');
+                    $('#filtroCategoriaSelectInventario').val('').trigger('change');
+                    $('#filtroTipoSelectInventario').val('').trigger('change');
+                    $('#filtroAlerataInventario').val('').trigger('change');
+                    $('#filtroUnidadInventario').val('').trigger('change');
+                    $('#filtroOcupacionInventario').val('').trigger('change');
+
+                    console.log('Todos los filtros limpiados');
+                });
+
+                console.log('Manejador botón limpiar vinculado');
+            }
+
+            // ========================================================
+            // INICIALIZAR SELECT2 EN CATEGORÍA (Segunda búsqueda)
+            // ========================================================
+            var $filtroCategoriaSelectInventario = $('#filtroCategoriaSelectInventario');
+            if ($filtroCategoriaSelectInventario.length) {
+                console.log('Encontrado #filtroCategoriaSelectInventario');
+
+                $filtroCategoriaSelectInventario.select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    allowClear: true,
+                    placeholder: 'Selecciona una categoría...',
+                    minimumInputLength: 0
+                });
+
+                console.log('Select2 inicializado en #filtroCategoriaSelectInventario');
+            }
+
+            // ========================================================
+            // INICIALIZAR SELECT2 EN TIPO (Segunda búsqueda)
+            // ========================================================
+            var $filtroTipoSelectInventario = $('#filtroTipoSelectInventario');
+            if ($filtroTipoSelectInventario.length) {
+                console.log('Encontrado #filtroTipoSelectInventario');
+
+                $filtroTipoSelectInventario.select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    allowClear: true,
+                    placeholder: 'Selecciona un tipo...',
+                    minimumInputLength: 0
+                });
+
+                console.log('Select2 inicializado en #filtroTipoSelectInventario');
+            }
+
+
+            // ========================================================
+            // INICIALIZAR SELECT2 EN ALERTA (Segunda búsqueda)
+            // ========================================================
+            var $filtroAlerataInventario = $('#filtroAlerataInventario');
+            if ($filtroAlerataInventario.length) {
+                console.log('Encontrado #filtroAlerataInventario');
+
+                $filtroAlerataInventario.select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    allowClear: true,
+                    placeholder: 'Selecciona una alerta...',
+                    minimumInputLength: 0
+                });
+
+                console.log('Select2 inicializado en #filtroAlerataInventario');
+            }
+
+            // ========================================================
+            // INICIALIZAR SELECT2 EN UNIDAD DE MEDIDA (Segunda búsqueda)
+            // ========================================================
+            var $filtroUnidadInventario = $('#filtroUnidadInventario');
+            if ($filtroUnidadInventario.length) {
+                console.log('Encontrado #filtroUnidadInventario');
+
+                $filtroUnidadInventario.select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    allowClear: true,
+                    placeholder: 'Selecciona una unidad...',
+                    minimumInputLength: 0
+                });
+
+                console.log('Select2 inicializado en #filtroUnidadInventario');
+            }
+
+            // ========================================================
+            // INICIALIZAR SELECT2 EN OCUPACIÓN (Segunda búsqueda)
+            // ========================================================
+            var $filtroOcupacionInventario = $('#filtroOcupacionInventario');
+            if ($filtroOcupacionInventario.length) {
+                console.log('Encontrado #filtroOcupacionInventario');
+
+                $filtroOcupacionInventario.select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    allowClear: true,
+                    placeholder: 'Selecciona ocupación...',
+                    minimumInputLength: 0
+                });
+
+                console.log('Select2 inicializado en #filtroOcupacionInventario');
+            }
+
+            console.log('Select2 inicialización completada');
+        }
+
+        // Inicializar cuando DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', inicializarSelect2);
+        } else {
+            inicializarSelect2();
+        }
+
+        console.log('✓ Script Select2 cargado y listo');
+    })();
+    </script>
+
 </section>
+
+

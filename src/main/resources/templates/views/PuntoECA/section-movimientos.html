@@ -20,70 +20,50 @@
             </h6>
         </div>
         <div class="card-body">
-            <!-- Barra de búsqueda -->
+            <!-- Barra de búsqueda con Select2 -->
             <div class="row g-3 mb-4">
                 <div class="col-12">
                     <label class="form-label fw-semibold text-muted mb-1" for="buscarMaterialMovimientos">Buscar Material</label>
-                    <div class="input-group input-group-lg flex-nowrap">
-                        <span class="input-group-text bg-light border-2 border-primary">
-                            <i class="bi bi-search text-primary"></i>
-                        </span>
-                        <input id="buscarMaterialMovimientos" type="text" class="form-control form-control-lg border-2 border-primary"
-                               placeholder="Nombre, código, categoría..." aria-label="Buscar material">
-                    </div>
+                    <select id="buscarMaterialMovimientos" class="form-control js-example-tags form-control-lg border-2 border-primary"
+                            style="width: 100%;" aria-label="Buscar material">
+                        <option></option>
+                    </select>
                 </div>
             </div>
-            <!-- Filtros: Categoría -->
-            <div class="row g-3 mb-3">
-                <div class="col-12">
-                    <span class="form-label fw-semibold text-muted d-block mb-2">Categoría</span>
-                    <div class="btn-group flex-wrap gap-2" role="group" aria-label="Filtro categoría movimientos">
-                        <input type="radio" class="btn-check" name="radioCategoriaMov" id="radioCategoriaMov_none" value="" autocomplete="off" checked>
-                        <label class="btn btn-outline-primary" for="radioCategoriaMov_none">Ninguno</label>
+            <!-- Filtros: Categoría, Tipo y Botones en una fila -->
+            <div class="row g-3 align-items-end mb-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold text-muted mb-1" for="selectCategoriaMov">Categoría</label>
+                    <select id="selectCategoriaMov" class="form-select border-2 border-primary js-select2-categoria-mov" style="width: 100%;">
+                        <option value="">-- Ninguno --</option>
                         <th:block th:if="${not #lists.isEmpty(categoriaMateriales)}">
-                            <th:block th:each="cat, iter : ${categoriaMateriales}">
-                                <input type="radio" class="btn-check" name="radioCategoriaMov"
-                                       th:id="${'radioCategoriaMov_' + iter.index}" th:value="${cat.nmbCategoria}" autocomplete="off">
-                                <label class="btn btn-outline-primary"
-                                       th:for="${'radioCategoriaMov_' + iter.index}" th:text="${cat.nmbCategoria}"
-                                       data-bs-toggle="tooltip" data-bs-placement="top"
-                                       th:attr="title=${cat.dscCategoria}">
-                                </label>
-                            </th:block>
+                            <option th:each="cat : ${categoriaMateriales}"
+                                    th:value="${cat.nmbCategoria}"
+                                    th:text="${cat.nmbCategoria}">
+                                Categoría
+                            </option>
                         </th:block>
-                    </div>
+                    </select>
                 </div>
-            </div>
-            <!-- Filtros: Tipo -->
-            <div class="row g-3 mb-4">
-                <div class="col-12">
-                    <span class="form-label fw-semibold text-muted d-block mb-2">Tipo</span>
-                    <div class="btn-group flex-wrap gap-2" role="group" aria-label="Filtro tipo movimientos">
-                        <input type="radio" class="btn-check" name="radioTipoMov" id="radioTipoMov_none" value="" autocomplete="off" checked>
-                        <label class="btn btn-outline-primary" for="radioTipoMov_none">Ninguno</label>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold text-muted mb-1" for="selectTipoMov">Tipo</label>
+                    <select id="selectTipoMov" class="form-select border-2 border-primary js-select2-tipo-mov" style="width: 100%;">
+                        <option value="">-- Ninguno --</option>
                         <th:block th:if="${not #lists.isEmpty(tiposMateriales)}">
-                            <th:block th:each="tipo, iter : ${tiposMateriales}">
-                                <input type="radio" class="btn-check" name="radioTipoMov"
-                                       th:id="${'radioTipoMov_' + iter.index}" th:value="${tipo.nmbCategoria}" autocomplete="off">
-                                <label class="btn btn-outline-primary"
-                                       th:for="${'radioTipoMov_' + iter.index}" th:text="${tipo.nmbCategoria}"
-                                       data-bs-toggle="tooltip" data-bs-placement="top"
-                                       th:attr="title=${tipo.dscCategoria}">
-                                </label>
-                            </th:block>
+                            <option th:each="tipo : ${tiposMateriales}"
+                                    th:value="${tipo.nmbCategoria}"
+                                    th:text="${tipo.nmbCategoria}">
+                                Tipo
+                            </option>
                         </th:block>
-                    </div>
+                    </select>
                 </div>
-            </div>
-            <!-- Botones de acción -->
-            <div class="row">
-                <div class="col-12 d-flex flex-wrap gap-3 justify-content-between align-items-center">
-                    <small class="text-muted">Selecciona opcionalmente categoría y tipo o deja "Ninguno" para no filtrar.</small>
+
+                <div class="col-md-4">
                     <div class="d-flex gap-2">
-                        <button id="btnBuscarMaterialMov" class="btn btn-primary btn-sm fw-semibold" type="button">
-                            <i class="bi bi-search me-1"></i>Buscar
-                        </button>
-                        <button id="btnLimpiarBusquedaMov" class="btn btn-outline-secondary btn-sm fw-semibold" type="button">
+                        <!-- Botón Buscar eliminado: la búsqueda se hace automáticamente con Select2 y filtros -->
+                        <button id="btnLimpiarBusquedaMov" class="btn btn-outline-secondary flex-grow-1 fw-semibold" type="button">
                             <i class="bi bi-eraser me-1"></i>Limpiar
                         </button>
                     </div>
@@ -249,18 +229,18 @@
                             <div class="table-responsive">
                                 <table class="table table-sm table-hover align-middle mb-0">
                                     <thead class="table-light">
-                                        <tr>
-                                            <th scope="col" class="fw-bold small">Fecha</th>
-                                            <th scope="col" class="fw-bold small">Material</th>
-                                            <th scope="col" class="fw-bold small text-end">Cantidad (kg)</th>
-                                            <th scope="col" class="fw-bold small text-end">Precio Unit.</th>
-                                            <th scope="col" class="fw-bold small">Observaciones</th>
-                                        </tr>
+                                    <tr>
+                                        <th scope="col" class="fw-bold small">Fecha</th>
+                                        <th scope="col" class="fw-bold small">Material</th>
+                                        <th scope="col" class="fw-bold small text-end">Cantidad (kg)</th>
+                                        <th scope="col" class="fw-bold small text-end">Precio Unit.</th>
+                                        <th scope="col" class="fw-bold small">Observaciones</th>
+                                    </tr>
                                     </thead>
                                     <tbody class="border-top" id="tablasEntradasBody">
-                                        <tr class="text-muted text-center">
-                                            <td colspan="5" class="py-3"><small>Sin registros</small></td>
-                                        </tr>
+                                    <tr class="text-muted text-center">
+                                        <td colspan="5" class="py-3"><small>Sin registros</small></td>
+                                    </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -418,18 +398,18 @@
                             <div class="table-responsive">
                                 <table class="table table-sm table-hover align-middle mb-0">
                                     <thead class="table-light">
-                                        <tr>
-                                            <th scope="col" class="fw-bold small">Fecha</th>
-                                            <th scope="col" class="fw-bold small">Material</th>
-                                            <th scope="col" class="fw-bold small text-end">Cantidad (kg)</th>
-                                            <th scope="col" class="fw-bold small text-end">Precio Unit.</th>
-                                            <th scope="col" class="fw-bold small">Centro Acopio</th>
-                                        </tr>
+                                    <tr>
+                                        <th scope="col" class="fw-bold small">Fecha</th>
+                                        <th scope="col" class="fw-bold small">Material</th>
+                                        <th scope="col" class="fw-bold small text-end">Cantidad (kg)</th>
+                                        <th scope="col" class="fw-bold small text-end">Precio Unit.</th>
+                                        <th scope="col" class="fw-bold small">Centro Acopio</th>
+                                    </tr>
                                     </thead>
                                     <tbody class="border-top" id="tablasSalidasBody">
-                                        <tr class="text-muted text-center">
-                                            <td colspan="5" class="py-3"><small>Sin registros</small></td>
-                                        </tr>
+                                    <tr class="text-muted text-center">
+                                        <td colspan="5" class="py-3"><small>Sin registros</small></td>
+                                    </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -512,22 +492,22 @@
                             <div class="table-responsive">
                                 <table class="table table-sm table-hover align-middle mb-0">
                                     <thead class="table-light">
-                                        <tr>
-                                            <th scope="col" class="fw-bold small">Fecha</th>
-                                            <th scope="col" class="fw-bold small">Tipo</th>
-                                            <th scope="col" class="fw-bold small">Material</th>
-                                            <th scope="col" class="fw-bold small text-end">Cantidad (kg)</th>
-                                            <th scope="col" class="fw-bold small text-end">Precio Unit.</th>
-                                            <th scope="col" class="fw-bold small">Detalles</th>
-                                        </tr>
+                                    <tr>
+                                        <th scope="col" class="fw-bold small">Fecha</th>
+                                        <th scope="col" class="fw-bold small">Tipo</th>
+                                        <th scope="col" class="fw-bold small">Material</th>
+                                        <th scope="col" class="fw-bold small text-end">Cantidad (kg)</th>
+                                        <th scope="col" class="fw-bold small text-end">Precio Unit.</th>
+                                        <th scope="col" class="fw-bold small">Detalles</th>
+                                    </tr>
                                     </thead>
                                     <tbody class="border-top" id="tablasHistorialBody">
-                                        <tr class="text-muted text-center">
-                                            <td colspan="6" class="py-4">
-                                                <i class="bi bi-inbox"></i>
-                                                <p class="mb-0 mt-2">Sin movimientos registrados</p>
-                                            </td>
-                                        </tr>
+                                    <tr class="text-muted text-center">
+                                        <td colspan="6" class="py-4">
+                                            <i class="bi bi-inbox"></i>
+                                            <p class="mb-0 mt-2">Sin movimientos registrados</p>
+                                        </td>
+                                    </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -548,347 +528,751 @@
     </div>
     <!-- FIN DEL ACORDEÓN -->
 
+    <!-- SELECT2 ASSETS (jQuery + Select2 CSS/JS con tema Bootstrap4) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <!-- SCRIPT INLINE PARA BÚSQUEDA Y SELECCIÓN DE MATERIALES -->
     <script>
-    (function() {
-        console.log('📌 Script inline de movimientos ejecutándose...');
+        (function() {
+            console.log('Script inline de movimientos ejecutándose...');
 
-        const puntoEcaSection = document.querySelector('section[data-usuario-id]');
-        const usuarioId = puntoEcaSection?.dataset.usuarioId;
-        const puntoEcaId = puntoEcaSection?.dataset.puntoEcaId;
-        const gestor = puntoEcaSection?.dataset.gestor;
+            // Esperar a que jQuery y Select2 estén listos
+            function inicializarSelect2() {
+                if (typeof $ === 'undefined' || typeof $.fn.select2 === 'undefined') {
+                    console.warn('Select2 o jQuery no disponibles, reintentando...');
+                    setTimeout(inicializarSelect2, 100);
+                    return;
+                }
 
-        const inputBusqueda = document.getElementById('buscarMaterialMovimientos');
-        const btnBuscar = document.getElementById('btnBuscarMaterialMov');
-        const btnLimpiar = document.getElementById('btnLimpiarBusquedaMov');
-        const modalBusqueda = document.getElementById('buscarMaterialMovimientosModal');
-        const resultadosDiv = document.getElementById('resultadosBusquedaMov');
-        const estadoDiv = document.getElementById('estadoBusquedaMov');
+                console.log('jQuery y Select2 disponibles');
 
-        console.log('✓ Variables inicializadas - Usuario:', usuarioId, 'PuntoECA:', puntoEcaId, 'Gestor:', gestor);
+                const puntoEcaSection = document.querySelector('section[data-usuario-id]');
+                const usuarioId = puntoEcaSection?.dataset.usuarioId;
+                const puntoEcaId = puntoEcaSection?.dataset.puntoEcaId;
+                const gestor = puntoEcaSection?.dataset.gestor;
 
-        // Función para mostrar estado
-        function mostrarEstadoBusquedaMov(estado) {
-            if (!estadoDiv) return;
+                const inputBusqueda = document.getElementById('buscarMaterialMovimientos');
+                const btnLimpiar = document.getElementById('btnLimpiarBusquedaMov');
+                const modalBusqueda = document.getElementById('buscarMaterialMovimientosModal');
+                const resultadosDiv = document.getElementById('resultadosBusquedaMov');
+                const estadoDiv = document.getElementById('estadoBusquedaMov');
 
-            const estados = {
-                idle: '<i class="bi bi-search display-6 d-block mb-2"></i><p class="mb-0">Buscando materiales...</p>',
-                loading: '<div class="spinner-border spinner-border-sm me-2" role="status"><span class="visually-hidden">Cargando...</span></div><span>Buscando...</span>',
-                ready: '',
-                error: '<div class="alert alert-danger">Error al cargar los resultados. Intenta nuevamente.</div>'
-            };
+                console.log('✓ Variables inicializadas - Usuario:', usuarioId, 'PuntoECA:', puntoEcaId, 'Gestor:', gestor);
 
-            estadoDiv.innerHTML = estados[estado] || estados.idle;
-            estadoDiv.style.display = estado === 'ready' ? 'none' : 'block';
-        }
+                // ========================================================
+                // INICIALIZAR SELECT2 EN BUSCAR MATERIAL (AJAX)
+                // ========================================================
+                var $buscarMaterial = $(inputBusqueda);
+                if ($buscarMaterial.length) {
+                    console.log('Encontrado #buscarMaterialMovimientos');
 
-        // Función para actualizar resumen de filtros
-        function actualizarResumenFiltros(texto, categoria, tipo) {
-            const resumenTexto = document.getElementById('resumenMaterialTexto');
-            const resumenCat = document.getElementById('resumenMaterialCategoria');
-            const resumenTipo = document.getElementById('resumenMaterialTipo');
+                    // Obtener endpoint y puntoId
+                    var endpoint = '/punto-eca/catalogo/materiales/buscar';
+                    var puntoId = puntoEcaId; // Ya está disponible en el data attribute
 
-            if (resumenTexto) resumenTexto.textContent = texto || 'Sin filtro';
-            if (resumenCat) resumenCat.textContent = categoria || 'Sin filtro';
-            if (resumenTipo) resumenTipo.textContent = tipo || 'Sin filtro';
-        }
+                    console.log('Endpoint:', endpoint);
+                    console.log('PuntoId:', puntoId);
 
-        // Función para renderizar resultados
-        function renderResultadosBusqueda(materiales, opciones = {}) {
-            if (!resultadosDiv) return;
+                    $buscarMaterial.select2({
+                        theme: 'bootstrap4',
+                        width: '100%',
+                        placeholder: 'Nombre, código, categoría...',
+                        minimumInputLength: 0,
+                        allowClear: true,
+                        ajax: {
+                            url: endpoint,
+                            dataType: 'json',
+                            delay: 300,
+                            data: function(params) {
+                                var searchTerm = params.term || '';
 
-            resultadosDiv.innerHTML = '';
+                                // Obtener categoría y tipo desde los Select2
+                                var categoria = $('#selectCategoriaMov').val() || '';
+                                var tipo = $('#selectTipoMov').val() || '';
 
-            if (opciones.modoCarga) {
-                const skeleton = document.createElement('div');
-                skeleton.className = 'list-group-item py-3 text-muted d-flex align-items-center gap-3';
-                skeleton.innerHTML = '<span class="placeholder col-2"></span><span class="placeholder col-5"></span><span class="placeholder col-3 ms-auto"></span>';
-                resultadosDiv.appendChild(skeleton);
-                return;
-            }
+                                console.log('Buscando:', searchTerm || 'SIN FILTRO - TRAER TODOS');
+                                console.log('Categoria:', categoria || 'Sin filtro');
+                                console.log('Tipo:', tipo || 'Sin filtro');
 
-            if (!materiales || materiales.length === 0) {
-                const emptyItem = document.createElement('div');
-                emptyItem.className = 'list-group-item text-muted text-center py-4';
-                emptyItem.textContent = 'Sin resultados disponibles. Ejecuta una búsqueda para comenzar.';
-                resultadosDiv.appendChild(emptyItem);
-                mostrarEstadoBusquedaMov('idle');
-                return;
-            }
+                                // Construir objeto de datos para enviar
+                                var requestData = {
+                                    texto: searchTerm,      // Puede estar vacío
+                                    puntoId: puntoId
+                                };
 
-            materiales.forEach(material => {
-                const item = document.createElement('button');
-                item.type = 'button';
-                item.className = 'list-group-item list-group-item-action resultado-material-item d-flex align-items-start gap-3';
-                item.dataset.materialId = material.materialId || '';
-                item.dataset.nombre = material.nmbMaterial || '';
-                item.dataset.descripcion = material.dscMaterial || '';
-                item.dataset.tipo = material.nmbTipo || '';
-                item.dataset.categoria = material.nmbCategoria || '';
-                item.dataset.unidad = material.unidadMedida || '';
-                item.dataset.stockActual = material.stockActual || '0';
-                item.dataset.capacidadMaxima = material.capacidadMaxima || '0';
-                item.dataset.precioCompra = material.precioCompra || '0';
-                item.dataset.precioVenta = material.precioVenta || '0';
+                                // Solo agregar categoria si está seleccionada
+                                if (categoria) {
+                                    requestData.categoria = categoria;
+                                }
 
-                // Crear imagen
-                const img = document.createElement('img');
-                img.src = material.imagenUrl || '/imagenes/materiales.png';
-                img.alt = material.nmbMaterial || 'Imagen material';
-                img.className = 'rounded';
-                img.style.width = '64px';
-                img.style.height = '64px';
-                img.style.objectFit = 'cover';
-                img.style.flexShrink = '0';
+                                // Solo agregar tipo si está seleccionado
+                                if (tipo) {
+                                    requestData.tipo = tipo;
+                                }
 
-                // Contenido textual
-                const content = document.createElement('div');
-                content.className = 'flex-grow-1 text-start';
+                                console.log('Enviando al backend:', requestData);
 
-                const title = document.createElement('div');
-                title.className = 'fw-semibold';
-                title.textContent = material.nmbMaterial || 'Material sin nombre';
+                                return requestData;
+                            },
+                            processResults: function(data, params) {
+                                console.log('Respuesta AJAX recibida:', data);
 
-                const desc = document.createElement('small');
-                desc.className = 'text-muted d-block mb-2';
-                desc.textContent = material.dscMaterial || 'Sin descripción';
+                                // Si la respuesta es un error, mostrar el mensaje
+                                if (data.error) {
+                                    console.error('Error del backend:', data.mensaje);
+                                    return { results: [] };
+                                }
 
-                const badges = document.createElement('div');
-                const tipoBadge = document.createElement('span');
-                tipoBadge.className = 'badge bg-primary me-1';
-                tipoBadge.textContent = material.nmbTipo || 'Tipo';
-                const catBadge = document.createElement('span');
-                catBadge.className = 'badge bg-secondary';
-                catBadge.textContent = material.nmbCategoria || 'Categoría';
+                                if (!Array.isArray(data)) {
+                                    console.warn('La respuesta no es un array, conviriendo...');
+                                    data = [];
+                                }
 
-                badges.appendChild(tipoBadge);
-                badges.appendChild(catBadge);
+                                console.log('Total de resultados:', data.length);
 
-                content.appendChild(title);
-                content.appendChild(desc);
-                content.appendChild(badges);
+                                var results = data.map(function(m) {
+                                    console.log('Procesando material:', m.nmbMaterial);
+                                    return {
+                                        id: m.materialId || m.id || '',
+                                        text: m.nmbMaterial || m.nombre || 'Material sin nombre',
+                                        // Guardar atributos extra en el elemento para acceso en templateResult
+                                        element: $('<option>')
+                                            .attr('data-imagen', m.imagenUrl || '/imagenes/materiales.png')
+                                            .attr('data-tipo', m.nmbTipo || '')
+                                            .attr('data-categoria', m.nmbCategoria || '')[0],
+                                        data: m
+                                    };
+                                });
 
-                const actionBadge = document.createElement('span');
-                actionBadge.className = 'badge bg-primary rounded-pill align-self-start';
-                actionBadge.textContent = 'Seleccionar';
+                                return { results: results };
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error AJAX:', error);
+                                console.error('Status:', status);
+                                console.error('Response:', xhr.responseText);
+                            },
+                            cache: false  // Desabilitar cache para debugging
+                        },
+                        templateResult: function(data) {
+                            if (data.loading) return data.text;
+                            if (!data.id) return data.text;
 
-                item.appendChild(img);
-                item.appendChild(content);
-                item.appendChild(actionBadge);
+                            // Obtener datos del elemento
+                            var imagenUrl = data.element?.getAttribute('data-imagen') || '/imagenes/materiales.png';
+                            var nmbTipo = data.element?.getAttribute('data-tipo') || '';
+                            var nmbCategoria = data.element?.getAttribute('data-categoria') || '';
 
-                resultadosDiv.appendChild(item);
-            });
+                            // Construir elemento HTML con imagen
+                            var $state = $(
+                                '<span class="select2-state"><img alt="imagen material" class="img-material-select2" style="width: 24px; height: 24px; margin-right: 8px; border-radius: 4px; object-fit: cover;" /> ' +
+                                '<span class="state-text"></span>' +
+                                '<small class="state-meta" style="margin-left: 4px; color: #999; font-size: 0.85em;"></small></span>'
+                            );
 
-            mostrarEstadoBusquedaMov('ready');
+                            // Usar .text() para evitar inyecciones
+                            $state.find(".state-text").text(data.text || 'Material sin nombre');
+                            $state.find("img").attr("src", imagenUrl);
 
-            // Manejadores de clic para seleccionar material
-            document.querySelectorAll('.resultado-material-item').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
+                            // Agregar badges de tipo y categoría si están disponibles
+                            if (nmbTipo || nmbCategoria) {
+                                var metaText = [];
+                                if (nmbTipo) metaText.push(nmbTipo);
+                                if (nmbCategoria) metaText.push(nmbCategoria);
+                                $state.find(".state-meta").text('(' + metaText.join(' • ') + ')');
+                            }
 
-                    const materialId = this.dataset.materialId;
-                    const materialNombre = this.dataset.nombre;
-                    const materialTipo = this.dataset.tipo;
-                    const materialCategoria = this.dataset.categoria;
-                    const materialDescripcion = this.dataset.descripcion;
+                            return $state;
+                        },
+                        templateSelection: function(data) {
+                            if (!data.id) return data.text;
+                            return data.text;
+                        }
+                    });
 
-                    console.log('📦 Material seleccionado:', materialId, '-', materialNombre);
+                    // Evento al abrir dropdown - Disparar búsqueda automática
+                    $buscarMaterial.on('select2:opening', function() {
+                        console.log('Abriendo dropdown de materiales');
 
-                    // Obtener datos del material
-                    const unidad = this.dataset.unidad || 'N/A';
-                    const stockActual = parseFloat(this.dataset.stockActual) || 0;
-                    const capacidadMax = parseFloat(this.dataset.capacidadMaxima) || 0;
-                    const precioCompra = parseFloat(this.dataset.precioCompra) || 0;
-                    const precioVenta = parseFloat(this.dataset.precioVenta) || 0;
-
-                    // Llenar campos del formulario de ENTRADA
-                    const inputEntrada = document.getElementById('entradaMaterialSeleccionado');
-                    const idEntrada = document.getElementById('entradaMaterialId');
-                    const tipoEntrada = document.getElementById('entradaMaterialTipo');
-                    const categoriaEntrada = document.getElementById('entradaMaterialCategoria');
-                    const descripcionEntrada = document.getElementById('entradaMaterialDescripcion');
-                    const unidadEntrada = document.getElementById('entradaMaterialUnidad');
-                    const stockActualEntrada = document.getElementById('entradaStockActual');
-                    const capacidadMaxEntrada = document.getElementById('entradaCapacidadMaxima');
-                    const precioCompraEntrada = document.getElementById('entradaPrecioCompra');
-
-                    if (inputEntrada) inputEntrada.value = materialNombre;
-                    if (idEntrada) idEntrada.value = materialId;
-                    if (tipoEntrada) tipoEntrada.value = materialTipo;
-                    if (categoriaEntrada) categoriaEntrada.value = materialCategoria;
-                    if (descripcionEntrada) descripcionEntrada.value = materialDescripcion;
-                    if (unidadEntrada) unidadEntrada.value = unidad;
-                    if (stockActualEntrada) stockActualEntrada.value = stockActual.toFixed(2);
-                    if (capacidadMaxEntrada) capacidadMaxEntrada.value = capacidadMax.toFixed(2);
-                    if (precioCompraEntrada) precioCompraEntrada.value = precioCompra.toFixed(2);
-
-                    // Llenar campos del formulario de SALIDA
-                    const inputSalida = document.getElementById('salidaMaterialSeleccionado');
-                    const idSalida = document.getElementById('salidaMaterialId');
-                    const tipoSalida = document.getElementById('salidaMaterialTipo');
-                    const categoriaSalida = document.getElementById('salidaMaterialCategoria');
-                    const descripcionSalida = document.getElementById('salidaMaterialDescripcion');
-                    const unidadSalida = document.getElementById('salidaMaterialUnidad');
-                    const stockActualSalida = document.getElementById('salidaStockActual');
-                    const capacidadMaxSalida = document.getElementById('salidaCapacidadMaxima');
-                    const precioVentaSalida = document.getElementById('salidaPrecioVenta');
-
-                    if (inputSalida) inputSalida.value = materialNombre;
-                    if (idSalida) idSalida.value = materialId;
-                    if (tipoSalida) tipoSalida.value = materialTipo;
-                    if (categoriaSalida) categoriaSalida.value = materialCategoria;
-                    if (descripcionSalida) descripcionSalida.value = materialDescripcion;
-                    if (unidadSalida) unidadSalida.value = unidad;
-                    if (stockActualSalida) stockActualSalida.value = stockActual.toFixed(2);
-                    if (capacidadMaxSalida) capacidadMaxSalida.value = capacidadMax.toFixed(2);
-                    if (precioVentaSalida) precioVentaSalida.value = precioVenta.toFixed(2);
-
-                    // Configurar listeners para calcular stock resultante en ENTRADA
-                    const entradaCantidadInput = document.getElementById('entradaCantidad');
-                    const entradaStockResultante = document.getElementById('entradaStockResultante');
-                    if (entradaCantidadInput && entradaStockResultante) {
-                        entradaCantidadInput.addEventListener('input', function() {
-                            const cantidadAgregada = parseFloat(this.value) || 0;
-                            const nuevoStock = stockActual + cantidadAgregada;
-                            entradaStockResultante.textContent = nuevoStock.toFixed(2) + ' ' + unidad;
-                            if (nuevoStock > capacidadMax) {
-                                entradaStockResultante.classList.add('text-danger');
-                                entradaStockResultante.innerHTML += ' ⚠️ (Excede capacidad)';
+                        // Esperar a que Select2 renderice el campo de búsqueda
+                        setTimeout(function() {
+                            var searchInput = $('.select2-search__field');
+                            if (searchInput && searchInput.length > 0) {
+                                console.log('Campo de búsqueda encontrado');
+                                console.log('Disparando búsqueda automática...');
+                                searchInput.trigger('input');
                             } else {
-                                entradaStockResultante.classList.remove('text-danger');
+                                console.warn('Campo de búsqueda no encontrado');
+                            }
+                        }, 100);
+                    });
+
+                    // Cuando se selecciona un material desde Select2, cargar directamente en formularios
+                    $buscarMaterial.on('select2:select', function(e) {
+                        try {
+                            var data = e.params.data || {};
+                            var dto = data.data || data;
+                            console.log('select2:select ->', dto);
+
+                            // Si el dto contiene materialId y nmbMaterial, usar esos campos
+                            var materialId = dto.materialId || dto.id || data.id || '';
+                            var materialNombre = dto.nmbMaterial || dto.text || data.text || '';
+                            var materialTipo = dto.nmbTipo || dto.nmbTipo || (dto.nmbTipo) || '';
+                            var materialCategoria = dto.nmbCategoria || dto.nmbCategoria || '';
+                            var materialDescripcion = dto.dscMaterial || dto.descripcion || '';
+                            var unidad = dto.unidadMedida || dto.unidad || '';
+                            var stockActual = parseFloat(dto.stockActual || 0) || 0;
+                            var capacidadMax = parseFloat(dto.capacidadMaxima || 0) || 0;
+                            var precioCompra = parseFloat(dto.precioCompra || 0) || 0;
+                            var precioVenta = parseFloat(dto.precioVenta || 0) || 0;
+
+                            // Llenar campos ENTRADA
+                            var inputEntrada = document.getElementById('entradaMaterialSeleccionado');
+                            var idEntrada = document.getElementById('entradaMaterialId');
+                            var tipoEntrada = document.getElementById('entradaMaterialTipo');
+                            var categoriaEntrada = document.getElementById('entradaMaterialCategoria');
+                            var descripcionEntrada = document.getElementById('entradaMaterialDescripcion');
+                            var unidadEntrada = document.getElementById('entradaMaterialUnidad');
+                            var stockActualEntrada = document.getElementById('entradaStockActual');
+                            var capacidadMaxEntrada = document.getElementById('entradaCapacidadMaxima');
+                            var precioCompraEntrada = document.getElementById('entradaPrecioCompra');
+
+                            if (inputEntrada) inputEntrada.value = materialNombre;
+                            if (idEntrada) idEntrada.value = materialId;
+                            if (tipoEntrada) tipoEntrada.value = materialTipo;
+                            if (categoriaEntrada) categoriaEntrada.value = materialCategoria;
+                            if (descripcionEntrada) descripcionEntrada.value = materialDescripcion;
+                            if (unidadEntrada) unidadEntrada.value = unidad;
+                            if (stockActualEntrada) stockActualEntrada.value = stockActual.toFixed(2);
+                            if (capacidadMaxEntrada) capacidadMaxEntrada.value = capacidadMax.toFixed(2);
+                            if (precioCompraEntrada) precioCompraEntrada.value = precioCompra.toFixed(2);
+
+                            // Llenar campos SALIDA
+                            var inputSalida = document.getElementById('salidaMaterialSeleccionado');
+                            var idSalida = document.getElementById('salidaMaterialId');
+                            var tipoSalida = document.getElementById('salidaMaterialTipo');
+                            var categoriaSalida = document.getElementById('salidaMaterialCategoria');
+                            var descripcionSalida = document.getElementById('salidaMaterialDescripcion');
+                            var unidadSalida = document.getElementById('salidaMaterialUnidad');
+                            var stockActualSalida = document.getElementById('salidaStockActual');
+                            var capacidadMaxSalida = document.getElementById('salidaCapacidadMaxima');
+                            var precioVentaSalida = document.getElementById('salidaPrecioVenta');
+
+                            if (inputSalida) inputSalida.value = materialNombre;
+                            if (idSalida) idSalida.value = materialId;
+                            if (tipoSalida) tipoSalida.value = materialTipo;
+                            if (categoriaSalida) categoriaSalida.value = materialCategoria;
+                            if (descripcionSalida) descripcionSalida.value = materialDescripcion;
+                            if (unidadSalida) unidadSalida.value = unidad;
+                            if (stockActualSalida) stockActualSalida.value = stockActual.toFixed(2);
+                            if (capacidadMaxSalida) capacidadMaxSalida.value = capacidadMax.toFixed(2);
+                            if (precioVentaSalida) precioVentaSalida.value = precioVenta.toFixed(2);
+
+                            // Mostrar formularios y ocultar sección de búsqueda
+                            var formEntradaContainer = document.getElementById('formEntradaContainer');
+                            var formSalidaContainer = document.getElementById('formSalidaContainer');
+                            if (formEntradaContainer) formEntradaContainer.style.display = 'block';
+                            if (formSalidaContainer) formSalidaContainer.style.display = 'block';
+                            var seccionBusquedaMaterial = document.getElementById('seccionBusquedaMaterial');
+                            if (seccionBusquedaMaterial) seccionBusquedaMaterial.style.display = 'none';
+
+                            // Expandir acordeones correctamente (actualizar aria y clases en botones)
+                            var collapseEntradas = document.getElementById('collapseEntradas');
+                            var collapseSalidas = document.getElementById('collapseSalidas');
+                            if (collapseEntradas) {
+                                collapseEntradas.classList.add('show');
+                                collapseEntradas.setAttribute('aria-expanded', 'true');
+                                var buttonEntradas = document.querySelector('[data-bs-target="#collapseEntradas"]');
+                                if (buttonEntradas) buttonEntradas.classList.remove('collapsed');
+                            }
+                            if (collapseSalidas) {
+                                collapseSalidas.classList.add('show');
+                                collapseSalidas.setAttribute('aria-expanded', 'true');
+                                var buttonSalidas = document.querySelector('[data-bs-target="#collapseSalidas"]');
+                                if (buttonSalidas) buttonSalidas.classList.remove('collapsed');
+                            }
+
+                            // Disparar eventos input/change en los campos para notificar a cualquier listener
+                            function triggerEvents(el) {
+                                if (!el) return;
+                                try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch(e){}
+                                try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch(e){}
+                            }
+                            triggerEvents(document.getElementById('entradaMaterialSeleccionado'));
+                            triggerEvents(document.getElementById('entradaMaterialId'));
+                            triggerEvents(document.getElementById('salidaMaterialSeleccionado'));
+                            triggerEvents(document.getElementById('salidaMaterialId'));
+
+                            // Hacer scroll suave al formulario para que el usuario lo vea
+                            if (formEntradaContainer && typeof formEntradaContainer.scrollIntoView === 'function') {
+                                formEntradaContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+
+                        } catch (err) {
+                            console.error('Error al procesar selección Select2:', err);
+                        }
+                    });
+
+                    console.log('Select2 inicializado en #buscarMaterialMovimientos');
+                }
+
+                // ========================================================
+                // INICIALIZAR SELECT2 EN CATEGORÍA
+                // ========================================================
+                var $selectCategoria = $('#selectCategoriaMov');
+                if ($selectCategoria.length) {
+                    console.log('Encontrado #selectCategoriaMov');
+
+                    $selectCategoria.select2({
+                        theme: 'bootstrap4',
+                        width: '100%',
+                        allowClear: true,
+                        placeholder: 'Selecciona una categoría...',
+                        minimumInputLength: 0
+                    });
+
+                    // Al cambiar categoría, disparar búsqueda automática
+                    $selectCategoria.on('select2:select', function(e) {
+                        var categoria = e.params.data.id;
+                        console.log('Categoria seleccionada:', categoria);
+
+                        // Disparar búsqueda automática con la categoría
+                        console.log('Disparando búsqueda con filtros:', {
+                            texto: '',
+                            categoria: categoria,
+                            tipo: $('#selectTipoMov').val() || ''
+                        });
+                        buscarMateriales();
+                    });
+
+                    // Al limpiar categoría
+                    $selectCategoria.on('select2:unselect', function(e) {
+                        console.log('Categoria limpiada');
+                    });
+
+                    console.log('Select2 inicializado en #selectCategoriaMov');
+                }
+
+                // ========================================================
+                // INICIALIZAR SELECT2 EN TIPO
+                // ========================================================
+                var $selectTipo = $('#selectTipoMov');
+                if ($selectTipo.length) {
+                    console.log('Encontrado #selectTipoMov');
+
+                    $selectTipo.select2({
+                        theme: 'bootstrap4',
+                        width: '100%',
+                        allowClear: true,
+                        placeholder: 'Selecciona un tipo...',
+                        minimumInputLength: 0
+                    });
+
+                    // Al cambiar tipo, disparar búsqueda automática
+                    $selectTipo.on('select2:select', function(e) {
+                        var tipo = e.params.data.id;
+                        console.log('Tipo seleccionado:', tipo);
+
+                        // Disparar búsqueda automática con el tipo
+                        console.log('Disparando búsqueda con filtros:', {
+                            texto: '',
+                            categoria: $('#selectCategoriaMov').val() || '',
+                            tipo: tipo
+                        });
+                        buscarMateriales();
+                    });
+
+                    // Al limpiar tipo
+                    $selectTipo.on('select2:unselect', function(e) {
+                        console.log('Tipo limpiado');
+                    });
+
+                    console.log('Select2 inicializado en #selectTipoMov');
+                }
+
+                // Función para buscar materiales
+                function buscarMateriales() {
+                    const texto = $buscarMaterial?.val() || '';
+                    const categoria = $('#selectCategoriaMov').val() || '';
+                    const tipo = $('#selectTipoMov').val() || '';
+
+                    console.log('Buscando con:', { texto, categoria, tipo });
+
+                    // Obtener modal
+                    var modalBuscarMaterial = document.getElementById('buscarMaterialMovimientosModal');
+                    if (!modalBuscarMaterial) {
+                        console.error('❌ Modal de búsqueda no encontrado');
+                        return;
+                    }
+
+                    // Mostrar estado loading
+                    var estadoBusquedaEl = document.getElementById('estadoBusquedaMov');
+                    if (estadoBusquedaEl) {
+                        estadoBusquedaEl.innerHTML = '<div class="d-flex flex-column align-items-center"><div class="spinner-border text-primary mb-3" role="status"></div><p class="mb-0">Buscando materiales...</p></div>';
+                    }
+
+                    // Limpiar resultados
+                    var listaResultadosEl = document.getElementById('resultadosBusquedaMov');
+                    if (listaResultadosEl) {
+                        listaResultadosEl.innerHTML = '';
+                    }
+
+                    // Abrir modal
+                    var modal = new bootstrap.Modal(modalBuscarMaterial);
+                    modal.show();
+
+                    // Construir URL con parámetros como en section-materiales.html
+                    var endpoint = '/punto-eca/catalogo/materiales/buscar';
+                    var params = new URLSearchParams();
+
+                    if (texto) params.append('texto', texto);
+                    if (categoria) params.append('categoria', categoria);
+                    if (tipo) params.append('tipo', tipo);
+                    if (puntoEcaId) params.append('puntoId', puntoEcaId);
+
+                    var url = endpoint + (params.toString() ? ('?' + params.toString()) : '');
+                    console.log('Buscando en:', url);
+
+                    fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } })
+                        .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, data: data })))
+                        .then(({ status, ok, data }) => {
+                            console.log('Respuesta recibida:', data);
+
+                            if (!ok) {
+                                var mensajeError = data?.mensaje || data?.message || 'Error desconocido';
+                                console.error('❌ Error:', mensajeError);
+                                if (estadoBusquedaEl) {
+                                    estadoBusquedaEl.innerHTML = '<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-2"></i>' + mensajeError + '</div>';
+                                }
+                                return;
+                            }
+
+                            if (!Array.isArray(data)) data = [];
+
+                            console.log('Total de resultados:', data.length);
+
+                            // Renderizar resultados en el modal
+                            renderResultadosBusquedaMov(data);
+                        })
+                        .catch(error => {
+                            console.error('❌ Error en búsqueda:', error);
+                            if (estadoBusquedaEl) {
+                                estadoBusquedaEl.innerHTML = '<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-exclamation-octagon me-2"></i>Error de conexión</div>';
                             }
                         });
+                }
+
+                // Función para renderizar resultados en el modal
+                function renderResultadosBusquedaMov(materiales) {
+                    console.log('Renderizando', materiales.length, 'resultados');
+
+                    var listaResultadosEl = document.getElementById('resultadosBusquedaMov');
+                    var estadoBusquedaEl = document.getElementById('estadoBusquedaMov');
+
+                    if (!listaResultadosEl) return;
+
+                    listaResultadosEl.innerHTML = '';
+
+                    if (!materiales || materiales.length === 0) {
+                        listaResultadosEl.innerHTML = '<div class="list-group-item text-muted text-center py-4">Sin resultados disponibles</div>';
+                        if (estadoBusquedaEl) {
+                            estadoBusquedaEl.innerHTML = '<i class="bi bi-search display-6 d-block mb-2"></i><p class="mb-0">No se encontraron materiales con estos filtros</p>';
+                        }
+                        return;
                     }
 
-                    // Configurar listeners para calcular stock restante en SALIDA
-                    const salidaCantidadInput = document.getElementById('salidaCantidad');
-                    const salidaStockRestante = document.getElementById('salidaStockRestante');
-                    if (salidaCantidadInput && salidaStockRestante) {
-                        salidaCantidadInput.addEventListener('input', function() {
-                            const cantidadDescontada = parseFloat(this.value) || 0;
-                            const stockRestante = stockActual - cantidadDescontada;
-                            salidaStockRestante.textContent = stockRestante.toFixed(2) + ' ' + unidad;
-                            if (stockRestante < 0) {
-                                salidaStockRestante.classList.add('text-danger');
-                                salidaStockRestante.innerHTML += ' ⚠️ (Insuficiente)';
-                            } else {
-                                salidaStockRestante.classList.remove('text-danger');
+                    materiales.forEach(material => {
+                        var item = document.createElement('button');
+                        item.type = 'button';
+                        item.className = 'list-group-item list-group-item-action resultado-material-item d-flex align-items-start gap-3';
+                        item.dataset.materialId = material.materialId || '';
+                        item.dataset.nombre = material.nmbMaterial || '';
+                        item.dataset.descripcion = material.dscMaterial || '';
+                        item.dataset.tipo = material.nmbTipo || '';
+                        item.dataset.categoria = material.nmbCategoria || '';
+                        item.dataset.unidad = material.unidadMedida || '';
+                        item.dataset.stockActual = material.stockActual || '0';
+                        item.dataset.capacidadMaxima = material.capacidadMaxima || '0';
+                        item.dataset.precioCompra = material.precioCompra || '0';
+                        item.dataset.precioVenta = material.precioVenta || '0';
+
+                        var img = document.createElement('img');
+                        img.src = material.imagenUrl || '/imagenes/materiales.png';
+                        img.alt = material.nmbMaterial || 'Material';
+                        img.className = 'rounded';
+                        img.style.width = '64px';
+                        img.style.height = '64px';
+                        img.style.objectFit = 'cover';
+                        img.style.flexShrink = '0';
+
+                        var content = document.createElement('div');
+                        content.className = 'flex-grow-1 text-start';
+
+                        var title = document.createElement('div');
+                        title.className = 'fw-semibold';
+                        title.textContent = material.nmbMaterial || 'Material sin nombre';
+
+                        var desc = document.createElement('small');
+                        desc.className = 'text-muted d-block mb-2';
+                        desc.textContent = material.dscMaterial || 'Sin descripción';
+
+                        var badges = document.createElement('div');
+                        var tipoBadge = document.createElement('span');
+                        tipoBadge.className = 'badge bg-primary me-1';
+                        tipoBadge.textContent = material.nmbTipo || 'Tipo';
+                        var catBadge = document.createElement('span');
+                        catBadge.className = 'badge bg-secondary';
+                        catBadge.textContent = material.nmbCategoria || 'Categoría';
+
+                        badges.appendChild(tipoBadge);
+                        badges.appendChild(catBadge);
+
+                        content.appendChild(title);
+                        content.appendChild(desc);
+                        content.appendChild(badges);
+
+                        var actionBadge = document.createElement('span');
+                        actionBadge.className = 'badge bg-primary rounded-pill align-self-start';
+                        actionBadge.textContent = 'Seleccionar';
+
+                        item.appendChild(img);
+                        item.appendChild(content);
+                        item.appendChild(actionBadge);
+
+                        listaResultadosEl.appendChild(item);
+                    });
+
+                    if (estadoBusquedaEl) {
+                        estadoBusquedaEl.style.display = 'none';
+                    }
+
+                    // Agregar event listeners para seleccionar material
+                    document.querySelectorAll('.resultado-material-item').forEach(item => {
+                        item.addEventListener('click', function(e) {
+                            e.preventDefault();
+
+                            const materialId = this.dataset.materialId;
+                            const materialNombre = this.dataset.nombre;
+                            const materialTipo = this.dataset.tipo;
+                            const materialCategoria = this.dataset.categoria;
+                            const materialDescripcion = this.dataset.descripcion;
+
+                            console.log('Material seleccionado:', materialId, '-', materialNombre);
+
+                            // Obtener datos del material
+                            const unidad = this.dataset.unidad || 'N/A';
+                            const stockActual = parseFloat(this.dataset.stockActual) || 0;
+                            const capacidadMax = parseFloat(this.dataset.capacidadMaxima) || 0;
+                            const precioCompra = parseFloat(this.dataset.precioCompra) || 0;
+                            const precioVenta = parseFloat(this.dataset.precioVenta) || 0;
+
+                            // Llenar campos del formulario de ENTRADA
+                            const inputEntrada = document.getElementById('entradaMaterialSeleccionado');
+                            const idEntrada = document.getElementById('entradaMaterialId');
+                            const tipoEntrada = document.getElementById('entradaMaterialTipo');
+                            const categoriaEntrada = document.getElementById('entradaMaterialCategoria');
+                            const descripcionEntrada = document.getElementById('entradaMaterialDescripcion');
+                            const unidadEntrada = document.getElementById('entradaMaterialUnidad');
+                            const stockActualEntrada = document.getElementById('entradaStockActual');
+                            const capacidadMaxEntrada = document.getElementById('entradaCapacidadMaxima');
+                            const precioCompraEntrada = document.getElementById('entradaPrecioCompra');
+
+                            if (inputEntrada) inputEntrada.value = materialNombre;
+                            if (idEntrada) idEntrada.value = materialId;
+                            if (tipoEntrada) tipoEntrada.value = materialTipo;
+                            if (categoriaEntrada) categoriaEntrada.value = materialCategoria;
+                            if (descripcionEntrada) descripcionEntrada.value = materialDescripcion;
+                            if (unidadEntrada) unidadEntrada.value = unidad;
+                            if (stockActualEntrada) stockActualEntrada.value = stockActual.toFixed(2);
+                            if (capacidadMaxEntrada) capacidadMaxEntrada.value = capacidadMax.toFixed(2);
+                            if (precioCompraEntrada) precioCompraEntrada.value = precioCompra.toFixed(2);
+
+                            // Llenar campos del formulario de SALIDA
+                            const inputSalida = document.getElementById('salidaMaterialSeleccionado');
+                            const idSalida = document.getElementById('salidaMaterialId');
+                            const tipoSalida = document.getElementById('salidaMaterialTipo');
+                            const categoriaSalida = document.getElementById('salidaMaterialCategoria');
+                            const descripcionSalida = document.getElementById('salidaMaterialDescripcion');
+                            const unidadSalida = document.getElementById('salidaMaterialUnidad');
+                            const stockActualSalida = document.getElementById('salidaStockActual');
+                            const capacidadMaxSalida = document.getElementById('salidaCapacidadMaxima');
+                            const precioVentaSalida = document.getElementById('salidaPrecioVenta');
+
+                            if (inputSalida) inputSalida.value = materialNombre;
+                            if (idSalida) idSalida.value = materialId;
+                            if (tipoSalida) tipoSalida.value = materialTipo;
+                            if (categoriaSalida) categoriaSalida.value = materialCategoria;
+                            if (descripcionSalida) descripcionSalida.value = materialDescripcion;
+                            if (unidadSalida) unidadSalida.value = unidad;
+                            if (stockActualSalida) stockActualSalida.value = stockActual.toFixed(2);
+                            if (capacidadMaxSalida) capacidadMaxSalida.value = capacidadMax.toFixed(2);
+                            if (precioVentaSalida) precioVentaSalida.value = precioVenta.toFixed(2);
+
+                            // Cerrar modal
+                            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('buscarMaterialMovimientosModal'));
+                            if (modalInstance) {
+                                modalInstance.hide();
                             }
+
+                            // Mostrar formularios y ocultar sección de búsqueda
+                            var formEntradaContainer = document.getElementById('formEntradaContainer');
+                            var formSalidaContainer = document.getElementById('formSalidaContainer');
+                            if (formEntradaContainer) formEntradaContainer.style.display = 'block';
+                            if (formSalidaContainer) formSalidaContainer.style.display = 'block';
+                            var seccionBusquedaMaterial = document.getElementById('seccionBusquedaMaterial');
+                            if (seccionBusquedaMaterial) seccionBusquedaMaterial.style.display = 'none';
+
+                            // Expandir acordeones correctamente (actualizar aria y clases en botones)
+                            var collapseEntradas = document.getElementById('collapseEntradas');
+                            var collapseSalidas = document.getElementById('collapseSalidas');
+                            if (collapseEntradas) {
+                                collapseEntradas.classList.add('show');
+                                collapseEntradas.setAttribute('aria-expanded', 'true');
+                                var buttonEntradas = document.querySelector('[data-bs-target="#collapseEntradas"]');
+                                if (buttonEntradas) buttonEntradas.classList.remove('collapsed');
+                            }
+                            if (collapseSalidas) {
+                                collapseSalidas.classList.add('show');
+                                collapseSalidas.setAttribute('aria-expanded', 'true');
+                                var buttonSalidas = document.querySelector('[data-bs-target="#collapseSalidas"]');
+                                if (buttonSalidas) buttonSalidas.classList.remove('collapsed');
+                            }
+
+                            // Disparar eventos input/change en los campos para notificar a cualquier listener
+                            function triggerEvents(el) {
+                                if (!el) return;
+                                try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch(e){}
+                                try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch(e){}
+                            }
+                            triggerEvents(document.getElementById('entradaMaterialSeleccionado'));
+                            triggerEvents(document.getElementById('entradaMaterialId'));
+                            triggerEvents(document.getElementById('salidaMaterialSeleccionado'));
+                            triggerEvents(document.getElementById('salidaMaterialId'));
+
+                            // Hacer scroll suave al formulario para que el usuario lo vea
+                            if (formEntradaContainer && typeof formEntradaContainer.scrollIntoView === 'function') {
+                                formEntradaContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+
                         });
+                    });
+                }
+
+                // ========================================================
+                // CARGA INICIAL DE DATOS EN TABLAS (ENTRADAS Y SALIDAS)
+                // ========================================================
+                // Esta sección se ejecuta una vez que el DOM está completamente cargado
+                function cargarDatosIniciales() {
+                    console.log('Cargando datos iniciales en tablas...');
+
+                    // Datos de entradas (compras) - Inyectados desde Thymeleaf
+                    const entradasData = /*[[${entradasIniciales.content}]]*/ [];
+
+                    // Datos de salidas (ventas) - Inyectados desde Thymeleaf
+                    const salidasData = /*[[${salidasIniciales.content}]]*/ [];
+
+                    console.log('Entradas cargadas:', entradasData.length, entradasData);
+                    console.log('Salidas cargadas:', salidasData.length, salidasData);
+
+                    // Renderizar entradas
+                    function renderizarEntradas() {
+                        const tbody = document.getElementById('tablasEntradasBody');
+                        if (!tbody) {
+                            console.warn('No se encontró tbody tablasEntradasBody');
+                            return;
+                        }
+
+                        if (!entradasData || entradasData.length === 0) {
+                            tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="5" class="py-3"><small>Sin registros</small></td></tr>';
+                            document.getElementById('badgeEntradasCount').textContent = '0 registros';
+                            return;
+                        }
+
+                        tbody.innerHTML = entradasData.map(entrada => {
+                            const fecha = entrada.fechaCompra ? new Date(entrada.fechaCompra).toLocaleDateString('es-CO') : '-';
+                            const cantidad = parseFloat(entrada.cantidad || 0);
+                            const precio = parseFloat(entrada.precioCompra || 0);
+                            return `
+                    <tr>
+                        <td class="small">${fecha}</td>
+                        <td class="small">${entrada.nombreMaterial || '-'}</td>
+                        <td class="text-end small">${cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="text-end small">$${precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="small">${entrada.observaciones || '-'}</td>
+                    </tr>
+                `;
+                        }).join('');
+
+                        document.getElementById('badgeEntradasCount').textContent = entradasData.length + ' registros';
+                        console.log('✅ Tabla de entradas renderizada');
                     }
 
-                    // Mostrar ambos formularios (entrada y salida)
-                    const formEntradaContainer = document.getElementById('formEntradaContainer');
-                    const formSalidaContainer = document.getElementById('formSalidaContainer');
-                    if (formEntradaContainer) formEntradaContainer.style.display = 'block';
-                    if (formSalidaContainer) formSalidaContainer.style.display = 'block';
+                    // Renderizar salidas
+                    function renderizarSalidas() {
+                        const tbody = document.getElementById('tablasSalidasBody');
+                        if (!tbody) {
+                            console.warn('No se encontró tbody tablasSalidasBody');
+                            return;
+                        }
 
-                    // Ocultar sección de búsqueda de material
-                    const seccionBusquedaMaterial = document.getElementById('seccionBusquedaMaterial');
-                    if (seccionBusquedaMaterial) seccionBusquedaMaterial.style.display = 'none';
+                        if (!salidasData || salidasData.length === 0) {
+                            tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="5" class="py-3"><small>Sin registros</small></td></tr>';
+                            document.getElementById('badgeSalidasCount').textContent = '0 registros';
+                            return;
+                        }
 
-                    // Expandir ambas secciones del acordeón
-                    const collapseEntradas = document.getElementById('collapseEntradas');
-                    const collapseSalidas = document.getElementById('collapseSalidas');
-                    if (collapseEntradas) {
-                        collapseEntradas.classList.add('show');
-                        collapseEntradas.setAttribute('aria-expanded', 'true');
-                        const buttonEntradas = document.querySelector('[data-bs-target="#collapseEntradas"]');
-                        if (buttonEntradas) buttonEntradas.classList.remove('collapsed');
-                    }
-                    if (collapseSalidas) {
-                        collapseSalidas.classList.add('show');
-                        collapseSalidas.setAttribute('aria-expanded', 'true');
-                        const buttonSalidas = document.querySelector('[data-bs-target="#collapseSalidas"]');
-                        if (buttonSalidas) buttonSalidas.classList.remove('collapsed');
-                    }
+                        tbody.innerHTML = salidasData.map(salida => {
+                            const fecha = salida.fechaVenta ? new Date(salida.fechaVenta).toLocaleDateString('es-CO') : '-';
+                            const cantidad = parseFloat(salida.cantidad || 0);
+                            const precio = parseFloat(salida.precioVenta || 0);
+                            return `
+                    <tr>
+                        <td class="small">${fecha}</td>
+                        <td class="small">${salida.nombreMaterial || '-'}</td>
+                        <td class="text-end small">${cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="text-end small">$${precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="small">${salida.nombreCentroAcopio || '-'}</td>
+                    </tr>
+                `;
+                        }).join('');
 
-                    // Mostrar mensaje de éxito mejorado
-                    const respuestaDiv = document.createElement('div');
-                    respuestaDiv.className = 'alert alert-success alert-dismissible fade show';
-                    respuestaDiv.innerHTML = `
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-check-circle me-2" style="font-size: 1.2rem;"></i>
-                            <div>
-                                <strong>¡Material agregado!</strong>
-                                <div class="small">El material "<strong>${materialNombre}</strong>" ha sido cargado. Ahora puedes registrar una <strong>entrada</strong> o una <strong>salida</strong> de este material.</div>
-                            </div>
-                        </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-                    `;
-
-                    const formEntrada = document.getElementById('formEntrada');
-                    if (formEntrada && formEntrada.parentNode) {
-                        formEntrada.parentNode.insertBefore(respuestaDiv, formEntrada);
+                        document.getElementById('badgeSalidasCount').textContent = salidasData.length + ' registros';
+                        console.log('✅ Tabla de salidas renderizada');
                     }
 
-                    // Cerrar modal
-                    const modalInstance = bootstrap.Modal.getInstance(modalBusqueda);
-                    if (modalInstance) {
-                        modalInstance.hide();
+                    // Inicializar cuando el DOM esté listo
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', function() {
+                            console.log('✅ DOM cargado, renderizando...');
+                            renderizarEntradas();
+                            renderizarSalidas();
+                        });
+                    } else {
+                        console.log('✅ DOM ya cargado, renderizando...');
+                        renderizarEntradas();
+                        renderizarSalidas();
                     }
+                }
 
-                    console.log('✓ Material cargado en ambos formularios');
-                });
-            });
-        }
+                // Intentar cargar datos iniciales
+                cargarDatosIniciales();
 
-        // Función para buscar materiales
-        function buscarMateriales() {
-            const texto = inputBusqueda?.value || '';
-            const categoria = document.querySelector('input[name="radioCategoriaMov"]:checked')?.value || '';
-            const tipo = document.querySelector('input[name="radioTipoMov"]:checked')?.value || '';
-
-            console.log('🔍 Buscando con:', { texto, categoria, tipo });
-
-            mostrarEstadoBusquedaMov('loading');
-            actualizarResumenFiltros(texto, categoria, tipo);
-
-            // Llamar al endpoint del controller
-            const url = `/punto-eca/catalogo/inventario/materiales/buscar?` +
-                        `puntoId=${puntoEcaId}&texto=${encodeURIComponent(texto)}&categoria=${encodeURIComponent(categoria)}&tipo=${encodeURIComponent(tipo)}`;
-
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) throw new Error('Error en la búsqueda');
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('✓ Resultados recibidos:', data);
-                    renderResultadosBusqueda(data);
-                })
-                .catch(error => {
-                    console.error('✗ Error:', error);
-                    mostrarEstadoBusquedaMov('error');
-                });
-        }
-
-        // Event listeners
-        if (btnBuscar) {
-            btnBuscar.addEventListener('click', function() {
-                console.log('✓ Botón Buscar clickeado');
-                buscarMateriales();
-                const modal = new bootstrap.Modal(modalBusqueda);
-                modal.show();
-            });
-        }
-
-        if (btnLimpiar) {
-            btnLimpiar.addEventListener('click', function() {
-                console.log('✓ Botón Limpiar clickeado');
-                if (inputBusqueda) inputBusqueda.value = '';
-                document.querySelectorAll('input[name="radioCategoriaMov"]').forEach(r => r.checked = r.id.includes('none'));
-                document.querySelectorAll('input[name="radioTipoMov"]').forEach(r => r.checked = r.id.includes('none'));
-                if (resultadosDiv) resultadosDiv.innerHTML = '';
+                // Mostrar estado inicial
                 mostrarEstadoBusquedaMov('idle');
-            });
-        }
+                console.log('Script de movimientos inicializado con Select2');
+            } // Cierra inicializarSelect2
 
-        // Mostrar estado inicial
-        mostrarEstadoBusquedaMov('idle');
-        console.log('✓ Script de movimientos inicializado');
+            // Intentar inicializar al cargar el DOM
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', inicializarSelect2);
+            } else {
+                inicializarSelect2();
+            }
+        })();
 
-        // Función para cambiar el material seleccionado
+        // Función global para cambiar el material seleccionado
         window.cambiarMaterial = function() {
             console.log('🔄 Cambiando material...');
 
@@ -949,51 +1333,53 @@
             if (seccionBusquedaMaterial) seccionBusquedaMaterial.style.display = 'block';
 
             // Limpiar búsqueda anterior
-            if (inputBusqueda) inputBusqueda.value = '';
-            document.querySelectorAll('input[name="radioCategoriaMov"]').forEach(r => r.checked = r.id.includes('none'));
-            document.querySelectorAll('input[name="radioTipoMov"]').forEach(r => r.checked = r.id.includes('none'));
+            const inputBusqueda = document.getElementById('buscarMaterialMovimientos');
+            if (inputBusqueda) {
+                $(inputBusqueda).val(null).trigger('change');
+            }
+            $('#selectCategoriaMov').val('').trigger('change');
+            $('#selectTipoMov').val('').trigger('change');
+
             const resultadosDiv = document.getElementById('resultadosBusquedaMov');
             if (resultadosDiv) resultadosDiv.innerHTML = '';
-            mostrarEstadoBusquedaMov('idle');
 
             console.log('✓ Material cambiado, sección de búsqueda mostrada nuevamente');
         };
-    })();
     </script>
 
     <!-- SCRIPT PARA CARGAR DATOS INICIALES DE ENTRADAS Y SALIDAS -->
     <script th:inline="javascript">
-    (function() {
-        console.log('📌 Inicializando carga de datos de movimientos...');
+        (function() {
+            console.log('Inicializando carga de datos de movimientos...');
 
-        // Datos de entradas (compras) - Inyectados desde Thymeleaf
-        const entradasData = /*[[${entradasIniciales.content}]]*/ [];
+            // Datos de entradas (compras) - Inyectados desde Thymeleaf
+            const entradasData = /*[[${entradasIniciales.content}]]*/ [];
 
-        // Datos de salidas (ventas) - Inyectados desde Thymeleaf
-        const salidasData = /*[[${salidasIniciales.content}]]*/ [];
+            // Datos de salidas (ventas) - Inyectados desde Thymeleaf
+            const salidasData = /*[[${salidasIniciales.content}]]*/ [];
 
-        console.log('📊 Entradas cargadas:', entradasData.length, entradasData);
-        console.log('📊 Salidas cargadas:', salidasData.length, salidasData);
+            console.log('Entradas cargadas:', entradasData.length, entradasData);
+            console.log('Salidas cargadas:', salidasData.length, salidasData);
 
-        // Renderizar entradas
-        function renderizarEntradas() {
-            const tbody = document.getElementById('tablasEntradasBody');
-            if (!tbody) {
-                console.warn('⚠️ No se encontró tbody tablasEntradasBody');
-                return;
-            }
+            // Renderizar entradas
+            function renderizarEntradas() {
+                const tbody = document.getElementById('tablasEntradasBody');
+                if (!tbody) {
+                    console.warn('No se encontró tbody tablasEntradasBody');
+                    return;
+                }
 
-            if (!entradasData || entradasData.length === 0) {
-                tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="5" class="py-3"><small>Sin registros</small></td></tr>';
-                document.getElementById('badgeEntradasCount').textContent = '0 registros';
-                return;
-            }
+                if (!entradasData || entradasData.length === 0) {
+                    tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="5" class="py-3"><small>Sin registros</small></td></tr>';
+                    document.getElementById('badgeEntradasCount').textContent = '0 registros';
+                    return;
+                }
 
-            tbody.innerHTML = entradasData.map(entrada => {
-                const fecha = entrada.fechaCompra ? new Date(entrada.fechaCompra).toLocaleDateString('es-CO') : '-';
-                const cantidad = parseFloat(entrada.cantidad || 0);
-                const precio = parseFloat(entrada.precioCompra || 0);
-                return `
+                tbody.innerHTML = entradasData.map(entrada => {
+                    const fecha = entrada.fechaCompra ? new Date(entrada.fechaCompra).toLocaleDateString('es-CO') : '-';
+                    const cantidad = parseFloat(entrada.cantidad || 0);
+                    const precio = parseFloat(entrada.precioCompra || 0);
+                    return `
                     <tr>
                         <td class="small">${fecha}</td>
                         <td class="small">${entrada.nombreMaterial || '-'}</td>
@@ -1002,31 +1388,31 @@
                         <td class="small">${entrada.observaciones || '-'}</td>
                     </tr>
                 `;
-            }).join('');
+                }).join('');
 
-            document.getElementById('badgeEntradasCount').textContent = entradasData.length + ' registros';
-            console.log('✅ Tabla de entradas renderizada');
-        }
-
-        // Renderizar salidas
-        function renderizarSalidas() {
-            const tbody = document.getElementById('tablasSalidasBody');
-            if (!tbody) {
-                console.warn('⚠️ No se encontró tbody tablasSalidasBody');
-                return;
+                document.getElementById('badgeEntradasCount').textContent = entradasData.length + ' registros';
+                console.log('✅ Tabla de entradas renderizada');
             }
 
-            if (!salidasData || salidasData.length === 0) {
-                tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="5" class="py-3"><small>Sin registros</small></td></tr>';
-                document.getElementById('badgeSalidasCount').textContent = '0 registros';
-                return;
-            }
+            // Renderizar salidas
+            function renderizarSalidas() {
+                const tbody = document.getElementById('tablasSalidasBody');
+                if (!tbody) {
+                    console.warn('No se encontró tbody tablasSalidasBody');
+                    return;
+                }
 
-            tbody.innerHTML = salidasData.map(salida => {
-                const fecha = salida.fechaVenta ? new Date(salida.fechaVenta).toLocaleDateString('es-CO') : '-';
-                const cantidad = parseFloat(salida.cantidad || 0);
-                const precio = parseFloat(salida.precioVenta || 0);
-                return `
+                if (!salidasData || salidasData.length === 0) {
+                    tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="5" class="py-3"><small>Sin registros</small></td></tr>';
+                    document.getElementById('badgeSalidasCount').textContent = '0 registros';
+                    return;
+                }
+
+                tbody.innerHTML = salidasData.map(salida => {
+                    const fecha = salida.fechaVenta ? new Date(salida.fechaVenta).toLocaleDateString('es-CO') : '-';
+                    const cantidad = parseFloat(salida.cantidad || 0);
+                    const precio = parseFloat(salida.precioVenta || 0);
+                    return `
                     <tr>
                         <td class="small">${fecha}</td>
                         <td class="small">${salida.nombreMaterial || '-'}</td>
@@ -1035,24 +1421,18 @@
                         <td class="small">${salida.nombreCentroAcopio || '-'}</td>
                     </tr>
                 `;
-            }).join('');
+                }).join('');
 
-            document.getElementById('badgeSalidasCount').textContent = salidasData.length + ' registros';
-            console.log('✅ Tabla de salidas renderizada');
-        }
+                document.getElementById('badgeSalidasCount').textContent = salidasData.length + ' registros';
+                console.log('✅ Tabla de salidas renderizada');
+            }
 
-        // Inicializar cuando el DOM esté listo
-        if (document.readyState === 'loading') {
+            // Inicializar cuando el DOM esté completamente cargado
             document.addEventListener('DOMContentLoaded', function() {
                 console.log('✅ DOM cargado, renderizando...');
                 renderizarEntradas();
                 renderizarSalidas();
             });
-        } else {
-            console.log('✅ DOM ya cargado, renderizando...');
-            renderizarEntradas();
-            renderizarSalidas();
-        }
-    })();
+        })();
     </script>
 </section>

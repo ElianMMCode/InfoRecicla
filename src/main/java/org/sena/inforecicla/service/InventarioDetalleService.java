@@ -19,5 +19,6 @@ public interface InventarioDetalleService {
     List<TipoMaterialesInvResponseDTO> obtenerTiposDelPunto(UUID puntoId);
 
     List<MaterialResponseDTO> buscarMaterialNuevoFiltrandoInventario(UUID puntoId, String texto, String categoria, String tipo) throws InventarioFoundExistException;
+
     List<MaterialInvResponseDTO> buscarMaterialExistentesFiltrandoInventario(UUID puntoId, String texto, String categoria, String tipo) throws InventarioFoundExistException;
 }

@@ -18,6 +18,7 @@ public record PuntoEcaResponseDTO(
         double longitud,
         String sitioWebPunto,
         String horarioAtencionPunto
+
 ) {
 
     public static PuntoEcaResponseDTO derivado(PuntoECA p){

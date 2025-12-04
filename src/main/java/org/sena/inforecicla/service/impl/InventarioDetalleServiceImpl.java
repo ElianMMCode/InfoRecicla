@@ -94,25 +94,18 @@ public class InventarioDetalleServiceImpl implements InventarioDetalleService {
     }
 
     /**
-     * Normaliza y valida que al menos un filtro esté presente
+     * Normaliza parámetros sin validar que al menos uno esté presente.
+     * Permite enviar todos vacíos para traer todos los materiales.
      *
      * @param texto     criterio de búsqueda por nombre
      * @param categoria criterio de búsqueda por categoría
      * @param tipo      criterio de búsqueda por tipo
      * @return objeto FiltroNormalizado con valores normalizados
-     * @throws InventarioFoundExistException si ningún filtro está presente
      */
-    private FiltroNormalizado normalizarYValidarFiltros(String texto, String categoria, String tipo) throws InventarioFoundExistException {
+    private FiltroNormalizado normalizarYValidarFiltros(String texto, String categoria, String tipo) {
         String textoNorm = normalizarParametro(texto);
         String categoriaNorm = normalizarParametro(categoria);
         String tipoNorm = normalizarParametro(tipo);
-
-        if (textoNorm.trim().isEmpty() && categoriaNorm.trim().isEmpty() && tipoNorm.trim().isEmpty()) {
-            throw new InventarioFoundExistException(
-                    "⚠️ Debes ingresar al menos un criterio de búsqueda. " +
-                            "Por favor, escribe un nombre, selecciona una categoría o un tipo de material."
-            );
-        }
 
         return new FiltroNormalizado(textoNorm, categoriaNorm, tipoNorm);
     }
@@ -154,12 +147,12 @@ public class InventarioDetalleServiceImpl implements InventarioDetalleService {
                 int totalEncontrados = materialesEncontrados.size();
                 if (totalEncontrados == 1) {
                     throw new InventarioFoundExistException(
-                            "⚠️ El material '" + materialesEncontrados.getFirst().getNombre() +
-                                    "' ya ha sido agregado al inventario de este punto ECA. No puedes agregar el mismo material dos veces."
+                            "El material '" + materialesEncontrados.getFirst().getNombre() +
+                                    "' ya ha sido agregado al inventario de este punto ECA. No se puede agregar el mismo material dos veces."
                     );
                 } else {
                     throw new InventarioFoundExistException(
-                            "⚠️ Todos los " + totalEncontrados +
+                            "Todos los " + totalEncontrados +
                                     " materiales encontrados con esos criterios ya han sido agregados al inventario de este punto ECA. " +
                                     "Intenta con diferentes filtros o busca otros materiales disponibles."
                     );
@@ -169,20 +162,12 @@ public class InventarioDetalleServiceImpl implements InventarioDetalleService {
     }
 
     @Override
-    public List<MaterialInvResponseDTO> buscarMaterialExistentesFiltrandoInventario(UUID puntoId, String texto, String categoria, String tipo) throws InventarioFoundExistException {
+    public List<MaterialInvResponseDTO> buscarMaterialExistentesFiltrandoInventario(UUID puntoId, String texto, String categoria, String tipo) {
 
         // Normalizar valores nulos a strings vacíos
         String textoNormalizado = normalizarParametro(texto);
         String categoriaNormalizada = normalizarParametro(categoria);
         String tipoNormalizado = normalizarParametro(tipo);
-
-        // Validar que al menos un filtro esté presente
-        if (textoNormalizado.trim().isEmpty() && categoriaNormalizada.trim().isEmpty() && tipoNormalizado.trim().isEmpty()) {
-            throw new InventarioFoundExistException(
-                    "⚠️ Debes ingresar al menos un criterio de búsqueda. " +
-                            "Por favor, escribe un nombre, selecciona una categoría o un tipo de material."
-            );
-        }
 
         final String textoNormal = textoNormalizado.toLowerCase();
         final String categoriaNormal = categoriaNormalizada.toLowerCase();

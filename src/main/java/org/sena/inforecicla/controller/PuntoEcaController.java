@@ -403,11 +403,19 @@ public class PuntoEcaController {
             List<MaterialResponseDTO> resultados = inventarioDetalleService.buscarMaterialNuevoFiltrandoInventario(puntoId, texto, categoria, tipo);
             return ResponseEntity.ok(resultados);
         } catch (InventarioFoundExistException e) {
-            // Devolver el mensaje de error de forma legible al frontend
-            return ResponseEntity.badRequest().body(Map.of(
-                    "error", true,
-                    "mensaje", e.getMessage()
-            ));
+            // Si todos los materiales encontrados ya existen en el inventario, en vez de
+            // devolver un error mostramos las coincidencias existentes para que el
+            // frontend las muestre (el usuario pidió ver coincidencias, no bloquear).
+            try {
+                List<MaterialInvResponseDTO> existentes = inventarioDetalleService.buscarMaterialExistentesFiltrandoInventario(puntoId, texto, categoria, tipo);
+                return ResponseEntity.ok(existentes);
+            } catch (Exception ex) {
+                // Si algo falla al obtener los existentes, devolver mensaje de error legible
+                return ResponseEntity.badRequest().body(Map.of(
+                        "error", true,
+                        "mensaje", e.getMessage()
+                ));
+            }
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of(
                     "error", true,
