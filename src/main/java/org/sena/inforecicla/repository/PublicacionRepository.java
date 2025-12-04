@@ -1,22 +1,30 @@
 package org.sena.inforecicla.repository;
 
-
-
 import org.sena.inforecicla.model.Publicacion;
-import org.sena.inforecicla.model.enums.Estado;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.UUID;
 
-public interface PublicacionRepository  extends BaseRepository <Publicacion, UUID>{
+@Repository
+public interface PublicacionRepository extends JpaRepository<Publicacion, UUID> {
 
-    // Buscar publicaciones por su estado (ej: PUBLICADO, BORRADOR)
-    List<Publicacion> findByEstado(Estado estado);
+    List<Publicacion> findByUsuarioId(UUID usuarioId);
 
-    // Buscar todas las publicaciones de un usuario específico
-    // Asumiendo que tu entidad Usuario tiene un campo 'id' o 'usuarioId'
-    List<Publicacion> findByUsuario_UsuarioId(UUID usuarioId);
+    List<Publicacion> findByCategoriaPublicacionId(UUID categoriaId);
 
-    // Buscar publicaciones que contengan cierto texto en el título (Búsqueda simple)
-    List<Publicacion> findByTituloContainingIgnoreCase(String titulo);
+    List<Publicacion> findByEstado(String estado);
+
+    @Query("SELECT p FROM Publicacion p WHERE LOWER(p.titulo) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(p.contenido) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<Publicacion> buscarPorPalabraClave(@Param("keyword") String keyword);
+
+    @Query("SELECT p FROM Publicacion p WHERE p.usuario.usuarioId = :usuarioId AND p.estado = :estado")
+    List<Publicacion> findByUsuarioIdAndEstado(@Param("usuarioId") UUID usuarioId,
+                                               @Param("estado") String estado);
+
+    long countByUsuarioId(UUID usuarioId);
 }

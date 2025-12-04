@@ -25,27 +25,27 @@
                 <ul class="nav nav-pills flex-column gap-2 w-100">
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${(#strings.equals(seccion,'indexPublicacion') or #strings.isEmpty(seccion)) ? 'bg-white text-primary fw-semibold border-start border-4 border-primary rounded-start' : 'text-white'}"
+                           th:classappend="${(#strings.equals(seccion,'indexPublicacion') or #strings.isEmpty(seccion)) ? 'text-white fw-semibold border-start border-4 border-primary rounded-start' : 'text-white'}"
                            th:attr="aria-current=${(#strings.equals(seccion,'indexPublicacion') or #strings.isEmpty(seccion)) ? 'page' : null}"
-                           th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=indexPublicacion'}">Inicio</a>
+                           th:href="@{'/Publicacion/' + ${usuario.usuarioId} + '?seccion=indexPublicacion'}">Inicio</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'listPublicacion') ? 'bg-white text-primary fw-semibold border-start border-4 border-primary rounded-start' : 'text-white'}"
+                           th:classappend="${#strings.equals(seccion,'listPublicacion') ? 'text-white fw-semibold border-start border-4 border-primary rounded-start' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'listPublicacion') ? 'page' : null}"
-                           th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion'}">Mis Publicaciones</a>
+                           th:href="@{'/Publicacion/' + ${usuario.usuarioId} + '?seccion=listPublicacion'}">Mis Publicaciones</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'createPublicacion') ? 'bg-white text-primary fw-semibold border-start border-4 border-primary rounded-start' : 'text-white'}"
+                           th:classappend="${#strings.equals(seccion,'createPublicacion') ? 'text-white fw-semibold border-start border-4 border-primary rounded-start' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'createPublicacion') ? 'page' : null}"
-                           th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=createPublicacion'}">Crear Publicación</a>
+                           th:href="@{'/Publicacion/' + ${usuario.usuarioId} + '?seccion=createPublicacion'}">Crear Publicación</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'categorias') ? 'bg-white text-primary fw-semibold border-start border-4 border-primary rounded-start' : 'text-white'}"
+                           th:classappend="${#strings.equals(seccion,'categorias') ? 'text-white fw-semibold border-start border-4 border-primary rounded-start' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'categorias') ? 'page' : null}"
-                           th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=categorias'}">Categorías</a>
+                           th:href="@{'/Publicacion/' + ${usuario.usuarioId} + '?seccion=categorias'}">Categorías</a>
                     </li>
                 </ul>
             </nav>
@@ -58,7 +58,7 @@
         <!-- Top horizontal nav for small screens -->
         <div class="d-md-none w-100 bg-primary py-2 fixed-top z-3 shadow-sm">
             <div class="d-flex align-items-center justify-content-between px-3">
-                <a class="navbar-brand d-flex align-items-center gap-2 text-white" th:href="@{../Inicio/inicio.html}">
+                <a class="navbar-brand d-flex align-items-center gap-2 text-white" th:href="@{/}">
                     <img th:src="@{/imagenes/logo.png}" src="/imagenes/logo.png" alt="Logo" width="32" height="32"
                          class="rounded">
                     <span class="fw-semibold">InfoRecicla</span>
@@ -68,27 +68,27 @@
                 <ul class="nav nav-pills flex-row gap-2 overflow-auto px-3">
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${(#strings.equals(seccion,'indexPublicacion') or #strings.isEmpty(seccion)) ? 'bg-white text-primary fw-semibold border-bottom border-3 border-primary rounded-bottom' : 'text-white'}"
+                           th:classappend="${(#strings.equals(seccion,'indexPublicacion') or #strings.isEmpty(seccion)) ? 'text-white fw-semibold border-bottom border-3 border-primary rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${(#strings.equals(seccion,'indexPublicacion') or #strings.isEmpty(seccion)) ? 'page' : null}"
-                           th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=indexPublicacion'}">Inicio</a>
+                           th:href="@{'/Publicacion/' + ${usuario.usuarioId} + '?seccion=indexPublicacion'}">Inicio</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'listPublicacion') ? 'bg-white text-primary fw-semibold border-bottom border-3 border-primary rounded-bottom' : 'text-white'}"
+                           th:classappend="${#strings.equals(seccion,'listPublicacion') ? 'text-white fw-semibold border-bottom border-3 border-primary rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'listPublicacion') ? 'page' : null}"
-                           th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion'}">Mis Publicaciones</a>
+                           th:href="@{'/Publicacion/' + ${usuario.usuarioId} + '?seccion=listPublicacion'}">Mis Publicaciones</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'createPublicacion') ? 'bg-white text-primary fw-semibold border-bottom border-3 border-primary rounded-bottom' : 'text-white'}"
+                           th:classappend="${#strings.equals(seccion,'createPublicacion') ? 'text-white fw-semibold border-bottom border-3 border-primary rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'createPublicacion') ? 'page' : null}"
-                           th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=createPublicacion'}">Crear</a>
+                           th:href="@{'/Publicacion/' + ${usuario.usuarioId} + '?seccion=createPublicacion'}">Crear</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'categorias') ? 'bg-white text-primary fw-semibold border-bottom border-3 border-primary rounded-bottom' : 'text-white'}"
-                           th:attr="aria-current=${#strings.equals(seccion,'categorias') ? 'page' : null}"
-                           th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=categorias'}">Categorías</a>
+                           th:classappend="${#strings.equals(seccion,'indexCategoriaPublicacion') ? 'text-white fw-semibold border-bottom border-3 border-primary rounded-bottom' : 'text-white'}"
+                           th:attr="aria-current=${#strings.equals(seccion,'indexCategoriaPublicacion') ? 'page' : null}"
+                           th:href="@{'/Publicacion/' + ${usuario.usuarioId} + '?seccion=indexCategoriaPublicacion'}">Categorías</a>
                     </li>
                 </ul>
             </nav>
@@ -97,12 +97,12 @@
         <!-- Main content -->
         <main class="col offset-md-2 p-4 pt-5 pt-md-0">
             <div th:switch="${#strings.isEmpty(seccion) ? 'indexPublicacion' : seccion}">
-                <div th:case="'indexPublicacion'" th:insert="~{views/Publicaciones/section-indexPublicacion :: indexPublicacion}"></div>
-                <div th:case="'listPublicacion'" th:insert="~{views/Publicaciones/section-listPublicacion :: listPublicacion}"></div>
-                <div th:case="'createPublicacion'" th:insert="~{views/Publicaciones/section-createPublicacion :: createPublicacion}"></div>
-                <div th:case="'editPublicacion'" th:insert="~{views/Publicaciones/section-editPublicacion :: editPublicacion}"></div>
-                <div th:case="'showPublicacion'" th:insert="~{views/Publicaciones/section-showPublicacion :: showPublicacion}"></div>
-                <div th:case="'categorias'" th:insert="~{views/Publicaciones/section-categorias :: categorias}"></div>
+                <div th:case="'indexPublicacion'" th:insert="~{views/Publicacion/section-indexPublicacion :: indexPublicacion}"></div>
+                <div th:case="'listPublicacion'" th:insert="~{views/Publicacion/section-listPublicacion :: listPublicacion}"></div>
+                <div th:case="'createPublicacion'" th:insert="~{views/Publicacion/section-createPublicacion :: createPublicacion}"></div>
+                <div th:case="'editPublicacion'" th:insert="~{views/Publicacion/section-editPublicacion :: editPublicacion}"></div>
+                <div th:case="'showPublicacion'" th:insert="~{views/Publicacion/section-showPublicacion :: showPublicacion}"></div>
+                <div th:case="'indexCategoriaPublicacion'" th:insert="~{views/Admin/section-indexCategoriaPublicacion :: indexCategoriaPublicacion}"></div>
                 <div th:case="*" class="text-center text-muted">Sección no encontrada.</div>
             </div>
         </main>
