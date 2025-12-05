@@ -38,6 +38,6 @@ public class PublicacionesMultimedia extends EntidadCreacionModificacion {
 
     @ManyToOne
     @JoinColumn(name = "publicacion_id", nullable = false)
-    private Publicaciones publicacion;
+    private Publicacion publicacion;
 
 }

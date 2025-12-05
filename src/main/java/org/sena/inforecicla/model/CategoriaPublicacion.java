@@ -28,9 +28,9 @@ public class CategoriaPublicacion extends EntidadDescripcion {
 
     @Id
     @GeneratedValue
-    @Column(name = "categoiraPublicacionId", unique = true, nullable = false)
-    private UUID categoiraPublicacionId;
+    @Column(name = "categoria_publicacion_id", unique = true, nullable = false)
+    private UUID categoriaPublicacionId;
 
-    @OneToMany(mappedBy = "ctgPublicacion")
+    @OneToMany(mappedBy = "categoriaPublicacion")
     private List<Publicacion> publicaciones;
 }
