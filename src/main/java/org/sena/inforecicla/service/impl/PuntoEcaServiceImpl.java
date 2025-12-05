@@ -2,6 +2,7 @@ package org.sena.inforecicla.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.sena.inforecicla.model.PuntoECA;
+import org.sena.inforecicla.model.enums.Estado;
 import org.sena.inforecicla.repository.PuntoEcaRepository;
 import org.sena.inforecicla.service.PuntoEcaService;
 import org.springframework.stereotype.Service;
@@ -21,8 +22,8 @@ public class PuntoEcaServiceImpl implements PuntoEcaService {
     }
 
     @Override
-    public Optional<PuntoECA> mostrarPuntoEca(UUID puntoId) {
-        return buscarPuntoEca(puntoId);
+    public Optional<PuntoECA> buscarPuntoEcaEstado(UUID puntoId, Estado estado) {
+        return puntoEcaRepository.findByPuntoEcaIDAndEstado(puntoId, estado);
     }
 }
 

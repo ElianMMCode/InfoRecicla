@@ -1,80 +1,2002 @@
 <!-- Fragment: Movimientos -->
-<section th:fragment="movimientos" class="container py-4">
-    <h2 class="h5 mb-3">Movimientos</h2>
-    <div class="row g-4">
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header bg-success text-white"><strong>Registrar ENTRADA</strong></div>
-                <div class="card-body">
-                    <p class="small text-muted mb-2">Selecciona material y cantidad de entrada.</p>
-                    <div class="mb-2">
-                        <label class="form-label small" for="entradaMaterial">Material</label>
-                        <select id="entradaMaterial" class="form-select form-select-sm">
-                            <option selected>Selecciona...</option>
-                            <option>Ejemplo</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small" for="entradaCantidad">Cantidad</label>
-                        <input id="entradaCantidad" type="number" step="0.01" class="form-control form-control-sm" placeholder="0.00">
-                    </div>
-                    <button type="button" class="btn btn-success btn-sm" disabled aria-disabled="true">Guardar entrada</button>
+<section th:fragment="movimientos" class="py-4"
+         th:data-gestor="${gestor}"
+         th:data-usuario-id="${usuario.usuarioId}"
+         th:data-punto-eca-id="${puntoEcaId}">
+    <!-- Título principal -->
+    <div class="mb-4">
+        <h2 class="h4 fw-bold text-dark mb-1">
+            <i class="bi bi-arrow-left-right me-2"></i>Gestión de Movimientos de Inventario
+        </h2>
+        <p class="text-muted small mb-0">Registra y consulta entradas y salidas de materiales en el centro de acopio</p>
+    </div>
+    <!-- ═════════════════════════════════════════════════════════════ -->
+    <!-- SECCIÓN 1: BARRA DE BÚSQUEDA Y SELECCIÓN DE MATERIAL -->
+    <!-- ═════════════════════════════════════════════════════════════ -->
+    <div class="card shadow-sm mb-4" id="seccionBusquedaMaterial">
+        <div class="card-header bg-primary-subtle border-0 px-4 py-3">
+            <h6 class="mb-0 fw-bold text-primary">
+                <i class="bi bi-search me-2"></i>Seleccionar Material para Registrar Movimiento
+            </h6>
+        </div>
+        <div class="card-body">
+            <!-- Barra de búsqueda con Select2 -->
+            <div class="row g-3 mb-4">
+                <div class="col-12">
+                    <label class="form-label fw-semibold text-muted mb-1" for="buscarMaterialMovimientos">Buscar Material</label>
+                    <select id="buscarMaterialMovimientos" class="form-control js-example-tags form-control-lg border-2 border-primary"
+                            style="width: 100%;" aria-label="Buscar material">
+                        <option></option>
+                    </select>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header bg-danger text-white"><strong>Registrar SALIDA</strong></div>
-                <div class="card-body">
-                    <p class="small text-muted mb-2">Selecciona material y cantidad de salida.</p>
-                    <div class="mb-2">
-                        <label class="form-label small" for="salidaMaterial">Material</label>
-                        <select id="salidaMaterial" class="form-select form-select-sm">
-                            <option selected>Selecciona...</option>
-                            <option>Ejemplo</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small" for="salidaCantidad">Cantidad</label>
-                        <input id="salidaCantidad" type="number" step="0.01" class="form-control form-control-sm" placeholder="0.00">
-                    </div>
-                    <button type="button" class="btn btn-danger btn-sm" disabled aria-disabled="true">Guardar salida</button>
+            <!-- Filtros: Categoría, Tipo y Botones en una fila -->
+            <div class="row g-3 align-items-end mb-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold text-muted mb-1" for="selectCategoriaMov">Categoría</label>
+                    <select id="selectCategoriaMov" class="form-select border-2 border-primary js-select2-categoria-mov" style="width: 100%;">
+                        <option value="">-- Ninguno --</option>
+                        <th:block th:if="${not #lists.isEmpty(categoriaMateriales)}">
+                            <option th:each="cat : ${categoriaMateriales}"
+                                    th:value="${cat.nmbCategoria}"
+                                    th:text="${cat.nmbCategoria}">
+                                Categoría
+                            </option>
+                        </th:block>
+                    </select>
                 </div>
-            </div>
-        </div>
-        <div class="col-12">
-            <div class="card mt-2">
-                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                    <strong>Últimos movimientos</strong>
-                    <span class="small text-light">0 registros</span>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold text-muted mb-1" for="selectTipoMov">Tipo</label>
+                    <select id="selectTipoMov" class="form-select border-2 border-primary js-select2-tipo-mov" style="width: 100%;">
+                        <option value="">-- Ninguno --</option>
+                        <th:block th:if="${not #lists.isEmpty(tiposMateriales)}">
+                            <option th:each="tipo : ${tiposMateriales}"
+                                    th:value="${tipo.nmbCategoria}"
+                                    th:text="${tipo.nmbCategoria}">
+                                Tipo
+                            </option>
+                        </th:block>
+                    </select>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm align-middle table-hover mb-0">
-                            <thead class="bg-success text-white small">
-                                <tr>
-                                    <th scope="col" style="width:110px;">Fecha</th>
-                                    <th scope="col" style="width:90px;">Tipo</th>
-                                    <th scope="col" style="min-width:140px;">Material</th>
-                                    <th scope="col" class="text-end" style="width:120px;">Cantidad</th>
-                                    <th scope="col" style="width:70px;">Unidad</th>
-                                    <th scope="col" class="text-end" style="width:100px;">Precio</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="table-success-subtle">
-                                    <td>—</td>
-                                    <td><span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle">Entrada</span></td>
-                                    <td class="fw-semibold">—</td>
-                                    <td class="text-end">0</td>
-                                    <td>kg</td>
-                                    <td class="text-end">0</td>
-                                </tr>
-                            </tbody>
-                        </table>
+
+                <div class="col-md-4">
+                    <div class="d-flex gap-2">
+                        <!-- Botón Buscar eliminado: la búsqueda se hace automáticamente con Select2 y filtros -->
+                        <button id="btnLimpiarBusquedaMov" class="btn btn-outline-secondary flex-grow-1 fw-semibold" type="button">
+                            <i class="bi bi-eraser me-1"></i>Limpiar
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <!-- MODAL: RESULTADOS DE BÚSQUEDA -->
+    <div class="modal fade" id="buscarMaterialMovimientosModal" tabindex="-1" aria-labelledby="buscarMaterialMovimientosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="buscarMaterialMovimientosLabel">
+                        <i class="bi bi-search me-2"></i>Selecciona un Material
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info mb-3">
+                        <strong>Filtros aplicados:</strong>
+                        <div class="mt-2">
+                            <span class="badge bg-info-subtle text-info">Texto: <strong id="resumenMaterialTexto">Sin filtro</strong></span>
+                            <span class="badge bg-info-subtle text-info ms-2">Categoría: <strong id="resumenMaterialCategoria">Sin filtro</strong></span>
+                            <span class="badge bg-info-subtle text-info ms-2">Tipo: <strong id="resumenMaterialTipo">Sin filtro</strong></span>
+                        </div>
+                    </div>
+                    <div id="estadoBusquedaMov" class="text-center text-muted py-4 mb-3">
+                        <i class="bi bi-search display-6 d-block mb-2"></i>
+                        <p class="mb-0">Buscando materiales...</p>
+                    </div>
+                    <div id="resultadosBusquedaMov" class="list-group">
+                        <!-- Los resultados se renderizarán aquí -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ═════════════════════════════════════════════════════════════ -->
+    <!-- ACORDEÓN PRINCIPAL -->
+    <!-- ═════════════════════════════════════════════════════════════ -->
+    <div class="accordion accordion-flush shadow-sm" id="movimientosAccordion">
+        <!-- ITEM 1: ENTRADAS DE MATERIAL -->
+        <div class="accordion-item border-start border-5 border-success">
+            <h2 class="accordion-header" id="headingEntradas">
+                <button class="accordion-button fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEntradas">
+                    <span class="bg-success p-2 rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-arrow-down text-white"></i>
+                    </span>
+                    <span>
+                        <span class="fw-bold text-dark d-block">Entradas de Material</span>
+                        <small class="text-muted fw-normal">Registra la entrada de materiales reciclables al inventario</small>
+                    </span>
+                </button>
+            </h2>
+            <div id="collapseEntradas" class="accordion-collapse collapse" data-bs-parent="#movimientosAccordion">
+                <div class="accordion-body p-4 bg-light">
+                    <!-- Formulario de entrada -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-success-subtle border-0 px-4 py-3">
+                            <h6 class="mb-0 fw-bold text-success">Registrar Nueva Entrada</h6>
+                        </div>
+                        <div class="card-body" id="formEntradaContainer" style="display: none;">
+                            <form id="formEntrada" class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Material <span class="text-danger">*</span></label>
+                                    <input id="entradaMaterialSeleccionado" type="text" class="form-control form-control-sm" readonly required>
+                                    <input id="entradaMaterialId" type="hidden">
+                                    <input id="entradaInventarioId" type="hidden">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Tipo</label>
+                                    <input id="entradaMaterialTipo" type="text" class="form-control form-control-sm bg-light" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Categoría</label>
+                                    <input id="entradaMaterialCategoria" type="text" class="form-control form-control-sm bg-light" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Descripción</label>
+                                    <input id="entradaMaterialDescripcion" type="text" class="form-control form-control-sm bg-light" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Unidad de Medida</label>
+                                    <input id="entradaMaterialUnidad" type="text" class="form-control form-control-sm bg-light" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Stock Actual</label>
+                                    <input id="entradaStockActual" type="number" step="0.01" class="form-control form-control-sm bg-light" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Capacidad Máxima</label>
+                                    <input id="entradaCapacidadMaxima" type="number" step="0.01" class="form-control form-control-sm bg-light" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Cantidad a Agregar (kg) <span class="text-danger">*</span></label>
+                                    <input id="entradaCantidad" name="cantidad" type="number" step="0.01" min="0" class="form-control form-control-sm border-primary border-2" placeholder="0.00" required>
+                                    <small class="text-muted d-block mt-1">Stock después: <strong id="entradaStockResultante">-</strong></small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Fecha <span class="text-danger">*</span></label>
+                                    <input id="entradaFecha" type="datetime-local" class="form-control form-control-sm border-primary border-2" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Precio de Compra Unitario (COP) <span class="text-danger">*</span></label>
+                                    <input id="entradaPrecioCompra" type="number" step="0.01" min="0" class="form-control form-control-sm border-primary border-2" placeholder="0.00" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold small">Observaciones</label>
+                                    <textarea id="entradaObservaciones" class="form-control form-control-sm border-primary border-2" rows="2" placeholder="Notas adicionales..."></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-success btn-sm fw-semibold">
+                                        <i class="bi bi-check-circle me-2"></i>Guardar Entrada
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm fw-semibold" onclick="cambiarMaterial()">
+                                        <i class="bi bi-arrow-counterclockwise me-2"></i>Cambiar Material
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Filtros -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-light border-0 px-4 py-3">
+                            <h6 class="mb-0 fw-bold text-dark">
+                                <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form class="row g-3" id="filtrosFormEntradas">
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Material</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="Buscar material...">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Desde</label>
+                                    <input type="date" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Hasta</label>
+                                    <input type="date" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">&nbsp;</label>
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary btn-sm fw-semibold flex-grow-1">
+                                            <i class="bi bi-search me-1"></i>Filtrar
+                                        </button>
+                                        <button type="reset" class="btn btn-outline-secondary btn-sm fw-semibold">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Tabla de entradas -->
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light border-0 px-4 py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold text-dark">Historial de Entradas</h6>
+                            <span class="badge bg-success rounded-pill" id="badgeEntradasCount">0 registros</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th scope="col" class="fw-bold small">Fecha</th>
+                                        <th scope="col" class="fw-bold small">Material</th>
+                                        <th scope="col" class="fw-bold small text-end">Cantidad (kg)</th>
+                                        <th scope="col" class="fw-bold small text-end">Precio Unit.</th>
+                                        <th scope="col" class="fw-bold small">Observaciones</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="border-top" id="tablasEntradasBody">
+                                    <tr class="text-muted text-center">
+                                        <td colspan="5" class="py-3"><small>Sin registros</small></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light border-top px-4 py-3">
+                            <nav aria-label="Paginación entradas">
+                                <ul class="pagination pagination-sm mb-0 justify-content-center" id="paginacionEntradas">
+                                    <li class="page-item disabled"><a class="page-link" href="#">Anterior</a></li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">Siguiente</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ITEM 2: SALIDAS DE MATERIAL -->
+        <div class="accordion-item border-start border-5 border-danger">
+            <h2 class="accordion-header" id="headingSalidas">
+                <button class="accordion-button fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSalidas">
+                    <span class="bg-danger p-2 rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-arrow-up text-white"></i>
+                    </span>
+                    <span>
+                        <span class="fw-bold text-dark d-block">Salidas de Material</span>
+                        <small class="text-muted fw-normal">Registra la salida de materiales reciclables del inventario</small>
+                    </span>
+                </button>
+            </h2>
+            <div id="collapseSalidas" class="accordion-collapse collapse" data-bs-parent="#movimientosAccordion">
+                <div class="accordion-body p-4 bg-light">
+                    <!-- Formulario de salida -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-danger-subtle border-0 px-4 py-3">
+                            <h6 class="mb-0 fw-bold text-danger">Registrar Nueva Salida</h6>
+                        </div>
+                        <div class="card-body" id="formSalidaContainer" style="display: none;">
+                            <form id="formSalida" class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Material <span class="text-danger">*</span></label>
+                                    <input id="salidaMaterialSeleccionado" type="text" class="form-control form-control-sm" readonly required>
+                                    <input id="salidaMaterialId" type="hidden">
+                                    <input id="salidaInventarioId" type="hidden">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Tipo</label>
+                                    <input id="salidaMaterialTipo" type="text" class="form-control form-control-sm bg-light" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Categoría</label>
+                                    <input id="salidaMaterialCategoria" type="text" class="form-control form-control-sm bg-light" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Descripción</label>
+                                    <input id="salidaMaterialDescripcion" type="text" class="form-control form-control-sm bg-light" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Unidad de Medida</label>
+                                    <input id="salidaMaterialUnidad" type="text" class="form-control form-control-sm bg-light" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Stock Actual (NO EDITABLE)</label>
+                                    <input id="salidaStockActual" type="number" step="0.01" class="form-control form-control-sm bg-secondary bg-opacity-10" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Capacidad Máxima</label>
+                                    <input id="salidaCapacidadMaxima" type="number" step="0.01" class="form-control form-control-sm bg-light" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Cantidad a Descontar (kg) <span class="text-danger">*</span></label>
+                                    <input id="salidaCantidad" name="cantidad" type="number" step="0.01" min="0" class="form-control form-control-sm border-danger border-2" placeholder="0.00" required>
+                                    <small class="text-muted d-block mt-1">Stock restante: <strong id="salidaStockRestante" class="text-danger">-</strong></small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Fecha <span class="text-danger">*</span></label>
+                                    <input id="salidaFecha" type="datetime-local" class="form-control form-control-sm border-danger border-2" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Precio de Venta Unitario (COP) <span class="text-danger">*</span></label>
+                                    <input id="salidaPrecioVenta" type="number" step="0.01" min="0" class="form-control form-control-sm border-danger border-2" placeholder="0.00" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Centro de Acopio</label>
+                                    <select id="salidaCentroAcopio" class="form-select form-select-sm border-danger border-2 js-select2-centro-acopio" style="width: 100%;" required>
+                                        <option value="">Selecciona un centro...</option>
+                                        <th:block th:if="${not #lists.isEmpty(centrosAcopio)}">
+                                            <option th:each="centro : ${centrosAcopio}"
+                                                    th:value="${centro.cntAcpId}"
+                                                    th:text="${centro.nombreCntAcp}">
+                                                Centro de Acopio
+                                            </option>
+                                        </th:block>
+                                        <th:block th:if="${#lists.isEmpty(centrosAcopio)}">
+                                            <option disabled>No hay centros disponibles</option>
+                                        </th:block>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold small">Observaciones</label>
+                                    <textarea id="salidaObservaciones" class="form-control form-control-sm border-danger border-2" rows="2" placeholder="Notas adicionales..."></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-danger btn-sm fw-semibold">
+                                        <i class="bi bi-check-circle me-2"></i>Guardar Salida
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm fw-semibold" onclick="cambiarMaterial()">
+                                        <i class="bi bi-arrow-counterclockwise me-2"></i>Cambiar Material
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Filtros -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-light border-0 px-4 py-3">
+                            <h6 class="mb-0 fw-bold text-dark">
+                                <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form class="row g-3" id="filtrosFormSalidas">
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Material</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="Buscar material...">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Desde</label>
+                                    <input type="date" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Hasta</label>
+                                    <input type="date" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">&nbsp;</label>
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary btn-sm fw-semibold flex-grow-1">
+                                            <i class="bi bi-search me-1"></i>Filtrar
+                                        </button>
+                                        <button type="reset" class="btn btn-outline-secondary btn-sm fw-semibold">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Tabla de salidas -->
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light border-0 px-4 py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold text-dark">Historial de Salidas</h6>
+                            <span class="badge bg-danger rounded-pill" id="badgeSalidasCount">0 registros</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th scope="col" class="fw-bold small">Fecha</th>
+                                        <th scope="col" class="fw-bold small">Material</th>
+                                        <th scope="col" class="fw-bold small text-end">Cantidad (kg)</th>
+                                        <th scope="col" class="fw-bold small text-end">Precio Unit.</th>
+                                        <th scope="col" class="fw-bold small">Centro Acopio</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="border-top" id="tablasSalidasBody">
+                                    <tr class="text-muted text-center">
+                                        <td colspan="5" class="py-3"><small>Sin registros</small></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light border-top px-4 py-3">
+                            <nav aria-label="Paginación salidas">
+                                <ul class="pagination pagination-sm mb-0 justify-content-center" id="paginacionSalidas">
+                                    <li class="page-item disabled"><a class="page-link" href="#">Anterior</a></li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">Siguiente</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ITEM 3: HISTORIAL GENERAL -->
+        <div class="accordion-item border-start border-5 border-secondary">
+            <h2 class="accordion-header" id="headingHistorial">
+                <button class="accordion-button fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHistorial">
+                    <span class="bg-secondary p-2 rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-search text-white"></i>
+                    </span>
+                    <span>
+                        <span class="fw-bold text-dark d-block">Historial General de Movimientos</span>
+                        <small class="text-muted fw-normal">Busca y filtra todos los movimientos registrados</small>
+                    </span>
+                </button>
+            </h2>
+            <div id="collapseHistorial" class="accordion-collapse collapse" data-bs-parent="#movimientosAccordion">
+                <div class="accordion-body p-4 bg-light">
+                    <!-- Filtros -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-light border-0 px-4 py-3">
+                            <h6 class="mb-0 fw-bold text-dark">
+                                <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form class="row g-3" id="filtrosFormHistorial">
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Material</label>
+                                    <input type="text" class="form-control form-control-sm" placeholder="Buscar material...">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Tipo de Movimiento</label>
+                                    <select class="form-select form-select-sm">
+                                        <option value="">Todos</option>
+                                        <option value="entrada">Entradas</option>
+                                        <option value="salida">Salidas</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Desde</label>
+                                    <input type="date" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Hasta</label>
+                                    <input type="date" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary btn-sm fw-semibold">
+                                        <i class="bi bi-search me-2"></i>Buscar
+                                    </button>
+                                    <button type="reset" class="btn btn-outline-secondary btn-sm fw-semibold">
+                                        <i class="bi bi-arrow-counterclockwise me-2"></i>Limpiar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Tabla general -->
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light border-0 px-4 py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold text-dark">Todos los Movimientos</h6>
+                            <span class="badge bg-secondary rounded-pill" id="badgeHistorialCount">0 registros</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th scope="col" class="fw-bold small">Fecha</th>
+                                        <th scope="col" class="fw-bold small">Tipo</th>
+                                        <th scope="col" class="fw-bold small">Material</th>
+                                        <th scope="col" class="fw-bold small text-end">Cantidad (kg)</th>
+                                        <th scope="col" class="fw-bold small text-end">Precio Unit.</th>
+                                        <th scope="col" class="fw-bold small">Detalles</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="border-top" id="tablasHistorialBody">
+                                    <tr class="text-muted text-center">
+                                        <td colspan="6" class="py-4">
+                                            <i class="bi bi-inbox"></i>
+                                            <p class="mb-0 mt-2">Sin movimientos registrados</p>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light border-top px-4 py-3">
+                            <nav aria-label="Paginación historial">
+                                <ul class="pagination pagination-sm mb-0 justify-content-center" id="paginacionHistorial">
+                                    <li class="page-item disabled"><a class="page-link" href="#">Anterior</a></li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">Siguiente</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- FIN DEL ACORDEÓN -->
+
+    <!-- SELECT2 ASSETS (jQuery + Select2 CSS/JS con tema Bootstrap4) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- SCRIPT INLINE PARA BÚSQUEDA Y SELECCIÓN DE MATERIALES -->
+    <script>
+        (function() {
+            console.log('Script inline de movimientos ejecutándose...');
+
+            // Función helper para mostrar estado de búsqueda en el modal (no-op seguro si no existe el elemento)
+            function mostrarEstadoBusquedaMov(state) {
+                try {
+                    var estadoEl = document.getElementById('estadoBusquedaMov');
+                    if (!estadoEl) return;
+                    if (state === 'idle') {
+                        estadoEl.innerHTML = '<i class="bi bi-search display-6 d-block mb-2"></i><p class="mb-0">Buscando materiales...</p>';
+                        estadoEl.style.display = '';
+                    } else if (state === 'loading') {
+                        estadoEl.innerHTML = '<div class="d-flex flex-column align-items-center"><div class="spinner-border text-primary mb-3" role="status"></div><p class="mb-0">Buscando materiales...</p></div>';
+                        estadoEl.style.display = '';
+                    } else if (state === 'error') {
+                        estadoEl.innerHTML = '<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-exclamation-octagon me-2"></i>Error de búsqueda</div>';
+                        estadoEl.style.display = '';
+                    } else if (state === 'hidden') {
+                        estadoEl.style.display = 'none';
+                    }
+                } catch (e) {
+                    // no crítico
+                }
+            }
+
+            // Esperar a que jQuery y Select2 estén listos
+            function inicializarSelect2() {
+                if (typeof $ === 'undefined' || typeof $.fn.select2 === 'undefined') {
+                    console.warn('Select2 o jQuery no disponibles, reintentando...');
+                    setTimeout(inicializarSelect2, 100);
+                    return;
+                }
+
+                console.log('jQuery y Select2 disponibles');
+
+                const puntoEcaSection = document.querySelector('section[data-usuario-id]');
+                const usuarioId = puntoEcaSection?.dataset.usuarioId;
+                const puntoEcaId = puntoEcaSection?.dataset.puntoEcaId;
+                const gestor = puntoEcaSection?.dataset.gestor;
+
+                const inputBusqueda = document.getElementById('buscarMaterialMovimientos');
+                const btnLimpiar = document.getElementById('btnLimpiarBusquedaMov');
+                const modalBusqueda = document.getElementById('buscarMaterialMovimientosModal');
+                const resultadosDiv = document.getElementById('resultadosBusquedaMov');
+                const estadoDiv = document.getElementById('estadoBusquedaMov');
+
+                console.log('✓ Variables inicializadas - Usuario:', usuarioId, 'PuntoECA:', puntoEcaId, 'Gestor:', gestor);
+
+                // ========================================================
+                // INICIALIZAR SELECT2 EN BUSCAR MATERIAL (AJAX)
+                // ========================================================
+                var $buscarMaterial = $(inputBusqueda);
+                if ($buscarMaterial.length) {
+                    console.log('Encontrado #buscarMaterialMovimientos');
+
+                    // Obtener endpoint y puntoId
+                    var endpoint = '/punto-eca/catalogo/materiales/buscar';
+                    var puntoId = puntoEcaId; // Ya está disponible en el data attribute
+
+                    console.log('Endpoint:', endpoint);
+                    console.log('PuntoId:', puntoId);
+
+                    $buscarMaterial.select2({
+                        theme: 'bootstrap4',
+                        width: '100%',
+                        placeholder: 'Nombre, código, categoría...',
+                        minimumInputLength: 0,
+                        allowClear: true,
+                        ajax: {
+                            url: endpoint,
+                            dataType: 'json',
+                            delay: 300,
+                            data: function(params) {
+                                var searchTerm = params.term || '';
+
+                                // Obtener categoría y tipo desde los Select2
+                                var categoria = $('#selectCategoriaMov').val() || '';
+                                var tipo = $('#selectTipoMov').val() || '';
+
+                                console.log('Buscando:', searchTerm || 'SIN FILTRO - TRAER TODOS');
+                                console.log('Categoria:', categoria || 'Sin filtro');
+                                console.log('Tipo:', tipo || 'Sin filtro');
+
+                                // Construir objeto de datos para enviar
+                                var requestData = {
+                                    texto: searchTerm,      // Puede estar vacío
+                                    puntoId: puntoId
+                                };
+
+                                // Solo agregar categoria si está seleccionada
+                                if (categoria) {
+                                    requestData.categoria = categoria;
+                                }
+
+                                // Solo agregar tipo si está seleccionado
+                                if (tipo) {
+                                    requestData.tipo = tipo;
+                                }
+
+                                console.log('Enviando al backend:', requestData);
+
+                                return requestData;
+                            },
+                            processResults: function(data, params) {
+                                console.log('Respuesta AJAX recibida:', data);
+
+                                // Si la respuesta es un error, mostrar el mensaje
+                                if (data.error) {
+                                    console.error('Error del backend:', data.mensaje);
+                                    return { results: [] };
+                                }
+
+                                if (!Array.isArray(data)) {
+                                    console.warn('La respuesta no es un array, conviriendo...');
+                                    data = [];
+                                }
+
+                                console.log('Total de resultados:', data.length);
+
+                                var results = data.map(function(m) {
+                                    console.log('Procesando material:', m.nmbMaterial);
+                                    return {
+                                        id: m.materialId || m.id || '',
+                                        text: m.nmbMaterial || m.nombre || 'Material sin nombre',
+                                        // Guardar atributos extra en el elemento para acceso en templateResult
+                                        element: $('<option>')
+                                            .attr('data-imagen', m.imagenUrl || '/imagenes/materiales.png')
+                                            .attr('data-tipo', m.nmbTipo || '')
+                                            .attr('data-categoria', m.nmbCategoria || '')[0],
+                                        data: m
+                                    };
+                                });
+
+                                return { results: results };
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error AJAX:', error);
+                                console.error('Status:', status);
+                                console.error('Response:', xhr.responseText);
+                            },
+                            cache: false  // Desabilitar cache para debugging
+                        },
+                        templateResult: function(data) {
+                            if (data.loading) return data.text;
+                            if (!data.id) return data.text;
+
+                            // Obtener datos del elemento
+                            var imagenUrl = data.element?.getAttribute('data-imagen') || '/imagenes/materiales.png';
+                            var nmbTipo = data.element?.getAttribute('data-tipo') || '';
+                            var nmbCategoria = data.element?.getAttribute('data-categoria') || '';
+
+                            // Construir elemento HTML con imagen
+                            var $state = $(
+                                '<span class="select2-state"><img alt="imagen material" class="img-material-select2" style="width: 24px; height: 24px; margin-right: 8px; border-radius: 4px; object-fit: cover;" /> ' +
+                                '<span class="state-text"></span>' +
+                                '<small class="state-meta" style="margin-left: 4px; color: #999; font-size: 0.85em;"></small></span>'
+                            );
+
+                            // Usar .text() para evitar inyecciones
+                            $state.find(".state-text").text(data.text || 'Material sin nombre');
+                            $state.find("img").attr("src", imagenUrl);
+
+                            // Agregar badges de tipo y categoría si están disponibles
+                            if (nmbTipo || nmbCategoria) {
+                                var metaText = [];
+                                if (nmbTipo) metaText.push(nmbTipo);
+                                if (nmbCategoria) metaText.push(nmbCategoria);
+                                $state.find(".state-meta").text('(' + metaText.join(' • ') + ')');
+                            }
+
+                            return $state;
+                        },
+                        templateSelection: function(data) {
+                            if (!data.id) return data.text;
+                            return data.text;
+                        }
+                    });
+
+                    // Helper: Aplica un DTO de material a los campos de ENTRADA y SALIDA
+                    function applyMaterialToForms(m) {
+                        console.log('applyMaterialToForms -> DTO recibido:', m);
+                        try { window.lastMaterialSeleccionado = m; } catch (e) { /* no crítico */ }
+                        if (!m) return;
+
+                        // Normalizar campos posibles de MaterialResponseDTO y MaterialInvResponseDTO
+                        var materialId = m.materialId || m.id || (m.material && m.material.materialId) || '';
+                        var materialNombre = m.nmbMaterial || m.nombre || m.text || '';
+                        var materialTipo = m.nmbTipo || m.tipo || '';
+                        var materialCategoria = m.nmbCategoria || m.categoria || '';
+                        var materialDescripcion = m.dscMaterial || m.descripcion || '';
+
+                        // unidad puede venir como string o como objeto {nombre, clave}
+                        var unidad = '';
+                        if (m.unidadMedida !== undefined && m.unidadMedida !== null) {
+                            if (typeof m.unidadMedida === 'string') {
+                                unidad = m.unidadMedida;
+                            } else if (typeof m.unidadMedida === 'object') {
+                                unidad = m.unidadMedida.nombre || m.unidadMedida.clave || '';
+                            } else {
+                                unidad = String(m.unidadMedida || '');
+                            }
+                        } else if (m.unidad !== undefined && m.unidad !== null) {
+                            unidad = m.unidad;
+                        }
+
+                        var stockActual = (m.stockActual !== undefined && m.stockActual !== null && m.stockActual !== '') ? parseFloat(m.stockActual) : null;
+                        var capacidadMax = (m.capacidadMaxima !== undefined && m.capacidadMaxima !== null && m.capacidadMaxima !== '') ? parseFloat(m.capacidadMaxima) : null;
+                        var precioCompra = (m.precioCompra !== undefined && m.precioCompra !== null && m.precioCompra !== '') ? parseFloat(m.precioCompra) : null;
+                        var precioVenta = (m.precioVenta !== undefined && m.precioVenta !== null && m.precioVenta !== '') ? parseFloat(m.precioVenta) : null;
+
+                        // Inner helper que realmente asigna los valores al DOM
+                        function setFields(res) {
+                            try {
+                                console.log('setFields INICIADO con:', res);
+                                try { window.lastMaterialAplicado = res; } catch(e) {}
+
+                                // Extraer inventarioId del DTO
+                                var inventarioId = (res && res.inventarioId) || (m && m.inventarioId) || '';
+                                console.log('inventarioId extraído:', inventarioId);
+
+                                // Priorizar valores que vienen en 'res' (mergeado) y fallback a variables previamente calculadas
+                                var appliedMaterialNombre = (res && (res.nmbMaterial || res.nombre || res.text)) || materialNombre || '';
+                                var appliedMaterialTipo = (res && (res.nmbTipo || res.tipo)) || materialTipo || '';
+                                var appliedMaterialCategoria = (res && (res.nmbCategoria || res.categoria)) || materialCategoria || '';
+                                var appliedMaterialDescripcion = (res && (res.dscMaterial || res.descripcion)) || materialDescripcion || '';
+
+                                // Normalizar appliedUnidad si res contiene unidadMedida
+                                var appliedUnidad = unidad || '';
+                                if (res && res.unidadMedida !== undefined && res.unidadMedida !== null) {
+                                    if (typeof res.unidadMedida === 'string') {
+                                        appliedUnidad = res.unidadMedida;
+                                    } else if (typeof res.unidadMedida === 'object') {
+                                        appliedUnidad = res.unidadMedida.nombre || res.unidadMedida.clave || unidad || '';
+                                    } else {
+                                        appliedUnidad = String(res.unidadMedida || unidad || '');
+                                    }
+                                }
+
+                                console.log('Valores normalizados:', {
+                                    nombre: appliedMaterialNombre,
+                                    tipo: appliedMaterialTipo,
+                                    categoria: appliedMaterialCategoria,
+                                    unidad: appliedUnidad,
+                                    stock: (res && res.stockActual),
+                                    capacidad: (res && res.capacidadMaxima),
+                                    precioCompra: (res && res.precioCompra),
+                                    precioVenta: (res && res.precioVenta)
+                                });
+
+                                var inputEntrada = document.getElementById('entradaMaterialSeleccionado');
+                                var idEntrada = document.getElementById('entradaMaterialId');
+                                var tipoEntrada = document.getElementById('entradaMaterialTipo');
+                                var categoriaEntrada = document.getElementById('entradaMaterialCategoria');
+                                var descripcionEntrada = document.getElementById('entradaMaterialDescripcion');
+                                var unidadEntrada = document.getElementById('entradaMaterialUnidad');
+                                var stockActualEntrada = document.getElementById('entradaStockActual');
+                                var capacidadMaxEntrada = document.getElementById('entradaCapacidadMaxima');
+                                var precioCompraEntrada = document.getElementById('entradaPrecioCompra');
+
+                                var inputSalida = document.getElementById('salidaMaterialSeleccionado');
+                                var idSalida = document.getElementById('salidaMaterialId');
+                                var tipoSalida = document.getElementById('salidaMaterialTipo');
+                                var categoriaSalida = document.getElementById('salidaMaterialCategoria');
+                                var descripcionSalida = document.getElementById('salidaMaterialDescripcion');
+                                var unidadSalida = document.getElementById('salidaMaterialUnidad');
+                                var stockActualSalida = document.getElementById('salidaStockActual');
+                                var capacidadMaxSalida = document.getElementById('salidaCapacidadMaxima');
+                                var precioVentaSalida = document.getElementById('salidaPrecioVenta');
+
+                                console.log('Elementos del DOM encontrados:', {
+                                    inputEntrada: !!inputEntrada,
+                                    tipoEntrada: !!tipoEntrada,
+                                    stockActualEntrada: !!stockActualEntrada,
+                                    inputSalida: !!inputSalida,
+                                    tipoSalida: !!tipoSalida,
+                                    stockActualSalida: !!stockActualSalida
+                                });
+
+                                // Valores normalizados (res puede venir del fetch con campos de inventario)
+                                var finalUnidad = appliedUnidad || '';
+                                // Si res contiene unidadMedida, usar ese en lugar del appliedUnidad
+                                if (res && res.unidadMedida !== undefined && res.unidadMedida !== null) {
+                                    if (typeof res.unidadMedida === 'string') {
+                                        finalUnidad = res.unidadMedida;
+                                    } else if (typeof res.unidadMedida === 'object') {
+                                        finalUnidad = res.unidadMedida.nombre || res.unidadMedida.clave || appliedUnidad || '';
+                                    } else {
+                                        finalUnidad = String(res.unidadMedida || appliedUnidad || '');
+                                    }
+                                }
+                                var finalStock = (res && res.stockActual !== undefined && res.stockActual !== null) ? parseFloat(res.stockActual) : (stockActual !== null ? stockActual : null);
+                                var finalCapacidad = (res && res.capacidadMaxima !== undefined && res.capacidadMaxima !== null) ? parseFloat(res.capacidadMaxima) : (capacidadMax !== null ? capacidadMax : null);
+                                var finalPrecioCompra = (res && res.precioCompra !== undefined && res.precioCompra !== null) ? parseFloat(res.precioCompra) : (precioCompra !== null ? precioCompra : null);
+                                var finalPrecioVenta = (res && res.precioVenta !== undefined && res.precioVenta !== null) ? parseFloat(res.precioVenta) : (precioVenta !== null ? precioVenta : null);
+
+                                console.log('Valores finales:', {
+                                    finalUnidad,
+                                    finalStock,
+                                    finalCapacidad,
+                                    finalPrecioCompra,
+                                    finalPrecioVenta
+                                });
+
+                                // Asignaciones (con triggers para notificar listeners si jQuery está presente)
+                                if (inputEntrada) { inputEntrada.value = appliedMaterialNombre; try { $(inputEntrada).val(appliedMaterialNombre).trigger('change'); } catch(e){} }
+                                if (idEntrada) { idEntrada.value = materialId; try { $(idEntrada).val(materialId).trigger('change'); } catch(e){} }
+                                var entradaInventarioIdInput = document.getElementById('entradaInventarioId');
+                                if (entradaInventarioIdInput) { entradaInventarioIdInput.value = inventarioId; console.log('Asignado inventarioId entrada:', inventarioId); }
+                                if (tipoEntrada) { tipoEntrada.value = appliedMaterialTipo; try { $(tipoEntrada).val(appliedMaterialTipo).trigger('change'); } catch(e){} }
+                                if (categoriaEntrada) { categoriaEntrada.value = appliedMaterialCategoria; try { $(categoriaEntrada).val(appliedMaterialCategoria).trigger('change'); } catch(e){} }
+                                if (descripcionEntrada) { descripcionEntrada.value = appliedMaterialDescripcion; try { $(descripcionEntrada).val(appliedMaterialDescripcion).trigger('change'); } catch(e){} }
+                                if (unidadEntrada) { unidadEntrada.value = finalUnidad; try { $(unidadEntrada).val(finalUnidad).trigger('change'); } catch(e){} }
+                                if (stockActualEntrada) { stockActualEntrada.value = finalStock !== null && !isNaN(finalStock) ? finalStock.toFixed(2) : ''; try { $(stockActualEntrada).val(finalStock !== null && !isNaN(finalStock) ? finalStock.toFixed(2) : '').trigger('change'); } catch(e){} }
+                                if (capacidadMaxEntrada) { capacidadMaxEntrada.value = finalCapacidad !== null && !isNaN(finalCapacidad) ? finalCapacidad.toFixed(2) : ''; try { $(capacidadMaxEntrada).val(finalCapacidad !== null && !isNaN(finalCapacidad) ? finalCapacidad.toFixed(2) : '').trigger('change'); } catch(e){} }
+                                if (precioCompraEntrada) { precioCompraEntrada.value = finalPrecioCompra !== null && !isNaN(finalPrecioCompra) ? finalPrecioCompra.toFixed(2) : ''; try { $(precioCompraEntrada).val(finalPrecioCompra !== null && !isNaN(finalPrecioCompra) ? finalPrecioCompra.toFixed(2) : '').trigger('change'); } catch(e){} }
+
+                                if (inputSalida) { inputSalida.value = appliedMaterialNombre; try { $(inputSalida).val(appliedMaterialNombre).trigger('change'); } catch(e){} }
+                                if (idSalida) { idSalida.value = materialId; try { $(idSalida).val(materialId).trigger('change'); } catch(e){} }
+                                var salidaInventarioIdInput = document.getElementById('salidaInventarioId');
+                                if (salidaInventarioIdInput) { salidaInventarioIdInput.value = inventarioId; console.log('Asignado inventarioId salida:', inventarioId); }
+                                if (tipoSalida) { tipoSalida.value = appliedMaterialTipo; try { $(tipoSalida).val(appliedMaterialTipo).trigger('change'); } catch(e){} }
+                                if (categoriaSalida) { categoriaSalida.value = appliedMaterialCategoria; try { $(categoriaSalida).val(appliedMaterialCategoria).trigger('change'); } catch(e){} }
+                                if (descripcionSalida) { descripcionSalida.value = appliedMaterialDescripcion; try { $(descripcionSalida).val(appliedMaterialDescripcion).trigger('change'); } catch(e){} }
+                                if (unidadSalida) { unidadSalida.value = finalUnidad; try { $(unidadSalida).val(finalUnidad).trigger('change'); } catch(e){} }
+                                if (stockActualSalida) { stockActualSalida.value = finalStock !== null && !isNaN(finalStock) ? finalStock.toFixed(2) : ''; try { $(stockActualSalida).val(finalStock !== null && !isNaN(finalStock) ? finalStock.toFixed(2) : '').trigger('change'); } catch(e){} }
+                                if (capacidadMaxSalida) { capacidadMaxSalida.value = finalCapacidad !== null && !isNaN(finalCapacidad) ? finalCapacidad.toFixed(2) : ''; try { $(capacidadMaxSalida).val(finalCapacidad !== null && !isNaN(finalCapacidad) ? finalCapacidad.toFixed(2) : '').trigger('change'); } catch(e){} }
+                                if (precioVentaSalida) { precioVentaSalida.value = finalPrecioVenta !== null && !isNaN(finalPrecioVenta) ? finalPrecioVenta.toFixed(2) : ''; try { $(precioVentaSalida).val(finalPrecioVenta !== null && !isNaN(finalPrecioVenta) ? finalPrecioVenta.toFixed(2) : '').trigger('change'); } catch(e){} }
+
+                                // Log para confirmar valores realmente visibles en el DOM (ayuda al debugging)
+                                console.log('DOM values set -> entrada:', document.getElementById('entradaMaterialSeleccionado')?.value, document.getElementById('entradaMaterialId')?.value);
+                                console.log('DOM values set -> salida:', document.getElementById('salidaMaterialSeleccionado')?.value, document.getElementById('salidaMaterialId')?.value);
+                            } catch (e) {
+                                console.error('Error en setFields:', e);
+                            }
+                        }
+
+                        // Si el DTO no incluye datos de inventario (stock/capacidad/precios), intentar consultar el endpoint de inventario
+                        // PERO: si el DTO tiene inventarioId, significa que ya es MaterialInvResponseDTO con datos completos
+                        var hasInventarioId = m && m.inventarioId && m.inventarioId !== '';
+                        var hasInventoryInfo = (stockActual !== null && stockActual !== undefined) || (capacidadMax !== null && capacidadMax !== undefined) || (precioCompra !== null && precioCompra !== undefined) || (precioVenta !== null && precioVenta !== undefined);
+
+                        console.log('Análisis del DTO:', {
+                            hasInventarioId: hasInventarioId,
+                            hasInventoryInfo: hasInventoryInfo,
+                            inventarioId: m?.inventarioId,
+                            stockActual: m?.stockActual,
+                            capacidadMaxima: m?.capacidadMaxima
+                        });
+
+                        if (!hasInventoryInfo && !hasInventarioId && typeof puntoEcaId !== 'undefined' && puntoEcaId) {
+                            console.log('Intentando obtener datos de inventario (no vienen en DTO)');
+                            try {
+                                var params = new URLSearchParams();
+                                params.append('puntoId', puntoEcaId);
+                                params.append('texto', materialNombre || '');
+
+                                var url = '/punto-eca/catalogo/inventario/materiales/buscar' + (params.toString() ? ('?' + params.toString()) : '');
+                                console.log('Intentando obtener datos de inventario en:', url);
+
+                                fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        console.log('Respuesta inventario (raw):', data);
+                                        try {
+                                            if (Array.isArray(data) && data.length > 0) {
+                                                var foundById = data.find(function(it) { return it.materialId === materialId; });
+                                                var foundByName = data.find(function(it) { return (it.nmbMaterial && it.nmbMaterial === materialNombre); });
+                                                var found = foundById || foundByName || data[0];
+
+                                                console.log('Coincidencia inventario encontrada:', found);
+
+                                                var merged = Object.assign({}, m, found || {});
+                                                try {
+                                                    if (merged.stockActual !== undefined && merged.stockActual !== null) merged.stockActual = parseFloat(merged.stockActual);
+                                                    if (merged.capacidadMaxima !== undefined && merged.capacidadMaxima !== null) merged.capacidadMaxima = parseFloat(merged.capacidadMaxima);
+                                                    if (merged.precioCompra !== undefined && merged.precioCompra !== null) merged.precioCompra = parseFloat(merged.precioCompra);
+                                                    if (merged.precioVenta !== undefined && merged.precioVenta !== null) merged.precioVenta = parseFloat(merged.precioVenta);
+                                                } catch(e) { /* no crítico */ }
+
+                                                console.log('Merged DTO a aplicar:', merged);
+                                                setFields(merged);
+                                            } else {
+                                                console.log('No se encontraron coincidencias en inventario, aplicando DTO original');
+                                                setFields(m);
+                                            }
+                                        } catch (e) {
+                                            console.error('Error procesando respuesta inventario:', e);
+                                            setFields(m);
+                                        }
+                                    })
+                                     .catch(err => {
+                                         console.error('Error al consultar inventario:', err);
+                                         setFields(m);
+                                     });
+                            } catch (err) {
+                                console.error('Error al construir consulta inventario:', err);
+                                setFields(m);
+                            }
+                        } else {
+                            // Ya tiene datos de inventario (hasInventoryInfo=true o hasInventarioId=true)
+                            console.log('DTO ya contiene datos de inventario, aplicando directamente');
+                            setFields(m);
+                        }
+                    }
+
+                    // Evento al abrir dropdown - Disparar búsqueda automática
+                    $buscarMaterial.on('select2:opening', function() {
+                        console.log('Abriendo dropdown de materiales');
+
+                        // Esperar a que Select2 renderice el campo de búsqueda
+                        setTimeout(function() {
+                            var searchInput = $('.select2-search__field');
+                            if (searchInput && searchInput.length > 0) {
+                                console.log('Campo de búsqueda encontrado');
+                                console.log('Disparando búsqueda automática...');
+                                searchInput.trigger('input');
+                            } else {
+                                console.warn('Campo de búsqueda no encontrado');
+                            }
+                        }, 100);
+                    });
+
+                    // Cuando se selecciona un material desde Select2, cargar directamente en formularios
+                    $buscarMaterial.on('select2:select', function(e) {
+                        try {
+                            var data = e.params.data || {};
+                            var dto = data.data || data;
+                            console.log('select2:select ->', dto);
+
+                            // Aplicar DTO al formulario (normaliza MaterialResponseDTO / MaterialInvResponseDTO)
+                            applyMaterialToForms(dto);
+
+                            // Mostrar formularios y ocultar sección de búsqueda
+                            var formEntradaContainer = document.getElementById('formEntradaContainer');
+                            var formSalidaContainer = document.getElementById('formSalidaContainer');
+                            if (formEntradaContainer) formEntradaContainer.style.display = 'block';
+                            if (formSalidaContainer) formSalidaContainer.style.display = 'block';
+                            var seccionBusquedaMaterial = document.getElementById('seccionBusquedaMaterial');
+                            if (seccionBusquedaMaterial) seccionBusquedaMaterial.style.display = 'none';
+
+                            // Expandir acordeones correctamente (actualizar aria y clases en botones)
+                            var collapseEntradas = document.getElementById('collapseEntradas');
+                            var collapseSalidas = document.getElementById('collapseSalidas');
+                            if (collapseEntradas) {
+                                collapseEntradas.classList.add('show');
+                                collapseEntradas.setAttribute('aria-expanded', 'true');
+                                var buttonEntradas = document.querySelector('[data-bs-target="#collapseEntradas"]');
+                                if (buttonEntradas) buttonEntradas.classList.remove('collapsed');
+                            }
+                            if (collapseSalidas) {
+                                collapseSalidas.classList.add('show');
+                                collapseSalidas.setAttribute('aria-expanded', 'true');
+                                var buttonSalidas = document.querySelector('[data-bs-target="#collapseSalidas"]');
+                                if (buttonSalidas) buttonSalidas.classList.remove('collapsed');
+                            }
+
+                            // Disparar eventos input/change en los campos para notificar a cualquier listener
+                            function triggerEvents(el) {
+                                if (!el) return;
+                                try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch(e){}
+                                try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch(e){}
+                            }
+                            triggerEvents(document.getElementById('entradaMaterialSeleccionado'));
+                            triggerEvents(document.getElementById('entradaMaterialId'));
+                            triggerEvents(document.getElementById('salidaMaterialSeleccionado'));
+                            triggerEvents(document.getElementById('salidaMaterialId'));
+
+                            // Hacer scroll suave al formulario para que el usuario lo vea
+                            if (formEntradaContainer && typeof formEntradaContainer.scrollIntoView === 'function') {
+                                formEntradaContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+
+                        } catch (err) {
+                            console.error('Error al procesar selección Select2:', err);
+                        }
+                    });
+
+                    console.log('Select2 inicializado en #buscarMaterialMovimientos');
+                }
+
+                // ========================================================
+                // INICIALIZAR SELECT2 EN CATEGORÍA
+                // ========================================================
+                var $selectCategoria = $('#selectCategoriaMov');
+                if ($selectCategoria.length) {
+                    console.log('Encontrado #selectCategoriaMov');
+
+                    $selectCategoria.select2({
+                        theme: 'bootstrap4',
+                        width: '100%',
+                        allowClear: true,
+                        placeholder: 'Selecciona una categoría...',
+                        minimumInputLength: 0
+                    });
+
+                    // Al cambiar categoría, disparar búsqueda automática
+                    $selectCategoria.on('select2:select', function(e) {
+                        var categoria = e.params.data.id;
+                        console.log('Categoria seleccionada:', categoria);
+
+                        // Disparar búsqueda automática con la categoría
+                        console.log('Disparando búsqueda con filtros:', {
+                            texto: '',
+                            categoria: categoria,
+                            tipo: $('#selectTipoMov').val() || ''
+                        });
+                        buscarMateriales();
+                    });
+
+                    // Al limpiar categoría
+                    $selectCategoria.on('select2:unselect', function(e) {
+                        console.log('Categoria limpiada');
+                    });
+
+                    console.log('Select2 inicializado en #selectCategoriaMov');
+                }
+
+                // ========================================================
+                // INICIALIZAR SELECT2 EN TIPO
+                // ========================================================
+                var $selectTipo = $('#selectTipoMov');
+                if ($selectTipo.length) {
+                    console.log('Encontrado #selectTipoMov');
+
+                    $selectTipo.select2({
+                        theme: 'bootstrap4',
+                        width: '100%',
+                        allowClear: true,
+                        placeholder: 'Selecciona un tipo...',
+                        minimumInputLength: 0
+                    });
+
+                    // Al cambiar tipo, disparar búsqueda automática
+                    $selectTipo.on('select2:select', function(e) {
+                        var tipo = e.params.data.id;
+                        console.log('Tipo seleccionado:', tipo);
+
+                        // Disparar búsqueda automática con el tipo
+                        console.log('Disparando búsqueda con filtros:', {
+                            texto: '',
+                            categoria: $('#selectCategoriaMov').val() || '',
+                            tipo: tipo
+                        });
+                        buscarMateriales();
+                    });
+
+                    // Al limpiar tipo
+                    $selectTipo.on('select2:unselect', function(e) {
+                        console.log('Tipo limpiado');
+                    });
+
+                    console.log('Select2 inicializado en #selectTipoMov');
+                }
+
+                // ========================================================
+                // INICIALIZAR SELECT2 EN CENTRO DE ACOPIO
+                // ========================================================
+                var $selectCentroAcopio = $('#salidaCentroAcopio');
+                if ($selectCentroAcopio.length) {
+                    console.log('Encontrado #salidaCentroAcopio');
+
+                    $selectCentroAcopio.select2({
+                        theme: 'bootstrap4',
+                        width: '100%',
+                        allowClear: true,
+                        placeholder: 'Selecciona un centro...',
+                        minimumInputLength: 0
+                    });
+
+                    // Al cambiar centro de acopio
+                    $selectCentroAcopio.on('select2:select', function(e) {
+                        var centro = e.params.data.id;
+                        var centroNombre = e.params.data.text;
+                        console.log('Centro de Acopio seleccionado:', centro, '-', centroNombre);
+                    });
+
+                    // Al limpiar centro de acopio
+                    $selectCentroAcopio.on('select2:unselect', function(e) {
+                        console.log('Centro de Acopio limpiado');
+                    });
+
+                    console.log('Select2 inicializado en #salidaCentroAcopio');
+                }
+
+                // Función para buscar materiales
+                function buscarMateriales() {
+                    const texto = $buscarMaterial?.val() || '';
+                    const categoria = $('#selectCategoriaMov').val() || '';
+                    const tipo = $('#selectTipoMov').val() || '';
+
+                    console.log('Buscando con:', { texto, categoria, tipo });
+
+                    // Obtener modal
+                    var modalBuscarMaterial = document.getElementById('buscarMaterialMovimientosModal');
+                    if (!modalBuscarMaterial) {
+                        console.error('❌ Modal de búsqueda no encontrado');
+                        return;
+                    }
+
+                    // Mostrar estado loading
+                    var estadoBusquedaEl = document.getElementById('estadoBusquedaMov');
+                    if (estadoBusquedaEl) {
+                        estadoBusquedaEl.innerHTML = '<div class="d-flex flex-column align-items-center"><div class="spinner-border text-primary mb-3" role="status"></div><p class="mb-0">Buscando materiales...</p></div>';
+                    }
+
+                    // Limpiar resultados
+                    var listaResultadosEl = document.getElementById('resultadosBusquedaMov');
+                    if (listaResultadosEl) {
+                        listaResultadosEl.innerHTML = '';
+                    }
+
+                    // Abrir modal
+                    var modal = new bootstrap.Modal(modalBuscarMaterial);
+                    modal.show();
+
+                    // Construir URL con parámetros como en section-materiales.html
+                    var endpoint = '/punto-eca/catalogo/materiales/buscar';
+                    var params = new URLSearchParams();
+
+                    if (texto) params.append('texto', texto);
+                    if (categoria) params.append('categoria', categoria);
+                    if (tipo) params.append('tipo', tipo);
+                    if (puntoEcaId) params.append('puntoId', puntoEcaId);
+
+                    var url = endpoint + (params.toString() ? ('?' + params.toString()) : '');
+                    console.log('Buscando en:', url);
+
+                    fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } })
+                        .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, data: data })))
+                        .then(({ status, ok, data }) => {
+                            console.log('Respuesta recibida:', data);
+
+                            if (!ok) {
+                                var mensajeError = data?.mensaje || data?.message || 'Error desconocido';
+                                console.error('❌ Error:', mensajeError);
+                                if (estadoBusquedaEl) {
+                                    estadoBusquedaEl.innerHTML = '<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-2"></i>' + mensajeError + '</div>';
+                                }
+                                return;
+                            }
+
+                            if (!Array.isArray(data)) data = [];
+
+                            console.log('Total de resultados:', data.length);
+
+                            // Renderizar resultados en el modal
+                            renderResultadosBusquedaMov(data);
+                        })
+                        .catch(error => {
+                            console.error('❌ Error en búsqueda:', error);
+                            if (estadoBusquedaEl) {
+                                estadoBusquedaEl.innerHTML = '<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-exclamation-octagon me-2"></i>Error de conexión</div>';
+                            }
+                        });
+                }
+
+                // Función para renderizar resultados en el modal
+                function renderResultadosBusquedaMov(materiales) {
+                    console.log('Renderizando', materiales.length, 'resultados');
+
+                    var listaResultadosEl = document.getElementById('resultadosBusquedaMov');
+                    var estadoBusquedaEl = document.getElementById('estadoBusquedaMov');
+
+                    if (!listaResultadosEl) return;
+
+                    listaResultadosEl.innerHTML = '';
+
+                    if (!materiales || materiales.length === 0) {
+                        listaResultadosEl.innerHTML = '<div class="list-group-item text-muted text-center py-4">Sin resultados disponibles</div>';
+                        if (estadoBusquedaEl) {
+                            estadoBusquedaEl.innerHTML = '<i class="bi bi-search display-6 d-block mb-2"></i><p class="mb-0">No se encontraron materiales con estos filtros</p>';
+                        }
+                        return;
+                    }
+
+                    materiales.forEach(material => {
+                        var item = document.createElement('button');
+                        item.type = 'button';
+                        item.className = 'list-group-item list-group-item-action resultado-material-item d-flex align-items-start gap-3';
+
+                        // Normalizar unidadMedida que puede venir como string o objeto {nombre, clave}
+                        var unidadVal = '';
+                        if (material.unidadMedida !== undefined && material.unidadMedida !== null) {
+                            if (typeof material.unidadMedida === 'string') {
+                                unidadVal = material.unidadMedida;
+                            } else if (typeof material.unidadMedida === 'object') {
+                                unidadVal = material.unidadMedida.nombre || material.unidadMedida.clave || '';
+                            } else {
+                                unidadVal = String(material.unidadMedida || '');
+                            }
+                        }
+
+                        // Helper para convertir valores numéricos sin perder null/undefined
+                        function numToString(v) {
+                            if (v === undefined || v === null || v === '') return '';
+                            var n = Number(v);
+                            return (isNaN(n) ? '' : String(n));
+                        }
+
+                        item.dataset.materialId = material.materialId || '';
+                        item.dataset.nombre = material.nmbMaterial || '';
+                        item.dataset.descripcion = material.dscMaterial || '';
+                        item.dataset.tipo = material.nmbTipo || '';
+                        item.dataset.categoria = material.nmbCategoria || '';
+                        item.dataset.unidad = unidadVal;
+                        item.dataset.stockActual = numToString(material.stockActual);
+                        item.dataset.capacidadMaxima = numToString(material.capacidadMaxima);
+                        item.dataset.precioCompra = numToString(material.precioCompra);
+                        item.dataset.precioVenta = numToString(material.precioVenta);
+
+                        var img = document.createElement('img');
+                        img.src = material.imagenUrl || '/imagenes/materiales.png';
+                        img.alt = material.nmbMaterial || 'Material';
+                        img.className = 'rounded';
+                        img.style.width = '64px';
+                        img.style.height = '64px';
+                        img.style.objectFit = 'cover';
+                        img.style.flexShrink = '0';
+
+                        var content = document.createElement('div');
+                        content.className = 'flex-grow-1 text-start';
+
+                        var title = document.createElement('div');
+                        title.className = 'fw-semibold';
+                        title.textContent = material.nmbMaterial || 'Material sin nombre';
+
+                        var desc = document.createElement('small');
+                        desc.className = 'text-muted d-block mb-2';
+                        desc.textContent = material.dscMaterial || 'Sin descripción';
+
+                        var badges = document.createElement('div');
+                        var tipoBadge = document.createElement('span');
+                        tipoBadge.className = 'badge bg-primary me-1';
+                        tipoBadge.textContent = material.nmbTipo || 'Tipo';
+                        var catBadge = document.createElement('span');
+                        catBadge.className = 'badge bg-secondary';
+                        catBadge.textContent = material.nmbCategoria || 'Categoría';
+
+                        badges.appendChild(tipoBadge);
+                        badges.appendChild(catBadge);
+
+                        content.appendChild(title);
+                        content.appendChild(desc);
+                        content.appendChild(badges);
+
+                        var actionBadge = document.createElement('span');
+                        actionBadge.className = 'badge bg-primary rounded-pill align-self-start';
+                        actionBadge.textContent = 'Seleccionar';
+
+                        item.appendChild(img);
+                        item.appendChild(content);
+                        item.appendChild(actionBadge);
+
+                        listaResultadosEl.appendChild(item);
+                    });
+
+                    if (estadoBusquedaEl) {
+                        estadoBusquedaEl.style.display = 'none';
+                    }
+
+                    // Agregar event listeners para seleccionar material
+                    document.querySelectorAll('.resultado-material-item').forEach(item => {
+                        item.addEventListener('click', function(e) {
+                            e.preventDefault();
+
+                            const materialId = this.dataset.materialId;
+                            const materialNombre = this.dataset.nombre;
+                            const materialTipo = this.dataset.tipo;
+                            const materialCategoria = this.dataset.categoria;
+                            const materialDescripcion = this.dataset.descripcion;
+
+                            console.log('Material seleccionado:', materialId, '-', materialNombre);
+
+                            // Construir DTO con los datos del dataset y usar helper para aplicar a formularios
+                            var dto = {
+                                materialId: materialId,
+                                nmbMaterial: materialNombre,
+                                nmbTipo: materialTipo,
+                                nmbCategoria: materialCategoria,
+                                dscMaterial: materialDescripcion,
+                                unidadMedida: this.dataset.unidad || null,
+                                stockActual: (this.dataset.stockActual !== undefined && this.dataset.stockActual !== '') ? parseFloat(this.dataset.stockActual) : null,
+                                capacidadMaxima: (this.dataset.capacidadMaxima !== undefined && this.dataset.capacidadMaxima !== '') ? parseFloat(this.dataset.capacidadMaxima) : null,
+                                precioCompra: (this.dataset.precioCompra !== undefined && this.dataset.precioCompra !== '') ? parseFloat(this.dataset.precioCompra) : null,
+                                precioVenta: (this.dataset.precioVenta !== undefined && this.dataset.precioVenta !== '') ? parseFloat(this.dataset.precioVenta) : null
+                            };
+
+                            applyMaterialToForms(dto);
+
+                            // Cerrar modal
+                            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('buscarMaterialMovimientosModal'));
+                            if (modalInstance) {
+                                modalInstance.hide();
+                            }
+
+                            // Mostrar formularios y ocultar sección de búsqueda
+                            var formEntradaContainer = document.getElementById('formEntradaContainer');
+                            var formSalidaContainer = document.getElementById('formSalidaContainer');
+                            if (formEntradaContainer) formEntradaContainer.style.display = 'block';
+                            if (formSalidaContainer) formSalidaContainer.style.display = 'block';
+                            var seccionBusquedaMaterial = document.getElementById('seccionBusquedaMaterial');
+                            if (seccionBusquedaMaterial) seccionBusquedaMaterial.style.display = 'none';
+
+                            // Expandir acordeones correctamente (actualizar aria y clases en botones)
+                            var collapseEntradas = document.getElementById('collapseEntradas');
+                            var collapseSalidas = document.getElementById('collapseSalidas');
+                            if (collapseEntradas) {
+                                collapseEntradas.classList.add('show');
+                                collapseEntradas.setAttribute('aria-expanded', 'true');
+                                var buttonEntradas = document.querySelector('[data-bs-target="#collapseEntradas"]');
+                                if (buttonEntradas) buttonEntradas.classList.remove('collapsed');
+                            }
+                            if (collapseSalidas) {
+                                collapseSalidas.classList.add('show');
+                                collapseSalidas.setAttribute('aria-expanded', 'true');
+                                var buttonSalidas = document.querySelector('[data-bs-target="#collapseSalidas"]');
+                                if (buttonSalidas) buttonSalidas.classList.remove('collapsed');
+                            }
+
+                            // Disparar eventos input/change en los campos para notificar a cualquier listener
+                            function triggerEvents(el) {
+                                if (!el) return;
+                                try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch(e){}
+                                try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch(e){}
+                            }
+                            triggerEvents(document.getElementById('entradaMaterialSeleccionado'));
+                            triggerEvents(document.getElementById('entradaMaterialId'));
+                            triggerEvents(document.getElementById('salidaMaterialSeleccionado'));
+                            triggerEvents(document.getElementById('salidaMaterialId'));
+
+                            // Hacer scroll suave al formulario para que el usuario lo vea
+                            if (formEntradaContainer && typeof formEntradaContainer.scrollIntoView === 'function') {
+                                formEntradaContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+
+                        });
+                    });
+                }
+
+                // ========================================================
+                // CARGA INICIAL DE DATOS EN TABLAS (ENTRADAS Y SALIDAS)
+                // ========================================================
+                // Esta sección se ejecuta una vez que el DOM está completamente cargado
+                function cargarDatosIniciales() {
+                    console.log('Cargando datos iniciales en tablas...');
+
+                    // Datos de entradas (compras) - Inyectados desde Thymeleaf
+                    const entradasData = /*[[${entradasIniciales.content}]]*/ [];
+
+                    // Datos de salidas (ventas) - Inyectados desde Thymeleaf
+                    const salidasData = /*[[${salidasIniciales.content}]]*/ [];
+
+                    console.log('Entradas cargadas:', entradasData.length, entradasData);
+                    console.log('Salidas cargadas:', salidasData.length, salidasData);
+
+                    // Renderizar entradas
+                    function renderizarEntradas() {
+                        const tbody = document.getElementById('tablasEntradasBody');
+                        if (!tbody) {
+                            console.warn('No se encontró tbody tablasEntradasBody');
+                            return;
+                        }
+
+                        if (!entradasData || entradasData.length === 0) {
+                            tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="5" class="py-3"><small>Sin registros</small></td></tr>';
+                            document.getElementById('badgeEntradasCount').textContent = '0 registros';
+                            return;
+                        }
+
+                        tbody.innerHTML = entradasData.map(entrada => {
+                            const fecha = entrada.fechaCompra ? new Date(entrada.fechaCompra).toLocaleDateString('es-CO') : '-';
+                            const cantidad = parseFloat(entrada.cantidad || 0);
+                            const precio = parseFloat(entrada.precioCompra || 0);
+                            return `
+                    <tr>
+                        <td class="small">${fecha}</td>
+                        <td class="small">${entrada.nombreMaterial || '-'}</td>
+                        <td class="text-end small">${cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="text-end small">$${precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="small">${entrada.observaciones || '-'}</td>
+                    </tr>
+                `;
+                        }).join('');
+
+                        document.getElementById('badgeEntradasCount').textContent = entradasData.length + ' registros';
+                        console.log('✅ Tabla de entradas renderizada');
+                    }
+
+                    // Renderizar salidas
+                    function renderizarSalidas() {
+                        const tbody = document.getElementById('tablasSalidasBody');
+                        if (!tbody) {
+                            console.warn('No se encontró tbody tablasSalidasBody');
+                            return;
+                        }
+
+                        if (!salidasData || salidasData.length === 0) {
+                            tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="5" class="py-3"><small>Sin registros</small></td></tr>';
+                            document.getElementById('badgeSalidasCount').textContent = '0 registros';
+                            return;
+                        }
+
+                        tbody.innerHTML = salidasData.map(salida => {
+                            const fecha = salida.fechaVenta ? new Date(salida.fechaVenta).toLocaleDateString('es-CO') : '-';
+                            const cantidad = parseFloat(salida.cantidad || 0);
+                            const precio = parseFloat(salida.precioVenta || 0);
+                            return `
+                    <tr>
+                        <td class="small">${fecha}</td>
+                        <td class="small">${salida.nombreMaterial || '-'}</td>
+                        <td class="text-end small">${cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="text-end small">$${precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="small">${salida.nombreCentroAcopio || '-'}</td>
+                    </tr>
+                `;
+                        }).join('');
+
+                        document.getElementById('badgeSalidasCount').textContent = salidasData.length + ' registros';
+                        console.log('✅ Tabla de salidas renderizada');
+                    }
+
+                    // Inicializar cuando el DOM esté listo
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', function() {
+                            console.log('✅ DOM cargado, renderizando...');
+                            renderizarEntradas();
+                            renderizarSalidas();
+                        });
+                    } else {
+                        console.log('✅ DOM ya cargado, renderizando...');
+                        renderizarEntradas();
+                        renderizarSalidas();
+                    }
+                }
+
+                // Intentar cargar datos iniciales
+                cargarDatosIniciales();
+
+                // Mostrar estado inicial
+                mostrarEstadoBusquedaMov('idle');
+                console.log('Script de movimientos inicializado con Select2');
+            } // Cierra inicializarSelect2
+
+            // Intentar inicializar al cargar el DOM
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', inicializarSelect2);
+            } else {
+                inicializarSelect2();
+            }
+        })();
+
+        // Función global para cambiar el material seleccionado
+        window.cambiarMaterial = function() {
+            console.log('🔄 Cambiando material...');
+
+            // Limpiar campos del formulario de entrada
+            const inputEntrada = document.getElementById('entradaMaterialSeleccionado');
+            const idEntrada = document.getElementById('entradaMaterialId');
+            const inventarioIdEntrada = document.getElementById('entradaInventarioId');
+            const tipoEntrada = document.getElementById('entradaMaterialTipo');
+            const categoriaEntrada = document.getElementById('entradaMaterialCategoria');
+            const descripcionEntrada = document.getElementById('entradaMaterialDescripcion');
+
+            if (inputEntrada) inputEntrada.value = '';
+            if (idEntrada) idEntrada.value = '';
+            if (inventarioIdEntrada) inventarioIdEntrada.value = '';
+            if (tipoEntrada) tipoEntrada.value = '';
+            if (categoriaEntrada) categoriaEntrada.value = '';
+            if (descripcionEntrada) descripcionEntrada.value = '';
+
+            // Limpiar campos del formulario de salida
+            const inputSalida = document.getElementById('salidaMaterialSeleccionado');
+            const idSalida = document.getElementById('salidaMaterialId');
+            const inventarioIdSalida = document.getElementById('salidaInventarioId');
+            const tipoSalida = document.getElementById('salidaMaterialTipo');
+            const categoriaSalida = document.getElementById('salidaMaterialCategoria');
+            const descripcionSalida = document.getElementById('salidaMaterialDescripcion');
+
+            if (inputSalida) inputSalida.value = '';
+            if (idSalida) idSalida.value = '';
+            if (inventarioIdSalida) inventarioIdSalida.value = '';
+            if (tipoSalida) tipoSalida.value = '';
+            if (categoriaSalida) categoriaSalida.value = '';
+            if (descripcionSalida) descripcionSalida.value = '';
+
+            // Limpiar alertas de éxito anterior
+            const alertas = document.querySelectorAll('.alert-success');
+            alertas.forEach(alerta => alerta.remove());
+
+            // Ocultar formularios de entrada y salida
+            const formEntradaContainer = document.getElementById('formEntradaContainer');
+            const formSalidaContainer = document.getElementById('formSalidaContainer');
+            if (formEntradaContainer) formEntradaContainer.style.display = 'none';
+            if (formSalidaContainer) formSalidaContainer.style.display = 'none';
+
+            // Contraer secciones del acordeón
+            const collapseEntradas = document.getElementById('collapseEntradas');
+            const collapseSalidas = document.getElementById('collapseSalidas');
+            if (collapseEntradas) {
+                collapseEntradas.classList.remove('show');
+                collapseEntradas.setAttribute('aria-expanded', 'false');
+                const buttonEntradas = document.querySelector('[data-bs-target="#collapseEntradas"]');
+                if (buttonEntradas) buttonEntradas.classList.add('collapsed');
+            }
+            if (collapseSalidas) {
+                collapseSalidas.classList.remove('show');
+                collapseSalidas.setAttribute('aria-expanded', 'false');
+                const buttonSalidas = document.querySelector('[data-bs-target="#collapseSalidas"]');
+                if (buttonSalidas) buttonSalidas.classList.add('collapsed');
+            }
+
+            // Mostrar sección de búsqueda nuevamente
+            const seccionBusquedaMaterial = document.getElementById('seccionBusquedaMaterial');
+            if (seccionBusquedaMaterial) seccionBusquedaMaterial.style.display = 'block';
+
+            // Limpiar búsqueda anterior
+            const inputBusqueda = document.getElementById('buscarMaterialMovimientos');
+            if (inputBusqueda) {
+                $(inputBusqueda).val(null).trigger('change');
+            }
+            $('#selectCategoriaMov').val('').trigger('change');
+            $('#selectTipoMov').val('').trigger('change');
+
+            const resultadosDiv = document.getElementById('resultadosBusquedaMov');
+            if (resultadosDiv) resultadosDiv.innerHTML = '';
+
+            console.log('✓ Material cambiado, sección de búsqueda mostrada nuevamente');
+        };
+    </script>
+
+    <!-- SCRIPT PARA CARGAR DATOS INICIALES DE ENTRADAS Y SALIDAS -->
+    <script th:inline="javascript">
+        (function() {
+            console.log('Inicializando carga de datos de movimientos...');
+
+            // Datos de entradas (compras) - Inyectados desde Thymeleaf
+            const entradasData = /*[[${entradasIniciales.content}]]*/ [];
+
+            // Datos de salidas (ventas) - Inyectados desde Thymeleaf
+            const salidasData = /*[[${salidasIniciales.content}]]*/ [];
+
+            console.log('Entradas cargadas:', entradasData.length, entradasData);
+            console.log('Salidas cargadas:', salidasData.length, salidasData);
+
+            // Renderizar entradas
+            function renderizarEntradas() {
+                const tbody = document.getElementById('tablasEntradasBody');
+                if (!tbody) {
+                    console.warn('No se encontró tbody tablasEntradasBody');
+                    return;
+                }
+
+                if (!entradasData || entradasData.length === 0) {
+                    tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="5" class="py-3"><small>Sin registros</small></td></tr>';
+                    document.getElementById('badgeEntradasCount').textContent = '0 registros';
+                    return;
+                }
+
+                tbody.innerHTML = entradasData.map(entrada => {
+                    const fecha = entrada.fechaCompra ? new Date(entrada.fechaCompra).toLocaleDateString('es-CO') : '-';
+                    const cantidad = parseFloat(entrada.cantidad || 0);
+                    const precio = parseFloat(entrada.precioCompra || 0);
+                    return `
+                    <tr>
+                        <td class="small">${fecha}</td>
+                        <td class="small">${entrada.nombreMaterial || '-'}</td>
+                        <td class="text-end small">${cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="text-end small">$${precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="small">${entrada.observaciones || '-'}</td>
+                    </tr>
+                `;
+                }).join('');
+
+                document.getElementById('badgeEntradasCount').textContent = entradasData.length + ' registros';
+                console.log('✅ Tabla de entradas renderizada');
+            }
+
+            // Renderizar salidas
+            function renderizarSalidas() {
+                const tbody = document.getElementById('tablasSalidasBody');
+                if (!tbody) {
+                    console.warn('No se encontró tbody tablasSalidasBody');
+                    return;
+                }
+
+                if (!salidasData || salidasData.length === 0) {
+                    tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="5" class="py-3"><small>Sin registros</small></td></tr>';
+                    document.getElementById('badgeSalidasCount').textContent = '0 registros';
+                    return;
+                }
+
+                tbody.innerHTML = salidasData.map(salida => {
+                    const fecha = salida.fechaVenta ? new Date(salida.fechaVenta).toLocaleDateString('es-CO') : '-';
+                    const cantidad = parseFloat(salida.cantidad || 0);
+                    const precio = parseFloat(salida.precioVenta || 0);
+                    return `
+                    <tr>
+                        <td class="small">${fecha}</td>
+                        <td class="small">${salida.nombreMaterial || '-'}</td>
+                        <td class="text-end small">${cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="text-end small">$${precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="small">${salida.nombreCentroAcopio || '-'}</td>
+                    </tr>
+                `;
+                }).join('');
+
+                document.getElementById('badgeSalidasCount').textContent = salidasData.length + ' registros';
+                console.log('✅ Tabla de salidas renderizada');
+            }
+
+            // Inicializar cuando el DOM esté completamente cargado
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('✅ DOM cargado, renderizando...');
+                renderizarEntradas();
+                renderizarSalidas();
+
+                // Inicializar listeners para cálculo de stock
+                inicializarCalculoStock();
+            });
+        })();
+
+        // Función para calcular y actualizar el stock resultante/restante
+        function inicializarCalculoStock() {
+            console.log('Inicializando cálculo de stock...');
+
+            // === ENTRADA: Stock después (Stock Actual + Cantidad Agregada) ===
+            var inputCantidadEntrada = document.getElementById('entradaCantidad');
+            var inputStockActualEntrada = document.getElementById('entradaStockActual');
+            var inputCapacidadMaxEntrada = document.getElementById('entradaCapacidadMaxima');
+            var spanStockResultanteEntrada = document.getElementById('entradaStockResultante');
+
+            if (inputCantidadEntrada && inputStockActualEntrada && spanStockResultanteEntrada) {
+                var calcularStockResultanteEntrada = function() {
+                    var stockActual = parseFloat(inputStockActualEntrada.value) || 0;
+                    var cantidadAgregar = parseFloat(inputCantidadEntrada.value) || 0;
+                    var capacidadMax = parseFloat(inputCapacidadMaxEntrada.value) || 0;
+                    var stockResultante = stockActual + cantidadAgregar;
+
+                    // Formatear con 2 decimales
+                    var stockResultanteFormateado = stockResultante.toFixed(2);
+
+                    // Determinar color y estado
+                    var html = '';
+                    if (capacidadMax > 0 && stockResultante > capacidadMax) {
+                        // Excede capacidad - error
+                        html = `<span class="text-danger fw-bold">${stockResultanteFormateado} (Excede capacidad de ${capacidadMax.toFixed(2)})</span>`;
+                        console.warn('ENTRADA: Stock resultante excede capacidad:', stockResultante, '>', capacidadMax);
+                    } else if (stockResultante >= capacidadMax && capacidadMax > 0) {
+                        // Alcanza capacidad máxima - advertencia
+                        html = `<span class="text-warning fw-bold">${stockResultanteFormateado} (En límite)</span>`;
+                        console.info('ENTRADA: Stock resultante alcanza capacidad máxima:', stockResultante);
+                    } else {
+                        // Normal
+                        html = `<span class="text-success">${stockResultanteFormateado}</span>`;
+                    }
+
+                    spanStockResultanteEntrada.innerHTML = html;
+                };
+
+                // Escuchar cambios en cantidad
+                inputCantidadEntrada.addEventListener('input', calcularStockResultanteEntrada);
+                // También actualizar si cambian datos del material
+                inputStockActualEntrada.addEventListener('change', calcularStockResultanteEntrada);
+                inputCapacidadMaxEntrada.addEventListener('change', calcularStockResultanteEntrada);
+
+                // Calcular inicialmente
+                calcularStockResultanteEntrada();
+            }
+
+            // === SALIDA: Stock restante (Stock Actual - Cantidad Descontada) ===
+            var inputCantidadSalida = document.getElementById('salidaCantidad');
+            var inputStockActualSalida = document.getElementById('salidaStockActual');
+            var spanStockRestanteSalida = document.getElementById('salidaStockRestante');
+
+            if (inputCantidadSalida && inputStockActualSalida && spanStockRestanteSalida) {
+                var calcularStockRestanteSalida = function() {
+                    var stockActual = parseFloat(inputStockActualSalida.value) || 0;
+                    var cantidadDescontar = parseFloat(inputCantidadSalida.value) || 0;
+                    var stockRestante = stockActual - cantidadDescontar;
+
+                    // Formatear con 2 decimales
+                    var stockRestanteFormateado = stockRestante.toFixed(2);
+
+                    // Determinar color y estado
+                    var html = '';
+                    if (stockRestante < 0) {
+                        // Stock insuficiente - error
+                        html = `<span class="text-danger fw-bold">${stockRestanteFormateado} (Stock insuficiente)</span>`;
+                        console.error('SALIDA: Stock insuficiente. Disponible:', stockActual, 'Solicitado:', cantidadDescontar);
+                    } else if (stockRestante === 0 && cantidadDescontar > 0) {
+                        // Stock se agota solo si hay una cantidad a descontar
+                        html = `<span class="text-warning fw-bold">${stockRestanteFormateado} (Se agotará)</span>`;
+                        console.warn('SALIDA: Stock se agotará completamente');
+                    } else if (cantidadDescontar > 0 && stockRestante > 0 && stockRestante < (stockActual * 0.2) && stockActual > 0) {
+                        // Stock bajo (menos del 20%) - solo si hay stock actual y cantidad a descontar
+                        html = `<span class="text-info fw-bold">${stockRestanteFormateado} (Stock bajo)</span>`;
+                        console.info('SALIDA: Stock bajo (menos del 20%)');
+                    } else {
+                        // Normal - sin alerta
+                        html = `<span class="text-success">${stockRestanteFormateado}</span>`;
+                    }
+
+                    spanStockRestanteSalida.innerHTML = html;
+                };
+
+                // Escuchar cambios en cantidad
+                inputCantidadSalida.addEventListener('input', calcularStockRestanteSalida);
+                // También actualizar si cambian datos del material
+                inputStockActualSalida.addEventListener('change', calcularStockRestanteSalida);
+
+                // Calcular inicialmente
+                calcularStockRestanteSalida();
+            }
+
+            console.log('Listeners de stock inicializados');
+        }
+
+        // Función para manejar el envío del formulario de ENTRADA
+        function inicializarFormularioEntrada() {
+            console.log('Inicializando formulario de entrada...');
+
+            const formEntrada = document.getElementById('formEntrada');
+            if (!formEntrada) {
+                console.warn('Formulario de entrada no encontrado');
+                return;
+            }
+
+            // Obtener puntoEcaId una sola vez (válido para ambos formularios)
+            const puntoEcaSection = document.querySelector('section[data-usuario-id]');
+            let puntoEcaId = puntoEcaSection?.dataset.puntoEcaId;
+
+            formEntrada.addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log('Formulario de entrada enviado');
+
+                // Obtener datos del formulario
+                const materialId = document.getElementById('entradaMaterialId').value;
+                const inventarioId = document.getElementById('entradaInventarioId').value || window.lastMaterialAplicado?.inventarioId;
+                const cantidad = document.getElementById('entradaCantidad').value;
+                const fecha = document.getElementById('entradaFecha').value;
+                const precioCompra = document.getElementById('entradaPrecioCompra').value;
+                const observaciones = document.getElementById('entradaObservaciones').value;
+
+                console.log('Datos obtenidos en formulario entrada:', {
+                    materialId,
+                    inventarioId,
+                    cantidad,
+                    fecha,
+                    precioCompra,
+                    campo_oculto: document.getElementById('entradaInventarioId')?.value
+                });
+
+                // Validaciones básicas
+                if (!materialId || !cantidad || !fecha || !precioCompra) {
+                    alert('Por favor completa todos los campos obligatorios');
+                    return;
+                }
+
+                if (!inventarioId) {
+                    alert('Error: No se pudo obtener el ID del inventario');
+                    console.error('inventarioId no encontrado');
+                    return;
+                }
+
+                if (!puntoEcaId) {
+                    alert('Error: No se pudo obtener la información del Punto ECA');
+                    console.error('Datos faltantes:', { puntoEcaId });
+                    return;
+                }
+
+                // Construir objeto de datos para enviar
+                const dataEntrada = {
+                    materialId: materialId,
+                    inventarioId: inventarioId,
+                    puntoEcaId: puntoEcaId,
+                    cantidad: cantidad,
+                    fechaCompra: fecha,
+                    precioCompra: precioCompra,
+                    observaciones: observaciones
+                };
+
+                console.log('Datos de entrada a enviar:', dataEntrada);
+
+                // Enviar al backend
+                const endpoint = '/punto-eca/movimientos/registrar-entrada';
+
+                fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(dataEntrada)
+                })
+                .then(response => {
+                    console.log('Respuesta del servidor:', response.status);
+                    return response.json().then(data => ({ status: response.status, ok: response.ok, data: data }));
+                })
+                .then(({ status, ok, data }) => {
+                    console.log('Respuesta JSON:', data);
+
+                    if (!ok) {
+                        const mensajeError = data?.mensaje || data?.message || 'Error al registrar entrada';
+                        console.error('Error:', mensajeError);
+                        alert('Error: ' + mensajeError);
+                        return;
+                    }
+
+                    console.log('Entrada registrada correctamente');
+                    alert('Entrada registrada correctamente');
+
+                    // Limpiar formulario
+                    formEntrada.reset();
+
+                    // Llamar a cambiarMaterial para resetear la vista
+                    window.cambiarMaterial();
+
+                    // Recargar las tablas de movimientos
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Error en la solicitud:', error);
+                    alert('Error de conexión: ' + error.message);
+                });
+            });
+        }
+
+        // Función para manejar el envío del formulario de SALIDA
+        function inicializarFormularioSalida() {
+            console.log('Inicializando formulario de salida...');
+
+            const formSalida = document.getElementById('formSalida');
+            if (!formSalida) {
+                console.warn('Formulario de salida no encontrado');
+                return;
+            }
+
+            formSalida.addEventListener('submit', function(e) {
+                e.preventDefault();
+                console.log('Formulario de salida enviado');
+
+                // Obtener datos del formulario
+                const materialId = document.getElementById('salidaMaterialId').value;
+                const inventarioId = document.getElementById('salidaInventarioId').value || window.lastMaterialAplicado?.inventarioId;
+                const cantidad = document.getElementById('salidaCantidad').value;
+                const fecha = document.getElementById('salidaFecha').value;
+                const precioVenta = document.getElementById('salidaPrecioVenta').value;
+                const centroAcopio = document.getElementById('salidaCentroAcopio').value;
+                const observaciones = document.getElementById('salidaObservaciones').value;
+
+                // Obtener puntoEcaId del data attribute de la sección
+                const puntoEcaSection = document.querySelector('section[data-usuario-id]');
+                const puntoEcaId = puntoEcaSection?.dataset.puntoEcaId;
+
+                console.log('Datos obtenidos en formulario salida:', {
+                    materialId,
+                    inventarioId,
+                    cantidad,
+                    fecha,
+                    precioVenta,
+                    centroAcopio,
+                    campo_oculto: document.getElementById('salidaInventarioId')?.value
+                });
+
+                // Validaciones básicas
+                if (!materialId || !cantidad || !fecha || !precioVenta || !centroAcopio) {
+                    alert('Por favor completa todos los campos obligatorios');
+                    return;
+                }
+
+                if (!inventarioId) {
+                    alert('Error: No se pudo obtener el ID del inventario');
+                    console.error('inventarioId no encontrado');
+                    return;
+                }
+
+                if (!puntoEcaId) {
+                    alert('Error: No se pudo obtener el ID del Punto ECA');
+                    console.error('puntoEcaId no encontrado');
+                    return;
+                }
+
+                // Validar que el stock no sea negativo
+                const stockActual = parseFloat(document.getElementById('salidaStockActual').value) || 0;
+                const cantidadDescontar = parseFloat(cantidad);
+
+                if (cantidadDescontar > stockActual) {
+                    alert('Error: La cantidad a descontar excede el stock disponible');
+                    return;
+                }
+
+                if (!puntoEcaId) {
+                    alert('Error: No se pudo obtener la información del Punto ECA');
+                    console.error('Datos faltantes:', { puntoEcaId });
+                    return;
+                }
+
+                // Construir objeto de datos para enviar
+                const dataSalida = {
+                    materialId: materialId,
+                    inventarioId: inventarioId,
+                    puntoEcaId: puntoEcaId,
+                    cantidad: cantidad,
+                    fechaVenta: fecha,
+                    precioVenta: precioVenta,
+                    centroAcopioId: centroAcopio,
+                    observaciones: observaciones
+                };
+
+                console.log('Datos de salida a enviar:', dataSalida);
+
+                // Enviar al backend
+                const endpoint = '/punto-eca/movimientos/registrar-salida';
+
+                fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(dataSalida)
+                })
+                .then(response => {
+                    console.log('Respuesta del servidor:', response.status);
+                    return response.json().then(data => ({ status: response.status, ok: response.ok, data: data }));
+                })
+                .then(({ status, ok, data }) => {
+                    console.log('Respuesta JSON:', data);
+
+                    if (!ok) {
+                        const mensajeError = data?.mensaje || data?.message || 'Error al registrar salida';
+                        console.error('Error:', mensajeError);
+                        alert('Error: ' + mensajeError);
+                        return;
+                    }
+
+                    console.log('Salida registrada correctamente');
+                    alert('Salida registrada correctamente');
+
+                    // Limpiar formulario
+                    formSalida.reset();
+
+                    // Llamar a cambiarMaterial para resetear la vista
+                    window.cambiarMaterial();
+
+                    // Recargar las tablas de movimientos
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Error en la solicitud:', error);
+                    alert('Error de conexión: ' + error.message);
+                });
+            });
+        }
+
+        // Inicializar formularios cuando el DOM esté cargado
+        document.addEventListener('DOMContentLoaded', function() {
+            inicializarFormularioEntrada();
+            inicializarFormularioSalida();
+        });
+    </script>
 </section>

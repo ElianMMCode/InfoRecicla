@@ -1,8 +1,6 @@
 package org.sena.inforecicla.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.sena.inforecicla.dto.puntoEca.gestor.GestorResponseDTO;
 import org.sena.inforecicla.dto.puntoEca.gestor.GestorUpdateDTO;
 import org.sena.inforecicla.dto.puntoEca.gestor.PuntoEcaResponseDTO;
@@ -13,10 +11,10 @@ import org.sena.inforecicla.model.PuntoECA;
 import org.sena.inforecicla.model.Usuario;
 import org.sena.inforecicla.model.enums.Estado;
 import org.sena.inforecicla.model.enums.TipoUsuario;
-import org.sena.inforecicla.repository.LocalidadRepository;
 import org.sena.inforecicla.repository.PuntoEcaRepository;
 import org.sena.inforecicla.repository.UsuarioRepository;
 import org.sena.inforecicla.service.GestorEcaService;
+import org.sena.inforecicla.service.LocalidadService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,11 +25,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class GestorEcaServiceImpl implements GestorEcaService {
 
-    private static final Logger logger = LoggerFactory.getLogger(GestorEcaServiceImpl.class);
-
     private final UsuarioRepository usuarioRepository;
     private final PuntoEcaRepository puntoECARepository;
-    private final LocalidadRepository localidadRepository;
+    private final LocalidadService localidadService;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -43,7 +39,7 @@ public class GestorEcaServiceImpl implements GestorEcaService {
         usuario.setEmail(dto.email());
         usuario.setCelular(dto.celular());
         usuario.setCiudad(dto.ciudad());
-        usuario.setLocalidad(localidadRepository.findByNombreIgnoreCase(dto.localidad())
+        usuario.setLocalidad(localidadService.buscarPorNombre(dto.localidad())
                 .orElseThrow(() -> new RuntimeException("Localidad no encontrada: " + dto.localidad())));
         usuario.setTipoUsuario(TipoUsuario.GestorECA);
         usuario.setTipoDocumento(dto.tipoDocumento());
@@ -62,7 +58,7 @@ public class GestorEcaServiceImpl implements GestorEcaService {
         puntoECA.setDireccion(dto.direccionPunto());
         puntoECA.setLogoUrlPunto(dto.logoUrlPunto());
         puntoECA.setFotoUrlPunto(dto.fotoUrlPunto());
-        puntoECA.setLocalidad(localidadRepository.findByNombreIgnoreCase(dto.localidadPunto())
+        puntoECA.setLocalidad(localidadService.buscarPorNombre(dto.localidadPunto())
                 .orElseThrow(() -> new RuntimeException("Localidad no encontrada: " + dto.localidadPunto())));
         puntoECA.setCelular(dto.celularPunto());
         puntoECA.setEmail(dto.emailPunto());
@@ -139,7 +135,7 @@ public class GestorEcaServiceImpl implements GestorEcaService {
         punto.setEmail(puntoUpdate.emailPunto());
         punto.setDireccion(puntoUpdate.direccionPunto());
 
-        punto.setLocalidad(localidadRepository.findById(puntoUpdate.localidadPuntoId())
+        punto.setLocalidad(localidadService.buscarPorId(puntoUpdate.localidadPuntoId())
                 .orElseThrow(() -> new RuntimeException("Localidad no encontrada")));
 
         if (puntoUpdate.latitud() != null && puntoUpdate.latitud() != 0) {

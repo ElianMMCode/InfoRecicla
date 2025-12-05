@@ -1,46 +1,31 @@
 package org.sena.inforecicla.service;
 
-import lombok.RequiredArgsConstructor;
-import org.sena.inforecicla.dto.puntoEca.InventarioResponseDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.InventarioRequestDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.InventarioResponseDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.InventarioUpdateDTO;
+import org.sena.inforecicla.exception.InventarioNotFoundException;
+import org.sena.inforecicla.exception.MaterialNotFoundException;
+import org.sena.inforecicla.exception.PuntoEcaNotFoundException;
 import org.sena.inforecicla.model.Inventario;
-import org.sena.inforecicla.repository.InventarioRepository;
-import org.sena.inforecicla.repository.MaterialRepository;
-import org.sena.inforecicla.repository.PuntoEcaRepository;
-import org.springframework.stereotype.Service;
+import org.sena.inforecicla.model.enums.Alerta;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.Comparator.comparing;
+public interface InventarioService {
 
-@Service
-@RequiredArgsConstructor
-public class InventarioService {
+    List<InventarioResponseDTO> mostrarInventarioPuntoEca(UUID puntoId);
 
-    private final PuntoEcaRepository puntoEcaRepository;
-    private final MaterialRepository materialRepository;
-    private final InventarioRepository inventarioRepository;
+    InventarioResponseDTO actualizarInventario(UUID inventarioId, InventarioUpdateDTO invUpdate) throws InventarioNotFoundException;
 
-    public List<InventarioResponseDTO> mostrarInventariosPuntoEca(UUID puntoId) {
+    void guardarInventario(InventarioRequestDTO dto) throws PuntoEcaNotFoundException;
 
-        List<Inventario> inv = inventarioRepository.findAllByPuntoEca_PuntoEcaID(puntoId);
+    List<InventarioResponseDTO> filtraInventario(UUID gestorId, String texto, String categoria, String tipo, Alerta alerta, String unidad, String ocupacion);
 
-        return inv.stream().map(i -> InventarioResponseDTO.builder()
-                        .capacidadMaxima(i.getCapacidadMaxima())
-                        .unidadMedida(i.getUnidadMedida())
-                        .stockActual(i.getStockActual())
-                        .umbralAlerta(i.getUmbralAlerta())
-                        .umbralCritico(i.getUmbralCritico())
-                        .precioCompra(i.getPrecioCompra())
-                        .precioVenta(i.getPrecioVenta())
-                        .materialId(i.getMaterial().getMaterialId())
-                        .nombreMaterial(i.getMaterial().getNombre())
-                        .puntoEcaId(i.getPuntoEca().getPuntoEcaID())
-                        .nombrePuntoEca(i.getPuntoEca().getNombrePunto())
-                        .fechaCreacion(i.getFechaCreacion())
-                        .fechaActualizacion(i.getFechaActualizacion())
-                        .build())
-                .sorted(comparing(InventarioResponseDTO::fechaActualizacion).reversed())
-                .toList();
-    }
+    void eliminarInventario(UUID inventarioId) throws InventarioNotFoundException;
+
+    Inventario obtenerInventarioValidoParaCompra(UUID inventarioId, UUID puntoId, UUID materialId) throws InventarioNotFoundException;
+
+    void actualizarStock(Inventario inv);
 }

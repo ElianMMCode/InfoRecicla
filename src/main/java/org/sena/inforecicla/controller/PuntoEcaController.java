@@ -4,21 +4,26 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.sena.inforecicla.dto.puntoEca.gestor.GestorUpdateDTO;
 import org.sena.inforecicla.dto.puntoEca.gestor.PuntoEcaUpdateDTO;
-import org.sena.inforecicla.dto.puntoEca.inventario.InventarioGuardarDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.InventarioRequestDTO;
 import org.sena.inforecicla.dto.puntoEca.inventario.InventarioUpdateDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.movimientos.CompraInventarioRequestDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.movimientos.CompraInventarioResponseDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.movimientos.VentaInventarioRequestDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.movimientos.VentaInventarioResponseDTO;
+import org.sena.inforecicla.dto.puntoEca.materiales.CategoriaMaterialesInvResponseDTO;
 import org.sena.inforecicla.dto.puntoEca.materiales.MaterialInvResponseDTO;
+import org.sena.inforecicla.dto.puntoEca.materiales.TipoMaterialesInvResponseDTO;
 import org.sena.inforecicla.dto.usuario.UsuarioGestorResponseDTO;
 import org.sena.inforecicla.exception.InventarioFoundExistException;
 import org.sena.inforecicla.exception.InventarioNotFoundException;
-import org.sena.inforecicla.exception.MaterialNotFoundException;
 import org.sena.inforecicla.exception.PuntoEcaNotFoundException;
 import org.sena.inforecicla.model.Localidad;
 import org.sena.inforecicla.model.enums.Alerta;
 import org.sena.inforecicla.model.enums.TipoDocumento;
 import org.sena.inforecicla.model.enums.UnidadMedida;
-import org.sena.inforecicla.service.GestorEcaService;
-import org.sena.inforecicla.service.InventarioService;
-import org.sena.inforecicla.service.LocalidadService;
+import org.sena.inforecicla.service.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -27,9 +32,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Controller
 @AllArgsConstructor
 @RequestMapping("/punto-eca")
@@ -37,9 +39,17 @@ public class PuntoEcaController {
 
     private static final Logger logger = LoggerFactory.getLogger(PuntoEcaController.class);
 
+    // ✅ Services (no repositories)
     private final GestorEcaService gestorEcaService;
     private final InventarioService inventarioService;
     private final LocalidadService localidadService;
+    private final CentroAcopioService centroAcopioService;
+    private final PuntoEcaService puntoEcaService;
+    private final CompraInventarioService compraInventarioService;
+    private final VentaInventarioService ventaInventarioService;
+    private final TipoMaterialService tipoMaterialService;
+    private final CategoriaMaterialService categoriaMaterialService;
+    private final InventarioDetalleService inventarioDetalleService;
 
     // Vista principal con usuarioId
     @GetMapping("/{nombrePunto}/{gestorId}")
@@ -65,6 +75,8 @@ public class PuntoEcaController {
             @RequestParam(required = false) Alerta alerta,
             @RequestParam(required = false) String unidad,
             @RequestParam(required = false) String ocupacion,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
             Model model
     ) {
         // Normalizar sección a minúsculas
@@ -81,9 +93,10 @@ public class PuntoEcaController {
 
         // Cargar datos condicionales según la sección
         switch (seccion) {
-            case "materiales" -> cargarSeccionMateriales(usuario, texto, categoria, tipo, alerta, unidad, ocupacion, model);
+            case "materiales" ->
+                    cargarSeccionMateriales(usuario, texto, categoria, tipo, alerta, unidad, ocupacion, model);
             case "perfil" -> cargarSeccionPerfil(usuario, model);
-            case "movimientos" -> cargarSeccionMovimientos(usuario, model);
+            case "movimientos" -> cargarSeccionMovimientos(usuario, model, page, size);
             case "historial" -> cargarSeccionHistorial(usuario, model);
             case "centros" -> cargarSeccionCentros(usuario, model);
             case "configuracion" -> cargarSeccionConfiguracion(usuario, model);
@@ -104,16 +117,16 @@ public class PuntoEcaController {
      * Carga datos para la sección de Materiales con filtros
      */
     private void cargarSeccionMateriales(UsuarioGestorResponseDTO usuario, String texto, String categoria,
-            String tipo, Alerta alerta, String unidad, String ocupacion, Model model) {
+                                         String tipo, Alerta alerta, String unidad, String ocupacion, Model model) {
         List<?> inventarioFiltrado = Collections.emptyList();
         String mensajeAlerta = null;
 
         boolean hayFiltros = (texto != null && !texto.trim().isEmpty()) ||
-                             (categoria != null && !categoria.trim().isEmpty()) ||
-                             (tipo != null && !tipo.trim().isEmpty()) ||
-                             (alerta != null) ||
-                             (unidad != null && !unidad.trim().isEmpty()) ||
-                             (ocupacion != null && !ocupacion.trim().isEmpty());
+                (categoria != null && !categoria.trim().isEmpty()) ||
+                (tipo != null && !tipo.trim().isEmpty()) ||
+                (alerta != null) ||
+                (unidad != null && !unidad.trim().isEmpty()) ||
+                (ocupacion != null && !ocupacion.trim().isEmpty());
 
         try {
             if (hayFiltros) {
@@ -127,7 +140,6 @@ public class PuntoEcaController {
                 inventarioFiltrado = inventarioService.mostrarInventarioPuntoEca(usuario.puntoEcaId());
             }
         } catch (Exception e) {
-            // En caso de error al obtener los datos tratamos como "sin resultados"
             mensajeAlerta = "No se encontraron coincidencias con los filtros aplicados.";
         }
 
@@ -138,8 +150,8 @@ public class PuntoEcaController {
         if (mensajeAlerta != null) {
             model.addAttribute("mensajeAlerta", mensajeAlerta);
         }
-        model.addAttribute("categoriaMateriales", inventarioService.listarCategoriasMateriales());
-        model.addAttribute("tiposMateriales", inventarioService.listarTiposMateriales());
+        model.addAttribute("categoriaMateriales", categoriaMaterialService.listarCategoriasMateriales());
+        model.addAttribute("tiposMateriales", tipoMaterialService.listarTiposMateriales());
     }
 
     /**
@@ -153,14 +165,45 @@ public class PuntoEcaController {
         // Añade otros atributos necesarios para perfil cuando estén disponibles
     }
 
+
     /**
      * Carga datos para la sección de Movimientos
      */
-    private void cargarSeccionMovimientos(UsuarioGestorResponseDTO usuario, Model model) {
-        // Evitar warnings de parámetros no usados hasta que se implementen
-        Objects.requireNonNull(usuario);
-        Objects.requireNonNull(model);
-        // TODO: Implementar cuando haya servicio de movimientos
+    private void cargarSeccionMovimientos(UsuarioGestorResponseDTO usuario, Model model, int page, int size) {
+        try {
+            logger.debug("Cargando datos para sección de movimientos del usuario: {}", usuario.usuarioId());
+
+            UUID puntoEcaId = usuario.puntoEcaId();
+
+            // Obtener detalles del inventario
+//            Map<String, List<Object>> detallesMap = inventarioDetalleService.listaDetallesMaterialesInventario(puntoEcaId);
+
+            // Extraer y castear categorías correctamente
+            List<CategoriaMaterialesInvResponseDTO> categoriaMateriales = inventarioDetalleService.obtenerCategoriasDelPunto(puntoEcaId);
+            // Extraer y castear tipos correctamente
+            List<TipoMaterialesInvResponseDTO> tiposMateriales = inventarioDetalleService.obtenerTiposDelPunto(puntoEcaId);
+            Map<String, Object> atributos = Map.ofEntries(
+                    Map.entry("categoriaMateriales", categoriaMateriales),
+                    Map.entry("tiposMateriales", tiposMateriales),
+                    Map.entry("centrosAcopio", centroAcopioService.listaCentrosPorPuntoEca(puntoEcaId)),
+                    Map.entry("usuario", usuario),
+                    Map.entry("puntoEcaId", puntoEcaId),
+                    Map.entry("puntoEca", puntoEcaService.buscarPuntoEca(puntoEcaId)
+                            .orElseThrow(() -> new PuntoEcaNotFoundException("Punto ECA no encontrado: " + puntoEcaId))),
+                    Map.entry("entradasIniciales", compraInventarioService.comprasDelPunto(puntoEcaId, page, size)),
+                    Map.entry("salidasIniciales", ventaInventarioService.ventasDelPunto(puntoEcaId, page, size))
+            );
+
+            model.addAllAttributes(atributos);
+            logger.debug("Datos de movimientos cargados exitosamente");
+
+        } catch (PuntoEcaNotFoundException e) {
+            logger.error("Error: Punto ECA no encontrado: {}", e.getMessage());
+            model.addAttribute("error", "Error: " + e.getMessage());
+        } catch (Exception e) {
+            logger.error("Error al cargar sección de movimientos: {}", e.getMessage(), e);
+            model.addAttribute("error", "Error al cargar los datos de movimientos");
+        }
     }
 
     /**
@@ -195,7 +238,7 @@ public class PuntoEcaController {
                 .toList();
     }
 
-    private List<Localidad> construirLocalidades(){
+    private List<Localidad> construirLocalidades() {
         return localidadService.listadoLocalidades();
     }
 
@@ -212,6 +255,7 @@ public class PuntoEcaController {
                 })
                 .toList();
     }
+
     /**
      * Carga datos para la sección de Configuración
      */
@@ -234,7 +278,7 @@ public class PuntoEcaController {
             @RequestParam(defaultValue = "") String numeroDocumento,
             @RequestParam(defaultValue = "") String fechaNacimiento,
             @RequestParam(defaultValue = "") String biografia
-    ){
+    ) {
         try {
             // Validaciones
             if (nombres == null || nombres.trim().isEmpty() || nombres.length() < 3) {
@@ -251,21 +295,21 @@ public class PuntoEcaController {
             }
 
             var dto = new GestorUpdateDTO(
-                nombres.trim(),
-                apellidos.trim(),
-                TipoDocumento.valueOf(tipoDocumento),
-                numeroDocumento.trim(),
-                fechaNacimiento.trim(),
-                celular.trim(),
-                email.trim(),
-                biografia.trim()
+                    nombres.trim(),
+                    apellidos.trim(),
+                    TipoDocumento.valueOf(tipoDocumento),
+                    numeroDocumento.trim(),
+                    fechaNacimiento.trim(),
+                    celular.trim(),
+                    email.trim(),
+                    biografia.trim()
             );
             var resultado = gestorEcaService.actualizarGestor(usuarioId, dto);
             return ResponseEntity.ok(resultado);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", "Tipo de documento inválido"));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error al actualizar gestor: {}", e.getMessage(), e);
             return ResponseEntity.status(500).body(Map.of("error", "Error interno: " + e.getMessage()));
         }
     }
@@ -286,7 +330,7 @@ public class PuntoEcaController {
             @RequestParam(defaultValue = "") String descripcionPunto,
             @RequestParam(defaultValue = "") String sitioWebPunto,
             @RequestParam(defaultValue = "") String horarioAtencionPunto
-    ){
+    ) {
         try {
             logger.info("========== GUARDAR PUNTO ECA ==========");
             logger.info("usuarioId: {}", usuarioId);
@@ -325,17 +369,17 @@ public class PuntoEcaController {
 
             // Crear DTO con datos validados
             var dto = new PuntoEcaUpdateDTO(
-                nombrePunto.trim(),
-                descripcionPunto.trim(),
-                telefonoPunto.trim(),
-                celularPunto.trim(),
-                emailPunto.trim(),
-                direccionPunto.trim(),
-                localidadPuntoId,
-                latitud,
-                longitud,
-                sitioWebPunto.trim(),
-                horarioAtencionPunto.trim()
+                    nombrePunto.trim(),
+                    descripcionPunto.trim(),
+                    telefonoPunto.trim(),
+                    celularPunto.trim(),
+                    emailPunto.trim(),
+                    direccionPunto.trim(),
+                    localidadPuntoId,
+                    latitud,
+                    longitud,
+                    sitioWebPunto.trim(),
+                    horarioAtencionPunto.trim()
             );
 
             var resultado = gestorEcaService.actualizarPunto(usuarioId, puntoEcaId, dto);
@@ -345,12 +389,11 @@ public class PuntoEcaController {
             return ResponseEntity.badRequest().body(Map.of("error", "Datos inválidos: " + e.getMessage()));
         } catch (Exception e) {
             logger.error("❌ Error al guardar punto: {}", e.getMessage(), e);
-            e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("error", "Error interno: " + e.getMessage()));
         }
     }
 
-    // Endpoint REST: búsqueda de materiales - Devuelve JSON
+    // Endpoint REST: búsqueda de materiales nuevos (no en inventario) - Devuelve JSON
     @GetMapping("/catalogo/materiales/buscar")
     @ResponseBody
     public ResponseEntity<?> buscarMateriales(
@@ -360,7 +403,51 @@ public class PuntoEcaController {
             @RequestParam(required = false, defaultValue = "") String tipo
     ) {
         try {
-            List<MaterialInvResponseDTO> resultados = inventarioService.buscarMaterialFiltrandoInventario(puntoId, texto, categoria, tipo);
+            // Primero intentar buscar en materiales EXISTENTES en inventario
+            try {
+                List<MaterialInvResponseDTO> existentes = inventarioDetalleService.buscarMaterialExistentesFiltrandoInventario(puntoId, texto, categoria, tipo);
+                if (!existentes.isEmpty()) {
+                    logger.info("Materiales encontrados en inventario: {}", existentes.size());
+                    return ResponseEntity.ok(existentes);
+                }
+            } catch (Exception e) {
+                logger.debug("No se encontraron materiales en inventario, buscando en catálogo: {}", e.getMessage());
+            }
+
+            // Si no hay en inventario, buscar en catálogo (materiales nuevos)
+
+            // Si todos los materiales encontrados ya existen en el inventario
+            // devolver un error mostramos las coincidencias existentes para que el
+            // frontend las muestre (el usuario pidió ver coincidencias, no bloquear).
+            try {
+                List<MaterialInvResponseDTO> existentes = inventarioDetalleService.buscarMaterialExistentesFiltrandoInventario(puntoId, texto, categoria, tipo);
+                return ResponseEntity.ok(existentes);
+            } catch (Exception ex) {
+                // Si algo falla al obtener los existentes, devolver mensaje de error legible
+                return ResponseEntity.badRequest().body(Map.of(
+                        "error", true,
+                        "mensaje", ex.getMessage()
+                ));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "error", true,
+                    "mensaje", "Error al buscar materiales: " + e.getMessage()
+            ));
+        }
+    }
+
+    // Endpoint REST: búsqueda de materiales existentes en inventario - Devuelve JSON
+    @GetMapping("/catalogo/inventario/materiales/buscar")
+    @ResponseBody
+    public ResponseEntity<?> buscarMaterialesInventario(
+            @RequestParam UUID puntoId,
+            @RequestParam(required = false, defaultValue = "") String texto,
+            @RequestParam(required = false, defaultValue = "") String categoria,
+            @RequestParam(required = false, defaultValue = "") String tipo
+    ) {
+        try {
+            List<MaterialInvResponseDTO> resultados = inventarioDetalleService.buscarMaterialExistentesFiltrandoInventario(puntoId, texto, categoria, tipo);
             return ResponseEntity.ok(resultados);
         } catch (InventarioFoundExistException e) {
             // Devolver el mensaje de error de forma legible al frontend
@@ -375,7 +462,6 @@ public class PuntoEcaController {
             ));
         }
     }
-
 
     // Ruta: /punto-eca/{gestor}/{usuarioId}/actualizar-inventario/{inventarioId}
     @PutMapping("/{nombrePunto}/{usuarioId}/actualizar-inventario/{inventarioId}")
@@ -396,7 +482,7 @@ public class PuntoEcaController {
     @PostMapping("/inventario/agregar")
     @ResponseBody
     public ResponseEntity<?> agregarInventario(
-            @Valid @RequestBody InventarioGuardarDTO dto
+            @Valid @RequestBody InventarioRequestDTO dto
     ) {
         try {
             inventarioService.guardarInventario(dto);
@@ -404,7 +490,7 @@ public class PuntoEcaController {
                     "error", false,
                     "mensaje", "Inventario guardado exitosamente"
             ));
-        } catch (MaterialNotFoundException | PuntoEcaNotFoundException e) {
+        } catch (PuntoEcaNotFoundException e) {
             logger.error("Entidad no encontrada: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
                     "error", true,
@@ -448,6 +534,52 @@ public class PuntoEcaController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
                     "error", true,
                     "mensaje", "Error al eliminar inventario: " + e.getMessage()
+            ));
+        }
+    }
+
+    @PostMapping("/movimientos/registrar-entrada")
+    public ResponseEntity<?> registrarEntrada(
+            @RequestBody CompraInventarioRequestDTO compraDTO
+    ) {
+
+        try {
+            CompraInventarioResponseDTO compra = compraInventarioService.registrarCompra(compraDTO);
+
+            return ResponseEntity.ok(Map.of(
+                    "error", false,
+                    "mensaje", "Entrada registrada correctamente",
+                    "inventarioId", compra.inventarioId()
+            ));
+        } catch (InventarioNotFoundException e) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", true,
+                    "mensaje", e.getMessage()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", true,
+                    "mensaje", "Error al registrar entrada: " + e.getMessage()
+            ));
+        }
+
+    }
+
+    @PostMapping("/movimientos/registrar-salida")
+    public ResponseEntity<?> registrarCompra(
+            @RequestBody VentaInventarioRequestDTO ventaDTO
+    ) {
+        try {
+            VentaInventarioResponseDTO venta = ventaInventarioService.registrarVenta(ventaDTO);
+            return ResponseEntity.ok(Map.of(
+                    "error", false,
+                    "mensaje", "Salida registrada correctamente",
+                    "inventarioId", ventaDTO.inventarioId()
+            ));
+        } catch (InventarioNotFoundException | Exception e) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", true,
+                    "mensaje", e.getMessage()
             ));
         }
     }

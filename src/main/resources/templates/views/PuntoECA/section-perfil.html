@@ -1,25 +1,30 @@
 <!-- Sección de Perfil - Nuevo y Limpio -->
-<section th:fragment="perfil" class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <!-- Header -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body bg-success text-white p-3">
-                    <h3 class="mb-0"><i class="bi bi-person-check me-2"></i>Perfil del Gestor</h3>
-                </div>
-            </div>
+<section th:fragment="perfil" class="py-4">
+    <!-- Título principal -->
+    <div class="mb-4">
+        <h2 class="h4 fw-bold text-dark mb-1">
+            <i class="bi bi-person-check me-2"></i>Gestión de Perfil
+        </h2>
+        <p class="text-muted small mb-0">Administra la información del gestor y del centro de acopio</p>
+    </div>
 
-            <!-- Acordeones -->
-            <div class="accordion" id="perfilAccordion">
+    <!-- Acordeones -->
+    <div class="accordion accordion-flush shadow-sm" id="perfilAccordion">
                 <!-- ACORDEÓN 1: INFORMACIÓN DEL ENCARGADO -->
-                <div class="accordion-item">
+                <div class="accordion-item border-start border-5 border-primary">
                     <h2 class="accordion-header">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#encargadoPanel">
-                            <i class="bi bi-person-circle me-2 text-success"></i> Información del Encargado
+                        <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#encargadoPanel">
+                            <span class="bg-primary p-2 rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-person-circle text-white"></i>
+                            </span>
+                            <span>
+                                <span class="fw-bold text-dark d-block">Información del Encargado</span>
+                                <small class="text-muted fw-normal">Datos personales y de contacto</small>
+                            </span>
                         </button>
                     </h2>
                     <div id="encargadoPanel" class="accordion-collapse collapse show" data-bs-parent="#perfilAccordion">
-                        <div class="accordion-body">
+                        <div class="accordion-body p-4 bg-light">
                             <!-- Foto de Perfil - Al Inicio -->
                             <div class="text-center mb-4 pb-3 border-bottom">
                                 <div class="position-relative d-inline-block">
@@ -110,14 +115,20 @@
                 </div>
 
                 <!-- ACORDEÓN 2: INFORMACIÓN DEL PUNTO ECA -->
-                <div class="accordion-item">
+                <div class="accordion-item border-start border-5 border-info">
                     <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#puntoPanel">
-                            <i class="bi bi-building me-2 text-info"></i> Información del Punto ECA
+                        <button class="accordion-button fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#puntoPanel">
+                            <span class="bg-info p-2 rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-building text-white"></i>
+                            </span>
+                            <span>
+                                <span class="fw-bold text-dark d-block">Información del Punto ECA</span>
+                                <small class="text-muted fw-normal">Datos del centro de acopio</small>
+                            </span>
                         </button>
                     </h2>
                     <div id="puntoPanel" class="accordion-collapse collapse" data-bs-parent="#perfilAccordion">
-                        <div class="accordion-body">
+                        <div class="accordion-body p-4 bg-light">
                             <!-- Foto del Punto ECA - Al Inicio -->
                             <div class="text-center mb-4 pb-3 border-bottom">
                                 <div class="position-relative d-inline-block">
@@ -248,13 +259,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 </section>
 
-<script>
-// ✅ SCRIPT MOVIDO A puntoECA-layout.html
-// Todos los event listeners para los botones ahora se encuentran en el layout principal
-// para asegurar que se ejecuten correctamente con los fragmentos cargados vía th:insert
-</script>
 

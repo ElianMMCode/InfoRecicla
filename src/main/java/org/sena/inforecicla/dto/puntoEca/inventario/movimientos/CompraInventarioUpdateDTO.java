@@ -1,0 +1,30 @@
+package org.sena.inforecicla.dto.puntoEca.inventario.movimientos;
+
+import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+/**
+ * DTO para actualizar una compra de inventario existente
+ */
+public record CompraInventarioUpdateDTO(
+
+        @NotNull(message = "La fecha de compra es obligatoria")
+        LocalDateTime fechaCompra,
+
+        @NotNull(message = "El precio de compra es obligatorio")
+        @DecimalMin(value = "0.01", message = "El precio de compra debe ser mayor a 0.01")
+        @Digits(integer = 12, fraction = 2, message = "Formato inválido para precio de compra")
+        BigDecimal precioCompra,
+
+        @NotNull
+        @DecimalMin(value = "0.1", message = "La cantidad no puede ser negativo")
+        @Digits(integer = 10, fraction = 2, message = "Formato inválido para cantidad actual")
+        BigDecimal cantidad,
+
+        @Size(max = 500, message = "Las observaciones no pueden exceder 500 caracteres")
+        String observaciones
+
+) {
+}
+

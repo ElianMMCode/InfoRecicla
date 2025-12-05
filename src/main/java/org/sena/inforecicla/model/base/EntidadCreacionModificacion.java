@@ -1,9 +1,6 @@
 package org.sena.inforecicla.model.base;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +19,11 @@ public abstract class EntidadCreacionModificacion {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 15)
     private Estado estado;
+
+    @PrePersist
+    public void asignarEstadoDefault(){
+        if (estado == null) estado = Estado.Activo;
+    }
 
     @CreationTimestamp
     @Column(name = "fecha_creacion", nullable = false, updatable = false)

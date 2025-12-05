@@ -7,6 +7,7 @@ import org.sena.inforecicla.model.base.EntidadLocalizacionWebHorario;
 import org.sena.inforecicla.model.enums.TipoCentroAcopio;
 import org.sena.inforecicla.model.enums.Visibilidad;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -58,6 +59,6 @@ public class CentroAcopio extends EntidadLocalizacionWebHorario {
     @JoinColumn(name = "punto_eca_id", foreignKey = @ForeignKey(name = "fk_puntoeca_centroacopio"))
     private PuntoECA puntoEca;
 
-    @OneToOne(mappedBy = "ctrAcopio")
-    private VentaInventario ventaInventario;
+    @OneToMany(mappedBy = "ctrAcopio", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<VentaInventario> ventasInventario;
 }
