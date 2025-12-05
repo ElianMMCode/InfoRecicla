@@ -6,7 +6,9 @@ import org.sena.inforecicla.dto.puntoEca.inventario.InventarioUpdateDTO;
 import org.sena.inforecicla.exception.InventarioNotFoundException;
 import org.sena.inforecicla.exception.MaterialNotFoundException;
 import org.sena.inforecicla.exception.PuntoEcaNotFoundException;
+import org.sena.inforecicla.model.Inventario;
 import org.sena.inforecicla.model.enums.Alerta;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,4 +24,8 @@ public interface InventarioService {
     List<InventarioResponseDTO> filtraInventario(UUID gestorId, String texto, String categoria, String tipo, Alerta alerta, String unidad, String ocupacion);
 
     void eliminarInventario(UUID inventarioId) throws InventarioNotFoundException;
+
+    Inventario obtenerInventarioValidoParaCompra(UUID inventarioId, UUID puntoId, UUID materialId) throws InventarioNotFoundException;
+
+    void actualizarStock(Inventario inv);
 }

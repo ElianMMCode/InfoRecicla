@@ -13,6 +13,12 @@ public record CompraInventarioRequestDTO(
         @NotNull(message = "El inventario ID es obligatorio")
         UUID inventarioId,
 
+        @NotNull(message = "El puntoEca ID es obligatorio")
+        UUID puntoEcaId,
+
+        @NotNull(message = "El material ID es obligatorio")
+        UUID materialId,
+
         @NotNull(message = "La fecha de compra es obligatoria")
         LocalDateTime fechaCompra,
 

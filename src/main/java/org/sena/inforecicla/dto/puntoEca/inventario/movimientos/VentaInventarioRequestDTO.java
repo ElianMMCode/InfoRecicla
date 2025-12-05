@@ -13,6 +13,12 @@ public record VentaInventarioRequestDTO(
         @NotNull(message = "El inventario ID es obligatorio")
         UUID inventarioId,
 
+        @NotNull(message = "El puntoEca ID es obligatorio")
+        UUID puntoEcaId,
+
+        @NotNull(message = "El material ID es obligatorio")
+        UUID materialId,
+
         @NotNull(message = "La fecha de venta es obligatoria")
         LocalDateTime fechaVenta,
 
@@ -26,7 +32,6 @@ public record VentaInventarioRequestDTO(
         @Digits(integer = 10, fraction = 2, message = "Formato inválido para cantidad actual")
         BigDecimal cantidad,
 
-        @NotNull(message = "El centro de acopio es obligatorio")
         UUID centroAcopioId,
 
         @Size(max = 500, message = "Las observaciones no pueden exceder 500 caracteres")

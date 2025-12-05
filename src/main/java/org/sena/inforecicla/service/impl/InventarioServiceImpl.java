@@ -11,9 +11,12 @@ import org.sena.inforecicla.model.PuntoECA;
 import org.sena.inforecicla.model.enums.Alerta;
 import org.sena.inforecicla.model.enums.Estado;
 import org.sena.inforecicla.repository.InventarioRepository;
+import org.sena.inforecicla.repository.MaterialRepository;
+import org.sena.inforecicla.repository.PuntoEcaRepository;
 import org.sena.inforecicla.service.InventarioService;
 import org.sena.inforecicla.service.PuntoEcaService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -28,6 +31,8 @@ public class InventarioServiceImpl implements InventarioService {
 
     private final InventarioRepository inventarioRepository;
     private final PuntoEcaService puntoEcaService;
+    private final PuntoEcaRepository puntoEcaRepository;
+    private final MaterialRepository materialRepository;
 
     // ...existing code...
 
@@ -162,7 +167,7 @@ public class InventarioServiceImpl implements InventarioService {
                         .divide(capacidad, 0, RoundingMode.HALF_UP)
                         .intValue();
 
-        return switch(ocupacion) {
+        return switch (ocupacion) {
             case "0-25" -> porcentajeOcupacion >= 0 && porcentajeOcupacion <= 25;
             case "25-50" -> porcentajeOcupacion > 25 && porcentajeOcupacion <= 50;
             case "50-75" -> porcentajeOcupacion > 50 && porcentajeOcupacion <= 75;
@@ -170,5 +175,22 @@ public class InventarioServiceImpl implements InventarioService {
             default -> false;
         };
     }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Inventario obtenerInventarioValidoParaCompra(UUID inventarioId, UUID puntoId, UUID materialId) throws InventarioNotFoundException {
+        return inventarioRepository
+                .findByInventarioIdAndPuntoEca_PuntoEcaIDAndMaterial_MaterialId(inventarioId, puntoId, materialId)
+                .orElseThrow(() -> new InventarioNotFoundException(
+                        "No existe inventario con esos datos (inventario, punto, material)"
+                ));
+
+    }
+
+    @Override
+    public void actualizarStock(Inventario inv){
+        inventarioRepository.save(inv);
+    }
+
 }
 

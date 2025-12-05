@@ -6,9 +6,12 @@ import org.sena.inforecicla.dto.puntoEca.gestor.GestorUpdateDTO;
 import org.sena.inforecicla.dto.puntoEca.gestor.PuntoEcaUpdateDTO;
 import org.sena.inforecicla.dto.puntoEca.inventario.InventarioRequestDTO;
 import org.sena.inforecicla.dto.puntoEca.inventario.InventarioUpdateDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.movimientos.CompraInventarioRequestDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.movimientos.CompraInventarioResponseDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.movimientos.VentaInventarioRequestDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.movimientos.VentaInventarioResponseDTO;
 import org.sena.inforecicla.dto.puntoEca.materiales.CategoriaMaterialesInvResponseDTO;
 import org.sena.inforecicla.dto.puntoEca.materiales.MaterialInvResponseDTO;
-import org.sena.inforecicla.dto.puntoEca.materiales.MaterialResponseDTO;
 import org.sena.inforecicla.dto.puntoEca.materiales.TipoMaterialesInvResponseDTO;
 import org.sena.inforecicla.dto.usuario.UsuarioGestorResponseDTO;
 import org.sena.inforecicla.exception.InventarioFoundExistException;
@@ -180,15 +183,15 @@ public class PuntoEcaController {
             // Extraer y castear tipos correctamente
             List<TipoMaterialesInvResponseDTO> tiposMateriales = inventarioDetalleService.obtenerTiposDelPunto(puntoEcaId);
             Map<String, Object> atributos = Map.ofEntries(
-                Map.entry("categoriaMateriales", categoriaMateriales),
-                Map.entry("tiposMateriales", tiposMateriales),
-                Map.entry("centrosAcopio", centroAcopioService.obtenerPorPuntoECA(puntoEcaId)),
-                Map.entry("usuario", usuario),
-                Map.entry("puntoEcaId", puntoEcaId),
-                Map.entry("puntoEca", puntoEcaService.buscarPuntoEca(puntoEcaId)
-                    .orElseThrow(() -> new PuntoEcaNotFoundException("Punto ECA no encontrado: " + puntoEcaId))),
-                Map.entry("entradasIniciales", compraInventarioService.comprasDelPunto(puntoEcaId, page, size)),
-                Map.entry("salidasIniciales", ventaInventarioService.ventasDelPunto(puntoEcaId, page, size))
+                    Map.entry("categoriaMateriales", categoriaMateriales),
+                    Map.entry("tiposMateriales", tiposMateriales),
+                    Map.entry("centrosAcopio", centroAcopioService.listaCentrosPorPuntoEca(puntoEcaId)),
+                    Map.entry("usuario", usuario),
+                    Map.entry("puntoEcaId", puntoEcaId),
+                    Map.entry("puntoEca", puntoEcaService.buscarPuntoEca(puntoEcaId)
+                            .orElseThrow(() -> new PuntoEcaNotFoundException("Punto ECA no encontrado: " + puntoEcaId))),
+                    Map.entry("entradasIniciales", compraInventarioService.comprasDelPunto(puntoEcaId, page, size)),
+                    Map.entry("salidasIniciales", ventaInventarioService.ventasDelPunto(puntoEcaId, page, size))
             );
 
             model.addAllAttributes(atributos);
@@ -400,10 +403,20 @@ public class PuntoEcaController {
             @RequestParam(required = false, defaultValue = "") String tipo
     ) {
         try {
-            List<MaterialResponseDTO> resultados = inventarioDetalleService.buscarMaterialNuevoFiltrandoInventario(puntoId, texto, categoria, tipo);
-            return ResponseEntity.ok(resultados);
-        } catch (InventarioFoundExistException e) {
-            // Si todos los materiales encontrados ya existen en el inventario, en vez de
+            // Primero intentar buscar en materiales EXISTENTES en inventario
+            try {
+                List<MaterialInvResponseDTO> existentes = inventarioDetalleService.buscarMaterialExistentesFiltrandoInventario(puntoId, texto, categoria, tipo);
+                if (!existentes.isEmpty()) {
+                    logger.info("Materiales encontrados en inventario: {}", existentes.size());
+                    return ResponseEntity.ok(existentes);
+                }
+            } catch (Exception e) {
+                logger.debug("No se encontraron materiales en inventario, buscando en catálogo: {}", e.getMessage());
+            }
+
+            // Si no hay en inventario, buscar en catálogo (materiales nuevos)
+
+            // Si todos los materiales encontrados ya existen en el inventario
             // devolver un error mostramos las coincidencias existentes para que el
             // frontend las muestre (el usuario pidió ver coincidencias, no bloquear).
             try {
@@ -413,7 +426,7 @@ public class PuntoEcaController {
                 // Si algo falla al obtener los existentes, devolver mensaje de error legible
                 return ResponseEntity.badRequest().body(Map.of(
                         "error", true,
-                        "mensaje", e.getMessage()
+                        "mensaje", ex.getMessage()
                 ));
             }
         } catch (Exception e) {
@@ -521,6 +534,52 @@ public class PuntoEcaController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
                     "error", true,
                     "mensaje", "Error al eliminar inventario: " + e.getMessage()
+            ));
+        }
+    }
+
+    @PostMapping("/movimientos/registrar-entrada")
+    public ResponseEntity<?> registrarEntrada(
+            @RequestBody CompraInventarioRequestDTO compraDTO
+    ) {
+
+        try {
+            CompraInventarioResponseDTO compra = compraInventarioService.registrarCompra(compraDTO);
+
+            return ResponseEntity.ok(Map.of(
+                    "error", false,
+                    "mensaje", "Entrada registrada correctamente",
+                    "inventarioId", compra.inventarioId()
+            ));
+        } catch (InventarioNotFoundException e) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", true,
+                    "mensaje", e.getMessage()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", true,
+                    "mensaje", "Error al registrar entrada: " + e.getMessage()
+            ));
+        }
+
+    }
+
+    @PostMapping("/movimientos/registrar-salida")
+    public ResponseEntity<?> registrarCompra(
+            @RequestBody VentaInventarioRequestDTO ventaDTO
+    ) {
+        try {
+            VentaInventarioResponseDTO venta = ventaInventarioService.registrarVenta(ventaDTO);
+            return ResponseEntity.ok(Map.of(
+                    "error", false,
+                    "mensaje", "Salida registrada correctamente",
+                    "inventarioId", ventaDTO.inventarioId()
+            ));
+        } catch (InventarioNotFoundException | Exception e) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", true,
+                    "mensaje", e.getMessage()
             ));
         }
     }

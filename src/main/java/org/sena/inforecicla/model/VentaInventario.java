@@ -2,7 +2,6 @@ package org.sena.inforecicla.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import org.sena.inforecicla.model.base.EntidadCreacionModificacion;
 
@@ -31,10 +30,7 @@ public class VentaInventario extends EntidadCreacionModificacion {
     )
     private Inventario inventario;
 
-    @Pattern(
-            regexp = "^(19|20)\\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$",
-            message = "La fecha debe tener un formato válido YYYY-MM-DD"
-    )
+    @NotNull(message = "La fecha de venta es obligatoria")
     private LocalDateTime fechaVenta;
 
     @Column(precision = 12, scale = 2)

@@ -3,6 +3,7 @@ package org.sena.inforecicla.service;
 import org.sena.inforecicla.model.CentroAcopio;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -16,7 +17,7 @@ public interface CentroAcopioService {
      * @param puntoEcaId ID del Punto ECA
      * @return Lista de centros de acopio activos (ECA y GLOBAL)
      */
-    List<CentroAcopio> obtenerPorPuntoECA(UUID puntoEcaId);
+    List<CentroAcopio> listaCentrosPorPuntoEca(UUID puntoEcaId);
 
     /**
      * Obtiene un centro de acopio por su ID
@@ -25,5 +26,7 @@ public interface CentroAcopioService {
      * @return Centro de acopio si existe
      */
     CentroAcopio obtenerPorId(UUID centroAcopioId);
+
+    CentroAcopio obtenerCentroValidoPunto(UUID centroId, UUID puntoId);
 }
 
