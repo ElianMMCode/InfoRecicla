@@ -2,8 +2,8 @@ package org.sena.inforecicla.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.sena.inforecicla.model.base.EntidadCreacionModificacion;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -13,10 +13,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
-@Data
 @ToString
 @Table(name = "tb_etiqueta")
-public class Etiquetas {
+public class Etiquetas extends EntidadCreacionModificacion {
 
     @Id
     @GeneratedValue
@@ -31,5 +30,5 @@ public class Etiquetas {
 
 
     @ManyToMany(mappedBy = "etiquetas")
-    private List<Publicaciones> publicaciones = new ArrayList<>();
+    private List<Publicacion> publicaciones = new ArrayList<>();
 }
