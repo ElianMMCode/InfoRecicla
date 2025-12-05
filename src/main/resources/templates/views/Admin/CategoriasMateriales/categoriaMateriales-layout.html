@@ -14,37 +14,38 @@
 
         <!-- Vertical sidebar (fixed on md+, no JS, no custom CSS) -->
         <aside class="d-none d-md-flex col-md-2 position-fixed top-0 start-0 vh-100 bg-success text-white p-3 flex-column z-3 shadow-sm">
-            <a class="navbar-brand d-flex align-items-center gap-2 text-white mb-3" th:href="@{/}">
+            <a class="navbar-brand d-flex align-items-center gap-2 text-white mb-3" th:href="@{../Inicio/inicio.html}">
                 <img th:src="@{/imagenes/logo.png}" src="/imagenes/logo.png" alt="Logo" width="48" height="48"
                      class="rounded">
                 <span class="fw-semibold">InfoRecicla</span>
             </a>
-
             <nav class="w-100" role="navigation" aria-label="Menú principal Categorías de Material">
                 <ul class="nav nav-pills flex-column gap-2 w-100">
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${(#strings.equals(seccion,'dashboard') or #strings.isEmpty(seccion)) ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
-                           th:attr="aria-current=${(#strings.equals(seccion,'dashboard') or #strings.isEmpty(seccion)) ? 'page' : null}"
-                           th:href="@{/categorias?seccion=dashboard}">Dashboard</a>
+                           th:class="${(#strings.equals(seccion,'indexCategoriaMaterial') or #strings.isEmpty(seccion)) ?
+                          'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' :
+                          'text-white'}"
+                           th:attr="aria-current=${(#strings.equals(seccion,'indexCategoriaMaterial') or #strings.isEmpty(seccion)) ? 'page' : false}"
+                           th:href="@{/admin/categorias-materiales}">Inicio</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'listado') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
-                           th:attr="aria-current=${#strings.equals(seccion,'listado') ? 'page' : null}"
-                           th:href="@{/categorias/listado?seccion=listado}">Listado</a>
+                           th:classappend="${#strings.equals(seccion,'listCategoriaMaterial') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
+                           th:attr="aria-current=${#strings.equals(seccion,'listCategoriaMaterial') ? 'page' : null}"
+                           th:href="@{/admin/categorias-materiales}">Listado</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'crear') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
-                           th:attr="aria-current=${#strings.equals(seccion,'crear') ? 'page' : null}"
-                           th:href="@{/categorias/crear?seccion=crear}">Crear Categoría</a>
+                           th:classappend="${#strings.equals(seccion,'createCategoriaMaterial') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
+                           th:attr="aria-current=${#strings.equals(seccion,'createCategoriaMaterial') ? 'page' : null}"
+                           th:href="@{/admin/categorias-materiales}">Crear Categoría</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${#strings.equals(seccion,'materiales') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
-                           th:attr="aria-current=${#strings.equals(seccion,'materiales') ? 'page' : null}"
-                           th:href="@{/materiales?seccion=materiales}">Materiales</a>
+                           th:classappend="${#strings.equals(seccion,'showCategoriaMaterial') ? 'bg-white text-success fw-semibold border-start border-4 border-success rounded-start' : 'text-white'}"
+                           th:attr="aria-current=${#strings.equals(seccion,'showCategoriaMaterial') ? 'page' : null}"
+                           th:href="@{/admin/categoria-materiales}">Materiales</a>
                     </li>
                 </ul>
             </nav>
@@ -57,7 +58,7 @@
         <!-- Top horizontal nav for small screens (fixed-top) -->
         <div class="d-md-none w-100 bg-success py-2 fixed-top z-3 shadow-sm">
             <div class="d-flex align-items-center justify-content-between px-3">
-                <a class="navbar-brand d-flex align-items-center gap-2 text-white" th:href="@{/}">
+                <a class="navbar-brand d-flex align-items-center gap-2 text-white" th:href="@{../Inicio/inicio.html}">
                     <img th:src="@{/imagenes/logo.png}" src="/imagenes/logo.png" alt="Logo" width="1024" height="1024"
                          class="rounded">
                     <span class="fw-semibold">InfoRecicla</span>
@@ -67,27 +68,27 @@
                 <ul class="nav nav-pills flex-row gap-2 overflow-auto px-3">
                     <li class="nav-item">
                         <a class="nav-link"
-                           th:classappend="${(#strings.equals(seccion,'dashboard') or #strings.isEmpty(seccion)) ? 'bg-white text-success fw-semibold border-bottom border-3 border-success rounded-bottom' : 'text-white'}"
-                           th:attr="aria-current=${(#strings.equals(seccion,'dashboard') or #strings.isEmpty(seccion)) ? 'page' : null}"
-                           th:href="@{/categorias?seccion=dashboard}">Dashboard</a>
+                           th:classappend="${(#strings.equals(seccion,'indexCateroiaMaterial') or #strings.isEmpty(seccion)) ? 'bg-white text-success fw-semibold border-bottom border-3 border-success rounded-bottom' : 'text-white'}"
+                           th:attr="aria-current=${(#strings.equals(seccion,'indexCateroiaMaterial') or #strings.isEmpty(seccion)) ? 'page' : null}"
+                           th:href="@{/admin/categorias-materiales}">Inicio</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'listado') ? 'bg-white text-success fw-semibold border-bottom border-3 border-success rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'listado') ? 'page' : null}"
-                           th:href="@{/categorias/listado?seccion=listado}">Listado</a>
+                           th:href="@{/admin/admin/categorias-materiales}">Listado</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'crear') ? 'bg-white text-success fw-semibold border-bottom border-3 border-success rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'crear') ? 'page' : null}"
-                           th:href="@{/categorias/crear?seccion=crear}">Crear</a>
+                           th:href="@{/admin/admin/categorias-materiales}">Crear</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link"
                            th:classappend="${#strings.equals(seccion,'materiales') ? 'bg-white text-success fw-semibold border-bottom border-3 border-success rounded-bottom' : 'text-white'}"
                            th:attr="aria-current=${#strings.equals(seccion,'materiales') ? 'page' : null}"
-                           th:href="@{/materiales?seccion=materiales}">Materiales</a>
+                           th:href="@{/admin/admin/categorias-materiales}">Materiales</a>
                     </li>
                 </ul>
             </nav>
@@ -95,12 +96,12 @@
 
         <!-- Main content column (offset on md+ so it doesn't go under the fixed sidebar) -->
         <main class="col offset-md-2 p-4 pt-5 pt-md-0">
-            <div th:switch="${#strings.isEmpty(seccion) ? 'dashboard' : seccion}">
-                <div th:case="'dashboard'" th:insert="~{views/CategoriaMaterial/section-indexCategoriaMaterial :: dashboard}"></div>
-                <div th:case="'listado'" th:insert="~{views/CategoriaMaterial/section-listCategoriaMaterial :: listado}"></div>
-                <div th:case="'crear'" th:insert="~{views/CategoriaMaterial/section-createCategoriaMaterial :: crear}"></div>
-                <div th:case="'editar'" th:insert="~{views/CategoriaMaterial/section-editCategoriaMaterial :: editar}"></div>
-                <div th:case="'detalle'" th:insert="~{views/CategoriaMaterial/section-showCategoriaMaterial :: detalle}"></div>
+            <div th:switch="${#strings.isEmpty(seccion) ? 'inicio' : seccion}">
+                <div th:case="'dashboard'" th:insert="~{views/Admin/CategoriasMateriales/section-indexCategoriaMaterial :: inicio}"></div>
+                <div th:case="'listado'" th:insert="~{views/Admin/CategoriasMateriales/section-listCategoriaMaterial :: listado}"></div>
+                <div th:case="'crear'" th:insert="~{views/Admin/CategoriasMateriales/section-createCategoriaMaterial :: crear}"></div>
+                <div th:case="'editar'" th:insert="~{views/Admin/CategoriasMateriales/section-editCategoriaMaterial :: editar}"></div>
+                <div th:case="'detalle'" th:insert="~{views/Admin/CategoriasMateriales/section-showCategoriaMaterial :: detalle}"></div>
                 <div th:case="*" class="text-center text-muted">Sección no encontrada.</div>
             </div>
         </main>
