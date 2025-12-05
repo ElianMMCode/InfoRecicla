@@ -6,18 +6,19 @@ import jakarta.validation.constraints.*;
 import jakarta.persistence.GeneratedValue;
 
 import org.sena.inforecicla.model.base.EntidadDescripcion;
-import org.sena.inforecicla.model.enums.EstadoPublicacion;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "publicaciones")
+@Table(name = "publicacion")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Publicacion extends EntidadDescripcion {
+
         @Id
         @GeneratedValue(generator = "UUID")
         @Column(name = "publicacion_id", unique = true, nullable = false)
@@ -28,15 +29,9 @@ public class Publicacion extends EntidadDescripcion {
         @Size(min = 3, max = 200)
         private String titulo;
 
-        @Lob
-        @Column(name = "contenido", nullable = false, columnDefinition = "TEXT")
+        @Column(name = "contenido", nullable = false, columnDefinition = "LONGTEXT")
         @NotBlank(message = "El contenido no puede estar vacío")
         private String contenido;
-
-        @Enumerated(EnumType.STRING)
-        @Column(name = "estado", nullable = false, columnDefinition = "ENUM('Borrador','Publicado','Archivado')")
-        @NotNull(message = "El estado es obligatorio")
-        private EstadoPublicacion estado;
 
         @Column(name = "usuario_id", insertable = false, updatable = false)
         private UUID usuarioId;
@@ -53,4 +48,12 @@ public class Publicacion extends EntidadDescripcion {
         @JoinColumn(name = "categoria_publicacion_id", nullable = false, foreignKey = @ForeignKey(name = "fk_publicacion_categoria"))
         @NotNull
         private CategoriaPublicacion categoriaPublicacion;
+
+        @ManyToMany
+        @JoinTable(
+                name = "publicacion_etiquetas",
+                joinColumns = @JoinColumn(name = "publicacion_id"),
+                inverseJoinColumns = @JoinColumn(name = "etiqueta_id")
+        )
+        private List<Etiquetas> etiquetas;
 }

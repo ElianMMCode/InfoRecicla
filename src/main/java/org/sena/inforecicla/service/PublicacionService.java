@@ -8,6 +8,7 @@ import org.sena.inforecicla.exception.PublicacionNotFoundException;
 import org.sena.inforecicla.model.CategoriaPublicacion;
 import org.sena.inforecicla.model.Publicacion;
 import org.sena.inforecicla.model.Usuario;
+import org.sena.inforecicla.model.enums.Estado;
 import org.sena.inforecicla.model.enums.EstadoPublicacion;
 import org.sena.inforecicla.repository.CategoriaPublicacionRepository;
 import org.sena.inforecicla.repository.PublicacionRepository;
@@ -44,12 +45,16 @@ public class PublicacionService {
         Publicacion publicacion = Publicacion.builder()
                 .titulo(requestDTO.getTitulo())
                 .contenido(requestDTO.getContenido())
-                .nombre(requestDTO.getNombre())
-                .descripcion(requestDTO.getDescripcion())
-                .estado(requestDTO.getEstado())
                 .usuario(usuario)
                 .categoriaPublicacion(categoria)
                 .build();
+
+        // Establecer campos heredados de EntidadDescripcion
+        publicacion.setNombre(requestDTO.getNombre());
+        publicacion.setDescripcion(requestDTO.getDescripcion());
+
+        // Establecer estado heredado de EntidadCreacionModificacion
+        publicacion.setEstado(Estado.valueOf(requestDTO.getEstado().name()));
 
         Publicacion publicacionGuardada = publicacionRepository.save(publicacion);
 
@@ -82,10 +87,15 @@ public class PublicacionService {
     }
 
     public List<PublicacionResponseDTO> mostrarPublicacionesPorEstado(String estado) {
-        return publicacionRepository.findByEstado(estado)
-                .stream()
-                .map(this::convertirAResponseDTO)
-                .collect(Collectors.toList());
+        try {
+            Estado estadoEnum = Estado.valueOf(estado.toUpperCase());
+            return publicacionRepository.findByEstado(estadoEnum)
+                    .stream()
+                    .map(this::convertirAResponseDTO)
+                    .collect(Collectors.toList());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Estado inválido: " + estado);
+        }
     }
 
     public List<PublicacionResponseDTO> buscarPublicaciones(String keyword) {
@@ -114,7 +124,7 @@ public class PublicacionService {
             publicacion.setDescripcion(updateDTO.getDescripcion());
         }
         if (updateDTO.getEstado() != null) {
-            publicacion.setEstado(updateDTO.getEstado());
+            publicacion.setEstado(Estado.valueOf(updateDTO.getEstado().name()));
         }
         if (updateDTO.getCategoriaPublicacionId() != null) {
             CategoriaPublicacion categoria = categoriaPublicacionRepository
@@ -123,7 +133,7 @@ public class PublicacionService {
             publicacion.setCategoriaPublicacion(categoria);
         }
 
-        publicacion.setActualizado(LocalDateTime.now());
+        publicacion.setFechaActualizacion(LocalDateTime.now());
         Publicacion publicacionActualizada = publicacionRepository.save(publicacion);
 
         return convertirAResponseDTO(publicacionActualizada);
@@ -135,9 +145,9 @@ public class PublicacionService {
                 .orElseThrow(() -> new PublicacionNotFoundException("Publicación no encontrada"));
 
         try {
-            EstadoPublicacion nuevoEstado = EstadoPublicacion.valueOf(estado.toUpperCase());
+            Estado nuevoEstado = Estado.valueOf(estado.toUpperCase());
             publicacion.setEstado(nuevoEstado);
-            publicacion.setActualizado(LocalDateTime.now());
+            publicacion.setFechaActualizacion(LocalDateTime.now());
             publicacionRepository.save(publicacion);
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Estado inválido: " + estado);
@@ -163,13 +173,13 @@ public class PublicacionService {
                 .contenido(publicacion.getContenido())
                 .nombre(publicacion.getNombre())
                 .descripcion(publicacion.getDescripcion())
-                .estado(publicacion.getEstado())
+                .estado(EstadoPublicacion.valueOf(publicacion.getEstado().name()))
                 .usuarioId(publicacion.getUsuario().getUsuarioId())
-                .nombreUsuario(publicacion.getUsuario().getNombre() + " " + publicacion.getUsuario().getApellido())
-                .categoriaPublicacionId(publicacion.getCategoriaPublicacion().getCategoiraPublicacionId())
+                .nombreUsuario(publicacion.getUsuario().getNombres() + " " + publicacion.getUsuario().getApellidos())
+                .categoriaPublicacionId(publicacion.getCategoriaPublicacion().getCategoriaPublicacionId())
                 .nombreCategoria(publicacion.getCategoriaPublicacion().getNombre())
-                .creado(publicacion.getCreado())
-                .actualizado(publicacion.getActualizado())
+                .creado(publicacion.getFechaCreacion())
+                .actualizado(publicacion.getFechaActualizacion())
                 .build();
     }
 }
