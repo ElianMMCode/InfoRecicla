@@ -1,36 +1,28 @@
 package org.sena.inforecicla.model;
 
-import java.util.List;
+import jakarta.persistence.*;
+import lombok.*;
+import org.sena.inforecicla.model.base.EntidadCreacionModificacion;
+
 import java.util.UUID;
 
-import org.sena.inforecicla.model.base.EntidadDescripcion;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 @Entity
-@Table(name = "categoria_publicacion")
+@Table(name = "categorias_publicacion")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CategoriaPublicacion extends EntidadDescripcion {
+public class CategoriaPublicacion extends EntidadCreacionModificacion {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(generator = "UUID")
     @Column(name = "categoria_publicacion_id", unique = true, nullable = false)
     private UUID categoriaPublicacionId;
 
-    @OneToMany(mappedBy = "categoriaPublicacion")
-    private List<Publicacion> publicaciones;
+    @Column(name = "nombre", nullable = false, length = 100)
+    private String nombre;
+
+    @Column(name = "descripcion", length = 500)
+    private String descripcion;
 }

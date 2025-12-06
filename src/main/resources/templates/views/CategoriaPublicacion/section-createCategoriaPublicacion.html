@@ -1,0 +1,334 @@
+<!-- Crear Nueva Categoría de Publicación -->
+<section th:fragment="create" class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body bg-success text-white p-3">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a th:href="@{/categoria-publicacion/index}" class="text-white">Inicio</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a th:href="@{/categoria-publicacion/list}" class="text-white">Listado</a>
+                            </li>
+                            <li class="breadcrumb-item active text-white" aria-current="page">Crear Nueva Categoría</li>
+                        </ol>
+                    </nav>
+                    <h3 class="mb-0 mt-2"><i class="bi bi-plus-circle me-2"></i>Crear Nueva Categoría</h3>
+                </div>
+            </div>
+
+            <!-- Formulario de creación -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <form th:action="@{/categoria-publicacion/store}" method="POST" th:object="${categoriaRequestDTO}"
+                                  class="needs-validation" novalidate>
+
+                                <!-- Nombre -->
+                                <div class="mb-4">
+                                    <label for="nombre" class="form-label fw-bold">
+                                        <i class="bi bi-card-heading me-1 text-success"></i>Nombre de la categoría *
+                                    </label>
+                                    <input type="text" class="form-control form-control-lg"
+                                           id="nombre" name="nombre"
+                                           th:field="*{nombre}"
+                                           required
+                                           minlength="2"
+                                           maxlength="100"
+                                           placeholder="Ej: Reciclaje de Plástico, Compostaje, Reciclaje Electrónico">
+                                    <div class="form-text text-muted">
+                                        El nombre debe tener entre 2 y 100 caracteres. Sé descriptivo pero conciso.
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Por favor ingresa un nombre válido (entre 2 y 100 caracteres).
+                                    </div>
+                                </div>
+
+                                <!-- Descripción -->
+                                <div class="mb-4">
+                                    <label for="descripcion" class="form-label fw-bold">
+                                        <i class="bi bi-text-paragraph me-1 text-success"></i>Descripción *
+                                    </label>
+                                    <textarea class="form-control" id="descripcion" name="descripcion"
+                                              th:field="*{descripcion}"
+                                              rows="4"
+                                              maxlength="500"
+                                              placeholder="Describe brevemente el propósito y contenido de esta categoría..."
+                                              required></textarea>
+                                    <div class="form-text text-muted d-flex justify-content-between">
+                                        <span>Máximo 500 caracteres</span>
+                                        <span id="contadorDescripcion">500 caracteres restantes</span>
+                                    </div>
+                                    <div class="invalid-feedback">
+                                        Por favor ingresa una descripción válida (máximo 500 caracteres).
+                                    </div>
+                                </div>
+
+                                <!-- Icono y Color -->
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <label for="icono" class="form-label fw-bold">
+                                            <i class="bi bi-emoji-smile me-1 text-success"></i>Icono (opcional)
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="bi bi-emoji-smile"></i>
+                                            </span>
+                                            <input type="text" class="form-control" id="icono" name="icono"
+                                                   th:field="*{icono}"
+                                                   maxlength="50"
+                                                   placeholder="Ej: bi-recycle, bi-trash, bi-basket">
+                                        </div>
+                                        <div class="form-text text-muted">
+                                            Nombre de clase Bootstrap Icons (máx. 50 caracteres).
+                                            <a href="https://icons.getbootstrap.com/" target="_blank" class="text-decoration-none">
+                                                <i class="bi bi-box-arrow-up-right ms-1"></i> Ver iconos disponibles
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="color" class="form-label fw-bold">
+                                            <i class="bi bi-palette me-1 text-success"></i>Color (opcional)
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="color" class="form-control form-control-color" id="colorPicker"
+                                                   value="#28a745" title="Elige un color">
+                                            <input type="text" class="form-control" id="color" name="color"
+                                                   th:field="*{color}"
+                                                   maxlength="20"
+                                                   placeholder="#28a745 o green">
+                                        </div>
+                                        <div class="form-text text-muted">
+                                            Código hexadecimal o nombre CSS (máx. 20 caracteres). Usa colores que representen la categoría.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Estado y Orden -->
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <label for="estadoCategoria" class="form-label fw-bold">
+                                            <i class="bi bi-toggle-on me-1 text-success"></i>Estado *
+                                        </label>
+                                        <select class="form-select" id="estadoCategoria" name="estadoCategoria"
+                                                th:field="*{estadoCategoria}"
+                                                required>
+                                            <option value="">Selecciona un estado...</option>
+                                            <option th:each="estado : ${T(org.sena.inforecicla.model.enums.EstadoPublicacion).values()}"
+                                                    th:value="${estado}"
+                                                    th:text="${estado.name()}">
+                                            </option>
+                                        </select>
+                                        <div class="form-text text-muted">
+                                            Una categoría activa será visible para los usuarios.
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Por favor selecciona un estado para la categoría.
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="orden" class="form-label fw-bold">
+                                            <i class="bi bi-sort-numeric-down me-1 text-success"></i>Orden (opcional)
+                                        </label>
+                                        <input type="number" class="form-control" id="orden" name="orden"
+                                               th:field="*{orden}"
+                                               min="0"
+                                               max="999"
+                                               placeholder="Ej: 1, 2, 3...">
+                                        <div class="form-text text-muted">
+                                            Número para ordenar las categorías (0-999). Las categorías se mostrarán en orden ascendente.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Botones de acción -->
+                                <div class="d-flex gap-3 mt-5 pt-3 border-top">
+                                    <button type="submit" class="btn btn-success btn-lg px-4">
+                                        <i class="bi bi-check-circle me-2"></i>Crear Categoría
+                                    </button>
+                                    <a th:href="@{/categoria-publicacion/list}" class="btn btn-outline-secondary btn-lg px-4">
+                                        <i class="bi bi-x-circle me-2"></i>Cancelar
+                                    </a>
+                                    <button type="reset" class="btn btn-outline-danger btn-lg px-4">
+                                        <i class="bi bi-arrow-counterclockwise me-2"></i>Limpiar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vista previa -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="bi bi-eye me-2"></i>Vista previa</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <div id="previewIcono" class="d-inline-block p-4 rounded-circle mb-3" style="background-color: #28a745;">
+                                    <i id="previewIconoIcon" class="bi bi-tag text-white fs-1"></i>
+                                </div>
+                                <h4 id="previewNombre" class="mb-2">Nombre de la categoría</h4>
+                                <div class="mb-3">
+                                    <span id="previewEstado" class="badge bg-success me-2">ACTIVO</span>
+                                    <span id="previewOrden" class="badge bg-secondary">Orden: 0</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <h6 class="fw-bold text-muted mb-2">Descripción</h6>
+                                <p id="previewDescripcion" class="mb-0 text-muted">La descripción aparecerá aquí...</p>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-6">
+                                    <h6 class="fw-bold text-muted mb-2">Icono</h6>
+                                    <p id="previewIconoText" class="mb-0"><code>bi-tag</code></p>
+                                </div>
+                                <div class="col-6">
+                                    <h6 class="fw-bold text-muted mb-2">Color</h6>
+                                    <p id="previewColor" class="mb-0">#28a745</p>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Esta es una vista previa de cómo se verá tu categoría en el sistema.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ===== PREVIEW EN TIEMPO REAL =====
+        const nombreInput = document.getElementById('nombre');
+        const descripcionInput = document.getElementById('descripcion');
+        const iconoInput = document.getElementById('icono');
+        const colorInput = document.getElementById('color');
+        const colorPicker = document.getElementById('colorPicker');
+        const estadoSelect = document.getElementById('estadoCategoria');
+        const ordenInput = document.getElementById('orden');
+
+        const previewNombre = document.getElementById('previewNombre');
+        const previewDescripcion = document.getElementById('previewDescripcion');
+        const previewIcono = document.getElementById('previewIcono');
+        const previewIconoIcon = document.getElementById('previewIconoIcon');
+        const previewIconoText = document.getElementById('previewIconoText');
+        const previewEstado = document.getElementById('previewEstado');
+        const previewOrden = document.getElementById('previewOrden');
+        const previewColor = document.getElementById('previewColor');
+
+        // Contador de caracteres para descripción
+        const contadorDescripcion = document.getElementById('contadorDescripcion');
+
+        function actualizarPreview() {
+            // Nombre
+            if (nombreInput.value.trim()) {
+                previewNombre.textContent = nombreInput.value;
+            } else {
+                previewNombre.textContent = 'Nombre de la categoría';
+            }
+
+            // Descripción
+            if (descripcionInput.value.trim()) {
+                previewDescripcion.textContent = descripcionInput.value;
+                // Actualizar contador
+                const caracteresRestantes = 500 - descripcionInput.value.length;
+                contadorDescripcion.textContent = `${caracteresRestantes} caracteres restantes`;
+                contadorDescripcion.className = caracteresRestantes < 0 ? 'text-danger' : 'text-muted';
+            } else {
+                previewDescripcion.textContent = 'La descripción aparecerá aquí...';
+                contadorDescripcion.textContent = '500 caracteres restantes';
+                contadorDescripcion.className = 'text-muted';
+            }
+
+            // Icono
+            if (iconoInput.value.trim()) {
+                previewIconoIcon.className = `${iconoInput.value} text-white fs-1`;
+                previewIconoText.innerHTML = `<code>${iconoInput.value}</code>`;
+            } else {
+                previewIconoIcon.className = 'bi bi-tag text-white fs-1';
+                previewIconoText.innerHTML = '<code>bi-tag</code>';
+            }
+
+            // Color
+            let color = colorInput.value.trim();
+            if (!color && colorPicker.value) {
+                color = colorPicker.value;
+            }
+            if (color) {
+                previewIcono.style.backgroundColor = color;
+                previewColor.textContent = color;
+            } else {
+                previewIcono.style.backgroundColor = '#28a745';
+                previewColor.textContent = '#28a745';
+            }
+
+            // Estado
+            if (estadoSelect.value) {
+                previewEstado.textContent = estadoSelect.value.toUpperCase();
+                if (estadoSelect.value === 'ACTIVO') {
+                    previewEstado.className = 'badge bg-success me-2';
+                } else if (estadoSelect.value === 'INACTIVO') {
+                    previewEstado.className = 'badge bg-danger me-2';
+                } else {
+                    previewEstado.className = 'badge bg-secondary me-2';
+                }
+            }
+
+            // Orden
+            if (ordenInput.value) {
+                previewOrden.textContent = `Orden: ${ordenInput.value}`;
+            } else {
+                previewOrden.textContent = 'Orden: 0';
+            }
+        }
+
+        // Event listeners para actualizar preview
+        [nombreInput, descripcionInput, iconoInput, colorInput, estadoSelect, ordenInput].forEach(input => {
+            if (input) {
+                input.addEventListener('input', actualizarPreview);
+                input.addEventListener('change', actualizarPreview);
+            }
+        });
+
+        if (colorPicker) {
+            colorPicker.addEventListener('input', function() {
+                colorInput.value = colorPicker.value;
+                actualizarPreview();
+            });
+        }
+
+        // Sincronizar color picker con input de texto
+        colorInput.addEventListener('input', function() {
+            if (colorInput.value.match(/^#[0-9A-F]{6}$/i)) {
+                colorPicker.value = colorInput.value;
+            }
+        });
+
+        // ===== VALIDACIÓN DE FORMULARIO =====
+        const form = document.querySelector('form.needs-validation');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+        }
+
+        // ===== INICIALIZACIÓN =====
+        actualizarPreview();
+    });
+</script>

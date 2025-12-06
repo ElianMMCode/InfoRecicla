@@ -1,0 +1,284 @@
+<!-- Vista principal/Inicio del módulo de Categorías de Publicaciones -->
+<section th:fragment="index" class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header principal -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body bg-success text-white p-4 rounded">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                        <div>
+                            <h1 class="h2 mb-2"><i class="bi bi-tags me-2"></i>Categorías de Publicaciones</h1>
+                            <p class="mb-0 opacity-75">Gestión centralizada de categorías para organizar y clasificar las publicaciones del sistema</p>
+                        </div>
+                        <div class="mt-3 mt-md-0">
+                            <span class="badge bg-light text-success fs-6 p-2">
+                                <i class="bi bi-collection me-1"></i>
+                                <span th:text="${totalCategorias != null ? totalCategorias : '0'}">0</span> categorías
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjetas de resumen -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="bi bi-check-circle-fill text-success fs-1"></i>
+                            </div>
+                            <h3 class="h5 mb-2">Activas</h3>
+                            <p class="display-6 fw-bold text-success" th:text="${categoriasActivas != null ? categoriasActivas : '0'}">0</p>
+                            <a th:href="@{/categoria-publicacion/list?estado=PUBLICADO}" class="btn btn-sm btn-outline-success">Ver todas</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="bi bi-pause-circle-fill text-warning fs-1"></i>
+                            </div>
+                            <h3 class="h5 mb-2">Inactivas</h3>
+                            <p class="display-6 fw-bold text-warning" th:text="${categoriasInactivas != null ? categoriasInactivas : '0'}">0</p>
+                            <a th:href="@{/categoria-publicacion/list?estado=INACTIVO}" class="btn btn-sm btn-outline-warning">Ver todas</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="bi bi-star-fill text-info fs-1"></i>
+                            </div>
+                            <h3 class="h5 mb-2">Destacadas</h3>
+                            <p class="display-6 fw-bold text-info" th:text="${categoriasDestacadas != null ? categoriasDestacadas : '0'}">0</p>
+                            <a th:href="@{/categoria-publicacion/list?orden=desc}" class="btn btn-sm btn-outline-info">Ver todas</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="bi bi-clock-history text-secondary fs-1"></i>
+                            </div>
+                            <h3 class="h5 mb-2">Recientes</h3>
+                            <p class="display-6 fw-bold text-secondary" th:text="${categoriasRecientes != null ? categoriasRecientes : '0'}">0</p>
+                            <a th:href="@{/categoria-publicacion/list?orden=fecha_desc}" class="btn btn-sm btn-outline-secondary">Ver todas</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones principales -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h3 class="h5 mb-3"><i class="bi bi-lightning-charge text-success me-2"></i>Acciones rápidas</h3>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <a th:href="@{/categoria-publicacion/create}" class="btn btn-success w-100 d-flex align-items-center justify-content-center py-3">
+                                        <i class="bi bi-plus-circle me-2 fs-4"></i>
+                                        <div class="text-start">
+                                            <strong>Crear Nueva Categoría</strong>
+                                            <small class="d-block opacity-75">Agregar una nueva categoría al sistema</small>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-md-6">
+                                    <a th:href="@{/categoria-publicacion/list}" class="btn btn-outline-success w-100 d-flex align-items-center justify-content-center py-3">
+                                        <i class="bi bi-list-ul me-2 fs-4"></i>
+                                        <div class="text-start">
+                                            <strong>Ver Listado Completo</strong>
+                                            <small class="d-block opacity-75">Explorar todas las categorías</small>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-md-6">
+                                    <a th:href="@{/categoria-publicacion/reportes}" class="btn btn-info w-100 d-flex align-items-center justify-content-center py-3">
+                                        <i class="bi bi-graph-up me-2 fs-4"></i>
+                                        <div class="text-start">
+                                            <strong>Generar Reportes</strong>
+                                            <small class="d-block opacity-75">Estadísticas y análisis</small>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-md-6">
+                                    <a th:href="@{/categoria-publicacion/configuracion}" class="btn btn-warning w-100 d-flex align-items-center justify-content-center py-3">
+                                        <i class="bi bi-gear me-2 fs-4"></i>
+                                        <div class="text-start">
+                                            <strong>Configurar</strong>
+                                            <small class="d-block opacity-75">Ajustes del módulo</small>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h3 class="h5 mb-3"><i class="bi bi-info-circle text-primary me-2"></i>Información del módulo</h3>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    <strong>Versión:</strong> 1.0.0
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-calendar text-success me-2"></i>
+                                    <strong>Última actualización:</strong> <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy')}">Hoy</span>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-person text-success me-2"></i>
+                                    <strong>Responsable:</strong> Administrador
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-shield-check text-success me-2"></i>
+                                    <strong>Estado:</strong> <span class="badge bg-success">Activo</span>
+                                </li>
+                            </ul>
+                            <div class="mt-3 pt-3 border-top">
+                                <a href="#" class="btn btn-outline-primary btn-sm w-100">
+                                    <i class="bi bi-question-circle me-1"></i> Ver ayuda
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categorías recientes -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="h5 mb-0"><i class="bi bi-clock-history me-2"></i>Categorías recientes</h3>
+                        <a th:href="@{/categoria-publicacion/list}" class="btn btn-sm btn-outline-success">Ver todas →</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Icono</th>
+                                <th>Nombre</th>
+                                <th>Estado</th>
+                                <th>Orden</th>
+                                <th>Última actualización</th>
+                                <th class="text-end">Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- Ejemplo de datos estáticos - en producción se cargarían dinámicamente -->
+                            <tr>
+                                <td>
+                                        <span class="badge p-2 rounded-circle" style="background-color: #28a745;">
+                                            <i class="bi bi-recycle text-white"></i>
+                                        </span>
+                                </td>
+                                <td>
+                                    <strong>Reciclaje Básico</strong>
+                                    <small class="d-block text-muted">Consejos para iniciar en el reciclaje</small>
+                                </td>
+                                <td><span class="badge bg-success">ACTIVO</span></td>
+                                <td>1</td>
+                                <td>Hoy, 10:30 AM</td>
+                                <td class="text-end">
+                                    <a th:href="@{/categoria-publicacion/show/{id}(id=1)}" class="btn btn-sm btn-outline-info me-1">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a th:href="@{/categoria-publicacion/edit/{id}(id=1)}" class="btn btn-sm btn-outline-success me-1">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <!-- Más filas aquí -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-4">
+                        <a th:href="@{/categoria-publicacion/list}" class="btn btn-success">
+                            <i class="bi bi-arrow-right-circle me-1"></i> Ir al listado completo
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas rápidas -->
+            <div class="row mt-4 g-4">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-pie-chart me-2 text-success"></i>Distribución por estado</h5>
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="text-center">
+                                    <div class="mb-2">
+                                        <div class="d-inline-block rounded-circle bg-success p-3">
+                                            <i class="bi bi-check-circle text-white fs-4"></i>
+                                        </div>
+                                    </div>
+                                    <p class="mb-0 fw-bold">75% Activas</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="mb-2">
+                                        <div class="d-inline-block rounded-circle bg-warning p-3">
+                                            <i class="bi bi-pause-circle text-white fs-4"></i>
+                                        </div>
+                                    </div>
+                                    <p class="mb-0 fw-bold">25% Inactivas</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-activity me-2 text-success"></i>Actividad reciente</h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="bi bi-plus-circle text-success me-2"></i>
+                                    <strong>Nueva categoría:</strong> "Reciclaje Electrónico" creada hoy
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-pencil text-primary me-2"></i>
+                                    <strong>Actualización:</strong> "Reciclaje de Plástico" modificada ayer
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    <strong>Activada:</strong> "Compostaje" ahora está activa
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal de confirmación rápida -->
+<div class="modal fade" id="modalConfirmacionRapida" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-question-circle me-2"></i>Confirmar acción</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="mb-3">¿Estás seguro de que deseas realizar esta acción?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>

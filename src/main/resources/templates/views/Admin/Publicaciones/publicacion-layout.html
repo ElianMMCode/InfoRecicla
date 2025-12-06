@@ -15,8 +15,8 @@
 
         <!-- Vertical sidebar (fixed on md+, no JS, no custom CSS) -->
         <aside class="d-none d-md-flex col-md-2 position-fixed top-0 start-0 vh-100 bg-success text-white p-3 flex-column z-3 shadow-sm">
-            <a class="navbar-brand d-flex align-items-center gap-2 text-white mb-3" th:href="@{../Inicio/inicio.html}">
-                <img th:src="@{../static/imagenes/logo.png}" src="../static/imagenes/logo.png" alt="Logo" width="48" height="48"
+            <a class="navbar-brand d-flex align-items-center gap-2 text-white mb-3" th:href="@{/inicio}">
+                <img th:src="@{/imagenes/logo.png}" src="/imagenes/logo.png" alt="Logo" width="48" height="48"
                      class="rounded">
                 <span class="fw-semibold">InfoRecicla</span>
             </a>
@@ -56,6 +56,13 @@
                 </ul>
             </nav>
 
+            <!-- Botón Cerrar sesión -->
+            <div class="mt-3">
+                <a class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center" th:href="@{/Registro/inicioSesion.html}">
+                    <i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión
+                </a>
+            </div>
+
             <div class="mt-auto small text-white-50">
                 <span>&copy; 2025 InfoRecicla</span>
             </div>
@@ -64,11 +71,12 @@
         <!-- Top horizontal nav for small screens (fixed-top) -->
         <div class="d-md-none w-100 bg-success py-2 fixed-top z-3 shadow-sm">
             <div class="d-flex align-items-center justify-content-between px-3">
-                <a class="navbar-brand d-flex align-items-center gap-2 text-white" th:href="@{../Inicio/inicio.html}">
+                <a class="navbar-brand d-flex align-items-center gap-2 text-white" th:href="@{/inicio}">
                     <img th:src="@{/imagenes/logo.png}" src="/imagenes/logo.png" alt="Logo" width="1024" height="1024"
                          class="rounded">
                     <span class="fw-semibold">InfoRecicla</span>
                 </a>
+                <a class="btn btn-sm btn-outline-light" th:href="@{/Registro/inicioSesion.html}">Cerrar sesión</a>
             </div>
             <nav class="mt-2" role="navigation" aria-label="Menú alternativo Publicaciones">
                 <ul class="nav nav-pills flex-row gap-2 overflow-auto px-3">
@@ -109,11 +117,11 @@
         <!-- Main content column (offset on md+ so it doesn't go under the fixed sidebar) -->
         <main class="col offset-md-2 p-4 pt-5 pt-md-0">
             <div th:switch="${#strings.isEmpty(seccion) ? 'indexPublicacion' : seccion}">
-                <div th:case="'indexPublicacion'" th:insert="~{views/Admin/Publicacion/section-indexPublicacion :: indexPublicacion}"></div>
-                <div th:case="'listPublicacion'" th:insert="~{views/Admin/Publicacion/section-listPublicacion :: listPublicacion}"></div>
-                <div th:case="'showPublicacion'" th:insert="~{views/Admin/Publicacion/section-showPublicacion :: showPublicacion}"></div>
-                <div th:case="'editPublicacion'" th:insert="~{views/Admin/Publicacion/section-editPublicacion :: editPublicacion}"></div>
-                <div th:case="'createPublicacion'" th:insert="~{views/Admin/Publicacion/section-createPublicacion :: createPublicacion}"></div>
+                <div th:case="'indexPublicacion'" th:insert="~{views/Admin/Publicaciones/section-indexPublicacion :: indexPublicacion}"></div>
+                <div th:case="'listPublicacion'" th:insert="~{views/Admin/Publicaciones/section-listPublicacion :: listPublicacion}"></div>
+                <div th:case="'showPublicacion'" th:insert="~{views/Admin/Publicaciones/section-showPublicacion :: showPublicacion}"></div>
+                <div th:case="'editPublicacion'" th:insert="~{views/Admin/Publicaciones/section-editPublicacion :: editPublicacion}"></div>
+                <div th:case="'createPublicacion'" th:insert="~{views/Admin/Publicaciones/section-createPublicacion :: createPublicacion}"></div>
                 <div th:case="*" class="text-center text-muted">Sección no encontrada.</div>
             </div>
         </main>

@@ -1,85 +1,531 @@
-<!-- Fragment: Mostrar Publicación -->
-<div th:fragment="showPublicacion">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 text-primary">Detalle de Publicación</h1>
-        <div>
-            <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion'}"
-               class="btn btn-outline-secondary me-2">
-                <i class="fas fa-arrow-left"></i> Volver
-            </a>
-            <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/edit/' + ${publicacion.id} + '?seccion=editPublicacion'}"
-               class="btn btn-warning me-2">
-                <i class="fas fa-pencil-alt"></i> Editar
-            </a>
-            <button type="button" class="btn btn-outline-danger"
-                    th:onclick="|confirmarEliminar('${publicacion.id}')|">
-                <i class="fas fa-trash"></i> Eliminar
-            </button>
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="utf-8">
+</head>
+<body>
+    <!-- Detalles de Publicación -->
+    <section th:fragment="show" class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <!-- Header -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body bg-info text-white p-3">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item">
+                                    <a th:href="@{/publicacion/index}" class="text-white">Inicio</a>
+                                </li>
+                                <li class="breadcrumb-item">
+                                    <a th:href="@{/publicacion/list}" class="text-white">Listado</a>
+                                </li>
+                                <li class="breadcrumb-item active text-white" aria-current="page">Detalles de Publicación
+                                </li>
+                            </ol>
+                        </nav>
+                        <h3 class="mb-0 mt-2"><i class="bi bi-info-circle me-2"></i>Detalles de Publicación</h3>
+                    </div>
+                </div>
+
+                <!-- Contenido principal -->
+                <div class="row">
+                    <div class="col-lg-8">
+                        <!-- Encabezado de la publicación -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body">
+                                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-4 mb-4">
+                                    <!-- Categoría y estado -->
+                                    <div class="text-center">
+                                        <div class="p-4 rounded-circle d-inline-block mb-3"
+                                             th:style="'background-color: ' + ${colorCategoria} + ';'">
+                                            <i th:class="'bi ' + ${iconoCategoria} + ' text-white fs-1'"></i>
+                                        </div>
+                                        <div>
+                                            <span class="badge" th:style="'background-color: ' + ${colorCategoria} + ';'">
+                                                <i th:class="'bi ' + ${iconoCategoria} + ' me-1'"></i>
+                                                <span th:text="${publicacion.nombreCategoria}">Categoría</span>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Título y metadatos -->
+                                    <div class="flex-grow-1">
+                                        <h1 class="h2 mb-2" th:text="${publicacion.titulo}">Título de la publicación</h1>
+                                        <p class="text-muted mb-3" th:text="${publicacion.descripcion}">Descripción de la
+                                            publicación</p>
+                                        <div class="d-flex flex-wrap gap-3">
+                                            <div>
+                                                <small class="text-muted d-block">Estado</small>
+                                                <span th:class="'badge ' + (${publicacion.estado} == 'PUBLICADO' ? 'bg-success' :
+                                                                           ${publicacion.estado} == 'BORRADOR' ? 'bg-warning' : 'bg-info')"
+                                                      th:text="${publicacion.estado}">
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <small class="text-muted d-block">Autor</small>
+                                                <strong th:text="${publicacion.nombreUsuario}">Autor</strong>
+                                            </div>
+                                            <div>
+                                                <small class="text-muted d-block">Publicado</small>
+                                                <strong th:text="${#dates.format(publicacion.creado, 'dd/MM/yyyy')}">Fecha</strong>
+                                            </div>
+                                            <div>
+                                                <small class="text-muted d-block">Última edición</small>
+                                                <strong th:text="${#dates.format(publicacion.actualizado, 'dd/MM/yyyy HH:mm')}">Fecha
+                                                </strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Contenido completo -->
+                                <div class="mt-4 pt-4 border-top">
+                                    <h5 class="fw-bold mb-3"><i class="bi bi-file-text me-2"></i>Contenido</h5>
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body">
+                                            <div th:utext="${publicacion.contenido}">
+                                                Contenido de la publicación...
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Información adicional -->
+                                <div class="row mt-4">
+                                    <div class="col-md-6">
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body">
+                                                <h6 class="fw-bold mb-3"><i class="bi bi-card-checklist me-2"></i>Información básica
+                                                </h6>
+                                                <table class="table table-borderless mb-0">
+                                                    <tbody>
+                                                    <tr>
+                                                        <td class="text-muted" style="width: 140px;">Título:</td>
+                                                        <td><strong th:text="${publicacion.titulo}">--</strong></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-muted">Nombre interno:</td>
+                                                        <td><code th:text="${publicacion.nombre}">--</code></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-muted">Estado:</td>
+                                                        <td>
+                                                                <span th:class="'badge ' + (${publicacion.estado} == 'PUBLICADO' ? 'bg-success' :
+                                                                                   ${publicacion.estado} == 'BORRADOR' ? 'bg-warning' : 'bg-info')"
+                                                                  th:text="${publicacion.estado}">
+                                                                </span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-muted">Estado de entidad:</td>
+                                                        <td>
+                                                                <span class="badge"
+                                                                      th:class="${estadoEntidad == 'Activo'} ? 'bg-success' :
+                                                                                    ${estadoEntidad == 'Inactivo'} ? 'bg-danger' :
+                                                                                    ${estadoEntidad == 'Suspendido'} ? 'bg-warning' : 'bg-secondary'"
+                                                                      th:text="${estadoEntidad}">
+                                                                </span>
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="card border-0 bg-light">
+                                            <div class="card-body">
+                                                <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Información del registro
+                                                </h6>
+                                                <table class="table table-borderless mb-0">
+                                                    <tbody>
+                                                    <tr>
+                                                        <td class="text-muted" style="width: 140px;">Creado el:</td>
+                                                        <td><strong th:text="${#dates.format(publicacion.creado, 'dd/MM/yyyy HH:mm')}">--</strong>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-muted">Última actualización:</td>
+                                                        <td><strong th:text="${#dates.format(publicacion.actualizado, 'dd/MM/yyyy HH:mm')}">--</strong>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-muted">Autor:</td>
+                                                        <td><strong th:text="${publicacion.nombreUsuario}">--</strong></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-muted">Categoría:</td>
+                                                        <td><strong th:text="${publicacion.nombreCategoria}">--</strong></td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Comentarios o notas -->
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white border-0">
+                                <h5 class="mb-0"><i class="bi bi-chat-left-text me-2"></i>Notas y comentarios</h5>
+                            </div>
+                            <div class="card-body">
+                                <div th:if="${comentarios != null and !comentarios.empty}">
+                                    <div class="list-group">
+                                        <div class="list-group-item"
+                                             th:each="com : ${comentarios}">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h6 class="mb-1" th:text="${com.autor}">Autor</h6>
+                                                <small th:text="${#dates.format(com.fecha, 'dd/MM/yyyy HH:mm')}">Fecha</small>
+                                            </div>
+                                            <p class="mb-1" th:text="${com.contenido}">Contenido del comentario...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div th:unless="${comentarios != null and !comentarios.empty}">
+                                    <div class="text-center py-3">
+                                        <i class="bi bi-chat-left-text fs-1 text-muted mb-3 d-block"></i>
+                                        <p class="text-muted">No hay comentarios para esta publicación</p>
+                                        <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal"
+                                                data-bs-target="#modalAgregarComentario">
+                                            <i class="bi bi-plus-circle me-1"></i>Agregar comentario
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panel lateral de acciones -->
+                    <div class="col-lg-4">
+                        <!-- Acciones principales -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white border-0">
+                                <h5 class="mb-0"><i class="bi bi-gear me-2"></i>Acciones</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <a th:href="@{/publicacion/edit/{id}(id=${publicacion.publicacionId})}"
+                                       class="btn btn-primary">
+                                        <i class="bi bi-pencil me-2"></i>Editar publicación
+                                    </a>
+
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-outline-warning dropdown-toggle"
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-toggle-on me-2"></i>Cambiar estado
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item" href="#"
+                                                   th:if="${publicacion.estado != 'PUBLICADO'}"
+                                                   onclick="cambiarEstado('PUBLICADO')">
+                                                    <i class="bi bi-globe-americas text-success me-2"></i>Publicar
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#"
+                                                   th:if="${publicacion.estado != 'BORRADOR'}"
+                                                   onclick="cambiarEstado('BORRADOR')">
+                                                    <i class="bi bi-file-earmark text-warning me-2"></i>Mover a borradores
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#"
+                                                   th:if="${publicacion.estado != 'ARCHIVADO'}"
+                                                   onclick="cambiarEstado('ARCHIVADO')">
+                                                    <i class="bi bi-archive text-info me-2"></i>Archivar
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item" href="#"
+                                                   onclick="cambiarEstadoEntidad('Activo')">
+                                                    <i class="bi bi-check-circle text-success me-2"></i>Activar entidad
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#"
+                                                   onclick="cambiarEstadoEntidad('Inactivo')">
+                                                    <i class="bi bi-x-circle text-danger me-2"></i>Desactivar entidad
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <a th:href="@{/publicacion/duplicate/{id}(id=${publicacion.publicacionId})}"
+                                       class="btn btn-outline-success">
+                                        <i class="bi bi-copy me-2"></i>Duplicar publicación
+                                    </a>
+
+                                    <button type="button" class="btn btn-outline-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalEliminarPublicacion">
+                                        <i class="bi bi-trash me-2"></i>Eliminar publicación
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Estadísticas -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-white border-0">
+                                <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Estadísticas</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-6 mb-3">
+                                        <div class="p-3 bg-light rounded">
+                                            <h3 class="h2 mb-0" th:text="${vistas != null ? vistas : '0'}">0</h3>
+                                            <small class="text-muted">Vistas</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <div class="p-3 bg-light rounded">
+                                            <h3 class="h2 mb-0" th:text="${ediciones != null ? ediciones : '0'}">0</h3>
+                                            <small class="text-muted">Ediciones</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-3 bg-light rounded">
+                                            <h3 class="h2 mb-0" th:text="${comentariosCount != null ? comentariosCount : '0'}">0</h3>
+                                            <small class="text-muted">Comentarios</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-3 bg-light rounded">
+                                            <h3 class="h2 mb-0" th:text="${diasPublicado != null ? diasPublicado : '0'}">0</h3>
+                                            <small class="text-muted">Días publicado</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información rápida -->
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3"><i class="bi bi-lightbulb me-2"></i>Información rápida</h6>
+                                <ul class="list-unstyled small">
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle text-success me-2"></i>
+                                        <strong>ID:</strong> <code th:text="${publicacion.publicacionId}">ID</code>
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle text-success me-2"></i>
+                                        <strong>Categoría ID:</strong> <code th:text="${publicacion.categoriaPublicacionId}">ID</code>
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle text-success me-2"></i>
+                                        <strong>Autor ID:</strong> <code th:text="${publicacion.usuarioId}">ID</code>
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle text-success me-2"></i>
+                                        <strong>URL permanente:</strong>
+                                        <a th:href="@{/publicacion/show/{id}(id=${publicacion.publicacionId})}"
+                                           class="text-decoration-none">
+                                            /publicacion/show/<span th:text="${publicacion.publicacionId}">ID</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal: Agregar comentario -->
+    <div class="modal fade" id="modalAgregarComentario" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="bi bi-chat-left-text me-2"></i>Agregar comentario</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formComentario">
+                        <div class="mb-3">
+                            <label for="comentarioContenido" class="form-label">Comentario</label>
+                            <textarea class="form-control" id="comentarioContenido" rows="4"
+                                      placeholder="Escribe tu comentario o nota sobre esta publicación..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="guardarComentario()">
+                        <i class="bi bi-save me-1"></i>Guardar comentario
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header" th:classappend="'bg-' + ${publicacion.estado == 'publicado' ? 'success' : (publicacion.estado == 'borrador' ? 'warning' : 'secondary')} + ' text-white'">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0" th:text="${publicacion.titulo}">Título de la publicación</h5>
-                <span class="badge bg-light text-dark" th:text="${publicacion.estado}">Estado</span>
-            </div>
-        </div>
-        <div class="card-body">
-            <!-- Metadatos -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <strong>Categoría:</strong>
-                    <span th:text="${publicacion.categoria?.nombre} ?: 'Sin categoría'" class="text-muted">Categoría</span>
+    <!-- Modal: Confirmar eliminación -->
+    <div class="modal fade" id="modalEliminarPublicacion" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>Confirmar eliminación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="col-md-6">
-                    <strong>Autor:</strong>
-                    <span th:text="${publicacion.usuario?.nombre} ?: 'Usuario'" class="text-muted">Autor</span>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar la publicación "<strong th:text="${publicacion.titulo}"></strong>"?
+                    </p>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-circle me-2"></i>
+                        <strong>Advertencia:</strong> Esta acción no se puede deshacer.
+                    </div>
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="confirmarEliminacion">
+                        <label class="form-check-label" for="confirmarEliminacion">
+                            Confirmo que deseo eliminar esta publicación permanentemente
+                        </label>
+                    </div>
                 </div>
-            </div>
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <strong>Fecha de creación:</strong>
-                    <span th:text="${#temporals.format(publicacion.creado, 'dd/MM/yyyy HH:mm')}" class="text-muted">Fecha</span>
-                </div>
-                <div class="col-md-6">
-                    <strong>Última actualización:</strong>
-                    <span th:text="${#temporals.format(publicacion.actualizado, 'dd/MM/yyyy HH:mm')}" class="text-muted">Fecha</span>
-                </div>
-            </div>
-
-            <!-- Contenido -->
-            <div class="border-top pt-3">
-                <h6 class="text-primary mb-3">Contenido:</h6>
-                <div class="publicacion-contenido" th:utext="${publicacion.contenido}">
-                    Contenido de la publicación...
-                </div>
-            </div>
-        </div>
-        <div class="card-footer bg-transparent">
-            <div class="d-flex justify-content-between align-items-center">
-                <small class="text-muted">ID: <code th:text="${publicacion.id}">UUID</code></small>
-                <div>
-                    <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion'}"
-                       class="btn btn-outline-primary btn-sm">Volver al Listado</a>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form th:action="@{/publicacion/delete/{id}(id=${publicacion.publicacionId})}" method="POST"
+                          id="formEliminar">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="btn btn-danger" id="btnConfirmarEliminar" disabled>
+                            <i class="bi bi-trash me-1"></i>Eliminar publicación
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        function confirmarEliminar(publicacionId) {
-            if (confirm('¿Estás seguro de que deseas eliminar esta publicación?')) {
-                window.location.href = '/publicaciones/eliminar/' + publicacionId;
+        // Variables globales para usar en las funciones
+        const publicacionId = '[[${publicacion.publicacionId}]]';
+
+        // Función para cambiar el estado de la publicación
+        function cambiarEstado(nuevoEstado) {
+            let mensaje;
+            switch(nuevoEstado) {
+                case 'PUBLICADO':
+                    mensaje = '¿Publicar esta publicación? Será visible para todos los usuarios.';
+                    break;
+                case 'BORRADOR':
+                    mensaje = '¿Mover a borradores? La publicación dejará de ser visible públicamente.';
+                    break;
+                case 'ARCHIVADO':
+                    mensaje = '¿Archivar esta publicación? Será conservada pero no visible.';
+                    break;
+                default:
+                    mensaje = '¿Cambiar el estado de la publicación?';
+            }
+
+            if (confirm(mensaje)) {
+                fetch(`/publicacion/${publicacionId}/estado`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]')?.value
+                    },
+                    body: JSON.stringify({ estado: nuevoEstado })
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            alert('Error al cambiar el estado');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error al cambiar el estado');
+                    });
             }
         }
-    </script>
 
-    <style>
-        .publicacion-contenido {
-            line-height: 1.6;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+        // Función para cambiar el estado de la entidad
+        function cambiarEstadoEntidad(nuevoEstado) {
+            const mensaje = `¿${nuevoEstado === 'Activo' ? 'Activar' : 'Desactivar'} la entidad de esta publicación?`;
+
+            if (confirm(mensaje)) {
+                fetch(`/publicacion/${publicacionId}/estado-entidad`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]')?.value
+                    },
+                    body: JSON.stringify({ estado: nuevoEstado })
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            alert('Error al cambiar el estado de la entidad');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error al cambiar el estado de la entidad');
+                    });
+            }
         }
-    </style>
-</div>
+
+        // Función para guardar comentario
+        function guardarComentario() {
+            const contenido = document.getElementById('comentarioContenido').value.trim();
+
+            if (!contenido) {
+                alert('Por favor escribe un comentario');
+                return;
+            }
+
+            fetch(`/publicacion/${publicacionId}/comentario`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]')?.value
+                },
+                body: JSON.stringify({ contenido })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Error al guardar el comentario');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al guardar el comentario');
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // ===== CONFIRMACIÓN DE ELIMINACIÓN =====
+            const confirmCheckbox = document.getElementById('confirmarEliminacion');
+            const btnConfirmarEliminar = document.getElementById('btnConfirmarEliminar');
+
+            if (confirmCheckbox && btnConfirmarEliminar) {
+                confirmCheckbox.addEventListener('change', function() {
+                    btnConfirmarEliminar.disabled = !this.checked;
+                });
+            }
+
+            // ===== TOOLTIPS =====
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // ===== INICIALIZAR EDITOR PARA VISTA PREVIA SI ES NECESARIO =====
+            if (typeof tinymce !== 'undefined') {
+                // Podríamos inicializar TinyMCE en modo lectura para el contenido
+                // pero en este caso solo mostramos HTML estático
+            }
+        });
+    </script>
+</body>
+</html>

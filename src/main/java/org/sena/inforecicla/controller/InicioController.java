@@ -6,8 +6,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class InicioController {
 
-    @GetMapping
+    @GetMapping({"/inicio", "/home"})
     public String inicio() {
-        return "views/Inicio/inicio";
+        // Vista principal de la aplicación
+        return "views/converted/Inicio/inicio";
+    }
+
+    @GetMapping({"/inicio-sesion", "/login"})
+    public String inicioSesion() {
+        // Vista de inicio de sesión (registro convertido)
+        return "views/Registro/inicioSesion";
     }
 }
+

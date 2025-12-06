@@ -1,0 +1,266 @@
+<!-- Listado de Categorías de Publicaciones -->
+<section th:fragment="list" class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body bg-success text-white p-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-0"><i class="bi bi-list-ul me-2"></i>Listado de Categorías</h3>
+                        <p class="mb-0 small opacity-75">Gestiona todas las categorías de publicaciones del sistema</p>
+                    </div>
+                    <a th:href="@{/categoria-publicacion/create}" class="btn btn-light text-success fw-semibold">
+                        <i class="bi bi-plus-circle me-1"></i>Nueva Categoría
+                    </a>
+                </div>
+            </div>
+
+            <!-- Filtros y Búsqueda -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="bi bi-search text-muted"></i>
+                                </span>
+                                <input type="text" class="form-control border-start-0" id="searchCategoria"
+                                       placeholder="Buscar por nombre o descripción...">
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-lg-3">
+                            <select class="form-select" id="filterEstado">
+                                <option value="">Todos los estados</option>
+                                <option th:each="estado : ${T(org.sena.inforecicla.model.enums.EstadoPublicacion).values()}"
+                                        th:value="${estado.name()}"
+                                        th:text="${estado.name()}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 col-lg-2">
+                            <select class="form-select" id="filterOrden">
+                                <option value="">Orden por defecto</option>
+                                <option value="asc">Orden Ascendente</option>
+                                <option value="desc">Orden Descendente</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 col-lg-3 d-flex gap-2">
+                            <button class="btn btn-outline-success" id="btnAplicarFiltros">
+                                <i class="bi bi-funnel me-1"></i>Filtrar
+                            </button>
+                            <button class="btn btn-outline-secondary" id="btnLimpiarFiltros">
+                                <i class="bi bi-x-circle me-1"></i>Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Listado de Categorías -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="tablaCategorias">
+                            <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">#</th>
+                                <th>Icono</th>
+                                <th>Nombre</th>
+                                <th>Descripción</th>
+                                <th>Estado</th>
+                                <th>Orden</th>
+                                <th class="text-end pe-4">Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="categoria, iter : ${categorias}" th:object="${categoria}">
+                                <td class="ps-4" th:text="${iter.index + 1}">1</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                            <span class="badge p-2 rounded-circle" th:style="'background-color: ' + (*{color != null} ? *{color} : '#28a745')">
+                                                <i th:class="'bi ' + (*{icono != null} ? *{icono} : 'bi-tag') + ' text-white'"></i>
+                                            </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong th:text="*{nombre}">Nombre</strong>
+                                </td>
+                                <td>
+                                    <small class="text-muted" th:text="*{descripcion}">Descripción</small>
+                                </td>
+                                <td>
+                                    <th:block th:switch="*{estadoCategoria}">
+                                        <span th:case="'ACTIVO'" class="badge bg-success">ACTIVO</span>
+                                        <span th:case="'INACTIVO'" class="badge bg-danger">INACTIVO</span>
+                                        <span th:case="*" class="badge bg-secondary" th:text="*{estadoCategoria}"></span>
+                                    </th:block>
+                                </td>
+                                <td th:text="*{orden}">0</td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a th:href="@{/categoria-publicacion/edit/{id}(id=*{id})}"
+                                           class="btn btn-outline-success"
+                                           data-bs-toggle="tooltip"
+                                           title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a th:href="@{/categoria-publicacion/show/{id}(id=*{id})}"
+                                           class="btn btn-outline-info"
+                                           data-bs-toggle="tooltip"
+                                           title="Ver detalles">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <button type="button"
+                                                class="btn btn-outline-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEliminarCategoria"
+                                                th:attr="data-id=*{id}, data-nombre=*{nombre}"
+                                                data-bs-toggle="tooltip"
+                                                title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    <div class="d-flex justify-content-between align-items-center p-3 border-top">
+                        <div class="text-muted small">
+                            Mostrando <span id="totalRegistros" th:text="${categorias != null ? categorias.size() : 0}">0</span> categorías
+                        </div>
+                        <nav aria-label="Paginación de categorías">
+                            <ul class="pagination mb-0">
+                                <li class="page-item" th:classappend="${paginaActual == 1} ? 'disabled' : ''">
+                                    <a class="page-link" th:href="@{/categoria-publicacion/list(page=${paginaActual - 1})}" tabindex="-1">Anterior</a>
+                                </li>
+                                <li th:each="i : ${#numbers.sequence(1, totalPaginas)}"
+                                    class="page-item"
+                                    th:classappend="${i == paginaActual} ? 'active' : ''">
+                                    <a class="page-link" th:href="@{/categoria-publicacion/list(page=${i})}" th:text="${i}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${paginaActual == totalPaginas} ? 'disabled' : ''">
+                                    <a class="page-link" th:href="@{/categoria-publicacion/list(page=${paginaActual + 1})}">Siguiente</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal: Confirmar eliminación -->
+<div class="modal fade" id="modalEliminarCategoria" tabindex="-1" aria-labelledby="modalEliminarCategoriaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="modalEliminarCategoriaLabel">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirmar eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar la categoría "<strong id="nombreCategoriaEliminar"></strong>"?</p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    <strong>Advertencia:</strong> Esta acción no se puede deshacer. Se eliminarán todos los datos asociados a esta categoría.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form th:action="@{/categoria-publicacion/delete/{id}}" method="POST" id="formEliminarCategoria">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <input type="hidden" name="id" id="idCategoriaEliminar">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Eliminar categoría
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configurar modal de eliminación
+        const modalEliminar = document.getElementById('modalEliminarCategoria');
+        if (modalEliminar) {
+            modalEliminar.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-id');
+                const nombre = button.getAttribute('data-nombre');
+
+                document.getElementById('nombreCategoriaEliminar').textContent = nombre;
+                document.getElementById('idCategoriaEliminar').value = id;
+
+                // Actualizar acción del formulario
+                const form = document.getElementById('formEliminarCategoria');
+                form.action = `/categoria-publicacion/delete/${id}`;
+            });
+        }
+
+        // ===== FILTRADO Y BÚSQUEDA =====
+        const searchInput = document.getElementById('searchCategoria');
+        const filterEstado = document.getElementById('filterEstado');
+        const filterOrden = document.getElementById('filterOrden');
+        const btnAplicarFiltros = document.getElementById('btnAplicarFiltros');
+        const btnLimpiarFiltros = document.getElementById('btnLimpiarFiltros');
+
+        function aplicarFiltros() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const estadoFilter = filterEstado.value;
+            const ordenFilter = filterOrden.value;
+
+            const filas = document.querySelectorAll('#tablaCategorias tbody tr');
+            let visibleCount = 0;
+
+            filas.forEach(fila => {
+                const nombre = fila.cells[2].textContent.toLowerCase();
+                const descripcion = fila.cells[3].textContent.toLowerCase();
+                const estado = fila.cells[4].textContent;
+
+                let visible = true;
+
+                // Filtro por búsqueda
+                if (searchTerm && !nombre.includes(searchTerm) && !descripcion.includes(searchTerm)) {
+                    visible = false;
+                }
+
+                // Filtro por estado
+                if (estadoFilter && estado !== estadoFilter) {
+                    visible = false;
+                }
+
+                if (visible) {
+                    fila.style.display = '';
+                    visibleCount++;
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+
+            // Actualizar contador
+            document.getElementById('totalRegistros').textContent = visibleCount;
+        }
+
+        if (btnAplicarFiltros) {
+            btnAplicarFiltros.addEventListener('click', aplicarFiltros);
+        }
+
+        if (btnLimpiarFiltros) {
+            btnLimpiarFiltros.addEventListener('click', function() {
+                searchInput.value = '';
+                filterEstado.value = '';
+                filterOrden.value = '';
+                aplicarFiltros();
+            });
+        }
+
+        // Aplicar filtros al cargar si hay parámetros en la URL
+        aplicarFiltros();
+    });
+</script>

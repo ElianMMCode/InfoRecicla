@@ -1,120 +1,437 @@
-<!-- Fragment: Listado Publicaciones -->
-<div th:fragment="listPublicacion">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 text-primary">Mis Publicaciones</h1>
-        <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=createPublicacion'}"
-           class="btn btn-primary">
-            <i class="fas fa-plus-circle"></i> Nueva Publicación
-        </a>
-    </div>
-
-    <!-- Filtros -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form th:action="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion'}" method="get" class="row g-3">
-                <div class="col-md-4">
-                    <label for="estado" class="form-label">Estado</label>
-                    <select id="estado" name="estado" class="form-select">
-                        <option value="">Todos los estados</option>
-                        <option value="publicado">Publicado</option>
-                        <option value="borrador">Borrador</option>
-                        <option value="archivado">Archivado</option>
-                    </select>
+<!-- Listado de Publicaciones -->
+<section th:fragment="list" class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <!-- Header -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body bg-success text-white p-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0"><i class="bi bi-newspaper me-2"></i>Listado de Publicaciones</h3>
+                            <p class="mb-0 small opacity-75">Explora y gestiona todas las publicaciones del sistema
+                            </p>
+                        </div>
+                        <a th:href="@{/publicacion/create}" class="btn btn-light text-success fw-semibold">
+                            <i class="bi bi-plus-circle me-1"></i>Nueva Publicación
+                        </a>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <label for="categoria" class="form-label">Categoría</label>
-                    <select id="categoria" name="categoria" class="form-select">
-                        <option value="">Todas las categorías</option>
-                        <option th:each="categoria : ${categorias}"
-                                th:value="${categoria.id}"
-                                th:text="${categoria.nombre}">Categoría</option>
-                    </select>
-                </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary me-2">Filtrar</button>
-                    <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion'}"
-                       class="btn btn-outline-secondary">Limpiar</a>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <!-- Tabla de publicaciones -->
-    <div class="card">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Lista de Publicaciones</h5>
-        </div>
-        <div class="card-body p-0">
-            <div th:if="${publicaciones.empty}" class="text-center text-muted py-5">
-                <p>No hay publicaciones creadas.</p>
-                <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=createPublicacion'}"
-                   class="btn btn-primary">Crear Primera Publicación</a>
-            </div>
-
-            <div th:unless="${publicaciones.empty}" class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                    <tr>
-                        <th>Título</th>
-                        <th>Categoría</th>
-                        <th>Estado</th>
-                        <th>Fecha Creación</th>
-                        <th>Acciones</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="publicacion : ${publicaciones}">
-                        <td>
-                            <strong th:text="${publicacion.titulo}">Título</strong>
-                            <br>
-                            <small class="text-muted" th:text="${#strings.abbreviate(publicacion.contenido, 50)}">Contenido breve...</small>
-                        </td>
-                        <td th:text="${publicacion.categoria?.nombre} ?: 'Sin categoría'">Categoría</td>
-                        <td>
-                                <span th:classappend="'badge bg-' + ${publicacion.estado == 'publicado' ? 'success' : (publicacion.estado == 'borrador' ? 'warning' : 'secondary')}"
-                                      th:text="${publicacion.estado}">Estado</span>
-                        </td>
-                        <td th:text="${#temporals.format(publicacion.creado, 'dd/MM/yyyy HH:mm')}">Fecha</td>
-                        <td>
-                            <div class="btn-group btn-group-sm">
-                                <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/show/' + ${publicacion.id} + '?seccion=showPublicacion'}"
-                                   class="btn btn-outline-primary">Ver</a>
-                                <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '/edit/' + ${publicacion.id} + '?seccion=editPublicacion'}"
-                                   class="btn btn-outline-warning">Editar</a>
-                                <button type="button" class="btn btn-outline-danger"
-                                        th:onclick="|confirmarEliminar('${publicacion.id}')|">Eliminar</button>
+                <!-- Filtros y Búsqueda avanzada -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <!-- Búsqueda por texto -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-bold">Buscar contenido</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="bi bi-search text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0" id="searchPublicacion"
+                                           placeholder="Título, contenido, autor...">
+                                </div>
                             </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+
+                            <!-- Filtro por estado -->
+                            <div class="col-md-4 col-lg-3">
+                                <label class="form-label fw-bold">Estado de publicación</label>
+                                <select class="form-select" id="filterEstado">
+                                    <option value="">Todos los estados</option>
+                                    <option value="PUBLICADO">Publicado</option>
+                                    <option value="BORRADOR">Borrador</option>
+                                    <option value="ARCHIVADO">Archivado</option>
+                                </select>
+                            </div>
+
+                            <!-- Filtro por categoría -->
+                            <div class="col-md-4 col-lg-3">
+                                <label class="form-label fw-bold">Categoría</label>
+                                <select class="form-select" id="filterCategoria">
+                                    <option value="">Todas las categorías</option>
+                                    <option th:each="cat : ${categorias}"
+                                            th:value="${cat.categoriaPublicacionId}"
+                                            th:text="${cat.nombre}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Filtro por fecha -->
+                            <div class="col-md-4 col-lg-2">
+                                <label class="form-label fw-bold">Ordenar por</label>
+                                <select class="form-select" id="filterOrden">
+                                    <option value="fecha_desc">Más recientes</option>
+                                    <option value="fecha_asc">Más antiguos</option>
+                                    <option value="titulo_asc">Título A-Z</option>
+                                    <option value="titulo_desc">Título Z-A</option>
+                                </select>
+                            </div>
+
+                            <!-- Botones de acción -->
+                            <div class="col-12 d-flex gap-2 pt-3">
+                                <button class="btn btn-success" id="btnAplicarFiltros">
+                                    <i class="bi bi-funnel me-1"></i>Aplicar filtros
+                                </button>
+                                <button class="btn btn-outline-secondary" id="btnLimpiarFiltros">
+                                    <i class="bi bi-x-circle me-1"></i>Limpiar filtros
+                                </button>
+                                <button class="btn btn-outline-info" id="btnExportarResultados">
+                                    <i class="bi bi-download me-1"></i>Exportar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vista de tarjetas o tabla -->
+                <div class="mb-3">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-success active" id="btnVistaTarjetas">
+                            <i class="bi bi-grid-3x3-gap"></i> Tarjetas
+                        </button>
+                        <button type="button" class="btn btn-outline-success" id="btnVistaTabla">
+                            <i class="bi bi-list-ul"></i> Tabla
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Vista de tarjetas (por defecto) -->
+                <div id="vistaTarjetas">
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                        <div class="col" th:each="pub : ${publicaciones}">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <!-- Encabezado con categoría -->
+                                <div class="card-header bg-white border-bottom-0 pb-0">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge" th:style="'background-color: ' + ${pub.colorCategoria} + ';'">
+                                            <i th:class="'bi ' + ${pub.iconoCategoria} + ' me-1'"></i>
+                                            <span th:text="${pub.nombreCategoria}">Categoría</span>
+                                        </span>
+                                        <span th:class="'badge ' + (${pub.estado} == 'PUBLICADO' ? 'bg-success' :
+                                                                   ${pub.estado} == 'BORRADOR' ? 'bg-warning' : 'bg-info')"
+                                          th:text="${pub.estado}">
+                                    </span>
+                                    </div>
+                                </div>
+
+                                <!-- Cuerpo de la tarjeta -->
+                                <div class="card-body">
+                                    <h5 class="card-title mb-2" th:text="${pub.titulo}">Título</h5>
+                                    <p class="card-text text-muted small mb-3" th:text="${pub.descripcion}">Descripción breve
+                                    </p>
+
+                                    <div class="mb-3">
+                                        <small class="text-muted d-block">
+                                            <i class="bi bi-person me-1"></i>
+                                            <span th:text="${pub.nombreUsuario}">Autor</span>
+                                        </small>
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar me-1"></i>
+                                            <span th:text="${#dates.format(pub.creado, 'dd/MM/yyyy')}">Fecha</span>
+                                        </small>
+                                    </div>
+
+                                    <!-- Vista previa del contenido (truncado) -->
+                                    <div class="border-top pt-3 mt-3">
+                                        <small class="text-muted">Contenido:</small>
+                                        <p class="small text-muted mb-0"
+                                           th:text="${#strings.abbreviate(#strings.replace(pub.contenido, '<[^>]+>', ''), 100)}">
+                                            Contenido de la publicación...
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Pie de tarjeta con acciones -->
+                                <div class="card-footer bg-white border-top-0 pt-0">
+                                    <div class="d-flex justify-content-between">
+                                        <a th:href="@{/publicacion/show/{id}(id=${pub.publicacionId})}"
+                                           class="btn btn-sm btn-outline-info">
+                                            <i class="bi bi-eye me-1"></i>Ver
+                                        </a>
+                                        <a th:href="@{/publicacion/edit/{id}(id=${pub.publicacionId})}"
+                                           class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-pencil me-1"></i>Editar
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEliminarPublicacion"
+                                                th:attr="data-id=${pub.publicacionId}, data-titulo=${pub.titulo}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vista de tabla (oculta por defecto) -->
+                <div id="vistaTabla" class="d-none">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Título</th>
+                                        <th>Categoría</th>
+                                        <th>Autor</th>
+                                        <th>Estado</th>
+                                        <th>Fecha</th>
+                                        <th class="text-end pe-4">Acciones</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="pub : ${publicaciones}">
+                                        <td class="ps-4">
+                                            <strong th:text="${pub.titulo}">Título</strong>
+                                            <small class="d-block text-muted" th:text="${pub.descripcion}">Descripción</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge" th:style="'background-color: ' + ${pub.colorCategoria} + ';'">
+                                                <i th:class="'bi ' + ${pub.iconoCategoria}"></i>
+                                            </span>
+                                            <small class="ms-1" th:text="${pub.nombreCategoria}"></small>
+                                        </td>
+                                        <td th:text="${pub.nombreUsuario}">Autor</td>
+                                        <td>
+                                            <span th:class="'badge ' + (${pub.estado} == 'PUBLICADO' ? 'bg-success' :
+                                                                       ${pub.estado} == 'BORRADOR' ? 'bg-warning' : 'bg-info')"
+                                                  th:text="${pub.estado}">
+                                            </span>
+                                        </td>
+                                        <td th:text="${#dates.format(pub.creado, 'dd/MM/yyyy')}">Fecha</td>
+                                        <td class="text-end pe-4">
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a th:href="@{/publicacion/show/{id}(id=${pub.publicacionId})}"
+                                                   class="btn btn-outline-info">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a th:href="@{/publicacion/edit/{id}(id=${pub.publicacionId})}"
+                                                   class="btn btn-outline-success">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <button class="btn btn-outline-danger"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#modalEliminarPublicacion"
+                                                        th:attr="data-id=${pub.publicacionId}, data-titulo=${pub.titulo}">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paginación -->
+                <div class="d-flex justify-content-between align-items-center p-3 mt-4 border-top">
+                    <div class="text-muted small">
+                        Mostrando <span id="totalRegistros" th:text="${publicaciones != null ? publicaciones.size() : 0}">0</span>
+                        publicaciones
+                    </div>
+                    <nav aria-label="Paginación de publicaciones">
+                        <ul class="pagination mb-0">
+                            <li class="page-item" th:classappend="${paginaActual == 1} ? 'disabled' : ''">
+                                <a class="page-link" th:href="@{/publicacion/list(page=${paginaActual - 1})}" tabindex="-1">Anterior
+                                </a>
+                            </li>
+                            <li th:each="i : ${#numbers.sequence(1, totalPaginas)}"
+                                class="page-item"
+                                th:classappend="${i == paginaActual} ? 'active' : ''">
+                                <a class="page-link" th:href="@{/publicacion/list(page=${i})}" th:text="${i}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${paginaActual == totalPaginas} ? 'disabled' : ''">
+                                <a class="page-link" th:href="@{/publicacion/list(page=${paginaActual + 1})}">Siguiente</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
+    </section>
 
-        <!-- Paginación -->
-        <div th:if="${totalPaginas > 1}" class="card-footer">
-            <nav aria-label="Paginación de publicaciones">
-                <ul class="pagination justify-content-center mb-0">
-                    <li class="page-item" th:classappend="${paginaActual == 1} ? 'disabled'">
-                        <a class="page-link" th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion&page=' + ${paginaActual - 1}}">Anterior</a>
-                    </li>
-                    <li th:each="i : ${#numbers.sequence(1, totalPaginas)}"
-                        class="page-item" th:classappend="${i == paginaActual} ? 'active'">
-                        <a class="page-link" th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion&page=' + ${i}}" th:text="${i}">1</a>
-                    </li>
-                    <li class="page-item" th:classappend="${paginaActual == totalPaginas} ? 'disabled'">
-                        <a class="page-link" th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion&page=' + ${paginaActual + 1}}">Siguiente</a>
-                    </li>
-                </ul>
-            </nav>
+    <!-- Modal: Confirmar eliminación -->
+    <div class="modal fade" id="modalEliminarPublicacion" tabindex="-1" aria-labelledby="modalEliminarPublicacionLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="modalEliminarPublicacionLabel">
+                        <i class="bi bi-exclamation-triangle me-2"></i>Confirmar eliminación
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar la publicación "<strong id="tituloPublicacionEliminar"></strong>"?
+                    </p>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-circle me-2"></i>
+                        <strong>Advertencia:</strong> Esta acción no se puede deshacer.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form th:action="@{/publicacion/delete/{id}}" method="POST" id="formEliminarPublicacion">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <input type="hidden" name="id" id="idPublicacionEliminar">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i>Eliminar publicación
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        function confirmarEliminar(publicacionId) {
-            if (confirm('¿Estás seguro de que deseas eliminar esta publicación?')) {
-                window.location.href = '/publicaciones/eliminar/' + publicacionId;
+        document.addEventListener('DOMContentLoaded', function () {
+            // ===== ALTERNAR ENTRE VISTAS =====
+            const btnVistaTarjetas = document.getElementById('btnVistaTarjetas');
+            const btnVistaTabla = document.getElementById('btnVistaTabla');
+            const vistaTarjetas = document.getElementById('vistaTarjetas');
+            const vistaTabla = document.getElementById('vistaTabla');
+
+            if (btnVistaTarjetas && btnVistaTabla) {
+                btnVistaTarjetas.addEventListener('click', function () {
+                    btnVistaTarjetas.classList.add('active');
+                    btnVistaTabla.classList.remove('active');
+                    vistaTarjetas.classList.remove('d-none');
+                    vistaTabla.classList.add('d-none');
+                });
+
+                btnVistaTabla.addEventListener('click', function () {
+                    btnVistaTabla.classList.add('active');
+                    btnVistaTarjetas.classList.remove('active');
+                    vistaTabla.classList.remove('d-none');
+                    vistaTarjetas.classList.add('d-none');
+                });
             }
-        }
+
+            // ===== CONFIGURAR MODAL DE ELIMINACIÓN =====
+            const modalEliminar = document.getElementById('modalEliminarPublicacion');
+            if (modalEliminar) {
+                modalEliminar.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    const id = button.getAttribute('data-id');
+                    const titulo = button.getAttribute('data-titulo');
+
+                    document.getElementById('tituloPublicacionEliminar').textContent = titulo;
+                    document.getElementById('idPublicacionEliminar').value = id;
+
+                    // Actualizar acción del formulario
+                    const form = document.getElementById('formEliminarPublicacion');
+                    form.action = `/publicacion/delete/${id}`;
+                });
+            }
+
+            // ===== FILTRADO Y BÚSQUEDA =====
+            const searchInput = document.getElementById('searchPublicacion');
+            const filterEstado = document.getElementById('filterEstado');
+            const filterCategoria = document.getElementById('filterCategoria');
+            const filterOrden = document.getElementById('filterOrden');
+            const btnAplicarFiltros = document.getElementById('btnAplicarFiltros');
+            const btnLimpiarFiltros = document.getElementById('btnLimpiarFiltros');
+
+            function aplicarFiltros() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const estadoFilter = filterEstado.value;
+                const categoriaFilter = filterCategoria.value;
+
+                // En una implementación real, aquí se haría una llamada AJAX al servidor
+                // Para esta demo, filtramos en el cliente
+                const cards = document.querySelectorAll('#vistaTarjetas .col');
+                const rows = document.querySelectorAll('#vistaTabla tbody tr');
+
+                let visibleCount = 0;
+
+                // Filtrar tarjetas
+                cards.forEach((card, index) => {
+                    const titulo = card.querySelector('.card-title').textContent.toLowerCase();
+                    const descripcion = card.querySelector('.card-text').textContent.toLowerCase();
+                    const estado = card.querySelector('.badge').textContent;
+                    const categoria = card.querySelector('.badge:first-child').textContent;
+
+                    let visible = true;
+
+                    // Filtro por búsqueda
+                    if (searchTerm && !titulo.includes(searchTerm) && !descripcion.includes(searchTerm)) {
+                        visible = false;
+                    }
+
+                    // Filtro por estado
+                    if (estadoFilter && estado !== estadoFilter) {
+                        visible = false;
+                    }
+
+                    // Filtro por categoría (simplificado)
+                    if (categoriaFilter && !categoria.includes(categoriaFilter)) {
+                        visible = false;
+                    }
+
+                    if (visible) {
+                        card.style.display = '';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                // Filtrar filas de tabla
+                rows.forEach(row => {
+                    const titulo = row.cells[0].textContent.toLowerCase();
+                    const descripcion = row.cells[0].querySelector('small').textContent.toLowerCase();
+                    const estado = row.cells[3].textContent;
+
+                    let visible = true;
+
+                    // Filtro por búsqueda
+                    if (searchTerm && !titulo.includes(searchTerm) && !descripcion.includes(searchTerm)) {
+                        visible = false;
+                    }
+
+                    // Filtro por estado
+                    if (estadoFilter && estado !== estadoFilter) {
+                        visible = false;
+                    }
+
+                    if (visible) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                // Actualizar contador
+                document.getElementById('totalRegistros').textContent = visibleCount;
+            }
+
+            if (btnAplicarFiltros) {
+                btnAplicarFiltros.addEventListener('click', aplicarFiltros);
+            }
+
+            if (btnLimpiarFiltros) {
+                btnLimpiarFiltros.addEventListener('click', function () {
+                    searchInput.value = '';
+                    filterEstado.value = '';
+                    filterCategoria.value = '';
+                    filterOrden.value = 'fecha_desc';
+                    aplicarFiltros();
+                });
+            }
+
+            // ===== EXPORTAR RESULTADOS =====
+            const btnExportar = document.getElementById('btnExportarResultados');
+            if (btnExportar) {
+                btnExportar.addEventListener('click', function () {
+                    // Aquí iría la lógica para exportar
+                    alert('Función de exportación en desarrollo...');
+                });
+            }
+        });
     </script>
-</div>
+</body>
+</html>

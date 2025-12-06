@@ -1,30 +1,35 @@
 package org.sena.inforecicla.dto.publicacion;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.sena.inforecicla.model.enums.EstadoPublicacion;
+import org.sena.inforecicla.model.Publicacion;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class PublicacionResponseDTO {
+public record PublicacionResponseDTO(
+        UUID publicacionId,
+        String titulo,
+        String contenido,
+        String estado,
+        String usuarioNombre,
+        String usuarioEmail,
+        String categoriaNombre,
+        LocalDateTime fechaCreacion,
+        LocalDateTime fechaActualizacion
+) {
 
-    private UUID publicacionId;
-    private String titulo;
-    private String contenido;
-    private String nombre;
-    private String descripcion;
-    private EstadoPublicacion estado;
-    private UUID usuarioId;
-    private String nombreUsuario;
-    private UUID categoriaPublicacionId;
-    private String nombreCategoria;
-    private LocalDateTime creado;
-    private LocalDateTime actualizado;
+    public static PublicacionResponseDTO derivado(Publicacion p) {
+        return new PublicacionResponseDTO(
+                p.getPublicacionId(),
+                p.getTitulo(),
+                p.getContenido(),
+                p.getEstado().name(),
+                p.getUsuario() != null ? p.getUsuario().getNombres() + " " + p.getUsuario().getApellidos() : null,
+                p.getUsuario() != null ? p.getUsuario().getEmail() : null,
+                p.getCategoriaPublicacion() != null ? p.getCategoriaPublicacion().getNombre() : null,
+                p.getFechaCreacion(),
+                p.getFechaActualizacion()
+        );
+    }
 }

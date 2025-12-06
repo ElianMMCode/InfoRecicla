@@ -1,88 +1,417 @@
-<!-- Fragment: Crear Publicación -->
-<div th:fragment="createPublicacion">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 text-primary">Crear Nueva Publicación</h1>
-        <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion'}"
-           class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left"></i> Volver al Listado
-        </a>
-    </div>
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="utf-8">
+</head>
+<body>
+    <!-- Crear Nueva Publicación -->
+    <section th:fragment="create" class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <!-- Header -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body bg-success text-white p-3">
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb mb-0">
+                                <li class="breadcrumb-item">
+                                    <a th:href="@{/publicacion/index}" class="text-white">Inicio</a>
+                                </li>
+                                <li class="breadcrumb-item">
+                                    <a th:href="@{/publicacion/list}" class="text-white">Listado</a>
+                                </li>
+                                <li class="breadcrumb-item active text-white" aria-current="page">Crear Nueva Publicación
+                                </li>
+                            </ol>
+                        </nav>
+                        <h3 class="mb-0 mt-2"><i class="bi bi-plus-circle me-2"></i>Crear Nueva Publicación</h3>
+                    </div>
+                </div>
 
-    <div class="card">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Información de la Publicación</h5>
-        </div>
-        <div class="card-body">
-            <form th:action="@{'/publicaciones/' + ${usuario.usuarioId} + '/crear'}" method="post" th:object="${publicacion}">
-                <div class="row g-3">
-                    <!-- Título -->
-                    <div class="col-12">
-                        <label for="titulo" class="form-label">Título <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="titulo" th:field="*{titulo}"
-                               placeholder="Ingresa el título de la publicación" required maxlength="200">
-                        <div class="form-text">Máximo 200 caracteres</div>
+                <!-- Formulario de creación -->
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <form th:action="@{/publicacion/store}" method="POST" th:object="${publicacionRequestDTO}"
+                                      class="needs-validation" novalidate>
+                                    <input type="hidden" th:field="*{usuarioId}" th:value="${usuarioId}">
+
+                                    <!-- Título -->
+                                    <div class="mb-4">
+                                        <label for="titulo" class="form-label fw-bold">
+                                            <i class="bi bi-type me-1 text-success"></i>Título de la publicación *
+                                        </label>
+                                        <input type="text" class="form-control form-control-lg"
+                                               id="titulo" name="titulo"
+                                               th:field="*{titulo}"
+                                               required
+                                               minlength="3"
+                                               maxlength="200"
+                                               placeholder="Ej: Guía Completa para el Reciclaje de Plásticos en el Hogar">
+                                        <div class="form-text text-muted d-flex justify-content-between">
+                                            <span>Entre 3 y 200 caracteres</span>
+                                            <span id="contadorTitulo">200 caracteres restantes</span>
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Por favor ingresa un título válido (entre 3 y 200 caracteres).
+                                        </div>
+                                    </div>
+
+                                    <!-- Nombre interno (para referencia) -->
+                                    <div class="mb-4">
+                                        <label for="nombre" class="form-label fw-bold">
+                                            <i class="bi bi-card-heading me-1 text-success"></i>Nombre interno *
+                                        </label>
+                                        <input type="text" class="form-control"
+                                               id="nombre" name="nombre"
+                                               th:field="*{nombre}"
+                                               required
+                                               maxlength="30"
+                                               placeholder="Ej: guia-reciclaje-plasticos">
+                                        <div class="form-text text-muted d-flex justify-content-between">
+                                            <span>Máximo 30 caracteres (usado para referencia interna)</span>
+                                            <span id="contadorNombre">30 caracteres restantes</span>
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Por favor ingresa un nombre válido (máximo 30 caracteres).
+                                        </div>
+                                    </div>
+
+                                    <!-- Descripción breve -->
+                                    <div class="mb-4">
+                                        <label for="descripcion" class="form-label fw-bold">
+                                            <i class="bi bi-text-paragraph me-1 text-success"></i>Descripción breve *
+                                        </label>
+                                        <textarea class="form-control" id="descripcion" name="descripcion"
+                                                  th:field="*{descripcion}"
+                                                  rows="3"
+                                                  maxlength="500"
+                                                  placeholder="Resumen o introducción de la publicación (aparecerá en listados)..."
+                                                  required></textarea>
+                                        <div class="form-text text-muted d-flex justify-content-between">
+                                            <span>Máximo 500 caracteres</span>
+                                            <span id="contadorDescripcion">500 caracteres restantes</span>
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Por favor ingresa una descripción válida (máximo 500 caracteres).
+                                        </div>
+                                    </div>
+
+                                    <!-- Contenido completo -->
+                                    <div class="mb-4">
+                                        <label for="contenido" class="form-label fw-bold">
+                                            <i class="bi bi-file-text me-1 text-success"></i>Contenido completo *
+                                        </label>
+                                        <textarea class="form-control" id="contenido" name="contenido"
+                                                  th:field="*{contenido}"
+                                                  rows="12"
+                                                  placeholder="Escribe aquí el contenido completo de la publicación..."
+                                                  required></textarea>
+                                        <div class="form-text text-muted">
+                                            Usa el editor de texto enriquecido para dar formato a tu contenido.
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            El contenido de la publicación es obligatorio.
+                                        </div>
+                                    </div>
+
+                                    <!-- Categoría y Estado -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <label for="categoriaPublicacionId" class="form-label fw-bold">
+                                                <i class="bi bi-tags me-1 text-success"></i>Categoría *
+                                            </label>
+                                            <select class="form-select" id="categoriaPublicacionId" name="categoriaPublicacionId"
+                                                    th:field="*{categoriaPublicacionId}"
+                                                    required>
+                                                <option value="">Selecciona una categoría...</option>
+                                                <option th:each="cat : ${categorias}"
+                                                        th:value="${cat.categoriaPublicacionId}"
+                                                        th:text="${cat.nombre}">
+                                                </option>
+                                            </select>
+                                            <div class="form-text text-muted">
+                                                Selecciona la categoría más apropiada para tu publicación.
+                                            </div>
+                                            <div class="invalid-feedback">
+                                                Por favor selecciona una categoría.
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="estado" class="form-label fw-bold">
+                                                <i class="bi bi-toggle-on me-1 text-success"></i>Estado de publicación *
+                                            </label>
+                                            <select class="form-select" id="estado" name="estado"
+                                                    th:field="*{estado}"
+                                                    required>
+                                                <option value="">Selecciona un estado...</option>
+                                                <option th:each="estado : ${T(org.sena.inforecicla.model.enums.EstadoPublicacion).values()}"
+                                                        th:value="${estado}"
+                                                        th:text="${estado.descripcion}">
+                                                </option>
+                                            </select>
+                                            <div class="form-text text-muted">
+                                                <ul class="small ps-3 mb-0">
+                                                    <li><strong>Borrador:</strong> Solo tú puedes verlo</li>
+                                                    <li><strong>Publicado:</strong> Visible para todos los usuarios</li>
+                                                    <li><strong>Archivado:</strong> Conservado pero no visible</li>
+                                                </ul>
+                                            </div>
+                                            <div class="invalid-feedback">
+                                                Por favor selecciona un estado.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Botones de acción -->
+                                    <div class="d-flex gap-3 mt-5 pt-4 border-top">
+                                        <button type="submit" name="accion" value="guardar" class="btn btn-success btn-lg px-4">
+                                            <i class="bi bi-check-circle me-2"></i>Guardar Publicación
+                                        </button>
+                                        <button type="submit" name="accion" value="borrador" class="btn btn-warning btn-lg px-4">
+                                            <i class="bi bi-save me-2"></i>Guardar como Borrador
+                                        </button>
+                                        <a th:href="@{/publicacion/list}" class="btn btn-outline-secondary btn-lg px-4">
+                                            <i class="bi bi-x-circle me-2"></i>Cancelar
+                                        </a>
+                                        <button type="reset" class="btn btn-outline-danger btn-lg px-4">
+                                            <i class="bi bi-arrow-counterclockwise me-2"></i>Limpiar
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Categoría -->
-                    <div class="col-md-6">
-                        <label for="categoria" class="form-label">Categoría</label>
-                        <select class="form-select" id="categoria" th:field="*{categoria.id}">
-                            <option value="">Selecciona una categoría</option>
-                            <option th:each="categoria : ${categorias}"
-                                    th:value="${categoria.id}"
-                                    th:text="${categoria.nombre}">Categoría</option>
-                        </select>
-                    </div>
+                    <!-- Panel lateral: Vista previa y ayuda -->
+                    <div class="col-lg-4">
+                        <!-- Vista previa -->
+                        <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="bi bi-eye me-2"></i>Vista previa</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4">
+                                    <h6 class="fw-bold text-muted mb-2">Título</h6>
+                                    <p id="previewTitulo" class="mb-0 text-muted">El título aparecerá aquí...</p>
+                                </div>
 
-                    <!-- Estado -->
-                    <div class="col-md-6">
-                        <label for="estado" class="form-label">Estado <span class="text-danger">*</span></label>
-                        <select class="form-select" id="estado" th:field="*{estado}" required>
-                            <option value="borrador">Borrador</option>
-                            <option value="publicado">Publicado</option>
-                            <option value="archivado">Archivado</option>
-                        </select>
-                    </div>
+                                <div class="mb-4">
+                                    <h6 class="fw-bold text-muted mb-2">Descripción</h6>
+                                    <p id="previewDescripcion" class="mb-0 text-muted small">La descripción breve aparecerá aquí...
+                                    </p>
+                                </div>
 
-                    <!-- Contenido -->
-                    <div class="col-12">
-                        <label for="contenido" class="form-label">Contenido <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="contenido" th:field="*{contenido}"
-                                  rows="10" placeholder="Escribe el contenido de tu publicación..."
-                                  required></textarea>
-                        <div class="form-text">Puedes usar formato HTML básico si es necesario</div>
-                    </div>
+                                <div class="row mb-4">
+                                    <div class="col-6">
+                                        <h6 class="fw-bold text-muted mb-2">Categoría</h6>
+                                        <p id="previewCategoria" class="mb-0">
+                                            <span class="badge bg-secondary">No seleccionada</span>
+                                        </p>
+                                    </div>
+                                    <div class="col-6">
+                                        <h6 class="fw-bold text-muted mb-2">Estado</h6>
+                                        <p id="previewEstado" class="mb-0">
+                                            <span class="badge bg-secondary">No seleccionado</span>
+                                        </p>
+                                    </div>
+                                </div>
 
-                    <!-- Botones -->
-                    <div class="col-12">
-                        <div class="d-flex gap-2 justify-content-end">
-                            <a th:href="@{'/publicaciones/' + ${usuario.usuarioId} + '?seccion=listPublicacion'}"
-                               class="btn btn-secondary">Cancelar</a>
-                            <button type="submit" name="accion" value="guardar_borrador" class="btn btn-warning">
-                                Guardar como Borrador
-                            </button>
-                            <button type="submit" name="accion" value="publicar" class="btn btn-success">
-                                Publicar Ahora
-                            </button>
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    Esta es una vista previa básica. El contenido completo se verá en la vista detallada.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel de ayuda -->
+                        <div class="card border-0 shadow-sm mt-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="bi bi-lightbulb me-2"></i>Consejos para publicar</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled small">
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle text-success me-2"></i>
+                                        <strong>Títulos claros:</strong> Que describan exactamente el contenido
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle text-success me-2"></i>
+                                        <strong>Contenido estructurado:</strong> Usa encabezados, párrafos y listas
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle text-success me-2"></i>
+                                        <strong>Imágenes relevantes:</strong> Añade imágenes para ilustrar el contenido
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle text-success me-2"></i>
+                                        <strong>Revisa la ortografía:</strong> Antes de publicar, revisa cuidadosamente
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle text-success me-2"></i>
+                                        <strong>Categoría adecuada:</strong> Selecciona la categoría más pertinente
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Estadísticas rápidas -->
+                        <div class="card border-0 shadow-sm mt-4">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3"><i class="bi bi-bar-chart me-2"></i>Mis estadísticas</h6>
+                                <div class="row text-center">
+                                    <div class="col-6 mb-3">
+                                        <div class="p-2 bg-light rounded">
+                                            <h4 class="h3 mb-0" th:text="${misPublicaciones != null ? misPublicaciones : '0'}">0
+                                            </h4>
+                                            <small class="text-muted">Publicaciones</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <div class="p-2 bg-light rounded">
+                                            <h4 class="h3 mb-0" th:text="${misBorradores != null ? misBorradores : '0'}">0
+                                            </h4>
+                                            <small class="text-muted">Borradores</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Ayuda -->
-    <div class="card mt-4">
-        <div class="card-header bg-light">
-            <h6 class="mb-0">Consejos para una buena publicación</h6>
-        </div>
-        <div class="card-body">
-            <ul class="mb-0">
-                <li>Usa un título claro y descriptivo</li>
-                <li>Estructura el contenido en párrafos cortos</li>
-                <li>Revisa la ortografía antes de publicar</li>
-                <li>Los borradores te permiten guardar sin publicar</li>
-            </ul>
-        </div>
-    </div>
-</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ===== INICIALIZAR EDITOR TINYMCE =====
+            inicializarTinyMCE('textarea#contenido');
+
+            // ===== CONTADORES DE CARACTERES =====
+            const tituloInput = document.getElementById('titulo');
+            const nombreInput = document.getElementById('nombre');
+            const descripcionInput = document.getElementById('descripcion');
+
+            const contadorTitulo = document.getElementById('contadorTitulo');
+            const contadorNombre = document.getElementById('contadorNombre');
+            const contadorDescripcion = document.getElementById('contadorDescripcion');
+
+            // ===== ELEMENTOS DE VISTA PREVIA =====
+            const previewTitulo = document.getElementById('previewTitulo');
+            const previewDescripcion = document.getElementById('previewDescripcion');
+            const previewCategoria = document.getElementById('previewCategoria');
+            const previewEstado = document.getElementById('previewEstado');
+
+            const categoriaSelect = document.getElementById('categoriaPublicacionId');
+            const estadoSelect = document.getElementById('estado');
+
+            // ===== ACTUALIZAR CONTADORES Y VISTA PREVIA =====
+            function actualizarContadores() {
+                // Título
+                if (tituloInput) {
+                    const tituloRestantes = 200 - tituloInput.value.length;
+                    contadorTitulo.textContent = `${tituloRestantes} caracteres restantes`;
+                    contadorTitulo.className = tituloRestantes < 0 ? 'text-danger' : 'text-muted';
+                    previewTitulo.textContent = tituloInput.value || 'El título aparecerá aquí...';
+                }
+
+                // Nombre
+                if (nombreInput) {
+                    const nombreRestantes = 30 - nombreInput.value.length;
+                    contadorNombre.textContent = `${nombreRestantes} caracteres restantes`;
+                    contadorNombre.className = nombreRestantes < 0 ? 'text-danger' : 'text-muted';
+                }
+
+                // Descripción
+                if (descripcionInput) {
+                    const descripcionRestantes = 500 - descripcionInput.value.length;
+                    contadorDescripcion.textContent = `${descripcionRestantes} caracteres restantes`;
+                    contadorDescripcion.className = descripcionRestantes < 0 ? 'text-danger' : 'text-muted';
+                    previewDescripcion.textContent = descripcionInput.value || 'La descripción breve aparecerá aquí...';
+                }
+            }
+
+            // ===== ACTUALIZAR VISTA PREVIA DE CATEGORÍA Y ESTADO =====
+            function actualizarVistaPrevia() {
+                // Categoría
+                if (categoriaSelect && categoriaSelect.value) {
+                    const selectedOption = categoriaSelect.options[categoriaSelect.selectedIndex];
+                    previewCategoria.innerHTML = `<span class="badge bg-success">${selectedOption.text}</span>`;
+                } else {
+                    previewCategoria.innerHTML = '<span class="badge bg-secondary">No seleccionada</span>';
+                }
+
+                // Estado
+                if (estadoSelect && estadoSelect.value) {
+                    const selectedOption = estadoSelect.options[estadoSelect.selectedIndex];
+                    let badgeClass = 'bg-secondary';
+                    switch(estadoSelect.value) {
+                        case 'PUBLICADO': badgeClass = 'bg-success'; break;
+                        case 'BORRADOR': badgeClass = 'bg-warning'; break;
+                        case 'ARCHIVADO': badgeClass = 'bg-info'; break;
+                    }
+                    previewEstado.innerHTML = `<span class="badge ${badgeClass}">${selectedOption.text}</span>`;
+                } else {
+                    previewEstado.innerHTML = '<span class="badge bg-secondary">No seleccionado</span>';
+                }
+            }
+
+            // ===== EVENT LISTENERS =====
+            [tituloInput, nombreInput, descripcionInput].forEach(input => {
+                if (input) {
+                    input.addEventListener('input', actualizarContadores);
+                    input.addEventListener('change', actualizarContadores);
+                }
+            });
+
+            if (categoriaSelect) {
+                categoriaSelect.addEventListener('change', actualizarVistaPrevia);
+            }
+
+            if (estadoSelect) {
+                estadoSelect.addEventListener('change', actualizarVistaPrevia);
+            }
+
+            // ===== VALIDACIÓN DE FORMULARIO =====
+            const form = document.querySelector('form.needs-validation');
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    // Validar editor TinyMCE
+                    if (typeof tinymce !== 'undefined') {
+                        const editor = tinymce.get('contenido');
+                        if (editor && !editor.getContent().trim()) {
+                            alert('El contenido de la publicación es obligatorio.');
+                            event.preventDefault();
+                            event.stopPropagation();
+                            return;
+                        }
+                    }
+
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                });
+            }
+
+            // ===== INICIALIZACIÓN =====
+            actualizarContadores();
+            actualizarVistaPrevia();
+
+            // Configurar botones de acción
+            const botonesAccion = document.querySelectorAll('button[name="accion"]');
+            botonesAccion.forEach(boton => {
+                boton.addEventListener('click', function() {
+                    // Si es borrador, cambiar automáticamente el estado
+                    if (this.value === 'borrador' && estadoSelect) {
+                        estadoSelect.value = 'BORRADOR';
+                        actualizarVistaPrevia();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

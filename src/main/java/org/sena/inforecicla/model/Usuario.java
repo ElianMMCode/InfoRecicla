@@ -86,5 +86,8 @@ public class Usuario extends EntidadLocalizacion {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Votos> votosRealizados;
 
-
+    public Object getFechaUltimoAcceso() {
+        // Valor placeholder: se puede implementar para devolver la fecha del último acceso
+        return null;
+    }
 }

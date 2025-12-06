@@ -1,13 +1,18 @@
 package org.sena.inforecicla.model.enums;
 
-import lombok.*;
-
-@AllArgsConstructor
-@Getter
 public enum EstadoPublicacion {
-    Borrador("Borrador"),
-    Publicado("Publicado"),
-    Archivado("Archivado");
+    BORRADOR("Borrador"),
+    PUBLICADO("Publicado"),
+    ARCHIVADO("Archivado"),
+    ELIMINADO("Eliminado");
 
     private final String descripcion;
+
+    EstadoPublicacion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
 }

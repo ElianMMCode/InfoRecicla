@@ -1,0 +1,364 @@
+<!-- Detalles de Categoría de Publicación -->
+<section th:fragment="show" class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body bg-info text-white p-3">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a th:href="@{/categoria-publicacion/index}" class="text-white">Inicio</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a th:href="@{/categoria-publicacion/list}" class="text-white">Listado</a>
+                            </li>
+                            <li class="breadcrumb-item active text-white" aria-current="page">Detalles de Categoría</li>
+                        </ol>
+                    </nav>
+                    <h3 class="mb-0 mt-2"><i class="bi bi-info-circle me-2"></i>Detalles de Categoría</h3>
+                </div>
+            </div>
+
+            <!-- Información principal -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body">
+                            <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-4 mb-4">
+                                <!-- Icono y estado -->
+                                <div class="text-center">
+                                    <div class="p-4 rounded-circle d-inline-block mb-3"
+                                         th:style="'background-color: ' + (${categoria.color != null} ? ${categoria.color} : '#28a745')">
+                                        <i th:class="'bi ' + (${categoria.icono != null} ? ${categoria.icono} : 'bi-tag') + ' text-white fs-1'"></i>
+                                    </div>
+                                    <div>
+                                        <span th:class="${categoria.estadoCategoria == 'ACTIVO'} ? 'badge bg-success' : 'badge bg-danger'"
+                                              th:text="${categoria.estadoCategoria}">ESTADO</span>
+                                    </div>
+                                </div>
+
+                                <!-- Nombre y orden -->
+                                <div class="flex-grow-1">
+                                    <h1 class="h2 mb-2" th:text="${categoria.nombre}">Nombre de la categoría</h1>
+                                    <p class="text-muted mb-3" th:text="${categoria.descripcion}">Descripción de la categoría</p>
+                                    <div class="d-flex gap-3">
+                                        <div>
+                                            <small class="text-muted d-block">Orden</small>
+                                            <strong class="fs-5" th:text="${categoria.orden != null} ? categoria.orden : '0'">0</strong>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted d-block">Publicaciones</small>
+                                            <strong class="fs-5" th:text="${totalPublicaciones != null} ? totalPublicaciones : '0'">0</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Información detallada -->
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body">
+                                            <h6 class="fw-bold mb-3"><i class="bi bi-card-checklist me-2"></i>Información básica</h6>
+                                            <table class="table table-borderless mb-0">
+                                                <tbody>
+                                                <tr>
+                                                    <td class="text-muted" style="width: 140px;">Nombre:</td>
+                                                    <td><strong th:text="${categoria.nombre}">--</strong></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted">Estado:</td>
+                                                    <td>
+                                                            <span th:class="${categoria.estadoCategoria == 'ACTIVO'} ? 'badge bg-success' : 'badge bg-danger'"
+                                                                  th:text="${categoria.estadoCategoria}">--</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted">Orden:</td>
+                                                    <td><strong th:text="${categoria.orden != null} ? categoria.orden : 'No asignado'">--</strong></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted">Icono:</td>
+                                                    <td>
+                                                        <code th:text="${categoria.icono != null} ? categoria.icono : 'bi-tag'">--</code>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted">Color:</td>
+                                                    <td>
+                                                        <span th:text="${categoria.color != null} ? categoria.color : '#28a745'">--</span>
+                                                        <span class="ms-2 d-inline-block rounded-circle"
+                                                              th:style="'background-color: ' + (${categoria.color != null} ? categoria.color : '#28a745') + '; width: 20px; height: 20px;'"></span>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body">
+                                            <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Información del registro</h6>
+                                            <table class="table table-borderless mb-0">
+                                                <tbody>
+                                                <tr>
+                                                    <td class="text-muted" style="width: 140px;">Creado el:</td>
+                                                    <td><strong th:text="${#dates.format(categoria.createdAt, 'dd/MM/yyyy HH:mm')}">--</strong></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted">Última actualización:</td>
+                                                    <td><strong th:text="${#dates.format(categoria.updatedAt, 'dd/MM/yyyy HH:mm')}">--</strong></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted">Creado por:</td>
+                                                    <td><strong th:text="${categoria.createdBy != null} ? categoria.createdBy : 'Sistema'">--</strong></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted">Actualizado por:</td>
+                                                    <td><strong th:text="${categoria.updatedBy != null} ? categoria.updatedBy : 'Sistema'">--</strong></td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Descripción completa -->
+                            <div class="mt-4">
+                                <h5 class="fw-bold mb-3"><i class="bi bi-text-paragraph me-2"></i>Descripción completa</h5>
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body">
+                                        <p th:text="${categoria.descripcion}">Descripción de la categoría</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Publicaciones relacionadas -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-0">
+                            <h5 class="mb-0"><i class="bi bi-newspaper me-2"></i>Publicaciones en esta categoría</h5>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${publicaciones != null and !publicaciones.empty}">
+                                <div class="list-group">
+                                    <a th:href="@{/publicacion/show/{id}(id=${pub.id})}"
+                                       class="list-group-item list-group-item-action"
+                                       th:each="pub : ${publicaciones}">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1" th:text="${pub.titulo}">Título de publicación</h6>
+                                            <small th:text="${#dates.format(pub.createdAt, 'dd/MM/yyyy')}">Fecha</small>
+                                        </div>
+                                        <p class="mb-1 text-muted small" th:text="${pub.resumen}">Resumen de la publicación...</p>
+                                        <small th:class="${pub.estado == 'ACTIVO'} ? 'text-success' : 'text-warning'">
+                                            <i th:class="${pub.estado == 'ACTIVO'} ? 'bi bi-check-circle' : 'bi bi-pause-circle'"></i>
+                                            <span th:text="${pub.estado}">Estado</span>
+                                        </small>
+                                    </a>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <a th:href="@{/publicacion/list?categoriaId={id}(id=${categoria.id})}" class="btn btn-outline-info btn-sm">
+                                        Ver todas las publicaciones →
+                                    </a>
+                                </div>
+                            </div>
+                            <div th:unless="${publicaciones != null and !publicaciones.empty}">
+                                <div class="text-center py-4">
+                                    <i class="bi bi-newspaper fs-1 text-muted mb-3 d-block"></i>
+                                    <p class="text-muted">No hay publicaciones en esta categoría</p>
+                                    <a th:href="@{/publicacion/create?categoriaId={id}(id=${categoria.id})}" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-plus-circle me-1"></i>Crear primera publicación
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel lateral de acciones -->
+                <div class="col-lg-4">
+                    <!-- Acciones principales -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white border-0">
+                            <h5 class="mb-0"><i class="bi bi-gear me-2"></i>Acciones</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a th:href="@{/categoria-publicacion/edit/{id}(id=${categoria.id})}"
+                                   class="btn btn-primary">
+                                    <i class="bi bi-pencil me-2"></i>Editar categoría
+                                </a>
+                                <button type="button" class="btn btn-outline-warning" id="btnCambiarEstado">
+                                    <i class="bi bi-toggle-on me-2"></i>
+                                    <span th:text="${categoria.estadoCategoria == 'ACTIVO'} ? 'Desactivar' : 'Activar'">Cambiar estado</span>
+                                </button>
+                                <a th:href="@{/categoria-publicacion/duplicate/{id}(id=${categoria.id})}"
+                                   class="btn btn-outline-success">
+                                    <i class="bi bi-copy me-2"></i>Duplicar categoría
+                                </a>
+                                <button type="button" class="btn btn-outline-danger"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalEliminarCategoria">
+                                    <i class="bi bi-trash me-2"></i>Eliminar categoría
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estadísticas -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white border-0">
+                            <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Estadísticas</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-6 mb-3">
+                                    <div class="p-3 bg-light rounded">
+                                        <h3 class="h2 mb-0" th:text="${totalPublicaciones != null} ? totalPublicaciones : '0'">0</h3>
+                                        <small class="text-muted">Publicaciones</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <div class="p-3 bg-light rounded">
+                                        <h3 class="h2 mb-0" th:text="${publicacionesActivas != null} ? publicacionesActivas : '0'">0</h3>
+                                        <small class="text-muted">Activas</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-3 bg-light rounded">
+                                        <h3 class="h2 mb-0" th:text="${vistasTotales != null} ? vistasTotales : '0'">0</h3>
+                                        <small class="text-muted">Vistas totales</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-3 bg-light rounded">
+                                        <h3 class="h2 mb-0" th:text="${promedioVistas != null} ? promedioVistas : '0'">0</h3>
+                                        <small class="text-muted">Vistas/promedio</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información rápida -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-3"><i class="bi bi-lightbulb me-2"></i>Consejos</h6>
+                            <ul class="list-unstyled small">
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Las categorías activas son visibles para los usuarios
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Usa colores distintivos para diferenciar categorías
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Mantén las descripciones claras y concisas
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    Revisa periódicamente las categorías inactivas
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal: Confirmar eliminación -->
+<div class="modal fade" id="modalEliminarCategoria" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>Confirmar eliminación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar la categoría "<strong th:text="${categoria.nombre}"></strong>"?</p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    <strong>Advertencia:</strong> Esta acción no se puede deshacer.
+                    <span th:if="${totalPublicaciones > 0}">
+                        Se eliminarán <strong th:text="${totalPublicaciones}"></strong> publicaciones asociadas.
+                    </span>
+                </div>
+                <div class="form-check mt-3">
+                    <input class="form-check-input" type="checkbox" id="confirmarEliminacion">
+                    <label class="form-check-label" for="confirmarEliminacion">
+                        Confirmo que deseo eliminar esta categoría y todo su contenido asociado
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form th:action="@{/categoria-publicacion/delete/{id}(id=${categoria.id})}" method="POST" id="formEliminar">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" class="btn btn-danger" id="btnConfirmarEliminar" disabled>
+                        <i class="bi bi-trash me-1"></i>Eliminar categoría
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ===== CONFIRMACIÓN DE ELIMINACIÓN =====
+        const confirmCheckbox = document.getElementById('confirmarEliminacion');
+        const btnConfirmarEliminar = document.getElementById('btnConfirmarEliminar');
+
+        if (confirmCheckbox && btnConfirmarEliminar) {
+            confirmCheckbox.addEventListener('change', function() {
+                btnConfirmarEliminar.disabled = !this.checked;
+            });
+        }
+
+        // ===== CAMBIAR ESTADO =====
+        const btnCambiarEstado = document.getElementById('btnCambiarEstado');
+        if (btnCambiarEstado) {
+            btnCambiarEstado.addEventListener('click', function() {
+                const nuevoEstado = btnCambiarEstado.textContent.includes('Activar') ? 'ACTIVO' : 'INACTIVO';
+                const mensaje = nuevoEstado === 'ACTIVO'
+                    ? '¿Activar esta categoría? Será visible para los usuarios.'
+                    : '¿Desactivar esta categoría? No será visible para los usuarios.';
+
+                if (confirm(mensaje)) {
+                    // Aquí iría la llamada AJAX para cambiar el estado
+                    fetch(`/categoria-publicacion/${categoriaId}/estado`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ estado: nuevoEstado })
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                location.reload();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Error al cambiar el estado');
+                        });
+                }
+            });
+        }
+
+        // ===== TOOLTIPS =====
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
