@@ -14,4 +14,8 @@ public interface InventarioRepository extends BaseRepository<Inventario, UUID> {
 
     //Confirmar existencia de inventario
     Optional<Inventario> findByInventarioIdAndPuntoEca_PuntoEcaIDAndMaterial_MaterialId(UUID inventarioId, UUID puntoId, UUID materialId);
+
+    boolean existsByPuntoEca_PuntoEcaIDAndMaterial_MaterialId(UUID puntoId, UUID materialId);
+
+    boolean existsByInventarioIdAndPuntoEca_PuntoEcaID(UUID inventarioId, UUID inventarioId1);
 }

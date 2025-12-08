@@ -104,17 +104,28 @@
     <!-- ═════════════════════════════════════════════════════════════ -->
     <!-- ACORDEÓN PRINCIPAL -->
     <!-- ═════════════════════════════════════════════════════════════ -->
+    <!-- Inyectar datos desde Thymeleaf ANTES de los scripts -->
+    <script th:inline="javascript">
+        window.ENTRADAS_INICIALES = /*[[${entradasIniciales.content}]]*/ [];
+        window.SALIDAS_INICIALES = /*[[${salidasIniciales.content}]]*/ [];
+
+        // Variables para paginación
+        window.PAGINA_ACTUAL_ENTRADAS = 1;
+        window.PAGINA_ACTUAL_SALIDAS = 1;
+        window.REGISTROS_POR_PAGINA = 5;
+    </script>
+
     <div class="accordion accordion-flush shadow-sm" id="movimientosAccordion">
         <!-- ITEM 1: ENTRADAS DE MATERIAL -->
-        <div class="accordion-item border-start border-5 border-success">
+        <div class="accordion-item border-start border-5 border-danger">
             <h2 class="accordion-header" id="headingEntradas">
                 <button class="accordion-button fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEntradas">
-                    <span class="bg-success p-2 rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                    <span class="bg-danger p-2 rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                         <i class="bi bi-arrow-down text-white"></i>
                     </span>
                     <span>
-                        <span class="fw-bold text-dark d-block">Entradas de Material</span>
-                        <small class="text-muted fw-normal">Registra la entrada de materiales reciclables al inventario</small>
+                        <span class="fw-bold text-dark d-block">Compra de Material</span>
+                        <small class="text-muted fw-normal">Registra la compra de materiales reciclables al inventario</small>
                     </span>
                 </button>
             </h2>
@@ -122,8 +133,8 @@
                 <div class="accordion-body p-4 bg-light">
                     <!-- Formulario de entrada -->
                     <div class="card shadow-sm mb-4">
-                        <div class="card-header bg-success-subtle border-0 px-4 py-3">
-                            <h6 class="mb-0 fw-bold text-success">Registrar Nueva Entrada</h6>
+                        <div class="card-header bg-danger-subtle border-0 px-4 py-3">
+                            <h6 class="mb-0 fw-bold text-danger">Registrar Nueva Compra de Material</h6>
                         </div>
                         <div class="card-body" id="formEntradaContainer" style="display: none;">
                             <form id="formEntrada" class="row g-3">
@@ -158,7 +169,7 @@
                                     <input id="entradaCapacidadMaxima" type="number" step="0.01" class="form-control form-control-sm bg-light" readonly>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold small">Cantidad a Agregar (kg) <span class="text-danger">*</span></label>
+                                    <label class="form-label fw-semibold small">Cantidad a Agregar <span class="text-danger">*</span></label>
                                     <input id="entradaCantidad" name="cantidad" type="number" step="0.01" min="0" class="form-control form-control-sm border-primary border-2" placeholder="0.00" required>
                                     <small class="text-muted d-block mt-1">Stock después: <strong id="entradaStockResultante">-</strong></small>
                                 </div>
@@ -223,8 +234,8 @@
                     <!-- Tabla de entradas -->
                     <div class="card shadow-sm">
                         <div class="card-header bg-light border-0 px-4 py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0 fw-bold text-dark">Historial de Entradas</h6>
-                            <span class="badge bg-success rounded-pill" id="badgeEntradasCount">0 registros</span>
+                            <h6 class="mb-0 fw-bold text-dark">Historial de Compra de Material</h6>
+                            <span class="badge bg-danger rounded-pill" id="badgeEntradasCount">0 registros</span>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -233,14 +244,15 @@
                                     <tr>
                                         <th scope="col" class="fw-bold small">Fecha</th>
                                         <th scope="col" class="fw-bold small">Material</th>
-                                        <th scope="col" class="fw-bold small text-end">Cantidad (kg)</th>
+                                        <th scope="col" class="fw-bold small text-end">Cantidad</th>
                                         <th scope="col" class="fw-bold small text-end">Precio Unit.</th>
-                                        <th scope="col" class="fw-bold small">Observaciones</th>
+                                        <th scope="col" class="fw-bold small">Total</th>
+                                        <th scope="col" class="fw-bold small text-center">Acciones</th>
                                     </tr>
                                     </thead>
                                     <tbody class="border-top" id="tablasEntradasBody">
                                     <tr class="text-muted text-center">
-                                        <td colspan="5" class="py-3"><small>Sin registros</small></td>
+                                        <td colspan="6" class="py-3"><small>Sin registros</small></td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -260,15 +272,15 @@
             </div>
         </div>
         <!-- ITEM 2: SALIDAS DE MATERIAL -->
-        <div class="accordion-item border-start border-5 border-danger">
+        <div class="accordion-item border-start border-5 border-success">
             <h2 class="accordion-header" id="headingSalidas">
                 <button class="accordion-button fw-bold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSalidas">
-                    <span class="bg-danger p-2 rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                    <span class="bg-success p-2 rounded-circle me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                         <i class="bi bi-arrow-up text-white"></i>
                     </span>
                     <span>
-                        <span class="fw-bold text-dark d-block">Salidas de Material</span>
-                        <small class="text-muted fw-normal">Registra la salida de materiales reciclables del inventario</small>
+                        <span class="fw-bold text-dark d-block">Venta de Material</span>
+                        <small class="text-muted fw-normal">Registra la venta de materiales reciclables del inventario</small>
                     </span>
                 </button>
             </h2>
@@ -276,11 +288,11 @@
                 <div class="accordion-body p-4 bg-light">
                     <!-- Formulario de salida -->
                     <div class="card shadow-sm mb-4">
-                        <div class="card-header bg-danger-subtle border-0 px-4 py-3">
-                            <h6 class="mb-0 fw-bold text-danger">Registrar Nueva Salida</h6>
+                        <div class="card-header bg-success-subtle border-0 px-4 py-3">
+                            <h6 class="mb-0 fw-bold text-success">Registrar Nueva Venta de Material</h6>
                         </div>
                         <div class="card-body" id="formSalidaContainer" style="display: none;">
-                            <form id="formSalida" class="row g-3">
+                            <form id="formSalida" class="row g-3" novalidate>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Material <span class="text-danger">*</span></label>
                                     <input id="salidaMaterialSeleccionado" type="text" class="form-control form-control-sm" readonly required>
@@ -312,9 +324,9 @@
                                     <input id="salidaCapacidadMaxima" type="number" step="0.01" class="form-control form-control-sm bg-light" readonly>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold small">Cantidad a Descontar (kg) <span class="text-danger">*</span></label>
+                                    <label class="form-label fw-semibold small">Cantidad a Descontar <span class="text-danger">*</span></label>
                                     <input id="salidaCantidad" name="cantidad" type="number" step="0.01" min="0" class="form-control form-control-sm border-danger border-2" placeholder="0.00" required>
-                                    <small class="text-muted d-block mt-1">Stock restante: <strong id="salidaStockRestante" class="text-danger">-</strong></small>
+                                    <small class="text-muted d-block mt-1">Stock después: <strong id="salidaStockRestante" class="text-danger">-</strong></small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Fecha <span class="text-danger">*</span></label>
@@ -326,7 +338,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Centro de Acopio</label>
-                                    <select id="salidaCentroAcopio" class="form-select form-select-sm border-danger border-2 js-select2-centro-acopio" style="width: 100%;" required>
+                                    <select id="salidaCentroAcopio" class="form-select form-select-sm border-success border-2 js-select2-centro-acopio" style="width: 100%;">
                                         <option value="">Selecciona un centro...</option>
                                         <th:block th:if="${not #lists.isEmpty(centrosAcopio)}">
                                             <option th:each="centro : ${centrosAcopio}"
@@ -393,8 +405,8 @@
                     <!-- Tabla de salidas -->
                     <div class="card shadow-sm">
                         <div class="card-header bg-light border-0 px-4 py-3 d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0 fw-bold text-dark">Historial de Salidas</h6>
-                            <span class="badge bg-danger rounded-pill" id="badgeSalidasCount">0 registros</span>
+                            <h6 class="mb-0 fw-bold text-dark">Historial de Venta de Material</h6>
+                            <span class="badge bg-success rounded-pill" id="badgeSalidasCount">0 registros</span>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -403,14 +415,16 @@
                                     <tr>
                                         <th scope="col" class="fw-bold small">Fecha</th>
                                         <th scope="col" class="fw-bold small">Material</th>
-                                        <th scope="col" class="fw-bold small text-end">Cantidad (kg)</th>
+                                        <th scope="col" class="fw-bold small text-end">Cantidad</th>
                                         <th scope="col" class="fw-bold small text-end">Precio Unit.</th>
+                                        <th scope="col" class="fw-bold small">Total</th>
                                         <th scope="col" class="fw-bold small">Centro Acopio</th>
+                                        <th scope="col" class="fw-bold small text-center">Acciones</th>
                                     </tr>
                                     </thead>
                                     <tbody class="border-top" id="tablasSalidasBody">
                                     <tr class="text-muted text-center">
-                                        <td colspan="5" class="py-3"><small>Sin registros</small></td>
+                                        <td colspan="7" class="py-3"><small>Sin registros</small></td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -594,7 +608,7 @@
                     console.log('Encontrado #buscarMaterialMovimientos');
 
                     // Obtener endpoint y puntoId
-                    var endpoint = '/punto-eca/catalogo/materiales/buscar';
+                    var endpoint = '/punto-eca/catalogo/inventario/materiales/buscar';
                     var puntoId = puntoEcaId; // Ya está disponible en el data attribute
 
                     console.log('Endpoint:', endpoint);
@@ -1154,7 +1168,7 @@
                     modal.show();
 
                     // Construir URL con parámetros como en section-materiales.html
-                    var endpoint = '/punto-eca/catalogo/materiales/buscar';
+                    var endpoint = '/punto-eca/catalogo/inventario/materiales/buscar';
                     var params = new URLSearchParams();
 
                     if (texto) params.append('texto', texto);
@@ -1377,105 +1391,6 @@
                     });
                 }
 
-                // ========================================================
-                // CARGA INICIAL DE DATOS EN TABLAS (ENTRADAS Y SALIDAS)
-                // ========================================================
-                // Esta sección se ejecuta una vez que el DOM está completamente cargado
-                function cargarDatosIniciales() {
-                    console.log('Cargando datos iniciales en tablas...');
-
-                    // Datos de entradas (compras) - Inyectados desde Thymeleaf
-                    const entradasData = /*[[${entradasIniciales.content}]]*/ [];
-
-                    // Datos de salidas (ventas) - Inyectados desde Thymeleaf
-                    const salidasData = /*[[${salidasIniciales.content}]]*/ [];
-
-                    console.log('Entradas cargadas:', entradasData.length, entradasData);
-                    console.log('Salidas cargadas:', salidasData.length, salidasData);
-
-                    // Renderizar entradas
-                    function renderizarEntradas() {
-                        const tbody = document.getElementById('tablasEntradasBody');
-                        if (!tbody) {
-                            console.warn('No se encontró tbody tablasEntradasBody');
-                            return;
-                        }
-
-                        if (!entradasData || entradasData.length === 0) {
-                            tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="5" class="py-3"><small>Sin registros</small></td></tr>';
-                            document.getElementById('badgeEntradasCount').textContent = '0 registros';
-                            return;
-                        }
-
-                        tbody.innerHTML = entradasData.map(entrada => {
-                            const fecha = entrada.fechaCompra ? new Date(entrada.fechaCompra).toLocaleDateString('es-CO') : '-';
-                            const cantidad = parseFloat(entrada.cantidad || 0);
-                            const precio = parseFloat(entrada.precioCompra || 0);
-                            return `
-                    <tr>
-                        <td class="small">${fecha}</td>
-                        <td class="small">${entrada.nombreMaterial || '-'}</td>
-                        <td class="text-end small">${cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td class="text-end small">$${precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td class="small">${entrada.observaciones || '-'}</td>
-                    </tr>
-                `;
-                        }).join('');
-
-                        document.getElementById('badgeEntradasCount').textContent = entradasData.length + ' registros';
-                        console.log('✅ Tabla de entradas renderizada');
-                    }
-
-                    // Renderizar salidas
-                    function renderizarSalidas() {
-                        const tbody = document.getElementById('tablasSalidasBody');
-                        if (!tbody) {
-                            console.warn('No se encontró tbody tablasSalidasBody');
-                            return;
-                        }
-
-                        if (!salidasData || salidasData.length === 0) {
-                            tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="5" class="py-3"><small>Sin registros</small></td></tr>';
-                            document.getElementById('badgeSalidasCount').textContent = '0 registros';
-                            return;
-                        }
-
-                        tbody.innerHTML = salidasData.map(salida => {
-                            const fecha = salida.fechaVenta ? new Date(salida.fechaVenta).toLocaleDateString('es-CO') : '-';
-                            const cantidad = parseFloat(salida.cantidad || 0);
-                            const precio = parseFloat(salida.precioVenta || 0);
-                            return `
-                    <tr>
-                        <td class="small">${fecha}</td>
-                        <td class="small">${salida.nombreMaterial || '-'}</td>
-                        <td class="text-end small">${cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td class="text-end small">$${precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td class="small">${salida.nombreCentroAcopio || '-'}</td>
-                    </tr>
-                `;
-                        }).join('');
-
-                        document.getElementById('badgeSalidasCount').textContent = salidasData.length + ' registros';
-                        console.log('✅ Tabla de salidas renderizada');
-                    }
-
-                    // Inicializar cuando el DOM esté listo
-                    if (document.readyState === 'loading') {
-                        document.addEventListener('DOMContentLoaded', function() {
-                            console.log('✅ DOM cargado, renderizando...');
-                            renderizarEntradas();
-                            renderizarSalidas();
-                        });
-                    } else {
-                        console.log('✅ DOM ya cargado, renderizando...');
-                        renderizarEntradas();
-                        renderizarSalidas();
-                    }
-                }
-
-                // Intentar cargar datos iniciales
-                cargarDatosIniciales();
-
                 // Mostrar estado inicial
                 mostrarEstadoBusquedaMov('idle');
                 console.log('Script de movimientos inicializado con Select2');
@@ -1488,6 +1403,228 @@
                 inicializarSelect2();
             }
         })();
+
+        // ========================================================
+        // CARGA INICIAL DE DATOS EN TABLAS (ENTRADAS Y SALIDAS)
+        // ========================================================
+        // Datos ya están inyectados en window.ENTRADAS_INICIALES y window.SALIDAS_INICIALES
+
+        console.log('📊 Entradas disponibles:', window.ENTRADAS_INICIALES.length);
+        console.log('📊 Salidas disponibles:', window.SALIDAS_INICIALES.length);
+
+        // Renderizar entradas con paginación
+        function renderizarEntradas() {
+            const tbody = document.getElementById('tablasEntradasBody');
+            if (!tbody) {
+                return;
+            }
+
+            const entradasData = window.ENTRADAS_INICIALES || [];
+
+            if (!entradasData || entradasData.length === 0) {
+                tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="6" class="py-3"><small>Sin registros</small></td></tr>';
+                const badge = document.getElementById('badgeEntradasCount');
+                if (badge) badge.textContent = '0 registros';
+                actualizarPaginacionEntradas(0);
+                return;
+            }
+
+            // Calcular paginación
+            const registrosPorPagina = window.REGISTROS_POR_PAGINA || 5;
+            const totalPaginas = Math.ceil(entradasData.length / registrosPorPagina);
+            const paginaActual = window.PAGINA_ACTUAL_ENTRADAS || 1;
+
+            // Validar página actual
+            if (paginaActual > totalPaginas) {
+                window.PAGINA_ACTUAL_ENTRADAS = totalPaginas;
+            }
+            if (paginaActual < 1) {
+                window.PAGINA_ACTUAL_ENTRADAS = 1;
+            }
+
+            // Calcular índices
+            const inicio = (paginaActual - 1) * registrosPorPagina;
+            const fin = inicio + registrosPorPagina;
+            const registrosPagina = entradasData.slice(inicio, fin);
+
+            tbody.innerHTML = registrosPagina.map(entrada => {
+                const fecha = entrada.fechaCompra ? new Date(entrada.fechaCompra).toLocaleDateString('es-CO') : '-';
+                const cantidad = parseFloat(entrada.cantidad || 0);
+                const precio = parseFloat(entrada.precioCompra || 0);
+                const total = cantidad * precio;
+                return `
+                    <tr>
+                        <td class="small">${fecha}</td>
+                        <td class="small">${entrada.nombreMaterial || '-'}</td>
+                        <td class="text-end small">${cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="text-end small">$${precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="text-end small fw-semibold text-danger">$${total.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="text-center">
+                            <div class="d-flex gap-2 justify-content-center">
+                                <button type="button" class="btn btn-sm btn-danger text-white btn-detalles-entrada"
+                                        data-compra-id="${entrada.compraId}"
+                                        title="Ver detalles">
+                                    <i class="bi bi-eye-fill"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-eliminar-entrada"
+                                        data-compra-id="${entrada.compraId}"
+                                        title="Eliminar">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            const badge = document.getElementById('badgeEntradasCount');
+            if (badge) badge.textContent = entradasData.length + ' registros';
+            actualizarPaginacionEntradas(totalPaginas);
+        }
+
+        // Actualizar controles de paginación de entradas
+        function actualizarPaginacionEntradas(totalPaginas) {
+            const paginacion = document.getElementById('paginacionEntradas');
+            if (!paginacion) {
+                return;
+            }
+
+            if (totalPaginas <= 0) {
+                paginacion.innerHTML = '';
+                return;
+            }
+
+            const paginaActual = window.PAGINA_ACTUAL_ENTRADAS || 1;
+            let html = '<li class="page-item ' + (paginaActual <= 1 ? 'disabled' : '') + '"><a class="page-link" href="#" onclick="cambiarPaginaEntradas(' + (paginaActual - 1) + '); return false;">Anterior</a></li>';
+
+            for (let i = 1; i <= totalPaginas; i++) {
+                html += '<li class="page-item ' + (i === paginaActual ? 'active' : '') + '"><a class="page-link" href="#" onclick="cambiarPaginaEntradas(' + i + '); return false;">' + i + '</a></li>';
+            }
+
+            html += '<li class="page-item ' + (paginaActual >= totalPaginas ? 'disabled' : '') + '"><a class="page-link" href="#" onclick="cambiarPaginaEntradas(' + (paginaActual + 1) + '); return false;">Siguiente</a></li>';
+
+            paginacion.innerHTML = html;
+        }
+
+        // Cambiar página de entradas
+        function cambiarPaginaEntradas(pagina) {
+            window.PAGINA_ACTUAL_ENTRADAS = pagina;
+            renderizarEntradas();
+        }
+
+        // Renderizar salidas con paginación
+        function renderizarSalidas() {
+            const tbody = document.getElementById('tablasSalidasBody');
+            if (!tbody) {
+                return;
+            }
+
+            const salidasData = window.SALIDAS_INICIALES || [];
+
+            if (!salidasData || salidasData.length === 0) {
+                tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="7" class="py-3"><small>Sin registros</small></td></tr>';
+                const badge = document.getElementById('badgeSalidasCount');
+                if (badge) badge.textContent = '0 registros';
+                actualizarPaginacionSalidas(0);
+                return;
+            }
+
+            // Calcular paginación
+            const registrosPorPagina = window.REGISTROS_POR_PAGINA || 5;
+            const totalPaginas = Math.ceil(salidasData.length / registrosPorPagina);
+            const paginaActual = window.PAGINA_ACTUAL_SALIDAS || 1;
+
+            // Validar página actual
+            if (paginaActual > totalPaginas) {
+                window.PAGINA_ACTUAL_SALIDAS = totalPaginas;
+            }
+            if (paginaActual < 1) {
+                window.PAGINA_ACTUAL_SALIDAS = 1;
+            }
+
+            // Calcular índices
+            const inicio = (paginaActual - 1) * registrosPorPagina;
+            const fin = inicio + registrosPorPagina;
+            const registrosPagina = salidasData.slice(inicio, fin);
+
+            tbody.innerHTML = registrosPagina.map(salida => {
+                const fecha = salida.fechaVenta ? new Date(salida.fechaVenta).toLocaleDateString('es-CO') : '-';
+                const cantidad = parseFloat(salida.cantidad || 0);
+                const precio = parseFloat(salida.precioVenta || 0);
+                const total = cantidad * precio;
+                return `
+                    <tr>
+                        <td class="small">${fecha}</td>
+                        <td class="small">${salida.nombreMaterial || '-'}</td>
+                        <td class="text-end small">${cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="text-end small">$${precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="text-end small fw-semibold text-success">$${total.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="small">${salida.nombreCentroAcopio || '-'}</td>
+                        <td class="text-center">
+                            <div class="d-flex gap-2 justify-content-center">
+                                <button type="button" class="btn btn-sm btn-success text-white btn-detalles-salida"
+                                        data-venta-id="${salida.ventaId}"
+                                        title="Ver detalles">
+                                    <i class="bi bi-eye-fill"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-success btn-eliminar-salida"
+                                        data-venta-id="${salida.ventaId}"
+                                        title="Eliminar">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            const badge = document.getElementById('badgeSalidasCount');
+            if (badge) badge.textContent = salidasData.length + ' registros';
+            actualizarPaginacionSalidas(totalPaginas);
+        }
+
+        // Actualizar controles de paginación de salidas
+        function actualizarPaginacionSalidas(totalPaginas) {
+            const paginacion = document.getElementById('paginacionSalidas');
+            if (!paginacion) {
+                return;
+            }
+
+            if (totalPaginas <= 0) {
+                paginacion.innerHTML = '';
+                return;
+            }
+
+            const paginaActual = window.PAGINA_ACTUAL_SALIDAS || 1;
+            let html = '<li class="page-item ' + (paginaActual <= 1 ? 'disabled' : '') + '"><a class="page-link" href="#" onclick="cambiarPaginaSalidas(' + (paginaActual - 1) + '); return false;">Anterior</a></li>';
+
+            for (let i = 1; i <= totalPaginas; i++) {
+                html += '<li class="page-item ' + (i === paginaActual ? 'active' : '') + '"><a class="page-link" href="#" onclick="cambiarPaginaSalidas(' + i + '); return false;">' + i + '</a></li>';
+            }
+
+            html += '<li class="page-item ' + (paginaActual >= totalPaginas ? 'disabled' : '') + '"><a class="page-link" href="#" onclick="cambiarPaginaSalidas(' + (paginaActual + 1) + '); return false;">Siguiente</a></li>';
+
+            paginacion.innerHTML = html;
+        }
+
+        // Cambiar página de salidas
+        function cambiarPaginaSalidas(pagina) {
+            window.PAGINA_ACTUAL_SALIDAS = pagina;
+            renderizarSalidas();
+        }
+
+        // Ejecutar renderizado cuando el DOM esté listo
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('🎯 DOM completamente cargado, renderizando tablas...');
+                renderizarEntradas();
+                renderizarSalidas();
+            });
+        } else {
+            console.log('🎯 DOM ya estaba cargado, renderizando tablas...');
+            renderizarEntradas();
+            renderizarSalidas();
+        }
 
         // Función global para cambiar el material seleccionado
         window.cambiarMaterial = function() {
@@ -1566,437 +1703,975 @@
 
             console.log('✓ Material cambiado, sección de búsqueda mostrada nuevamente');
         };
-    </script>
 
-    <!-- SCRIPT PARA CARGAR DATOS INICIALES DE ENTRADAS Y SALIDAS -->
-    <script th:inline="javascript">
-        (function() {
-            console.log('Inicializando carga de datos de movimientos...');
-
-            // Datos de entradas (compras) - Inyectados desde Thymeleaf
-            const entradasData = /*[[${entradasIniciales.content}]]*/ [];
-
-            // Datos de salidas (ventas) - Inyectados desde Thymeleaf
-            const salidasData = /*[[${salidasIniciales.content}]]*/ [];
-
-            console.log('Entradas cargadas:', entradasData.length, entradasData);
-            console.log('Salidas cargadas:', salidasData.length, salidasData);
-
-            // Renderizar entradas
-            function renderizarEntradas() {
-                const tbody = document.getElementById('tablasEntradasBody');
-                if (!tbody) {
-                    console.warn('No se encontró tbody tablasEntradasBody');
-                    return;
-                }
-
-                if (!entradasData || entradasData.length === 0) {
-                    tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="5" class="py-3"><small>Sin registros</small></td></tr>';
-                    document.getElementById('badgeEntradasCount').textContent = '0 registros';
-                    return;
-                }
-
-                tbody.innerHTML = entradasData.map(entrada => {
-                    const fecha = entrada.fechaCompra ? new Date(entrada.fechaCompra).toLocaleDateString('es-CO') : '-';
-                    const cantidad = parseFloat(entrada.cantidad || 0);
-                    const precio = parseFloat(entrada.precioCompra || 0);
-                    return `
-                    <tr>
-                        <td class="small">${fecha}</td>
-                        <td class="small">${entrada.nombreMaterial || '-'}</td>
-                        <td class="text-end small">${cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td class="text-end small">$${precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td class="small">${entrada.observaciones || '-'}</td>
-                    </tr>
-                `;
-                }).join('');
-
-                document.getElementById('badgeEntradasCount').textContent = entradasData.length + ' registros';
-                console.log('✅ Tabla de entradas renderizada');
-            }
-
-            // Renderizar salidas
-            function renderizarSalidas() {
-                const tbody = document.getElementById('tablasSalidasBody');
-                if (!tbody) {
-                    console.warn('No se encontró tbody tablasSalidasBody');
-                    return;
-                }
-
-                if (!salidasData || salidasData.length === 0) {
-                    tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="5" class="py-3"><small>Sin registros</small></td></tr>';
-                    document.getElementById('badgeSalidasCount').textContent = '0 registros';
-                    return;
-                }
-
-                tbody.innerHTML = salidasData.map(salida => {
-                    const fecha = salida.fechaVenta ? new Date(salida.fechaVenta).toLocaleDateString('es-CO') : '-';
-                    const cantidad = parseFloat(salida.cantidad || 0);
-                    const precio = parseFloat(salida.precioVenta || 0);
-                    return `
-                    <tr>
-                        <td class="small">${fecha}</td>
-                        <td class="small">${salida.nombreMaterial || '-'}</td>
-                        <td class="text-end small">${cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td class="text-end small">$${precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td class="small">${salida.nombreCentroAcopio || '-'}</td>
-                    </tr>
-                `;
-                }).join('');
-
-                document.getElementById('badgeSalidasCount').textContent = salidasData.length + ' registros';
-                console.log('✅ Tabla de salidas renderizada');
-            }
-
-            // Inicializar cuando el DOM esté completamente cargado
-            document.addEventListener('DOMContentLoaded', function() {
-                console.log('✅ DOM cargado, renderizando...');
-                renderizarEntradas();
-                renderizarSalidas();
-
-                // Inicializar listeners para cálculo de stock
-                inicializarCalculoStock();
-            });
-        })();
-
-        // Función para calcular y actualizar el stock resultante/restante
-        function inicializarCalculoStock() {
-            console.log('Inicializando cálculo de stock...');
-
-            // === ENTRADA: Stock después (Stock Actual + Cantidad Agregada) ===
-            var inputCantidadEntrada = document.getElementById('entradaCantidad');
-            var inputStockActualEntrada = document.getElementById('entradaStockActual');
-            var inputCapacidadMaxEntrada = document.getElementById('entradaCapacidadMaxima');
-            var spanStockResultanteEntrada = document.getElementById('entradaStockResultante');
-
-            if (inputCantidadEntrada && inputStockActualEntrada && spanStockResultanteEntrada) {
-                var calcularStockResultanteEntrada = function() {
-                    var stockActual = parseFloat(inputStockActualEntrada.value) || 0;
-                    var cantidadAgregar = parseFloat(inputCantidadEntrada.value) || 0;
-                    var capacidadMax = parseFloat(inputCapacidadMaxEntrada.value) || 0;
-                    var stockResultante = stockActual + cantidadAgregar;
-
-                    // Formatear con 2 decimales
-                    var stockResultanteFormateado = stockResultante.toFixed(2);
-
-                    // Determinar color y estado
-                    var html = '';
-                    if (capacidadMax > 0 && stockResultante > capacidadMax) {
-                        // Excede capacidad - error
-                        html = `<span class="text-danger fw-bold">${stockResultanteFormateado} (Excede capacidad de ${capacidadMax.toFixed(2)})</span>`;
-                        console.warn('ENTRADA: Stock resultante excede capacidad:', stockResultante, '>', capacidadMax);
-                    } else if (stockResultante >= capacidadMax && capacidadMax > 0) {
-                        // Alcanza capacidad máxima - advertencia
-                        html = `<span class="text-warning fw-bold">${stockResultanteFormateado} (En límite)</span>`;
-                        console.info('ENTRADA: Stock resultante alcanza capacidad máxima:', stockResultante);
-                    } else {
-                        // Normal
-                        html = `<span class="text-success">${stockResultanteFormateado}</span>`;
-                    }
-
-                    spanStockResultanteEntrada.innerHTML = html;
-                };
-
-                // Escuchar cambios en cantidad
-                inputCantidadEntrada.addEventListener('input', calcularStockResultanteEntrada);
-                // También actualizar si cambian datos del material
-                inputStockActualEntrada.addEventListener('change', calcularStockResultanteEntrada);
-                inputCapacidadMaxEntrada.addEventListener('change', calcularStockResultanteEntrada);
-
-                // Calcular inicialmente
-                calcularStockResultanteEntrada();
-            }
-
-            // === SALIDA: Stock restante (Stock Actual - Cantidad Descontada) ===
-            var inputCantidadSalida = document.getElementById('salidaCantidad');
-            var inputStockActualSalida = document.getElementById('salidaStockActual');
-            var spanStockRestanteSalida = document.getElementById('salidaStockRestante');
-
-            if (inputCantidadSalida && inputStockActualSalida && spanStockRestanteSalida) {
-                var calcularStockRestanteSalida = function() {
-                    var stockActual = parseFloat(inputStockActualSalida.value) || 0;
-                    var cantidadDescontar = parseFloat(inputCantidadSalida.value) || 0;
-                    var stockRestante = stockActual - cantidadDescontar;
-
-                    // Formatear con 2 decimales
-                    var stockRestanteFormateado = stockRestante.toFixed(2);
-
-                    // Determinar color y estado
-                    var html = '';
-                    if (stockRestante < 0) {
-                        // Stock insuficiente - error
-                        html = `<span class="text-danger fw-bold">${stockRestanteFormateado} (Stock insuficiente)</span>`;
-                        console.error('SALIDA: Stock insuficiente. Disponible:', stockActual, 'Solicitado:', cantidadDescontar);
-                    } else if (stockRestante === 0 && cantidadDescontar > 0) {
-                        // Stock se agota solo si hay una cantidad a descontar
-                        html = `<span class="text-warning fw-bold">${stockRestanteFormateado} (Se agotará)</span>`;
-                        console.warn('SALIDA: Stock se agotará completamente');
-                    } else if (cantidadDescontar > 0 && stockRestante > 0 && stockRestante < (stockActual * 0.2) && stockActual > 0) {
-                        // Stock bajo (menos del 20%) - solo si hay stock actual y cantidad a descontar
-                        html = `<span class="text-info fw-bold">${stockRestanteFormateado} (Stock bajo)</span>`;
-                        console.info('SALIDA: Stock bajo (menos del 20%)');
-                    } else {
-                        // Normal - sin alerta
-                        html = `<span class="text-success">${stockRestanteFormateado}</span>`;
-                    }
-
-                    spanStockRestanteSalida.innerHTML = html;
-                };
-
-                // Escuchar cambios en cantidad
-                inputCantidadSalida.addEventListener('input', calcularStockRestanteSalida);
-                // También actualizar si cambian datos del material
-                inputStockActualSalida.addEventListener('change', calcularStockRestanteSalida);
-
-                // Calcular inicialmente
-                calcularStockRestanteSalida();
-            }
-
-            console.log('Listeners de stock inicializados');
-        }
-
-        // Función para manejar el envío del formulario de ENTRADA
-        function inicializarFormularioEntrada() {
-            console.log('Inicializando formulario de entrada...');
-
-            const formEntrada = document.getElementById('formEntrada');
-            if (!formEntrada) {
-                console.warn('Formulario de entrada no encontrado');
-                return;
-            }
-
-            // Obtener puntoEcaId una sola vez (válido para ambos formularios)
-            const puntoEcaSection = document.querySelector('section[data-usuario-id]');
-            let puntoEcaId = puntoEcaSection?.dataset.puntoEcaId;
-
-            formEntrada.addEventListener('submit', function(e) {
-                e.preventDefault();
-                console.log('Formulario de entrada enviado');
-
-                // Obtener datos del formulario
-                const materialId = document.getElementById('entradaMaterialId').value;
-                const inventarioId = document.getElementById('entradaInventarioId').value || window.lastMaterialAplicado?.inventarioId;
-                const cantidad = document.getElementById('entradaCantidad').value;
-                const fecha = document.getElementById('entradaFecha').value;
-                const precioCompra = document.getElementById('entradaPrecioCompra').value;
-                const observaciones = document.getElementById('entradaObservaciones').value;
-
-                console.log('Datos obtenidos en formulario entrada:', {
-                    materialId,
-                    inventarioId,
-                    cantidad,
-                    fecha,
-                    precioCompra,
-                    campo_oculto: document.getElementById('entradaInventarioId')?.value
-                });
-
-                // Validaciones básicas
-                if (!materialId || !cantidad || !fecha || !precioCompra) {
-                    alert('Por favor completa todos los campos obligatorios');
-                    return;
-                }
-
-                if (!inventarioId) {
-                    alert('Error: No se pudo obtener el ID del inventario');
-                    console.error('inventarioId no encontrado');
-                    return;
-                }
-
-                if (!puntoEcaId) {
-                    alert('Error: No se pudo obtener la información del Punto ECA');
-                    console.error('Datos faltantes:', { puntoEcaId });
-                    return;
-                }
-
-                // Construir objeto de datos para enviar
-                const dataEntrada = {
-                    materialId: materialId,
-                    inventarioId: inventarioId,
-                    puntoEcaId: puntoEcaId,
-                    cantidad: cantidad,
-                    fechaCompra: fecha,
-                    precioCompra: precioCompra,
-                    observaciones: observaciones
-                };
-
-                console.log('Datos de entrada a enviar:', dataEntrada);
-
-                // Enviar al backend
-                const endpoint = '/punto-eca/movimientos/registrar-entrada';
-
-                fetch(endpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(dataEntrada)
-                })
-                .then(response => {
-                    console.log('Respuesta del servidor:', response.status);
-                    return response.json().then(data => ({ status: response.status, ok: response.ok, data: data }));
-                })
-                .then(({ status, ok, data }) => {
-                    console.log('Respuesta JSON:', data);
-
-                    if (!ok) {
-                        const mensajeError = data?.mensaje || data?.message || 'Error al registrar entrada';
-                        console.error('Error:', mensajeError);
-                        alert('Error: ' + mensajeError);
-                        return;
-                    }
-
-                    console.log('Entrada registrada correctamente');
-                    alert('Entrada registrada correctamente');
-
-                    // Limpiar formulario
-                    formEntrada.reset();
-
-                    // Llamar a cambiarMaterial para resetear la vista
-                    window.cambiarMaterial();
-
-                    // Recargar las tablas de movimientos
-                    location.reload();
-                })
-                .catch(error => {
-                    console.error('Error en la solicitud:', error);
-                    alert('Error de conexión: ' + error.message);
-                });
-            });
-        }
-
-        // Función para manejar el envío del formulario de SALIDA
-        function inicializarFormularioSalida() {
-            console.log('Inicializando formulario de salida...');
-
-            const formSalida = document.getElementById('formSalida');
-            if (!formSalida) {
-                console.warn('Formulario de salida no encontrado');
-                return;
-            }
-
-            formSalida.addEventListener('submit', function(e) {
-                e.preventDefault();
-                console.log('Formulario de salida enviado');
-
-                // Obtener datos del formulario
-                const materialId = document.getElementById('salidaMaterialId').value;
-                const inventarioId = document.getElementById('salidaInventarioId').value || window.lastMaterialAplicado?.inventarioId;
-                const cantidad = document.getElementById('salidaCantidad').value;
-                const fecha = document.getElementById('salidaFecha').value;
-                const precioVenta = document.getElementById('salidaPrecioVenta').value;
-                const centroAcopio = document.getElementById('salidaCentroAcopio').value;
-                const observaciones = document.getElementById('salidaObservaciones').value;
-
-                // Obtener puntoEcaId del data attribute de la sección
-                const puntoEcaSection = document.querySelector('section[data-usuario-id]');
-                const puntoEcaId = puntoEcaSection?.dataset.puntoEcaId;
-
-                console.log('Datos obtenidos en formulario salida:', {
-                    materialId,
-                    inventarioId,
-                    cantidad,
-                    fecha,
-                    precioVenta,
-                    centroAcopio,
-                    campo_oculto: document.getElementById('salidaInventarioId')?.value
-                });
-
-                // Validaciones básicas
-                if (!materialId || !cantidad || !fecha || !precioVenta || !centroAcopio) {
-                    alert('Por favor completa todos los campos obligatorios');
-                    return;
-                }
-
-                if (!inventarioId) {
-                    alert('Error: No se pudo obtener el ID del inventario');
-                    console.error('inventarioId no encontrado');
-                    return;
-                }
-
-                if (!puntoEcaId) {
-                    alert('Error: No se pudo obtener el ID del Punto ECA');
-                    console.error('puntoEcaId no encontrado');
-                    return;
-                }
-
-                // Validar que el stock no sea negativo
-                const stockActual = parseFloat(document.getElementById('salidaStockActual').value) || 0;
-                const cantidadDescontar = parseFloat(cantidad);
-
-                if (cantidadDescontar > stockActual) {
-                    alert('Error: La cantidad a descontar excede el stock disponible');
-                    return;
-                }
-
-                if (!puntoEcaId) {
-                    alert('Error: No se pudo obtener la información del Punto ECA');
-                    console.error('Datos faltantes:', { puntoEcaId });
-                    return;
-                }
-
-                // Construir objeto de datos para enviar
-                const dataSalida = {
-                    materialId: materialId,
-                    inventarioId: inventarioId,
-                    puntoEcaId: puntoEcaId,
-                    cantidad: cantidad,
-                    fechaVenta: fecha,
-                    precioVenta: precioVenta,
-                    centroAcopioId: centroAcopio,
-                    observaciones: observaciones
-                };
-
-                console.log('Datos de salida a enviar:', dataSalida);
-
-                // Enviar al backend
-                const endpoint = '/punto-eca/movimientos/registrar-salida';
-
-                fetch(endpoint, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(dataSalida)
-                })
-                .then(response => {
-                    console.log('Respuesta del servidor:', response.status);
-                    return response.json().then(data => ({ status: response.status, ok: response.ok, data: data }));
-                })
-                .then(({ status, ok, data }) => {
-                    console.log('Respuesta JSON:', data);
-
-                    if (!ok) {
-                        const mensajeError = data?.mensaje || data?.message || 'Error al registrar salida';
-                        console.error('Error:', mensajeError);
-                        alert('Error: ' + mensajeError);
-                        return;
-                    }
-
-                    console.log('Salida registrada correctamente');
-                    alert('Salida registrada correctamente');
-
-                    // Limpiar formulario
-                    formSalida.reset();
-
-                    // Llamar a cambiarMaterial para resetear la vista
-                    window.cambiarMaterial();
-
-                    // Recargar las tablas de movimientos
-                    location.reload();
-                })
-                .catch(error => {
-                    console.error('Error en la solicitud:', error);
-                    alert('Error de conexión: ' + error.message);
-                });
-            });
-        }
-
-        // Inicializar formularios cuando el DOM esté cargado
+        // Event listeners para actualizar "Stock después" cuando cambia la cantidad
         document.addEventListener('DOMContentLoaded', function() {
-            inicializarFormularioEntrada();
-            inicializarFormularioSalida();
+            const entradaCantidad = document.getElementById('entradaCantidad');
+            const entradaStockActual = document.getElementById('entradaStockActual');
+            const entradaStockResultante = document.getElementById('entradaStockResultante');
+
+            const salidaCantidad = document.getElementById('salidaCantidad');
+            const salidaStockActual = document.getElementById('salidaStockActual');
+            const salidaStockRestante = document.getElementById('salidaStockRestante');
+
+            // Función para actualizar stock de entrada
+            function actualizarStockEntrada() {
+                const stock = parseFloat(entradaStockActual?.value || 0);
+                const cantidad = parseFloat(entradaCantidad?.value || 0);
+                const stockDespues = stock + cantidad;
+                if (entradaStockResultante) {
+                    entradaStockResultante.textContent = isNaN(stockDespues) ? '-' : stockDespues.toFixed(2);
+                }
+            }
+
+            // Función para actualizar stock de salida
+            function actualizarStockSalida() {
+                const stock = parseFloat(salidaStockActual?.value || 0);
+                const cantidad = parseFloat(salidaCantidad?.value || 0);
+                const stockDespues = stock - cantidad;
+                if (salidaStockRestante) {
+                    salidaStockRestante.textContent = isNaN(stockDespues) ? '-' : stockDespues.toFixed(2);
+                }
+            }
+
+            // Listeners para entrada
+            if (entradaCantidad) {
+                entradaCantidad.addEventListener('input', actualizarStockEntrada);
+            }
+            if (entradaStockActual) {
+                entradaStockActual.addEventListener('change', actualizarStockEntrada);
+            }
+
+            // Listeners para salida
+            if (salidaCantidad) {
+                salidaCantidad.addEventListener('input', actualizarStockSalida);
+            }
+            if (salidaStockActual) {
+                salidaStockActual.addEventListener('change', actualizarStockSalida);
+            }
         });
+
     </script>
+
+    <!-- MODALES PARA VER DETALLES, EDITAR Y ELIMINAR ENTRADAS Y SALIDAS -->
+
+    <!-- MODAL: VER DETALLES ENTRADA (COMPRA) -->
+    <div class="modal fade" id="detallesEntradaModal" tabindex="-1" aria-labelledby="detallesEntradaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="detallesEntradaLabel">
+                        <i class="bi bi-box-seam me-2"></i>Detalles de Compra de Material
+                    </h5>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-2 bg-light border-start border-4 border-success">
+                                <small class="text-muted d-block mb-1">Material</small>
+                                <p class="h6 fw-bold mb-0" id="detEntradaMaterial">-</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-2 bg-light border-start border-4 border-info">
+                                <small class="text-muted d-block mb-1">Fecha</small>
+                                <p class="h6 fw-bold mb-0" id="detEntradaFecha">-</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-2 bg-light border-start border-4 border-warning">
+                                <small class="text-muted d-block mb-1">Cantidad</small>
+                                <p class="h6 fw-bold mb-0" id="detEntradaCantidad">-</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-2 bg-light border-start border-4 border-primary">
+                                <small class="text-muted d-block mb-1">Precio Unitario</small>
+                                <p class="h6 fw-bold mb-0" id="detEntradaPrecio">-</p>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-3 rounded-2 bg-light border-start border-4 border-danger">
+                                <small class="text-muted d-block mb-1">Total</small>
+                                <p class="h5 fw-bold mb-0 text-danger" id="detEntradaTotal">-</p>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-3 rounded-2 bg-light">
+                                <small class="text-muted d-block mb-1">Observaciones</small>
+                                <p class="h6 mb-0" id="detEntradaObservaciones">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                            title="Cerrar">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                    <button type="button" class="btn btn-success text-white" id="btnEditarEntrada"
+                            title="Editar">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-danger" id="btnEliminarEntrada"
+                            title="Eliminar">
+                        <i class="bi bi-trash3-fill"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: VER DETALLES SALIDA (VENTA) -->
+    <div class="modal fade" id="detallesSalidaModal" tabindex="-1" aria-labelledby="detallesSalidaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="detallesSalidaLabel">
+                        <i class="bi bi-box-seam me-2"></i>Detalles de Venta de Material
+                    </h5>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-2 bg-light border-start border-4 border-danger">
+                                <small class="text-muted d-block mb-1">Material</small>
+                                <p class="h6 fw-bold mb-0" id="detSalidaMaterial">-</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-2 bg-light border-start border-4 border-info">
+                                <small class="text-muted d-block mb-1">Fecha</small>
+                                <p class="h6 fw-bold mb-0" id="detSalidaFecha">-</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-2 bg-light border-start border-4 border-warning">
+                                <small class="text-muted d-block mb-1">Cantidad</small>
+                                <p class="h6 fw-bold mb-0" id="detSalidaCantidad">-</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-2 bg-light border-start border-4 border-primary">
+                                <small class="text-muted d-block mb-1">Precio Unitario</small>
+                                <p class="h6 fw-bold mb-0" id="detSalidaPrecio">-</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-2 bg-light border-start border-4 border-secondary">
+                                <small class="text-muted d-block mb-1">Centro de Acopio</small>
+                                <p class="h6 fw-bold mb-0" id="detSalidaCentro">-</p>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-3 rounded-2 bg-light border-start border-4 border-danger">
+                                <small class="text-muted d-block mb-1">Total</small>
+                                <p class="h5 fw-bold mb-0 text-danger" id="detSalidaTotal">-</p>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-3 rounded-2 bg-light">
+                                <small class="text-muted d-block mb-1">Observaciones</small>
+                                <p class="h6 mb-0" id="detSalidaObservaciones">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                            title="Cerrar">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                    <button type="button" class="btn btn-success text-white" id="btnEditarSalida"
+                            title="Editar">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-success" id="btnEliminarSalida"
+                            title="Eliminar">
+                        <i class="bi bi-trash3-fill"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITAR COMPRA DE MATERIAL -->
+    <div class="modal fade" id="editarCompraModal" tabindex="-1" aria-labelledby="editarCompraLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="editarCompraLabel">
+                        <i class="bi bi-pencil-square me-2"></i>Editar Compra de Material
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="formEditarCompra">
+                        <input type="hidden" id="editCompraId">
+                        <input type="hidden" id="editInventarioId">
+                        <input type="hidden" id="editCompraMaterialId">
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Material</label>
+                                <input type="text" class="form-control form-control-sm bg-light" id="editCompraMaterial" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Fecha <span class="text-danger">*</span></label>
+                                <input type="datetime-local" class="form-control form-control-sm border-danger border-2" id="editCompraFecha" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Cantidad <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" class="form-control form-control-sm border-danger border-2" id="editCompraCantidad" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Precio Unitario (COP) <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" class="form-control form-control-sm border-danger border-2" id="editCompraPrecio" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Observaciones</label>
+                                <textarea class="form-control form-control-sm border-danger border-2" id="editCompraObservaciones" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light border-top">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger" id="btnGuardarCompra">
+                        <i class="bi bi-check-circle"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITAR VENTA DE MATERIAL -->
+    <div class="modal fade" id="editarVentaModal" tabindex="-1" aria-labelledby="editarVentaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="editarVentaLabel">
+                        <i class="bi bi-pencil-square me-2"></i>Editar Venta de Material
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="formEditarVenta">
+                        <input type="hidden" id="editVentaId">
+                        <input type="hidden" id="editInventarioIdVenta">
+                        <input type="hidden" id="editVentaMaterialId">
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Material</label>
+                                <input type="text" class="form-control form-control-sm bg-light" id="editVentaMaterial" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Fecha <span class="text-danger">*</span></label>
+                                <input type="datetime-local" class="form-control form-control-sm border-success border-2" id="editVentaFecha" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Cantidad <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" class="form-control form-control-sm border-success border-2" id="editVentaCantidad" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Precio Unitario (COP) <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" class="form-control form-control-sm border-success border-2" id="editVentaPrecio" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Centro de Acopio <span class="text-danger">*</span></label>
+                                <select class="form-select form-select-sm border-success border-2" id="editVentaCentro" required>
+                                    <option value="">Selecciona un centro...</option>
+                                    <th:block th:if="${not #lists.isEmpty(centrosAcopio)}">
+                                        <option th:each="centro : ${centrosAcopio}"
+                                                th:value="${centro.cntAcpId}"
+                                                th:text="${centro.nombreCntAcp}">
+                                        </option>
+                                    </th:block>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Observaciones</label>
+                                <textarea class="form-control form-control-sm border-success border-2" id="editVentaObservaciones" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light border-top">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                    <button type="button" class="btn btn-success" id="btnGuardarVenta">
+                        <i class="bi bi-check-circle"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT: EVENT LISTENERS PARA BOTONES DE ACCIONES -->
+    <script>
+        (function() {
+            console.log('📌 Inicializando event listeners para tablas de movimientos...');
+
+            // Mostrar detalles de entrada
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.btn-detalles-entrada');
+                if (!btn) return;
+
+                const compraId = btn.dataset.compraId;
+                console.log('📊 Abriendo detalles de entrada:', compraId);
+
+                // Buscar el registro en los datos
+                const entrada = window.ENTRADAS_INICIALES.find(e => e.compraId === compraId);
+                if (!entrada) {
+                    alert('No se encontraron los detalles de esta entrada');
+                    return;
+                }
+
+                // Llenar modal con datos
+                const fecha = entrada.fechaCompra ? new Date(entrada.fechaCompra).toLocaleDateString('es-CO') : '-';
+                const cantidad = parseFloat(entrada.cantidad || 0);
+                const precio = parseFloat(entrada.precioCompra || 0);
+                const total = cantidad * precio;
+
+                document.getElementById('detEntradaMaterial').textContent = entrada.nombreMaterial || '-';
+                document.getElementById('detEntradaFecha').textContent = fecha;
+                document.getElementById('detEntradaCantidad').textContent = cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                document.getElementById('detEntradaPrecio').textContent = '$' + precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                document.getElementById('detEntradaTotal').textContent = '$' + total.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                document.getElementById('detEntradaObservaciones').textContent = entrada.observaciones || 'Sin observaciones';
+
+                // Guardar ID en botones del modal
+                document.getElementById('btnEditarEntrada').dataset.compraId = compraId;
+                document.getElementById('btnEliminarEntrada').dataset.compraId = compraId;
+
+                const modal = new bootstrap.Modal(document.getElementById('detallesEntradaModal'));
+                modal.show();
+            });
+
+            // Eliminar entrada directamente desde la tabla (sin abrir modal de detalles)
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.btn-eliminar-entrada');
+                if (!btn) return;
+
+                const compraId = btn.dataset.compraId;
+                console.log('🔍 Click en botón eliminar entrada, compraId:', compraId);
+                console.log('📊 ENTRADAS_INICIALES disponibles:', window.ENTRADAS_INICIALES.length);
+
+                if (!confirm('¿Estás seguro de que deseas eliminar esta entrada?')) {
+                    return;
+                }
+
+                // Obtener datos de la entrada desde ENTRADAS_INICIALES (comparar como strings)
+                const entrada = window.ENTRADAS_INICIALES.find(e => String(e.compraId).trim() === String(compraId).trim());
+                if (!entrada) {
+                    console.error('❌ No se encontró entrada con compraId:', compraId);
+                    console.log('Buscando en:', window.ENTRADAS_INICIALES.map(e => e.compraId));
+                    alert('No se encontraron los datos de esta entrada');
+                    return;
+                }
+
+                const puntoId = document.querySelector('section[data-punto-eca-id]')?.dataset.puntoEcaId;
+                const inventarioId = entrada.inventarioId || '';
+                const materialId = entrada.materialId || '';
+
+                console.log('🗑️ Eliminando entrada desde tabla:', {
+                    compraId,
+                    inventarioId,
+                    puntoId,
+                    materialId
+                });
+
+                if (!materialId) {
+                    alert('⚠️ Falta materialId. No se puede eliminar.');
+                    return;
+                }
+
+                // Construir DTO para DELETE
+                const datosEliminar = {
+                    compraId: compraId,
+                    inventarioId: inventarioId,
+                    puntoId: puntoId,
+                    materialId: materialId
+                };
+
+                console.log('📤 JSON para DELETE:', JSON.stringify(datosEliminar, null, 2));
+
+                // DELETE a /punto-eca/inventario/compra/{compraId}
+                fetch(`/punto-eca/inventario/compra/${compraId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(datosEliminar)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log('📥 Respuesta:', data);
+                    if (data.success || data.ok || !data.error) {
+                        alert('Entrada eliminada correctamente');
+                        location.reload();
+                    } else {
+                        alert('Error al eliminar: ' + (data.mensaje || data.message || 'Error desconocido'));
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error:', error);
+                    alert('Error al procesar la solicitud: ' + error.message);
+                });
+            });
+
+            // Editar entrada desde modal
+            document.getElementById('btnEditarEntrada').addEventListener('click', function() {
+                const compraId = this.dataset.compraId;
+                console.log('✏️ Abriendo modal de edición para entrada:', compraId);
+
+                // Buscar el registro en los datos
+                const entrada = window.ENTRADAS_INICIALES.find(e => e.compraId === compraId);
+                if (!entrada) {
+                    alert('No se encontraron los datos de esta entrada');
+                    return;
+                }
+
+                // Llenar form de edición
+                document.getElementById('editCompraId').value = entrada.compraId || '';
+                document.getElementById('editInventarioId').value = entrada.inventarioId || '';
+                document.getElementById('editCompraMaterialId').value = entrada.materialId || '';
+                document.getElementById('editCompraMaterial').value = entrada.nombreMaterial || '';
+
+                // Convertir fecha al formato datetime-local
+                const fecha = entrada.fechaCompra ? new Date(entrada.fechaCompra).toISOString().slice(0, 16) : '';
+                document.getElementById('editCompraFecha').value = fecha;
+
+                document.getElementById('editCompraCantidad').value = entrada.cantidad || '';
+                document.getElementById('editCompraPrecio').value = entrada.precioCompra || '';
+                document.getElementById('editCompraObservaciones').value = entrada.observaciones || '';
+
+                // Cerrar modal actual y abrir modal de edición
+                const modalDetalles = bootstrap.Modal.getInstance(document.getElementById('detallesEntradaModal'));
+                if (modalDetalles) modalDetalles.hide();
+
+                const modalEditar = new bootstrap.Modal(document.getElementById('editarCompraModal'));
+                modalEditar.show();
+            });
+
+            // Eliminar entrada desde modal
+            document.getElementById('btnEliminarEntrada').addEventListener('click', function() {
+                const compraId = this.dataset.compraId;
+
+                if (!confirm('¿Estás seguro de que deseas eliminar esta entrada?')) {
+                    return;
+                }
+
+                // Obtener datos de la entrada desde ENTRADAS_INICIALES
+                const entrada = window.ENTRADAS_INICIALES.find(e => e.compraId === compraId);
+                if (!entrada) {
+                    alert('No se encontraron los datos de esta entrada');
+                    return;
+                }
+
+                const puntoId = document.querySelector('section[data-punto-eca-id]')?.dataset.puntoEcaId;
+                const inventarioId = entrada.inventarioId || '';
+                const materialId = entrada.materialId || '';
+
+                console.log('🗑️ Eliminando entrada:', {
+                    compraId,
+                    inventarioId,
+                    puntoId,
+                    materialId
+                });
+
+                // Construir DTO para DELETE
+                const datosEliminar = {
+                    compraId: compraId,
+                    inventarioId: inventarioId,
+                    puntoId: puntoId,
+                    materialId: materialId
+                };
+
+                console.log('📤 JSON para DELETE:', JSON.stringify(datosEliminar, null, 2));
+
+                // DELETE a /punto-eca/inventario/compra/{compraId}
+                fetch(`/punto-eca/inventario/compra/${compraId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(datosEliminar)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log('📥 Respuesta:', data);
+                    if (data.success || data.ok || !data.error) {
+                        alert('Entrada eliminada correctamente');
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('detallesEntradaModal'));
+                        if (modal) modal.hide();
+                        location.reload();
+                    } else {
+                        alert('Error al eliminar: ' + (data.mensaje || data.message || 'Error desconocido'));
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error:', error);
+                    alert('Error al procesar la solicitud: ' + error.message);
+                });
+            });
+
+            // Mostrar detalles de salida
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.btn-detalles-salida');
+                if (!btn) return;
+
+                const ventaId = btn.dataset.ventaId;
+                console.log('📊 Abriendo detalles de salida:', ventaId);
+
+                // Buscar el registro en los datos
+                const salida = window.SALIDAS_INICIALES.find(s => s.ventaId === ventaId);
+                if (!salida) {
+                    alert('No se encontraron los detalles de esta salida');
+                    return;
+                }
+
+                // Llenar modal con datos
+                const fecha = salida.fechaVenta ? new Date(salida.fechaVenta).toLocaleDateString('es-CO') : '-';
+                const cantidad = parseFloat(salida.cantidad || 0);
+                const precio = parseFloat(salida.precioVenta || 0);
+                const total = cantidad * precio;
+
+                document.getElementById('detSalidaMaterial').textContent = salida.nombreMaterial || '-';
+                document.getElementById('detSalidaFecha').textContent = fecha;
+                document.getElementById('detSalidaCantidad').textContent = cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                document.getElementById('detSalidaPrecio').textContent = '$' + precio.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                document.getElementById('detSalidaCentro').textContent = salida.nombreCentroAcopio || '-';
+                document.getElementById('detSalidaTotal').textContent = '$' + total.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                document.getElementById('detSalidaObservaciones').textContent = salida.observaciones || 'Sin observaciones';
+
+                // Guardar ID en botones del modal
+                document.getElementById('btnEditarSalida').dataset.ventaId = ventaId;
+                document.getElementById('btnEliminarSalida').dataset.ventaId = ventaId;
+
+                const modal = new bootstrap.Modal(document.getElementById('detallesSalidaModal'));
+                modal.show();
+            });
+
+            // Eliminar salida directamente desde la tabla (sin abrir modal de detalles)
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.btn-eliminar-salida');
+                if (!btn) return;
+
+                const ventaId = btn.dataset.ventaId;
+                console.log('🔍 Click en botón eliminar salida, ventaId:', ventaId);
+                console.log('📊 SALIDAS_INICIALES disponibles:', window.SALIDAS_INICIALES.length);
+
+                if (!confirm('¿Estás seguro de que deseas eliminar esta salida?')) {
+                    return;
+                }
+
+                // Obtener datos de la salida desde SALIDAS_INICIALES (comparar como strings)
+                const salida = window.SALIDAS_INICIALES.find(s => String(s.ventaId).trim() === String(ventaId).trim());
+                if (!salida) {
+                    console.error('❌ No se encontró salida con ventaId:', ventaId);
+                    console.log('Buscando en:', window.SALIDAS_INICIALES.map(s => s.ventaId));
+                    alert('No se encontraron los datos de esta salida');
+                    return;
+                }
+
+                const puntoId = document.querySelector('section[data-punto-eca-id]')?.dataset.puntoEcaId;
+                const inventarioId = salida.inventarioId || '';
+                const materialId = salida.materialId || '';
+
+                console.log('🗑️ Eliminando salida desde tabla:', {
+                    ventaId,
+                    inventarioId,
+                    puntoId,
+                    materialId
+                });
+
+                if (!materialId) {
+                    alert('⚠️ Falta materialId. No se puede eliminar.');
+                    return;
+                }
+
+                // Construir DTO para DELETE
+                const datosEliminar = {
+                    ventaId: ventaId,
+                    inventarioId: inventarioId,
+                    puntoId: puntoId,
+                    materialId: materialId
+                };
+
+                console.log('📤 JSON para DELETE:', JSON.stringify(datosEliminar, null, 2));
+
+                // DELETE a /punto-eca/inventario/venta/{ventaId}
+                fetch(`/punto-eca/inventario/venta/${ventaId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(datosEliminar)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log('📥 Respuesta:', data);
+                    if (data.success || data.ok || !data.error) {
+                        alert('Salida eliminada correctamente');
+                        location.reload();
+                    } else {
+                        alert('Error al eliminar: ' + (data.mensaje || data.message || 'Error desconocido'));
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error:', error);
+                    alert('Error al procesar la solicitud: ' + error.message);
+                });
+            });
+
+            // Editar salida desde modal
+            document.getElementById('btnEditarSalida').addEventListener('click', function() {
+                const ventaId = this.dataset.ventaId;
+                console.log('✏️ Abriendo modal de edición para salida:', ventaId);
+
+                // Buscar el registro en los datos
+                const salida = window.SALIDAS_INICIALES.find(s => s.ventaId === ventaId);
+                if (!salida) {
+                    alert('No se encontraron los datos de esta salida');
+                    return;
+                }
+
+                // Llenar form de edición
+                document.getElementById('editVentaId').value = salida.ventaId || '';
+                document.getElementById('editInventarioIdVenta').value = salida.inventarioId || '';
+                document.getElementById('editVentaMaterialId').value = salida.materialId || '';
+                document.getElementById('editVentaMaterial').value = salida.nombreMaterial || '';
+
+                // Convertir fecha al formato datetime-local
+                const fecha = salida.fechaVenta ? new Date(salida.fechaVenta).toISOString().slice(0, 16) : '';
+                document.getElementById('editVentaFecha').value = fecha;
+
+                document.getElementById('editVentaCantidad').value = salida.cantidad || '';
+                document.getElementById('editVentaPrecio').value = salida.precioVenta || '';
+                document.getElementById('editVentaCentro').value = salida.centroAcopioId || '';
+                document.getElementById('editVentaObservaciones').value = salida.observaciones || '';
+
+                // Cerrar modal actual y abrir modal de edición
+                const modalDetalles = bootstrap.Modal.getInstance(document.getElementById('detallesSalidaModal'));
+                if (modalDetalles) modalDetalles.hide();
+
+                const modalEditar = new bootstrap.Modal(document.getElementById('editarVentaModal'));
+                modalEditar.show();
+            });
+
+            // Eliminar salida desde modal
+            document.getElementById('btnEliminarSalida').addEventListener('click', function() {
+                const ventaId = this.dataset.ventaId;
+
+                if (!confirm('¿Estás seguro de que deseas eliminar esta salida?')) {
+                    return;
+                }
+
+                // Obtener datos de la salida desde SALIDAS_INICIALES
+                const salida = window.SALIDAS_INICIALES.find(s => s.ventaId === ventaId);
+                if (!salida) {
+                    alert('No se encontraron los datos de esta salida');
+                    return;
+                }
+
+                const puntoId = document.querySelector('section[data-punto-eca-id]')?.dataset.puntoEcaId;
+                const inventarioId = salida.inventarioId || '';
+                const materialId = salida.materialId || '';
+
+                console.log('🗑️ Eliminando salida:', {
+                    ventaId,
+                    inventarioId,
+                    puntoId,
+                    materialId
+                });
+
+                // Construir DTO para DELETE
+                const datosEliminar = {
+                    ventaId: ventaId,
+                    inventarioId: inventarioId,
+                    puntoId: puntoId,
+                    materialId: materialId
+                };
+
+                console.log('📤 JSON para DELETE:', JSON.stringify(datosEliminar, null, 2));
+
+                // DELETE a /punto-eca/inventario/venta/{ventaId}
+                fetch(`/punto-eca/inventario/venta/${ventaId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(datosEliminar)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log('📥 Respuesta:', data);
+                    if (data.success || data.ok || !data.error) {
+                        alert('Salida eliminada correctamente');
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('detallesSalidaModal'));
+                        if (modal) modal.hide();
+                        location.reload();
+                    } else {
+                        alert('Error al eliminar: ' + (data.mensaje || data.message || 'Error desconocido'));
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error:', error);
+                    alert('Error al procesar la solicitud: ' + error.message);
+                });
+            });
+
+            // Guardar cambios de compra
+            document.getElementById('btnGuardarCompra').addEventListener('click', function() {
+                const puntoId = document.querySelector('section[data-punto-eca-id]')?.dataset.puntoEcaId;
+                const compraId = document.getElementById('editCompraId').value;
+                const inventarioId = document.getElementById('editInventarioId').value;
+                const materialId = document.getElementById('editCompraMaterialId').value;
+                const cantidad = document.getElementById('editCompraCantidad').value;
+                const fechaCompra = document.getElementById('editCompraFecha').value;
+                const precioCompra = document.getElementById('editCompraPrecio').value;
+                const observaciones = document.getElementById('editCompraObservaciones').value;
+
+                console.log('💾 Guardando cambios de compra:', {
+                    puntoId,
+                    materialId,
+                    compraId,
+                    inventarioId,
+                    cantidad,
+                    fechaCompra,
+                    precioCompra,
+                    observaciones
+                });
+
+                if (!materialId) {
+                    alert('⚠️ materialId vacío. Recarga la página e intenta nuevamente.');
+                    console.error('materialId está vacío en editCompraMaterialId');
+                    return;
+                }
+
+                // Construir datos para CompraInventarioUpdateDTO
+                const datosActualizacion = {
+                    puntoId: puntoId,
+                    materialId: materialId,
+                    compraId: compraId,
+                    inventarioId: inventarioId,
+                    cantidad: parseFloat(cantidad),
+                    fechaCompra: (fechaCompra && fechaCompra.length===16) ? (fechaCompra + ':00') : fechaCompra,
+                    precioCompra: parseFloat(precioCompra),
+                    observaciones: observaciones
+                };
+
+                console.log('📤 JSON enviado:', JSON.stringify(datosActualizacion, null, 2));
+
+                // PUT a /punto-eca/inventario/compra/{compraId}
+                fetch(`/punto-eca/inventario/compra/${compraId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(datosActualizacion)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log('📥 Respuesta:', data);
+                    if (data.ok || data.status === 200 || !data.error) {
+                        alert('Compra actualizada correctamente');
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('editarCompraModal'));
+                        if (modal) modal.hide();
+                        location.reload();
+                    } else {
+                        alert('Error al actualizar: ' + (data.mensaje || data.message || 'Error desconocido'));
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error:', error);
+                    alert('Error al procesar la solicitud');
+                });
+            });
+
+            // Guardar cambios de venta (actualización)
+            document.getElementById('btnGuardarVenta').addEventListener('click', function() {
+                const puntoId = document.querySelector('section[data-punto-eca-id]')?.dataset.puntoEcaId;
+                const ventaId = document.getElementById('editVentaId').value;
+                const inventarioId = document.getElementById('editInventarioIdVenta').value;
+                const materialId = document.getElementById('editVentaMaterialId').value;
+                const cantidad = document.getElementById('editVentaCantidad').value;
+                const fechaVenta = document.getElementById('editVentaFecha').value;
+                const precioVenta = document.getElementById('editVentaPrecio').value;
+                const centroAcopioId = document.getElementById('editVentaCentro').value;
+                const observaciones = document.getElementById('editVentaObservaciones').value;
+
+                console.log('💾 Guardando cambios de venta:', {
+                    puntoId,
+                    ventaId,
+                    materialId,
+                    inventarioId,
+                    centroAcopioId,
+                    cantidad,
+                    fechaVenta,
+                    precioVenta,
+                    observaciones
+                });
+
+                if (!materialId) {
+                    alert('⚠️ materialId vacío. Recarga la página e intenta nuevamente.');
+                    return;
+                }
+
+                // Validar que centroAcopioId esté presente (@NotNull)
+                if (!centroAcopioId) {
+                    alert('El centro de acopio es obligatorio para actualizar la venta');
+                    return;
+                }
+
+                // Construir datos a enviar
+                const datosActualizacion = {
+                    puntoId: puntoId,
+                    ventaId: ventaId,
+                    materialId: materialId,
+                    inventarioId: inventarioId,
+                    cantidad: parseFloat(cantidad),
+                    fechaVenta: (fechaVenta && fechaVenta.length===16) ? (fechaVenta + ':00') : fechaVenta,
+                    precioVenta: parseFloat(precioVenta),
+                    centroAcopioId: centroAcopioId,
+                    observaciones: observaciones
+                };
+
+                console.log('📤 JSON enviado:', JSON.stringify(datosActualizacion, null, 2));
+
+                // PUT a /punto-eca/inventario/venta/{ventaId}
+                fetch(`/punto-eca/inventario/venta/${ventaId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(datosActualizacion)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log('📥 Respuesta:', data);
+                    if (data.ok || data.status === 200 || !data.error) {
+                        alert('Venta actualizada correctamente');
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('editarVentaModal'));
+                        if (modal) modal.hide();
+                        location.reload();
+                    } else {
+                        alert('Error al actualizar: ' + (data.mensaje || data.message || 'Error desconocido'));
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error:', error);
+                    alert('Error al procesar la solicitud');
+                });
+            });
+
+            console.log('✓ Event listeners inicializados');
+        })();
+    </script>
+
+    <script>
+        (function() {
+            // Manejadores ligeros para crear compra/venta sin recargar la página.
+            function safeParseFloat(v) { const n = parseFloat(v); return isNaN(n) ? null : n; }
+
+            var formEntrada = document.getElementById('formEntrada');
+            if (formEntrada) {
+                formEntrada.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    var puntoEcaId = document.querySelector('section[data-punto-eca-id]')?.dataset.puntoEcaId || null;
+                    var materialId = document.getElementById('entradaMaterialId')?.value || '';
+                    var inventarioId = document.getElementById('entradaInventarioId')?.value || '';
+                    var cantidad = document.getElementById('entradaCantidad')?.value;
+                    var fechaCompra = document.getElementById('entradaFecha')?.value;
+                    var precioCompra = document.getElementById('entradaPrecioCompra')?.value;
+                    var observaciones = document.getElementById('entradaObservaciones')?.value || '';
+
+                    if (!materialId) { alert('Seleccione un material antes de guardar la compra.'); return; }
+                    if (!cantidad || safeParseFloat(cantidad) === null || safeParseFloat(cantidad) <= 0) { alert('Ingrese una cantidad mayor a cero.'); return; }
+                    if (!fechaCompra) { alert('Seleccione la fecha de compra.'); return; }
+
+                    var payload = {
+                        puntoEcaId: puntoEcaId,
+                        materialId: materialId,
+                        inventarioId: inventarioId || null,
+                        cantidad: safeParseFloat(cantidad),
+                        // datetime-local usually gives "YYYY-MM-DDTHH:MM" — asegurar segundos para Jackson
+                        fechaCompra: (fechaCompra && fechaCompra.length===16) ? (fechaCompra + ':00') : fechaCompra,
+                        precioCompra: safeParseFloat(precioCompra) || 0,
+                        observaciones: observaciones
+                    };
+
+                    // Enviar al endpoint correcto que espera CompraInventarioRequestDTO
+                    fetch('/punto-eca/movimientos/registrar-entrada', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                    })
+                    .then(function(res) { return res.json().then(function(data){ return { ok: res.ok, status: res.status, data: data }; }); })
+                    .then(function(result) {
+                        if (result.ok) {
+                            // Éxito: recargar para reflejar cambios (el backend guarda)
+                            location.reload();
+                        } else {
+                            var msg = result.data?.mensaje || result.data?.message || ('Error al guardar compra: HTTP ' + result.status);
+                            alert(msg);
+                        }
+                    })
+                    .catch(function(err){ alert('Error al guardar compra: ' + (err && err.message ? err.message : err)); });
+                });
+            }
+
+            var formSalida = document.getElementById('formSalida');
+            if (formSalida) {
+                formSalida.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    var puntoEcaId = document.querySelector('section[data-punto-eca-id]')?.dataset.puntoEcaId || null;
+                    var materialId = document.getElementById('salidaMaterialId')?.value || '';
+                    var inventarioId = document.getElementById('salidaInventarioId')?.value || '';
+                    var cantidad = document.getElementById('salidaCantidad')?.value;
+                    var fechaVenta = document.getElementById('salidaFecha')?.value;
+                    var precioVenta = document.getElementById('salidaPrecioVenta')?.value;
+                    var centroAcopioId = document.getElementById('salidaCentroAcopio')?.value || '';
+                    var observaciones = document.getElementById('salidaObservaciones')?.value || '';
+
+                    if (!materialId) { alert('Seleccione un material antes de guardar la venta.'); return; }
+                    if (!cantidad || safeParseFloat(cantidad) === null || safeParseFloat(cantidad) <= 0) { alert('Ingrese una cantidad mayor a cero.'); return; }
+                    if (!fechaVenta) { alert('Seleccione la fecha de venta.'); return; }
+
+                    var payload = {
+                        puntoEcaId: puntoEcaId,
+                        materialId: materialId,
+                        inventarioId: inventarioId || null,
+                        cantidad: safeParseFloat(cantidad),
+                        // Asegurar formato con segundos para LocalDateTime
+                        fechaVenta: (fechaVenta && fechaVenta.length===16) ? (fechaVenta + ':00') : fechaVenta,
+                        precioVenta: safeParseFloat(precioVenta) || 0,
+                        centroAcopioId: centroAcopioId,
+                        observaciones: observaciones
+                    };
+
+                    // Enviar al endpoint correcto que espera VentaInventarioRequestDTO
+                    fetch('/punto-eca/movimientos/registrar-salida', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                    })
+                    .then(function(res) { return res.json().then(function(data){ return { ok: res.ok, status: res.status, data: data }; }); })
+                    .then(function(result) {
+                        if (result.ok) {
+                            location.reload();
+                        } else {
+                            var msg = result.data?.mensaje || result.data?.message || ('Error al guardar venta: HTTP ' + result.status);
+                            alert(msg);
+                        }
+                    })
+                    .catch(function(err){ alert('Error al guardar venta: ' + (err && err.message ? err.message : err)); });
+                });
+            }
+        })();
+    </script>
+
 </section>

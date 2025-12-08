@@ -12,9 +12,11 @@ public record CompraInventarioResponseDTO(
 
         UUID compraId,
         UUID inventarioId,
+        UUID materialId,
         String nombreMaterial,
         LocalDateTime fechaCompra,
         BigDecimal precioCompra,
+        BigDecimal cantidad,
         String observaciones,
         LocalDateTime fechaCreacion,
         LocalDateTime fechaActualizacion
@@ -28,9 +30,11 @@ public record CompraInventarioResponseDTO(
         return new CompraInventarioResponseDTO(
                 compra.getCompraId(),
                 compra.getInventario().getInventarioId(),
+                compra.getInventario().getMaterial().getMaterialId(),
                 compra.getInventario().getMaterial().getNombre(),
                 compra.getFechaCompra(),
                 compra.getPrecioCompra(),
+                compra.getCantidad(),
                 compra.getObservaciones(),
                 compra.getFechaCreacion(),
                 compra.getFechaActualizacion()

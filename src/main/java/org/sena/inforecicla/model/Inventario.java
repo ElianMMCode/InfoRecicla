@@ -14,7 +14,13 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "inventario")
+@Table(
+        name = "inventario",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_inventario_punto_material",
+                columnNames = {"punto_id", "material_id"}
+        )
+)
 @Getter
 @Setter
 @Builder

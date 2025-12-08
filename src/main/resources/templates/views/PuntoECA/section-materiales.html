@@ -1,7 +1,8 @@
 <!-- Fragment: Materiales -->
 <section th:fragment="materiales" class="py-4"
          th:data-gestor="${gestor}"
-         th:data-usuario-id="${usuario.usuarioId}">
+         th:data-usuario-id="${usuario.usuarioId}"
+         th:data-punto-eca-id="${puntoEcaId}">
     <!-- Título principal -->
     <div class="mb-4">
         <h2 class="h4 fw-bold text-dark mb-1">
@@ -1211,6 +1212,7 @@
                 if (btnBorrar) {
                     btnBorrar.dataset.inventarioId = inventarioId;
                     btnBorrar.dataset.nombreMaterial = nombre;
+                    btnBorrar.dataset.puntoEcaId = document.querySelector('section[data-punto-eca-id]')?.dataset.puntoEcaId || '';
                 }
 
                 // Mostrar modal detalles
@@ -1437,17 +1439,18 @@
 
                 const inventarioId = btnBorrar?.dataset.inventarioid || btnBorrar?.dataset.inventarioId || '';
                 const nombreMaterial = btnBorrar?.dataset.nombreMaterial || 'el material';
+                const puntoEcaId = btnBorrar?.dataset.puntoEcaId || '';
 
                 // ✅ Obtener datos del usuario correctamente
                 const section = document.querySelector('section[data-gestor]');
                 let gestor = section?.getAttribute('data-gestor') || '';
                 let usuarioId = section?.getAttribute('data-usuario-id') || '';
 
-                console.log('🗑️ Preparando eliminación:', { inventarioId, nombreMaterial, gestor, usuarioId });
+                console.log('🗑️ Preparando eliminación:', { inventarioId, nombreMaterial, gestor, usuarioId, puntoEcaId });
 
-                if (!gestor || !usuarioId) {
-                    console.error('❌ Datos de usuario no encontrados');
-                    alert('Error: No se encontraron los datos de usuario. Por favor recarga la página.');
+                if (!gestor || !usuarioId || !puntoEcaId) {
+                    console.error('❌ Datos no encontrados', { gestor, usuarioId, puntoEcaId });
+                    alert('Error: No se encontraron los datos necesarios. Por favor recarga la página.');
                     return;
                 }
 
@@ -1461,20 +1464,33 @@
                 const url = `/punto-eca/${gestor}/${usuarioId}/eliminar-inventario/${inventarioId}`;
                 console.log('🗑️ URL de eliminación:', url);
 
-                fetch(url, { method: 'DELETE' })
+                // ✅ Preparar payload con puntoId
+                const payload = {
+                    puntoId: puntoEcaId
+                };
+                console.log('📤 Body a enviar:', payload);
+
+                fetch(url, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
                     .then(res => {
                         console.log('📦 Respuesta del DELETE:', { status: res.status, ok: res.ok });
                         if (res.ok) {
-                            console.log('✅ Eliminación exitosa');
-                            mostrarModalResultado(true, '¡Eliminado!', 'El material ha sido eliminado del inventario correctamente.');
-                            if (detallesModalInstance) detallesModalInstance.hide();
-                            // Recargar después de cerrar modal
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 1500);
+                            return res.json();
                         } else {
                             return res.json().then(j => { throw new Error(j?.mensaje || j?.message || 'Error al borrar'); });
                         }
+                    })
+                    .then(data => {
+                        console.log('✅ Eliminación exitosa:', data);
+                        mostrarModalResultado(true, '¡Eliminado!', 'El material ha sido eliminado del inventario correctamente.');
+                        if (detallesModalInstance) detallesModalInstance.hide();
+                        // Recargar después de cerrar modal
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
                     })
                     .catch(err => {
                         console.error('❌ Error borrando:', err);
@@ -1724,7 +1740,7 @@
                 // ========================================================
                 var $selectCategoria = $('#selectCategoriaBusqueda');
                 if ($selectCategoria.length) {
-                    console.log('Encontrado #selectCategoriaBusqueda');
+                    console.log('✓ Encontrado #selectCategoriaBusqueda');
 
                     $selectCategoria.select2({
                         theme: 'bootstrap4',
@@ -1976,19 +1992,35 @@
             // ========================================================
             // INICIALIZAR SELECT2 EN UNIDAD MEDIDA DEL MODAL
             // ========================================================
-            var $unidadMedida = $('#unidadMedida');
-            if ($unidadMedida.length) {
-                console.log('✓ Encontrado #unidadMedida');
-
-                $unidadMedida.select2({
-                    theme: 'bootstrap4',
-                    width: '100%',
-                    allowClear: true,
-                    placeholder: '📐 Selecciona una unidad...',
-                    minimumInputLength: 0
-                });
-
-                console.log('Select2 inicializado en #unidadMedida');
+            // Detectar el elemento nativo
+            var unidadMedidaEl = document.getElementById('unidadMedida');
+            if (unidadMedidaEl) {
+                try {
+                    // Si el select está dentro del modal de AGREGAR, lo dejamos como select nativo
+                    var estaEnModalAgregar = unidadMedidaEl.closest && unidadMedidaEl.closest('#agregarInventarioModal');
+                    if (estaEnModalAgregar) {
+                        console.log('✋ Saltando inicialización Select2 para #unidadMedida dentro de #agregarInventarioModal (usar select nativo)');
+                    } else {
+                        console.log('✓ Encontrado #unidadMedida fuera del modal, inicializando Select2');
+                        $('#unidadMedida').select2({
+                            theme: 'bootstrap4',
+                            width: '100%',
+                            allowClear: true,
+                            placeholder: '📐 Selecciona una unidad...',
+                            minimumInputLength: 0
+                        });
+                        console.log('Select2 inicializado en #unidadMedida');
+                    }
+                } catch (err) {
+                    console.warn('⚠ Error verificando ubicación de #unidadMedida, inicializando Select2 por seguridad', err);
+                    $('#unidadMedida').select2({
+                        theme: 'bootstrap4',
+                        width: '100%',
+                        allowClear: true,
+                        placeholder: '📐 Selecciona una unidad...',
+                        minimumInputLength: 0
+                    });
+                }
             }
 
             // ========================================================
@@ -2251,6 +2283,128 @@
     })();
     </script>
 
-</section>
+    <!-- SCRIPT: Manejo de Guardar en Inventario -->
+    <script>
+    (function() {
+        console.log('📌 Inicializando handler de Guardar en Inventario...');
 
+        function obtenerNumero(id) {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            const v = el.value;
+            if (v === null || v === undefined || v === '') return null;
+            const n = Number(v);
+            return Number.isNaN(n) ? null : n;
+        }
+
+        function mostrarMensajeTemporal(text, tipo = 'info') {
+            const mensajeEl = document.getElementById('mensajeEstado');
+            const texto = document.getElementById('textoMensaje');
+            if (!mensajeEl || !texto) return;
+            texto.textContent = text;
+            mensajeEl.className = 'alert alert-' + (tipo === 'error' ? 'danger' : (tipo === 'success' ? 'success' : 'info')) + ' mt-4';
+            mensajeEl.style.display = 'block';
+            setTimeout(() => { mensajeEl.style.display = 'none'; }, 5000);
+        }
+
+        function validarPayload(payload) {
+            const errores = [];
+            if (!payload.materialId) errores.push('Material no seleccionado');
+            if (!payload.puntoEcaId) errores.push('Punto no encontrado');
+            if (payload.capacidadMaxima == null || payload.capacidadMaxima <= 0) errores.push('Capacidad máxima debe ser mayor a 0');
+            if (!payload.unidadMedida) errores.push('Unidad de medida es obligatoria');
+            if (payload.stockActual == null || payload.stockActual < 0) errores.push('Stock inicial inválido');
+            if (payload.precioCompra == null || payload.precioCompra <= 0) errores.push('Precio de compra inválido');
+            if (payload.precioVenta == null || payload.precioVenta <= 0) errores.push('Precio de venta inválido');
+            if (payload.umbralAlerta == null || payload.umbralAlerta < 1 || payload.umbralAlerta > 100) errores.push('Umbral de alerta debe estar entre 1 y 100');
+            if (payload.umbralCritico == null || payload.umbralCritico < 1 || payload.umbralCritico > 100) errores.push('Umbral crítico debe estar entre 1 y 100');
+            return errores;
+        }
+
+        function manejarGuardarInventario(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnGuardarInventario');
+            if (!btn) return;
+
+            // Recolectar datos
+            const materialId = (document.getElementById('agregarMaterialId') || {}).value || '';
+            const puntoEcaId = (document.getElementById('agregarPuntoId') || {}).value || '';
+            const capacidadMaxima = obtenerNumero('capacidadMaxima');
+            const unidadMedida = (document.getElementById('unidadMedida') || {}).value || '';
+            const stockActual = obtenerNumero('stockInicial');
+            const precioCompra = obtenerNumero('precioCompra');
+            const precioVenta = obtenerNumero('precioVenta');
+            const umbralAlerta = obtenerNumero('umbralAlerta');
+            const umbralCritico = obtenerNumero('umbralCritico');
+
+            const payload = {
+                capacidadMaxima: capacidadMaxima,
+                unidadMedida: unidadMedida,
+                stockActual: stockActual,
+                umbralAlerta: umbralAlerta ? Number(umbralAlerta) : null,
+                umbralCritico: umbralCritico ? Number(umbralCritico) : null,
+                precioVenta: precioVenta,
+                precioCompra: precioCompra,
+                materialId: materialId,
+                puntoEcaId: puntoEcaId
+            };
+
+            console.log('🔎 Payload a enviar:', payload);
+
+            const errores = validarPayload(payload);
+            if (errores.length) {
+                console.warn('⚠ Errores de validación:', errores);
+                mostrarMensajeTemporal('Errores: ' + errores.join('; '), 'error');
+                return;
+            }
+
+            // Deshabilitar botón y mostrar estado
+            const textoOriginal = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Guardando...';
+
+            // Ejecutar POST
+            fetch('/punto-eca/inventario/agregar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json().then(body => ({ status: response.status, ok: response.ok, body })))
+            .then(({ status, ok, body }) => {
+                console.log('📥 Respuesta servidor agregar inventario:', { status, ok, body });
+                if (ok && (status === 201 || status === 200)) {
+                    // Éxito
+                    mostrarModalResultado(true, '¡Inventario añadido!', body?.mensaje || 'Inventario guardado correctamente');
+                } else {
+                    const mensaje = body?.mensaje || body?.error || (body?.message) || 'Error al guardar inventario';
+                    console.error('❌ Error en creación:', mensaje);
+                    mostrarModalResultado(false, 'Error', mensaje);
+                }
+            })
+            .catch(err => {
+                console.error('❌ Error fetch al guardar inventario:', err);
+                mostrarModalResultado(false, 'Error', 'No fue posible guardar: ' + (err.message || err));
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = textoOriginal;
+            });
+        }
+
+        // Vincular evento al botón
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('btnGuardarInventario');
+            if (btn) {
+                btn.removeEventListener('click', manejarGuardarInventario);
+                btn.addEventListener('click', manejarGuardarInventario);
+                console.log('✓ Handler agregado a #btnGuardarInventario');
+            } else {
+                console.warn('✗ Botón #btnGuardarInventario no encontrado');
+            }
+        });
+
+    })();
+    </script>
+
+</section>
 

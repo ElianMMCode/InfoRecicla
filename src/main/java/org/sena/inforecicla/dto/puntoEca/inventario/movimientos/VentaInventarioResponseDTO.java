@@ -12,9 +12,11 @@ public record VentaInventarioResponseDTO(
 
         UUID ventaId,
         UUID inventarioId,
+        UUID materialId,
         String nombreMaterial,
         LocalDateTime fechaVenta,
         BigDecimal precioVenta,
+        BigDecimal cantidad,
         UUID centroAcopioId,
         String nombreCentroAcopio,
         String observaciones,
@@ -30,9 +32,11 @@ public record VentaInventarioResponseDTO(
         return new VentaInventarioResponseDTO(
                 venta.getVentaId(),
                 venta.getInventario().getInventarioId(),
+                venta.getInventario().getMaterial().getMaterialId(),
                 venta.getInventario().getMaterial().getNombre(),
                 venta.getFechaVenta(),
                 venta.getPrecioVenta(),
+                venta.getCantidad(),
                 venta.getCtrAcopio() != null ? venta.getCtrAcopio().getCntAcpId() : null,
                 venta.getCtrAcopio() != null ? venta.getCtrAcopio().getNombreCntAcp() : null,
                 venta.getObservaciones(),

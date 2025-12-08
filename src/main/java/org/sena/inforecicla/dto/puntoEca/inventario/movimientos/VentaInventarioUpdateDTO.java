@@ -5,10 +5,19 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * DTO para actualizar una venta de inventario existente
- */
 public record VentaInventarioUpdateDTO(
+
+        @NotNull(message = "El ID del punto ECA es obligatorio")
+        UUID puntoId,
+
+        @NotNull(message = "El ID de la venta es obligatorio")
+        UUID ventaId,
+
+        @NotNull(message = "El ID del material es obligatorio")
+        UUID materialId,
+
+        @NotNull(message = "El ID del inventario es obligatorio")
+        UUID inventarioId,
 
         @NotNull(message = "La fecha de venta es obligatoria")
         LocalDateTime fechaVenta,

@@ -23,9 +23,9 @@ public interface InventarioService {
 
     List<InventarioResponseDTO> filtraInventario(UUID gestorId, String texto, String categoria, String tipo, Alerta alerta, String unidad, String ocupacion);
 
-    void eliminarInventario(UUID inventarioId) throws InventarioNotFoundException;
+    void eliminarInventario(UUID inventarioId, UUID puntoId) throws InventarioNotFoundException;
 
-    Inventario obtenerInventarioValidoParaCompra(UUID inventarioId, UUID puntoId, UUID materialId) throws InventarioNotFoundException;
+    Inventario obtenerInventarioValido(UUID inventarioId, UUID puntoId, UUID materialId) throws InventarioNotFoundException;
 
     void actualizarStock(Inventario inv);
 }
