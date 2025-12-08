@@ -33,51 +33,68 @@
             <div id="collapseAgregar" class="accordion-collapse collapse" aria-labelledby="headingAgregar"
                  data-bs-parent="#acordeonMateriales">
                 <div class="accordion-body p-4 bg-light">
-                    <!-- Barra de búsqueda principal con Select2 AJAX -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-12">
-                            <label class="form-label fw-semibold text-muted mb-1" for="buscarMaterialSelect">Buscar Material</label>
-                            <select id="buscarMaterialSelect" class="form-select form-select-lg border-2 border-success js-select2-material" style="width: 100%;">
-                                <option></option>
-                            </select>
-                            <small class="text-muted">Comienza a escribir o haz clic para ver todos los materiales disponibles</small>
+                    <!-- SECCIÓN 1: Búsqueda Independiente de Material por Nombre -->
+                    <div class="mb-4 pb-4 border-bottom">
+                        <h6 class="fw-semibold text-success mb-3">
+                            <i class="bi bi-search me-2"></i>Opción 1: Buscar por Nombre de Material
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold text-muted mb-1" for="buscarMaterialSelect">Buscar Material</label>
+                                <select id="buscarMaterialSelect" class="form-select form-select-lg border-2 border-success js-select2-material" style="width: 100%;">
+                                    <option></option>
+                                </select>
+                                <small class="text-muted">Escribe el nombre del material o selecciona uno de la lista. Al seleccionar se abrirá el formulario de agregar.</small>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Categoría, Tipo y Limpiar lado a lado -->
-                    <div class="row g-3 align-items-end mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold text-muted mb-1" for="selectCategoriaBusqueda">Categoría</label>
-                            <select id="selectCategoriaBusqueda" class="form-select border-2 border-success js-select2-categoria" style="width: 100%;">
-                                <option value="">-- Ninguno --</option>
-                                <th:block th:if="${not #lists.isEmpty(categoriaMateriales)}">
-                                    <option th:each="cat : ${categoriaMateriales}"
-                                            th:value="${cat.nmbCategoria}"
-                                            th:text="${cat.nmbCategoria}">
-                                        Categoría
-                                    </option>
-                                </th:block>
-                            </select>
-                        </div>
+                    <!-- SECCIÓN 2: Búsqueda por Categoría y Tipo -->
+                    <div class="mb-0">
+                        <h6 class="fw-semibold text-success mb-3">
+                            <i class="bi bi-funnel me-2"></i>Opción 2: Buscar por Categoría y Tipo
+                        </h6>
+                        <div class="row g-3 align-items-end mb-3">
+                            <div class="col-md-5">
+                                <label class="form-label fw-semibold text-muted mb-1" for="selectCategoriaBusqueda">Categoría</label>
+                                <select id="selectCategoriaBusqueda" class="form-select border-2 border-success js-select2-categoria" style="width: 100%;">
+                                    <option value="">-- Selecciona una categoría --</option>
+                                    <th:block th:if="${not #lists.isEmpty(categoriaMateriales)}">
+                                        <option th:each="cat : ${categoriaMateriales}"
+                                                th:value="${cat.nmbCategoria}"
+                                                th:text="${cat.nmbCategoria}">
+                                            Categoría
+                                        </option>
+                                    </th:block>
+                                </select>
+                            </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold text-muted mb-1" for="selectTipoBusqueda">Tipo</label>
-                            <select id="selectTipoBusqueda" class="form-select border-2 border-success js-select2-tipo" style="width: 100%;">
-                                <option value="">-- Ninguno --</option>
-                                <th:block th:if="${not #lists.isEmpty(tiposMateriales)}">
-                                    <option th:each="tipo : ${tiposMateriales}"
-                                            th:value="${tipo.nmbCategoria}"
-                                            th:text="${tipo.nmbCategoria}">
-                                        Tipo
-                                    </option>
-                                </th:block>
-                            </select>
-                        </div>
+                            <div class="col-md-5">
+                                <label class="form-label fw-semibold text-muted mb-1" for="selectTipoBusqueda">Tipo</label>
+                                <select id="selectTipoBusqueda" class="form-select border-2 border-success js-select2-tipo" style="width: 100%;">
+                                    <option value="">-- Selecciona un tipo --</option>
+                                    <th:block th:if="${not #lists.isEmpty(tiposMateriales)}">
+                                        <option th:each="tipo : ${tiposMateriales}"
+                                                th:value="${tipo.nmbCategoria}"
+                                                th:text="${tipo.nmbCategoria}">
+                                            Tipo
+                                        </option>
+                                    </th:block>
+                                </select>
+                            </div>
 
-                        <div class="col-md-4">
-                            <button id="btnLimpiarBusquedaAgregar" class="btn btn-outline-secondary w-100" type="button">
-                                <i class="bi bi-eraser me-1"></i>Limpiar
-                            </button>
+                            <div class="col-md-2">
+                                <button id="btnBuscarPorCategoriaTipo" class="btn btn-success w-100" type="button">
+                                    <i class="bi bi-search me-1"></i>Buscar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <button id="btnLimpiarBusquedaAgregar" class="btn btn-outline-secondary w-100" type="button">
+                                    <i class="bi bi-eraser me-1"></i>Limpiar Filtros
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -208,10 +225,248 @@
             </div>
         </div>
 
-        <!-- SCRIPT INLINE PARA MANEJAR BOTÓN LIMPIAR -->
+        <!-- MODAL: RESULTADOS DE BÚSQUEDA POR CATEGORÍA Y TIPO -->
+        <div class="modal fade" id="buscarMaterialModal" tabindex="-1" aria-labelledby="buscarMaterialModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title" id="buscarMaterialModalLabel">
+                            <i class="bi bi-search me-2"></i>Resultados de Búsqueda
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Estado de búsqueda (loading, resultados, sin resultados) -->
+                        <div id="estadoBusquedaMateriales" class="text-center py-4">
+                            <i class="bi bi-search display-6 d-block mb-2"></i>
+                            <p class="mb-0">Realizando búsqueda...</p>
+                        </div>
+                        <!-- Lista de resultados -->
+                        <div id="resultadosBusqueda" class="list-group mt-3">
+                            <!-- Los resultados se cargarán aquí dinámicamente -->
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-1"></i>Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCRIPT INLINE PARA MANEJAR BÚSQUEDA POR CATEGORÍA Y TIPO + LIMPIAR -->
         <script>
+        // ============================================================
+        // FUNCIONES GLOBALES PARA BÚSQUEDA
+        // ============================================================
+        // Función para disparar búsqueda y abrir modal (disponible globalmente)
+        function dispararBusquedaYAbrirModal(filtros) {
+            console.log('Disparando búsqueda con filtros:', filtros);
+
+            var modalBuscarMaterial = document.getElementById('buscarMaterialModal');
+            if (!modalBuscarMaterial) {
+                console.error('Modal de búsqueda no encontrado');
+                return;
+            }
+
+            // Mostrar estado loading
+            var estadoBusquedaEl = document.getElementById('estadoBusquedaMateriales');
+            estadoBusquedaEl.innerHTML = '<div class="d-flex flex-column align-items-center"><div class="spinner-border text-success mb-3" role="status"></div><p class="mb-0">Buscando materiales...</p></div>';
+
+            // Limpiar resultados
+            var listaResultadosEl = document.getElementById('resultadosBusqueda');
+            listaResultadosEl.innerHTML = '';
+
+            // Abrir modal
+            var modal = new bootstrap.Modal(modalBuscarMaterial);
+            modal.show();
+
+            // Ejecutar búsqueda AJAX
+            var endpoint = '/punto-eca/catalogo/materiales/buscar';
+            var puntoId = document.getElementById('agregarPuntoId')?.value || '';
+
+            var params = new URLSearchParams();
+            if (filtros.texto) params.append('texto', filtros.texto);
+            if (filtros.categoria) params.append('categoria', filtros.categoria);
+            if (filtros.tipo) params.append('tipo', filtros.tipo);
+            if (puntoId) params.append('puntoId', puntoId);
+
+            var url = endpoint + (params.toString() ? ('?' + params.toString()) : '');
+            console.log('Buscando en:', url);
+
+            fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } })
+                .then(res => res.json().then(data => ({ ok: res.ok, data: data })))
+                .then(({ ok, data }) => {
+                    console.log('Respuesta recibida:', data);
+
+                    if (!ok) {
+                        var mensajeError = data?.mensaje || data?.message || 'Error desconocido';
+                        console.error('Error:', mensajeError);
+                        estadoBusquedaEl.innerHTML = '<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-2"></i>' + mensajeError + '</div>';
+                        return;
+                    }
+
+                    if (!Array.isArray(data)) data = [];
+
+                    console.log('Total de resultados:', data.length);
+
+                    // Renderizar resultados
+                    renderResultadosBusquedaModal(data);
+                })
+                .catch(err => {
+                    console.error('Error en búsqueda:', err);
+                    estadoBusquedaEl.innerHTML = '<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-exclamation-octagon me-2"></i>Error de conexión</div>';
+                });
+        }
+
+        // Función para renderizar resultados en modal (disponible globalmente)
+        function renderResultadosBusquedaModal(materiales) {
+            console.log('🎨 Renderizando', materiales.length, 'resultados');
+
+            var listaResultadosEl = document.getElementById('resultadosBusqueda');
+            var estadoBusquedaEl = document.getElementById('estadoBusquedaMateriales');
+
+            listaResultadosEl.innerHTML = '';
+
+            if (!materiales || materiales.length === 0) {
+                listaResultadosEl.innerHTML = '<div class="list-group-item text-muted text-center py-4">Sin resultados disponibles</div>';
+                estadoBusquedaEl.innerHTML = '<i class="bi bi-search display-6 d-block mb-2"></i><p class="mb-0">No se encontraron materiales con estos filtros</p>';
+                return;
+            }
+
+            materiales.forEach(material => {
+                var item = document.createElement('button');
+                item.type = 'button';
+                item.className = 'list-group-item list-group-item-action resultado-material-item d-flex align-items-start gap-3';
+                item.dataset.materialId = material.materialId || '';
+                item.dataset.nombre = material.nmbMaterial || '';
+                item.dataset.descripcion = material.dscMaterial || '';
+                item.dataset.tipo = material.nmbTipo || '';
+                item.dataset.categoria = material.nmbCategoria || '';
+                item.dataset.unidad = material.unidad || '';
+
+                var img = document.createElement('img');
+                img.src = material.imagenUrl || '/imagenes/materiales.png';
+                img.alt = material.nmbMaterial || 'Material';
+                img.className = 'rounded';
+                img.style.width = '64px';
+                img.style.height = '64px';
+                img.style.objectFit = 'cover';
+                img.style.flexShrink = '0';
+
+                var content = document.createElement('div');
+                content.className = 'flex-grow-1 text-start';
+
+                var title = document.createElement('div');
+                title.className = 'fw-semibold';
+                title.textContent = material.nmbMaterial || 'Material sin nombre';
+
+                var desc = document.createElement('small');
+                desc.className = 'text-muted d-block mb-2';
+                desc.textContent = material.dscMaterial || 'Sin descripción';
+
+                var badges = document.createElement('div');
+                var tipoBadge = document.createElement('span');
+                tipoBadge.className = 'badge bg-primary me-1';
+                tipoBadge.textContent = material.nmbTipo || 'Tipo';
+                var catBadge = document.createElement('span');
+                catBadge.className = 'badge bg-secondary';
+                catBadge.textContent = material.nmbCategoria || 'Categoría';
+
+                badges.appendChild(tipoBadge);
+                badges.appendChild(catBadge);
+
+                content.appendChild(title);
+                content.appendChild(desc);
+                content.appendChild(badges);
+
+                var actionBadge = document.createElement('span');
+                actionBadge.className = 'badge bg-success rounded-pill align-self-start';
+                actionBadge.textContent = 'Seleccionar';
+
+                item.appendChild(img);
+                item.appendChild(content);
+                item.appendChild(actionBadge);
+
+                listaResultadosEl.appendChild(item);
+            });
+
+            estadoBusquedaEl.innerHTML = '<i class="bi bi-check-circle text-success display-6 d-block mb-2"></i><p class="mb-0">Selecciona un material para continuar</p>';
+
+            // Agregar manejadores de clic a cada material
+            document.querySelectorAll('.resultado-material-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    var materialId = this.dataset.materialId;
+                    var materialNombre = this.dataset.nombre;
+
+                    console.log('📦 Material seleccionado:', materialId, '-', materialNombre);
+
+                    // Llenar los campos del formulario
+                    document.getElementById('agregarMaterialId').value = materialId;
+                    document.getElementById('agregarMaterialNombre').value = materialNombre;
+
+                    // Limpiar campos de entrada
+                    document.getElementById('stockInicial').value = '';
+                    document.getElementById('capacidadMaxima').value = '';
+                    document.getElementById('precioCompra').value = '';
+                    document.getElementById('precioVenta').value = '';
+                    document.getElementById('umbralAlerta').value = '';
+                    document.getElementById('umbralCritico').value = '';
+                    document.getElementById('unidadMedida').value = '';
+
+                    // Cerrar modal de búsqueda
+                    var modalBusquedaInstance = bootstrap.Modal.getInstance(document.getElementById('buscarMaterialModal'));
+                    if (modalBusquedaInstance) {
+                        modalBusquedaInstance.hide();
+                    }
+
+                    // Abrir modal de agregar inventario
+                    var modalAgregar = document.getElementById('agregarInventarioModal');
+                    if (modalAgregar) {
+                        var modal = new bootstrap.Modal(modalAgregar);
+                        modal.show();
+                        console.log('✓ Modal de agregar inventario abierto');
+                    }
+                });
+            });
+        }
+
+        // Script IIFE para handlers de botones
         (function() {
-            console.log('📌 Script inline de limpiar ejecutándose...');
+            console.log('📌 Script inline de búsqueda independiente ejecutándose...');
+
+            // ============================================================
+            // HANDLER: BOTÓN BUSCAR POR CATEGORÍA Y TIPO
+            // ============================================================
+            const btnBuscarPorCategoriaTipo = document.getElementById('btnBuscarPorCategoriaTipo');
+            if (btnBuscarPorCategoriaTipo) {
+                btnBuscarPorCategoriaTipo.addEventListener('click', function() {
+                    console.log('🔍 BÚSQUEDA POR CATEGORÍA Y TIPO (mediante botón)');
+
+                    const categoria = document.getElementById('selectCategoriaBusqueda')?.value || '';
+                    const tipo = document.getElementById('selectTipoBusqueda')?.value || '';
+
+                    // ✅ Validar que al menos uno esté seleccionado
+                    if (!categoria && !tipo) {
+                        console.warn('⚠️ No se seleccionó categoría ni tipo');
+                        alert('Por favor selecciona al menos una Categoría o un Tipo');
+                        return;
+                    }
+
+                    console.log('✅ Filtros válidos:', { categoria, tipo });
+
+                    // 🎯 Disparar búsqueda con filtros de categoría y tipo (SIN búsqueda de texto)
+                    dispararBusquedaYAbrirModal({
+                        texto: '',      // No usar búsqueda de texto (búsqueda independiente)
+                        categoria: categoria,
+                        tipo: tipo
+                    });
+                });
+                console.log('✓ Handler BUSCAR POR CATEGORÍA Y TIPO vinculado (solo dispara al hacer clic)');
+            }
 
             // ============================================================
             // HANDLER: BOTÓN LIMPIAR
@@ -221,7 +476,7 @@
                 btnLimpiarAgregar.addEventListener('click', function() {
                     console.log('🧹 Limpiando búsqueda y filtros del acordeón agregar...');
 
-                    // Limpiar Select2 de Buscar Material
+                    // Limpiar Select2 de Buscar Material (pero no abrir modal)
                     $('#buscarMaterialSelect').val(null).trigger('change');
                     console.log('✓ Limpiado: Buscar Material');
 
@@ -465,11 +720,7 @@
                             <!-- Tarjeta de Material -->
                             <div class="card h-100 shadow-sm border-0 transition"
                                  style="transition: all 0.3s ease;"
-                                 th:classappend="${ocupacion >= inventario.umbralCritico() ? 'estado-critico' : (ocupacion >= inventario.umbralAlerta() ? 'estado-alerta' : 'estado-ok')}"
-                                 th:data-ocupacion="${ocupacion}"
-                                 th:data-estado="${ocupacion >= inventario.umbralCritico() ? 'critico' : (ocupacion >= inventario.umbralAlerta() ? 'alerta' : 'ok')}"
-                                 th:data-stock-actual="${inventario.stockActual()}"
-                                 th:data-capacidad-maxima="${inventario.capacidadMaxima()}">
+                                 th:classappend="${ocupacion >= inventario.umbralCritico() ? 'estado-critico' : (ocupacion >= inventario.umbralAlerta() ? 'estado-alerta' : 'estado-ok')}">
                                 <div class="card-header bg-success text-white d-flex justify-content-between align-items-start">
                                     <div>
                                         <h5 class="card-title mb-1" th:text="${inventario.nombreMaterial()}">Material</h5>
@@ -1600,114 +1851,86 @@
                 $buscarMaterial.select2({
                     theme: 'bootstrap4',
                     width: '100%',
-                    placeholder: 'Selecciona un material para continuar...',
-                    minimumInputLength: 0,  // ✅ Mostrar materiales al abrir
+                    placeholder: 'Escribe el nombre del material...',
+                    minimumInputLength: 1,  // ✅ Requiere al menos 1 carácter para buscar
                     allowClear: true,
-                        ajax: {
-                            url: endpoint,
-                            dataType: 'json',
-                            delay: 300,
-                            data: function(params) {
-                                var searchTerm = params.term || '';
+                    ajax: {
+                        url: endpoint,
+                        dataType: 'json',
+                        delay: 300,
+                        data: function(params) {
+                            var searchTerm = params.term || '';
 
-                                // Obtener categoría y tipo desde los Select2 (no radio buttons)
-                                var categoria = $('#selectCategoriaBusqueda').val() || '';
-                                var tipo = $('#selectTipoBusqueda').val() || '';
+                            console.log('🔍 BÚSQUEDA INDEPENDIENTE DE MATERIAL POR NOMBRE');
+                            console.log('Buscando por nombre:', searchTerm);
+                            console.log('⚠️ NO se incluyen Categoría y Tipo (búsqueda totalmente independiente)');
 
-                                console.log('Buscando:', searchTerm || 'SIN FILTRO - TRAER TODOS');
-                                console.log('Categoria:', categoria || 'Sin filtro');
-                                console.log('Tipo:', tipo || 'Sin filtro');
+                            // Enviar SOLO el término de búsqueda de material
+                            // NO incluir categoría ni tipo
+                            var requestData = {
+                                texto: searchTerm,      // Búsqueda por nombre de material
+                                puntoId: puntoId
+                            };
 
-                                // Enviar parámetros tal como están (incluso vacíos)
-                                var requestData = {
-                                    texto: searchTerm,      // Puede estar vacío
-                                    puntoId: puntoId
-                                };
+                            console.log('Enviando al backend (búsqueda independiente):', requestData);
 
-                                // Solo agregar categoria si está seleccionada
-                                if (categoria) {
-                                    requestData.categoria = categoria;
-                                }
-
-                                // Solo agregar tipo si está seleccionado
-                                if (tipo) {
-                                    requestData.tipo = tipo;
-                                }
-
-                                console.log('Enviando al backend:', requestData);
-
-                                return requestData;
-                            },
-                            processResults: function(data, params) {
-                                console.log('Respuesta AJAX recibida:', data);
-
-                                // Si la respuesta es un error, mostrar el mensaje
-                                if (data.error) {
-                                    console.error('Error del backend:', data.mensaje);
-                                    return { results: [] };
-                                }
-
-                                if (!Array.isArray(data)) {
-                                    console.warn('La respuesta no es un array, conviriendo...');
-                                    data = [];
-                                }
-
-                                console.log('Total de resultados:', data.length);
-
-                                var results = data.map(function(m) {
-                                    console.log('Procesando material:', m.nmbMaterial);
-                                    return {
-                                        id: m.materialId || m.id || '',
-                                        text: m.nmbMaterial || m.nombre || 'Material sin nombre',
-                                        // Guardar atributos extra en el elemento para acceso en formatState
-                                        element: $('<option>')
-                                            .attr('data-imagen', m.imagenUrl || '/imagenes/materiales.png')
-                                            .attr('data-tipo', m.nmbTipo || '')
-                                            .attr('data-categoria', m.nmbCategoria || '')[0],
-                                        dto: m
-                                    };
-                                });
-
-                                return {
-                                    results: results
-                                };
-                            },
-                            error: function(xhr, status, error) {
-                                console.error('Error AJAX:', error);
-                                console.error('Status:', status);
-                                console.error('Response:', xhr.responseText);
-                            },
-                            cache: false  // Desabilitar cache para debugging
+                            return requestData;
                         },
+                        processResults: function(data, params) {
+                            console.log('Respuesta AJAX recibida:', data);
+
+                            // Si la respuesta es un error, mostrar el mensaje
+                            if (data.error) {
+                                console.error('Error del backend:', data.mensaje);
+                                return { results: [] };
+                            }
+
+                            if (!Array.isArray(data)) {
+                                console.warn('La respuesta no es un array, conviriendo...');
+                                data = [];
+                            }
+
+                            console.log('Total de resultados:', data.length);
+
+                            var results = data.map(function(m) {
+                                console.log('Procesando material:', m.nmbMaterial);
+                                return {
+                                    id: m.materialId || m.id || '',
+                                    text: m.nmbMaterial || m.nombre || 'Material sin nombre',
+                                    // Guardar atributos extra en el elemento para acceso en formatState
+                                    element: $('<option>')
+                                        .attr('data-imagen', m.imagenUrl || '/imagenes/materiales.png')
+                                        .attr('data-tipo', m.nmbTipo || '')
+                                        .attr('data-categoria', m.nmbCategoria || '')[0],
+                                    dto: m
+                                };
+                            });
+
+                            return {
+                                results: results
+                            };
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error AJAX:', error);
+                            console.error('Status:', status);
+                            console.error('Response:', xhr.responseText);
+                        },
+                        cache: false  // Desabilitar cache para debugging
+                    },
                     // Aplicar formatState a la selección y resultados
                     templateSelection: formatState,
                     templateResult: formatState
                 });
 
-                // Evento al abrir dropdown - Disparar búsqueda automática
-                $buscarMaterial.on('select2:opening', function(e) {
-                    console.log('Abriendo dropdown de materiales...');
-
-                    // Esperar a que Select2 renderice el campo de búsqueda
-                    setTimeout(function() {
-                        var searchInput = $('.select2-search__field');
-                        if (searchInput && searchInput.length > 0) {
-                            console.log('Campo de búsqueda encontrado');
-                            console.log('Disparando búsqueda automática...');
-                            searchInput.trigger('input');
-                        } else {
-                            console.warn('Campo de búsqueda no encontrado');
-                        }
-                    }, 100);
-                });
-
-                // Evento al seleccionar material
+                // Evento al seleccionar material - NO abre modal de búsqueda, solo abre modal de agregar
                 $buscarMaterial.on('select2:select', function(e) {
                     var data = e.params.data;
-                    console.log('Material seleccionado:', data);
+                    console.log('✅ Material seleccionado en búsqueda independiente:', data);
 
                     if (data && data.id) {
                         var dto = data.dto || {};
+
+                        // ✅ Rellenar datos en el formulario de agregar inventario
                         document.getElementById('agregarMaterialId').value = data.id;
                         document.getElementById('agregarMaterialNombre').value = data.text;
 
@@ -1723,20 +1946,23 @@
                             $('#unidadMedida').val(dto.unidad).trigger('change');
                         }
 
-                        // Abrir modal de agregar
+                        // 🎯 Limpiar la selección del select2 después de usarla
+                        $buscarMaterial.val(null).trigger('change');
+
+                        // ✅ Abrir DIRECTAMENTE el modal de agregar (SIN pasar por modal de búsqueda)
                         var modalAgregar = document.getElementById('agregarInventarioModal');
                         if (modalAgregar) {
-                            console.log('Abriendo modal de agregar inventario...');
+                            console.log('✓ Abriendo modal de agregar inventario directamente (desde búsqueda de nombre)');
                             var modal = new bootstrap.Modal(modalAgregar);
                             modal.show();
                         }
                     }
                 });
 
-                console.log('Select2 inicializado en #buscarMaterialSelect');
+                console.log('✓ Select2 inicializado en #buscarMaterialSelect (búsqueda independiente por nombre)');
 
                 // ========================================================
-                // INICIALIZAR SELECT2 EN CATEGORÍA
+                // INICIALIZAR SELECT2 EN CATEGORÍA (SIN BÚSQUEDA AUTOMÁTICA)
                 // ========================================================
                 var $selectCategoria = $('#selectCategoriaBusqueda');
                 if ($selectCategoria.length) {
@@ -1750,17 +1976,12 @@
                         minimumInputLength: 0
                     });
 
-                    // Al cambiar categoría, abre modal con búsqueda
+                    // Al cambiar categoría, NO abre modal automáticamente
+                    // El usuario debe hacer clic en el botón "Buscar"
                     $selectCategoria.on('select2:select', function(e) {
                         var categoria = e.params.data.id;
-                        console.log('Categoria seleccionada:', categoria);
-
-                        // Disparar búsqueda automática con la categoría
-                        dispararBusquedaYAbrirModal({
-                            texto: '',
-                            categoria: categoria,
-                            tipo: $('#selectTipoBusqueda').val() || ''
-                        });
+                        console.log('✓ Categoria seleccionada:', categoria);
+                        console.log('⏳ Esperando a que el usuario haga clic en el botón "Buscar"...');
                     });
 
                     // Al limpiar categoría
@@ -1772,7 +1993,7 @@
                 }
 
                 // ========================================================
-                // INICIALIZAR SELECT2 EN TIPO
+                // INICIALIZAR SELECT2 EN TIPO (SIN BÚSQUEDA AUTOMÁTICA)
                 // ========================================================
                 var $selectTipo = $('#selectTipoBusqueda');
                 if ($selectTipo.length) {
@@ -1786,17 +2007,12 @@
                         minimumInputLength: 0
                     });
 
-                    // Al cambiar tipo, abre modal con búsqueda
+                    // Al cambiar tipo, NO abre modal automáticamente
+                    // El usuario debe hacer clic en el botón "Buscar"
                     $selectTipo.on('select2:select', function(e) {
                         var tipo = e.params.data.id;
-                        console.log('Tipo seleccionado:', tipo);
-
-                        // Disparar búsqueda automática con el tipo
-                        dispararBusquedaYAbrirModal({
-                            texto: '',
-                            categoria: $('#selectCategoriaBusqueda').val() || '',
-                            tipo: tipo
-                        });
+                        console.log('✓ Tipo seleccionado:', tipo);
+                        console.log('⏳ Esperando a que el usuario haga clic en el botón "Buscar"...');
                     });
 
                     // Al limpiar tipo
@@ -1807,183 +2023,6 @@
                     console.log('✓ Select2 inicializado en #selectTipoBusqueda');
                 }
 
-                // ========================================================
-                // FUNCIÓN AUXILIAR: Disparar búsqueda y abrir modal
-                // ========================================================
-                function dispararBusquedaYAbrirModal(filtros) {
-                    console.log('Disparando búsqueda con filtros:', filtros);
-
-                    var modalBuscarMaterial = document.getElementById('buscarMaterialModal');
-                    if (!modalBuscarMaterial) {
-                        console.error('Modal de búsqueda no encontrado');
-                        return;
-                    }
-
-                    // Mostrar estado loading
-                    var estadoBusquedaEl = document.getElementById('estadoBusquedaMateriales');
-                    estadoBusquedaEl.innerHTML = '<div class="d-flex flex-column align-items-center"><div class="spinner-border text-success mb-3" role="status"></div><p class="mb-0">Buscando materiales...</p></div>';
-
-                    // Limpiar resultados
-                    var listaResultadosEl = document.getElementById('resultadosBusqueda');
-                    listaResultadosEl.innerHTML = '';
-
-                    // Abrir modal
-                    var modal = new bootstrap.Modal(modalBuscarMaterial);
-                    modal.show();
-
-                    // Ejecutar búsqueda AJAX
-                    var endpoint = '/punto-eca/catalogo/materiales/buscar';
-                    var puntoId = document.getElementById('agregarPuntoId')?.value || '';
-
-                    var params = new URLSearchParams();
-                    if (filtros.texto) params.append('texto', filtros.texto);
-                    if (filtros.categoria) params.append('categoria', filtros.categoria);
-                    if (filtros.tipo) params.append('tipo', filtros.tipo);
-                    if (puntoId) params.append('puntoId', puntoId);
-
-                    var url = endpoint + (params.toString() ? ('?' + params.toString()) : '');
-                    console.log('Buscando en:', url);
-
-                    fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } })
-                        .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, data: data })))
-                        .then(({ status, ok, data }) => {
-                            console.log('Respuesta recibida:', data);
-
-                            if (!ok) {
-                                var mensajeError = data?.mensaje || data?.message || 'Error desconocido';
-                                console.error('Error:', mensajeError);
-                                estadoBusquedaEl.innerHTML = '<div class="alert alert-warning mb-0" role="alert"><i class="bi bi-exclamation-triangle me-2"></i>' + mensajeError + '</div>';
-                                return;
-                            }
-
-                            if (!Array.isArray(data)) data = [];
-
-                            console.log('Total de resultados:', data.length);
-
-                            // Renderizar resultados
-                            renderResultadosBusquedaModal(data);
-                        })
-                        .catch(err => {
-                            console.error('Error en búsqueda:', err);
-                            estadoBusquedaEl.innerHTML = '<div class="alert alert-danger mb-0" role="alert"><i class="bi bi-exclamation-octagon me-2"></i>Error de conexión</div>';
-                        });
-                }
-
-                // ========================================================
-                // FUNCIÓN AUXILIAR: Renderizar resultados en modal
-                // ========================================================
-                function renderResultadosBusquedaModal(materiales) {
-                    console.log('🎨 Renderizando', materiales.length, 'resultados');
-
-                    var listaResultadosEl = document.getElementById('resultadosBusqueda');
-                    var estadoBusquedaEl = document.getElementById('estadoBusquedaMateriales');
-
-                    listaResultadosEl.innerHTML = '';
-
-                    if (!materiales || materiales.length === 0) {
-                        listaResultadosEl.innerHTML = '<div class="list-group-item text-muted text-center py-4">Sin resultados disponibles</div>';
-                        estadoBusquedaEl.innerHTML = '<i class="bi bi-search display-6 d-block mb-2"></i><p class="mb-0">No se encontraron materiales con estos filtros</p>';
-                        return;
-                    }
-
-                    materiales.forEach(material => {
-                        var item = document.createElement('button');
-                        item.type = 'button';
-                        item.className = 'list-group-item list-group-item-action resultado-material-item d-flex align-items-start gap-3';
-                        item.dataset.materialId = material.materialId || '';
-                        item.dataset.nombre = material.nmbMaterial || '';
-                        item.dataset.descripcion = material.dscMaterial || '';
-                        item.dataset.tipo = material.nmbTipo || '';
-                        item.dataset.categoria = material.nmbCategoria || '';
-                        item.dataset.unidad = material.unidad || '';
-
-                        var img = document.createElement('img');
-                        img.src = material.imagenUrl || '/imagenes/materiales.png';
-                        img.alt = material.nmbMaterial || 'Material';
-                        img.className = 'rounded';
-                        img.style.width = '64px';
-                        img.style.height = '64px';
-                        img.style.objectFit = 'cover';
-                        img.style.flexShrink = '0';
-
-                        var content = document.createElement('div');
-                        content.className = 'flex-grow-1 text-start';
-
-                        var title = document.createElement('div');
-                        title.className = 'fw-semibold';
-                        title.textContent = material.nmbMaterial || 'Material sin nombre';
-
-                        var desc = document.createElement('small');
-                        desc.className = 'text-muted d-block mb-2';
-                        desc.textContent = material.dscMaterial || 'Sin descripción';
-
-                        var badges = document.createElement('div');
-                        var tipoBadge = document.createElement('span');
-                        tipoBadge.className = 'badge bg-primary me-1';
-                        tipoBadge.textContent = material.nmbTipo || 'Tipo';
-                        var catBadge = document.createElement('span');
-                        catBadge.className = 'badge bg-secondary';
-                        catBadge.textContent = material.nmbCategoria || 'Categoría';
-
-                        badges.appendChild(tipoBadge);
-                        badges.appendChild(catBadge);
-
-                        content.appendChild(title);
-                        content.appendChild(desc);
-                        content.appendChild(badges);
-
-                        var actionBadge = document.createElement('span');
-                        actionBadge.className = 'badge bg-success rounded-pill align-self-start';
-                        actionBadge.textContent = 'Seleccionar';
-
-                        item.appendChild(img);
-                        item.appendChild(content);
-                        item.appendChild(actionBadge);
-
-                        listaResultadosEl.appendChild(item);
-                    });
-
-                    estadoBusquedaEl.innerHTML = '<i class="bi bi-check-circle text-success display-6 d-block mb-2"></i><p class="mb-0">Selecciona un material para continuar</p>';
-
-                    // Agregar manejadores de clic a cada material
-                    document.querySelectorAll('.resultado-material-item').forEach(item => {
-                        item.addEventListener('click', function(e) {
-                            e.preventDefault();
-
-                            var materialId = this.dataset.materialId;
-                            var materialNombre = this.dataset.nombre;
-
-                            console.log('📦 Material seleccionado:', materialId, '-', materialNombre);
-
-                            // Llenar los campos del formulario
-                            document.getElementById('agregarMaterialId').value = materialId;
-                            document.getElementById('agregarMaterialNombre').value = materialNombre;
-
-                            // Limpiar campos de entrada
-                            document.getElementById('stockInicial').value = '';
-                            document.getElementById('capacidadMaxima').value = '';
-                            document.getElementById('precioCompra').value = '';
-                            document.getElementById('precioVenta').value = '';
-                            document.getElementById('umbralAlerta').value = '';
-                            document.getElementById('umbralCritico').value = '';
-                            document.getElementById('unidadMedida').value = '';
-
-                            // Cerrar modal de búsqueda
-                            var modalBusquedaInstance = bootstrap.Modal.getInstance(document.getElementById('buscarMaterialModal'));
-                            if (modalBusquedaInstance) {
-                                modalBusquedaInstance.hide();
-                            }
-
-                            // Abrir modal de agregar inventario
-                            var modalAgregar = document.getElementById('agregarInventarioModal');
-                            if (modalAgregar) {
-                                var modal = new bootstrap.Modal(modalAgregar);
-                                modal.show();
-                                console.log('✓ Modal de agregar inventario abierto');
-                            }
-                        });
-                    });
-                }
 
             } else {
                 console.error('❌ No se encontró #buscarMaterialSelect');
@@ -2024,7 +2063,7 @@
             }
 
             // ========================================================
-            // SELECT2 BÚSQUEDA DE MATERIAL EN INVENTARIO - CON AJAX
+            // SELECT2 BÚSQUEDA DE MATERIAL EN INVENTARIO - INDEPENDIENTE
             // ========================================================
             var $busquedaMaterialInventario = $('#busquedaMaterialInventario');
             if ($busquedaMaterialInventario.length) {
@@ -2039,35 +2078,40 @@
                 $busquedaMaterialInventario.select2({
                     theme: 'bootstrap4',
                     width: '100%',
-                    placeholder: 'Busca o selecciona un material...',
+                    placeholder: 'Escribe el nombre del material...',
                     allowClear: true,
-                    minimumInputLength: 0,
+                    minimumInputLength: 1,  // ✅ Requiere mínimo 1 carácter
                     ajax: {
                         url: endpoint,
                         dataType: 'json',
                         delay: 300,
                         data: function(params) {
                             var searchTerm = params.term || '';
-                            var categoria = $('#filtroCategoriaSelectInventario').val() || '';
-                            var tipo = $('#filtroTipoSelectInventario').val() || '';
 
+                            console.log('🔍 BÚSQUEDA INDEPENDIENTE DE MATERIAL EN INVENTARIO');
+                            console.log('Buscando por nombre:', searchTerm);
+                            console.log('⚠️ NO se incluyen Categoría, Tipo, Alerta, Unidad, Ocupación (búsqueda totalmente independiente)');
+
+                            // Enviar SOLO el término de búsqueda de material
+                            // NO incluir filtros (categoría, tipo, alerta, unidad, ocupación)
                             var requestData = {
-                                puntoId: puntoId,
-                                texto: searchTerm,
-                                categoria: categoria,
-                                tipo: tipo
+                                texto: searchTerm,      // Búsqueda por nombre de material
+                                puntoId: puntoId
                             };
 
-                            console.log('🔍 Parámetros AJAX búsqueda:', requestData);
+                            console.log('Enviando al backend (búsqueda independiente):', requestData);
+
                             return requestData;
                         },
                         processResults: function(data) {
-                            console.log('📦 Respuesta búsqueda:', data);
+                            console.log('Respuesta AJAX recibida:', data);
 
                             if (!Array.isArray(data)) {
-                                console.warn('Respuesta no es array');
-                                return { results: [] };
+                                console.warn('La respuesta no es un array, conviriendo...');
+                                data = [];
                             }
+
+                            console.log('Total de resultados:', data.length);
 
                             var results = data.map(function(m) {
                                 return {
@@ -2090,21 +2134,19 @@
 
                 // Evento cuando se selecciona un material
                 $busquedaMaterialInventario.on('select2:select', function(e) {
-                    console.log('Material seleccionado:', e.params.data);
-                    // El valor guardado es el nombre del material (nmbMaterial)
+                    var data = e.params.data;
+                    console.log('✅ Material seleccionado en búsqueda independiente:', data);
+
+                    // ✅ Limpiar la selección del select2 después de usarla
+                    $busquedaMaterialInventario.val(null).trigger('change');
+
+                    // ✅ Filtrar tarjetas por nombre de material
+                    filtrarTarjetasPorNombre(data.text);
+
+                    console.log('✓ Tarjetas filtradas por nombre:', data.text);
                 });
 
-                // Disparar búsqueda al abrir sin escritura
-                $busquedaMaterialInventario.on('select2:opening', function() {
-                    setTimeout(function() {
-                        var searchField = $busquedaMaterialInventario.data('select2').$dropdown.find('.select2-search__field');
-                        if (searchField) {
-                            searchField.trigger('input');
-                        }
-                    }, 50);
-                });
-
-                console.log('✓ Select2 búsqueda inicializado');
+                console.log('✓ Select2 búsqueda en inventario inicializado (búsqueda independiente)');
             }
 
             // ========================================================
@@ -2281,6 +2323,279 @@
 
         console.log('✓ Script Select2 cargado y listo');
     })();
+
+    // ========================================================
+    // FUNCIÓN GLOBAL: Obtener unidades únicas del inventario
+    // ========================================================
+    window.obtenerUnidadesDelInventario = function() {
+        var unidades = new Set();
+        var tarjetas = document.querySelectorAll('.tarjeta-material');
+
+        tarjetas.forEach(function(tarjeta) {
+            var unidad = tarjeta.getAttribute('data-unidad-medida');
+            if (unidad) unidades.add(unidad);
+        });
+
+        return Array.from(unidades).sort();
+    };
+
+    // ========================================================
+    // FUNCIÓN GLOBAL: Actualizar opciones de Select2 dinámicamente
+    // ========================================================
+    window.actualizarFiltrosInventario = function() {
+        console.log('🔄 Actualizando opciones de filtros del inventario...');
+
+        // Obtener unidades únicas del inventario
+        var unidades = window.obtenerUnidadesDelInventario();
+
+        console.log('Unidades encontradas:', unidades);
+
+        // Actualizar Select2 de Unidad
+        var $selectUnidad = $('#filtroUnidadInventario');
+        if ($selectUnidad.length) {
+            var opcionesUnidad = [{ id: '', text: 'Todas las unidades' }];
+            unidades.forEach(function(uni) {
+                opcionesUnidad.push({ id: uni, text: uni });
+            });
+            $selectUnidad.empty();
+            $selectUnidad.append(
+                opcionesUnidad.map(function(opt) {
+                    return '<option value="' + opt.id + '">' + opt.text + '</option>';
+                }).join('')
+            );
+            if ($selectUnidad.data('select2')) {
+                $selectUnidad.select2('destroy');
+                $selectUnidad.select2({
+                    theme: 'bootstrap4',
+                    width: '100%',
+                    allowClear: true,
+                    placeholder: 'Selecciona una unidad...',
+                    minimumInputLength: 0
+                });
+            }
+            console.log('✓ Select2 Unidad actualizado');
+        }
+
+        // Los Select2 de Categoría y Tipo ya tienen sus opciones del backend
+        // No necesitan actualización dinámica
+        console.log('✓ Nota: Categoría y Tipo se cargan desde el backend');
+    };
+
+    // Actualizar filtros cuando el DOM esté listo
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(window.actualizarFiltrosInventario, 500);
+        });
+    } else {
+        setTimeout(window.actualizarFiltrosInventario, 500);
+    }
+
+    // ========================================================
+    // ========================================================
+    window.filtrarTarjetasPorNombre = function(nombreMaterial) {
+        console.log('🎨 Filtrando tarjetas por nombre:', nombreMaterial);
+
+        var tarjetas = document.querySelectorAll('.tarjeta-material');
+        var visibles = 0;
+
+        tarjetas.forEach(function(tarjeta) {
+            var nombre = tarjeta.getAttribute('data-nombre-material') || '';
+
+            if (nombre.toLowerCase().includes(nombreMaterial.toLowerCase())) {
+                tarjeta.style.display = '';
+                visibles++;
+            } else {
+                tarjeta.style.display = 'none';
+            }
+        });
+
+        console.log('✓ Tarjetas mostradas:', visibles);
+
+        // Mostrar mensaje si no hay resultados
+        var contenedor = document.getElementById('contenedorMateriales');
+        if (contenedor) {
+            if (visibles === 0) {
+                var mensaje = document.createElement('div');
+                mensaje.className = 'col-12 text-center py-4';
+                mensaje.id = 'mensajeNoResultados';
+                mensaje.innerHTML = '<p class="text-muted">No se encontraron materiales que coincidan con "' + nombreMaterial + '"</p>';
+
+                var existente = document.getElementById('mensajeNoResultados');
+                if (existente) existente.remove();
+
+                contenedor.appendChild(mensaje);
+            } else {
+                var existente = document.getElementById('mensajeNoResultados');
+                if (existente) existente.remove();
+            }
+        }
+    };
+
+    // ========================================================
+    // FUNCIÓN GLOBAL: Filtrar Tarjetas por múltiples criterios
+    // ========================================================
+    window.filtrarTarjetasInventario = function() {
+        console.log('🔍 Aplicando filtros de inventario');
+
+        // Nota: Los filtros de categoría y tipo NO se aplican porque esos datos
+        // no están disponibles en las tarjetas (th:data-*). Solo están en el Select2.
+        // Los usuarios deben usar esos Select2 para ver opciones disponibles.
+
+        var alerta = document.getElementById('filtroAlerataInventario')?.value || '';
+        var unidad = document.getElementById('filtroUnidadInventario')?.value || '';
+        var ocupacion = document.getElementById('filtroOcupacionInventario')?.value || '';
+
+        console.log('Filtros aplicados:', { alerta, unidad, ocupacion });
+
+        var tarjetas = document.querySelectorAll('.tarjeta-material');
+        var visibles = 0;
+        var ocultadas = 0;
+
+        tarjetas.forEach(function(tarjeta) {
+            var mostrar = true;
+
+            // ✅ FILTRO 1: Alerta (Estado: ok, alerta, critico)
+            if (mostrar && alerta && alerta !== '') {
+                var tarjetaEstado = tarjeta.getAttribute('data-estado') || 'ok';
+                if (tarjetaEstado !== alerta) {
+                    mostrar = false;
+                }
+            }
+
+            // ✅ FILTRO 2: Unidad de Medida
+            if (mostrar && unidad && unidad !== '') {
+                var tarjetaUnidad = tarjeta.getAttribute('data-unidad-medida') || '';
+                if (tarjetaUnidad !== unidad) {
+                    mostrar = false;
+                }
+            }
+
+            // ✅ FILTRO 3: Ocupación (rango: 0-25, 25-50, 50-75, 75-100)
+            if (mostrar && ocupacion && ocupacion !== '') {
+                var ocupacionTarjeta = parseInt(tarjeta.getAttribute('data-ocupacion') || 0);
+                var [minOcup, maxOcup] = ocupacion.split('-').map(Number);
+
+                if (ocupacionTarjeta < minOcup || ocupacionTarjeta > maxOcup) {
+                    mostrar = false;
+                }
+            }
+
+            // Mostrar u ocultar tarjeta
+            if (mostrar) {
+                tarjeta.style.display = '';
+                visibles++;
+            } else {
+                tarjeta.style.display = 'none';
+                ocultadas++;
+            }
+        });
+
+        console.log('✓ Tarjetas mostradas:', visibles, '- Tarjetas ocultadas:', ocultadas);
+
+        // Mostrar mensaje si no hay resultados
+        var contenedor = document.getElementById('contenedorMateriales');
+        if (contenedor) {
+            if (visibles === 0) {
+                var mensaje = document.createElement('div');
+                mensaje.className = 'col-12 text-center py-4';
+                mensaje.id = 'mensajeSinResultados';
+                mensaje.innerHTML = '<p class="text-muted">No se encontraron materiales con los filtros seleccionados</p>';
+
+                var existente = document.getElementById('mensajeSinResultados');
+                if (existente) existente.remove();
+
+                contenedor.appendChild(mensaje);
+            } else {
+                var existente = document.getElementById('mensajeSinResultados');
+                if (existente) existente.remove();
+            }
+        }
+    };
+
+        // ========================================================
+        // HANDLERS: Botones de Búsqueda en Inventario
+        // ========================================================
+        (function() {
+            console.log('📌 Inicializando handlers de búsqueda en inventario...');
+
+            // ============================================================
+            // HANDLER: BOTÓN BUSCAR POR FILTROS (Categoría, Tipo, etc.)
+            // ============================================================
+            var btnBuscarInventario = document.getElementById('btnBuscarInventario');
+            if (btnBuscarInventario) {
+                btnBuscarInventario.addEventListener('click', function() {
+                    console.log('🔍 BÚSQUEDA POR FILTROS EN INVENTARIO (mediante botón)');
+
+                    var categoria = document.getElementById('filtroCategoriaSelectInventario')?.value || '';
+                    var tipo = document.getElementById('filtroTipoSelectInventario')?.value || '';
+                    var alerta = document.getElementById('filtroAlerataInventario')?.value || '';
+                    var unidad = document.getElementById('filtroUnidadInventario')?.value || '';
+                    var ocupacion = document.getElementById('filtroOcupacionInventario')?.value || '';
+
+                    // ✅ Validar que al menos un filtro esté seleccionado
+                    if (!categoria && !tipo && !alerta && !unidad && !ocupacion) {
+                        console.warn('⚠️ No se seleccionó ningún filtro');
+                        alert('Por favor selecciona al menos un filtro para buscar');
+                        return;
+                    }
+
+                    console.log('✅ Filtros válidos:', { categoria, tipo, alerta, unidad, ocupacion });
+
+                    // 🎯 Aplicar filtros a las tarjetas
+                    window.filtrarTarjetasInventario();
+                });
+                console.log('✓ Handler BUSCAR POR FILTROS vinculado (solo dispara al hacer clic)');
+            }
+
+            // ============================================================
+            // HANDLER: BOTÓN LIMPIAR TODOS LOS FILTROS
+            // ============================================================
+            var btnLimpiarTodos = document.getElementById('btnLimpiarTodosFiltraInventario');
+            if (btnLimpiarTodos) {
+                btnLimpiarTodos.addEventListener('click', function() {
+                    console.log('🧹 Limpiando todos los filtros del inventario...');
+
+                    // Limpiar Select2 de Buscar Material
+                    $('#busquedaMaterialInventario').val(null).trigger('change');
+                    console.log('✓ Limpiado: Buscar Material');
+
+                    // Limpiar Select2 de Categoría
+                    $('#filtroCategoriaSelectInventario').val('').trigger('change');
+                    console.log('✓ Limpiado: Categoría');
+
+                    // Limpiar Select2 de Tipo
+                    $('#filtroTipoSelectInventario').val('').trigger('change');
+                    console.log('✓ Limpiado: Tipo');
+
+                    // Limpiar Select2 de Alerta
+                    $('#filtroAlerataInventario').val('').trigger('change');
+                    console.log('✓ Limpiado: Alerta');
+
+                    // Limpiar Select2 de Unidad
+                    $('#filtroUnidadInventario').val('').trigger('change');
+                    console.log('✓ Limpiado: Unidad de Medida');
+
+                    // Limpiar Select2 de Ocupación
+                    $('#filtroOcupacionInventario').val('').trigger('change');
+                    console.log('✓ Limpiado: Ocupación');
+
+                    // Mostrar todas las tarjetas
+                    var tarjetas = document.querySelectorAll('.tarjeta-material');
+                    tarjetas.forEach(function(tarjeta) {
+                        tarjeta.style.display = '';
+                    });
+
+                    // Eliminar mensaje de no resultados
+                    var mensaje = document.getElementById('mensajeNoResultados');
+                    if (mensaje) mensaje.remove();
+
+                    console.log('✓ Todos los filtros limpiados correctamente');
+                });
+                console.log('✓ Handler LIMPIAR TODOS LOS FILTROS vinculado');
+            }
+
+            console.log('✓ Script handlers de inventario completado');
+        })();
     </script>
 
     <!-- SCRIPT: Manejo de Guardar en Inventario -->
