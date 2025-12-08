@@ -108,6 +108,8 @@
     <script th:inline="javascript">
         window.ENTRADAS_INICIALES = /*[[${entradasIniciales.content}]]*/ [];
         window.SALIDAS_INICIALES = /*[[${salidasIniciales.content}]]*/ [];
+        window.HISTORIAL_COMPRAS = /*[[${entradasIniciales.content}]]*/ [];
+        window.HISTORIAL_VENTAS = /*[[${salidasIniciales.content}]]*/ [];
 
         // Variables para paginación
         window.PAGINA_ACTUAL_ENTRADAS = 1;
@@ -200,33 +202,47 @@
                     <div class="card shadow-sm mb-4">
                         <div class="card-header bg-light border-0 px-4 py-3">
                             <h6 class="mb-0 fw-bold text-dark">
-                                <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+                                <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda - Compra
                             </h6>
                         </div>
                         <div class="card-body">
                             <form class="row g-3" id="filtrosFormEntradas">
                                 <div class="col-md-3">
                                     <label class="form-label fw-semibold small">Material</label>
-                                    <input type="text" class="form-control form-control-sm" placeholder="Buscar material...">
+                                    <select id="filtroCompraMaterial" class="form-select form-select-sm" style="width: 100%;">
+                                        <option value="">-- Todos --</option>
+                                    </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label fw-semibold small">Desde</label>
-                                    <input type="date" class="form-control form-control-sm">
+                                    <label class="form-label fw-semibold small">Categoría</label>
+                                    <select id="filtroCompraCategoria" class="form-select form-select-sm" style="width: 100%;">
+                                        <option value="">-- Todos --</option>
+                                    </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label fw-semibold small">Hasta</label>
-                                    <input type="date" class="form-control form-control-sm">
+                                    <label class="form-label fw-semibold small">Tipo</label>
+                                    <select id="filtroCompraTipo" class="form-select form-select-sm" style="width: 100%;">
+                                        <option value="">-- Todos --</option>
+                                    </select>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label fw-semibold small">&nbsp;</label>
                                     <div class="d-flex gap-2">
-                                        <button type="submit" class="btn btn-primary btn-sm fw-semibold flex-grow-1">
+                                        <button type="button" class="btn btn-primary btn-sm fw-semibold flex-grow-1" id="btnFiltrarCompra">
                                             <i class="bi bi-search me-1"></i>Filtrar
                                         </button>
-                                        <button type="reset" class="btn btn-outline-secondary btn-sm fw-semibold">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm fw-semibold" id="btnLimpiarCompra">
                                             <i class="bi bi-arrow-counterclockwise"></i>
                                         </button>
                                     </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Desde</label>
+                                    <input type="date" class="form-control form-control-sm" id="filtroCompraFechaDesde">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Hasta</label>
+                                    <input type="date" class="form-control form-control-sm" id="filtroCompraFechaHasta">
                                 </div>
                             </form>
                         </div>
@@ -371,33 +387,47 @@
                     <div class="card shadow-sm mb-4">
                         <div class="card-header bg-light border-0 px-4 py-3">
                             <h6 class="mb-0 fw-bold text-dark">
-                                <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+                                <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda - Venta
                             </h6>
                         </div>
                         <div class="card-body">
                             <form class="row g-3" id="filtrosFormSalidas">
                                 <div class="col-md-3">
                                     <label class="form-label fw-semibold small">Material</label>
-                                    <input type="text" class="form-control form-control-sm" placeholder="Buscar material...">
+                                    <select id="filtroVentaMaterial" class="form-select form-select-sm" style="width: 100%;">
+                                        <option value="">-- Todos --</option>
+                                    </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label fw-semibold small">Desde</label>
-                                    <input type="date" class="form-control form-control-sm">
+                                    <label class="form-label fw-semibold small">Categoría</label>
+                                    <select id="filtroVentaCategoria" class="form-select form-select-sm" style="width: 100%;">
+                                        <option value="">-- Todos --</option>
+                                    </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label fw-semibold small">Hasta</label>
-                                    <input type="date" class="form-control form-control-sm">
+                                    <label class="form-label fw-semibold small">Tipo</label>
+                                    <select id="filtroVentaTipo" class="form-select form-select-sm" style="width: 100%;">
+                                        <option value="">-- Todos --</option>
+                                    </select>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label fw-semibold small">&nbsp;</label>
                                     <div class="d-flex gap-2">
-                                        <button type="submit" class="btn btn-primary btn-sm fw-semibold flex-grow-1">
+                                        <button type="button" class="btn btn-primary btn-sm fw-semibold flex-grow-1" id="btnFiltrarVenta">
                                             <i class="bi bi-search me-1"></i>Filtrar
                                         </button>
-                                        <button type="reset" class="btn btn-outline-secondary btn-sm fw-semibold">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm fw-semibold" id="btnLimpiarVenta">
                                             <i class="bi bi-arrow-counterclockwise"></i>
                                         </button>
                                     </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Desde</label>
+                                    <input type="date" class="form-control form-control-sm" id="filtroVentaFechaDesde">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label fw-semibold small">Hasta</label>
+                                    <input type="date" class="form-control form-control-sm" id="filtroVentaFechaHasta">
                                 </div>
                             </form>
                         </div>
@@ -467,33 +497,55 @@
                         </div>
                         <div class="card-body">
                             <form class="row g-3" id="filtrosFormHistorial">
-                                <div class="col-md-3">
+                                <!-- FILA 1: Material y Categoría -->
+                                <div class="col-md-6">
                                     <label class="form-label fw-semibold small">Material</label>
-                                    <input type="text" class="form-control form-control-sm" placeholder="Buscar material...">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label fw-semibold small">Tipo de Movimiento</label>
-                                    <select class="form-select form-select-sm">
-                                        <option value="">Todos</option>
-                                        <option value="entrada">Entradas</option>
-                                        <option value="salida">Salidas</option>
+                                    <select class="form-select form-select-sm" id="filtroHistorialMaterial" style="width: 100%;">
+                                        <option value="">-- Todos --</option>
                                     </select>
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Categoría</label>
+                                    <select class="form-select form-select-sm" id="filtroHistorialCategoria">
+                                        <option value="">-- Todos --</option>
+                                    </select>
+                                </div>
+
+                                <!-- FILA 2: Tipo y Tipo de Movimiento -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Tipo</label>
+                                    <select class="form-select form-select-sm" id="filtroHistorialTipo">
+                                        <option value="">-- Todos --</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Tipo de Movimiento</label>
+                                    <select class="form-select form-select-sm" id="filtroHistorialTipoMovimiento">
+                                        <option value="">Todos</option>
+                                        <option value="compra">Compra</option>
+                                        <option value="venta">Venta</option>
+                                    </select>
+                                </div>
+
+                                <!-- FILA 3: Fechas -->
+                                <div class="col-md-4">
                                     <label class="form-label fw-semibold small">Desde</label>
-                                    <input type="date" class="form-control form-control-sm">
+                                    <input type="date" class="form-control form-control-sm" id="filtroHistorialDesde">
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-md-4">
                                     <label class="form-label fw-semibold small">Hasta</label>
-                                    <input type="date" class="form-control form-control-sm">
+                                    <input type="date" class="form-control form-control-sm" id="filtroHistorialHasta">
                                 </div>
-                                <div class="col-12">
-                                    <button type="submit" class="btn btn-primary btn-sm fw-semibold">
-                                        <i class="bi bi-search me-2"></i>Buscar
-                                    </button>
-                                    <button type="reset" class="btn btn-outline-secondary btn-sm fw-semibold">
-                                        <i class="bi bi-arrow-counterclockwise me-2"></i>Limpiar
-                                    </button>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold small">&nbsp;</label>
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-primary btn-sm fw-semibold flex-grow-1" id="btnFiltrarHistorial">
+                                            <i class="bi bi-search me-1"></i>Buscar
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm fw-semibold" id="btnLimpiarHistorial">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -1402,6 +1454,361 @@
             } else {
                 inicializarSelect2();
             }
+
+            // ========================================================
+            // INICIALIZAR SELECT2 EN FILTROS DE COMPRA Y VENTA
+            // ========================================================
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('🔧 Inicializando Select2 para filtros de Compra y Venta...');
+
+                // Función para extraer valores únicos desde atributos data de filas
+                function extraerValoresDelDOM(tableBodyId, dataAttribute) {
+                    const valores = new Set();
+                    const tbody = document.getElementById(tableBodyId);
+
+                    if (!tbody) {
+                        console.warn('⚠️ No se encontró tabla:', tableBodyId);
+                        return [];
+                    }
+
+                    const filas = tbody.querySelectorAll('tr');
+                    console.log(`📋 Extractando "${dataAttribute}" de ${tableBodyId}: ${filas.length} filas`);
+
+                    filas.forEach(fila => {
+                        const valor = fila.getAttribute(`data-${dataAttribute}`);
+                        if (valor && valor.trim() !== '' && valor !== 'Sin registros' && valor !== '-') {
+                            valores.add(valor.trim());
+                        }
+                    });
+
+                    const resultado = Array.from(valores).sort();
+                    console.log(`✅ Valores extraídos de ${dataAttribute}:`, resultado);
+                    return resultado;
+                }
+
+                // ========================================================
+                // FILTROS DE COMPRA CON SELECT2 (desde tabla)
+                // ========================================================
+                setTimeout(function() {
+                    const $filtroMaterialCompra = $('#filtroCompraMaterial');
+                    const $filtroCategoriaCompra = $('#filtroCompraCategoria');
+                    const $filtroTipoCompra = $('#filtroCompraTipo');
+
+                    // Material: columna 1 en la tabla de entradas
+                    if ($filtroMaterialCompra.length) {
+                        const tbody = document.getElementById('tablasEntradasBody');
+                        if (tbody) {
+                            const filas = tbody.querySelectorAll('tr');
+                            const materiales = new Set();
+                            filas.forEach(fila => {
+                                const celda = fila.querySelector('td:nth-child(2)'); // Material está en columna 2
+                                if (celda) {
+                                    const valor = celda.textContent.trim();
+                                    if (valor && valor !== 'Sin registros' && valor !== '-') {
+                                        materiales.add(valor);
+                                    }
+                                }
+                            });
+                            const materialesArray = Array.from(materiales).sort();
+                            console.log('🔧 Materiales para COMPRA:', materialesArray);
+                            materialesArray.forEach(m => {
+                                $filtroMaterialCompra.append($('<option>').val(m).text(m));
+                            });
+                        }
+
+                        $filtroMaterialCompra.select2({
+                            theme: 'bootstrap4',
+                            width: '100%',
+                            allowClear: true,
+                            placeholder: 'Selecciona material...',
+                            minimumInputLength: 0
+                        });
+                        console.log('✅ Select2 inicializado en #filtroCompraMaterial');
+                    }
+
+                    // Categoría desde atributo data-categoria
+                    if ($filtroCategoriaCompra.length) {
+                        const categorias = extraerValoresDelDOM('tablasEntradasBody', 'categoria');
+                        console.log('🔧 Categorías para COMPRA:', categorias);
+                        categorias.forEach(c => {
+                            $filtroCategoriaCompra.append($('<option>').val(c).text(c));
+                        });
+
+                        $filtroCategoriaCompra.select2({
+                            theme: 'bootstrap4',
+                            width: '100%',
+                            allowClear: true,
+                            placeholder: 'Selecciona categoría...'
+                        });
+                        console.log('✅ Select2 inicializado en #filtroCompraCategoria');
+                    }
+
+                    // Tipo desde atributo data-tipo
+                    if ($filtroTipoCompra.length) {
+                        const tipos = extraerValoresDelDOM('tablasEntradasBody', 'tipo');
+                        console.log('🔧 Tipos para COMPRA:', tipos);
+                        tipos.forEach(t => {
+                            $filtroTipoCompra.append($('<option>').val(t).text(t));
+                        });
+
+                        $filtroTipoCompra.select2({
+                            theme: 'bootstrap4',
+                            width: '100%',
+                            allowClear: true,
+                            placeholder: 'Selecciona tipo...'
+                        });
+                        console.log('✅ Select2 inicializado en #filtroCompraTipo');
+                    }
+                }, 300);
+
+                // ========================================================
+                // FILTROS DE VENTA CON SELECT2 (desde tabla)
+                // ========================================================
+                setTimeout(function() {
+                    const $filtroMaterialVenta = $('#filtroVentaMaterial');
+                    const $filtroCategoriaVenta = $('#filtroVentaCategoria');
+                    const $filtroTipoVenta = $('#filtroVentaTipo');
+
+                    // Material: columna 1 en la tabla de salidas
+                    if ($filtroMaterialVenta.length) {
+                        const tbody = document.getElementById('tablasSalidasBody');
+                        if (tbody) {
+                            const filas = tbody.querySelectorAll('tr');
+                            const materiales = new Set();
+                            filas.forEach(fila => {
+                                const celda = fila.querySelector('td:nth-child(2)'); // Material está en columna 2
+                                if (celda) {
+                                    const valor = celda.textContent.trim();
+                                    if (valor && valor !== 'Sin registros' && valor !== '-') {
+                                        materiales.add(valor);
+                                    }
+                                }
+                            });
+                            const materialesArray = Array.from(materiales).sort();
+                            console.log('🔧 Materiales para VENTA:', materialesArray);
+                            materialesArray.forEach(m => {
+                                $filtroMaterialVenta.append($('<option>').val(m).text(m));
+                            });
+                        }
+
+                        $filtroMaterialVenta.select2({
+                            theme: 'bootstrap4',
+                            width: '100%',
+                            allowClear: true,
+                            placeholder: 'Selecciona material...'
+                        });
+                        console.log('✅ Select2 inicializado en #filtroVentaMaterial');
+                    }
+
+                    // Categoría desde atributo data-categoria
+                    if ($filtroCategoriaVenta.length) {
+                        const categorias = extraerValoresDelDOM('tablasSalidasBody', 'categoria');
+                        console.log('🔧 Categorías para VENTA:', categorias);
+                        categorias.forEach(c => {
+                            $filtroCategoriaVenta.append($('<option>').val(c).text(c));
+                        });
+
+                        $filtroCategoriaVenta.select2({
+                            theme: 'bootstrap4',
+                            width: '100%',
+                            allowClear: true,
+                            placeholder: 'Selecciona categoría...'
+                        });
+                        console.log('✅ Select2 inicializado en #filtroVentaCategoria');
+                    }
+
+                    // Tipo desde atributo data-tipo
+                    if ($filtroTipoVenta.length) {
+                        const tipos = extraerValoresDelDOM('tablasSalidasBody', 'tipo');
+                        console.log('🔧 Tipos para VENTA:', tipos);
+                        tipos.forEach(t => {
+                            $filtroTipoVenta.append($('<option>').val(t).text(t));
+                        });
+
+                        $filtroTipoVenta.select2({
+                            theme: 'bootstrap4',
+                            width: '100%',
+                            allowClear: true,
+                            placeholder: 'Selecciona tipo...'
+                        });
+                        console.log('✅ Select2 inicializado en #filtroVentaTipo');
+                    }
+                }, 300);
+
+                // ========================================================
+                // INICIALIZAR SELECT2 EN FILTROS DE HISTORIAL
+                // ========================================================
+                setTimeout(function() {
+                    const $filtroHistorialMaterial = $('#filtroHistorialMaterial');
+                    const $filtroHistorialCategoria = $('#filtroHistorialCategoria');
+                    const $filtroHistorialTipo = $('#filtroHistorialTipo');
+
+                    // Llenar opciones de Material del Historial
+                    if ($filtroHistorialMaterial.length) {
+                        const materiales = new Set();
+                        const comprasData = window.HISTORIAL_COMPRAS || [];
+                        const ventasData = window.HISTORIAL_VENTAS || [];
+
+                        [...comprasData, ...ventasData].forEach(mov => {
+                            if (mov.nombreMaterial) materiales.add(mov.nombreMaterial);
+                        });
+
+                        const materialesArray = Array.from(materiales).sort();
+                        materialesArray.forEach(m => {
+                            $filtroHistorialMaterial.append($('<option>').val(m).text(m));
+                        });
+
+                        $filtroHistorialMaterial.select2({
+                            theme: 'bootstrap4',
+                            width: '100%',
+                            allowClear: true,
+                            placeholder: 'Selecciona material...',
+                            minimumInputLength: 0
+                        });
+                        console.log('✅ Select2 inicializado en #filtroHistorialMaterial');
+                    }
+
+                    // Llenar opciones de Categoría del Historial
+                    if ($filtroHistorialCategoria.length) {
+                        const categorias = new Set();
+                        const comprasData = window.HISTORIAL_COMPRAS || [];
+                        const ventasData = window.HISTORIAL_VENTAS || [];
+
+                        [...comprasData, ...ventasData].forEach(mov => {
+                            if (mov.nombreCategoria) categorias.add(mov.nombreCategoria);
+                        });
+
+                        const categoriasArray = Array.from(categorias).sort();
+                        categoriasArray.forEach(c => {
+                            $filtroHistorialCategoria.append($('<option>').val(c).text(c));
+                        });
+
+                        $filtroHistorialCategoria.select2({
+                            theme: 'bootstrap4',
+                            width: '100%',
+                            allowClear: true,
+                            placeholder: 'Selecciona categoría...'
+                        });
+                        console.log('✅ Select2 inicializado en #filtroHistorialCategoria');
+                    }
+
+                    // Llenar opciones de Tipo del Historial
+                    if ($filtroHistorialTipo.length) {
+                        const tipos = new Set();
+                        const comprasData = window.HISTORIAL_COMPRAS || [];
+                        const ventasData = window.HISTORIAL_VENTAS || [];
+
+                        [...comprasData, ...ventasData].forEach(mov => {
+                            if (mov.nombreTipo) tipos.add(mov.nombreTipo);
+                        });
+
+                        const tiposArray = Array.from(tipos).sort();
+                        tiposArray.forEach(t => {
+                            $filtroHistorialTipo.append($('<option>').val(t).text(t));
+                        });
+
+                        $filtroHistorialTipo.select2({
+                            theme: 'bootstrap4',
+                            width: '100%',
+                            allowClear: true,
+                            placeholder: 'Selecciona tipo...'
+                        });
+                        console.log('✅ Select2 inicializado en #filtroHistorialTipo');
+                    }
+                }, 300);
+
+                // ========================================================
+                // EVENT LISTENERS PARA BOTONES DE FILTRAR Y LIMPIAR
+                // ========================================================
+                const btnFiltrarCompra = document.getElementById('btnFiltrarCompra');
+                const btnLimpiarCompra = document.getElementById('btnLimpiarCompra');
+                const btnFiltrarVenta = document.getElementById('btnFiltrarVenta');
+                const btnLimpiarVenta = document.getElementById('btnLimpiarVenta');
+
+                if (btnFiltrarCompra) {
+                    btnFiltrarCompra.addEventListener('click', function() {
+                        const material = $('#filtroCompraMaterial').val() || '';
+                        const categoria = $('#filtroCompraCategoria').val() || '';
+                        const tipo = $('#filtroCompraTipo').val() || '';
+                        const fechaDesde = document.getElementById('filtroCompraFechaDesde')?.value || '';
+                        const fechaHasta = document.getElementById('filtroCompraFechaHasta')?.value || '';
+
+                        console.log('🔍 Filtros COMPRA aplicados:', { material, categoria, tipo, fechaDesde, fechaHasta });
+
+                        const entradasData = window.ENTRADAS_INICIALES || [];
+                        const entradasFiltradas = entradasData.filter(entrada => {
+                            const cumpleMaterial = !material || (entrada.nombreMaterial || '').toLowerCase().includes(material.toLowerCase());
+                            const cumpleCategoria = !categoria || (entrada.nombreCategoria || '') === categoria;
+                            const cumpleTipo = !tipo || (entrada.nombreTipo || '') === tipo;
+                            const cumpleFechaDesde = !fechaDesde || new Date(entrada.fechaCompra).toISOString().split('T')[0] >= fechaDesde;
+                            const cumpleFechaHasta = !fechaHasta || new Date(entrada.fechaCompra).toISOString().split('T')[0] <= fechaHasta;
+
+                            return cumpleMaterial && cumpleCategoria && cumpleTipo && cumpleFechaDesde && cumpleFechaHasta;
+                        });
+
+                        console.log('✅ Compras filtradas:', entradasFiltradas.length, 'de', entradasData.length);
+                        window.ENTRADAS_INICIALES = entradasFiltradas;
+                        renderizarEntradas();
+                    });
+                }
+
+                if (btnLimpiarCompra) {
+                    btnLimpiarCompra.addEventListener('click', function() {
+                        $('#filtroCompraMaterial').val('').trigger('change');
+                        $('#filtroCompraCategoria').val('').trigger('change');
+                        $('#filtroCompraTipo').val('').trigger('change');
+                        document.getElementById('filtroCompraFechaDesde').value = '';
+                        document.getElementById('filtroCompraFechaHasta').value = '';
+
+                        console.log('🔄 Filtros COMPRA limpiados');
+                        // Restaurar datos originales
+                        location.reload();
+                    });
+                }
+
+                if (btnFiltrarVenta) {
+                    btnFiltrarVenta.addEventListener('click', function() {
+                        const material = $('#filtroVentaMaterial').val() || '';
+                        const categoria = $('#filtroVentaCategoria').val() || '';
+                        const tipo = $('#filtroVentaTipo').val() || '';
+                        const fechaDesde = document.getElementById('filtroVentaFechaDesde')?.value || '';
+                        const fechaHasta = document.getElementById('filtroVentaFechaHasta')?.value || '';
+
+                        console.log('🔍 Filtros VENTA aplicados:', { material, categoria, tipo, fechaDesde, fechaHasta });
+
+                        const salidasData = window.SALIDAS_INICIALES || [];
+                        const salidasFiltradas = salidasData.filter(salida => {
+                            const cumpleMaterial = !material || (salida.nombreMaterial || '').toLowerCase().includes(material.toLowerCase());
+                            const cumpleCategoria = !categoria || (salida.nombreCategoria || '') === categoria;
+                            const cumpleTipo = !tipo || (salida.nombreTipo || '') === tipo;
+                            const cumpleFechaDesde = !fechaDesde || new Date(salida.fechaVenta).toISOString().split('T')[0] >= fechaDesde;
+                            const cumpleFechaHasta = !fechaHasta || new Date(salida.fechaVenta).toISOString().split('T')[0] <= fechaHasta;
+
+                            return cumpleMaterial && cumpleCategoria && cumpleTipo && cumpleFechaDesde && cumpleFechaHasta;
+                        });
+
+                        console.log('✅ Ventas filtradas:', salidasFiltradas.length, 'de', salidasData.length);
+                        window.SALIDAS_INICIALES = salidasFiltradas;
+                        renderizarSalidas();
+                    });
+                }
+
+                if (btnLimpiarVenta) {
+                    btnLimpiarVenta.addEventListener('click', function() {
+                        $('#filtroVentaMaterial').val('').trigger('change');
+                        $('#filtroVentaCategoria').val('').trigger('change');
+                        $('#filtroVentaTipo').val('').trigger('change');
+                        document.getElementById('filtroVentaFechaDesde').value = '';
+                        document.getElementById('filtroVentaFechaHasta').value = '';
+
+                        console.log('🔄 Filtros VENTA limpiados');
+                        // Restaurar datos originales
+                        location.reload();
+                    });
+                }
+
+                console.log('✅ Todos los Select2 de filtros inicializados correctamente');
+            });
         })();
 
         // ========================================================
@@ -1453,7 +1860,7 @@
                 const precio = parseFloat(entrada.precioCompra || 0);
                 const total = cantidad * precio;
                 return `
-                    <tr>
+                    <tr data-categoria="${entrada.nombreCategoria || ''}" data-tipo="${entrada.nombreTipo || ''}">
                         <td class="small">${fecha}</td>
                         <td class="small">${entrada.nombreMaterial || '-'}</td>
                         <td class="text-end small">${cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
@@ -1553,7 +1960,7 @@
                 const precio = parseFloat(salida.precioVenta || 0);
                 const total = cantidad * precio;
                 return `
-                    <tr>
+                    <tr data-categoria="${salida.nombreCategoria || ''}" data-tipo="${salida.nombreTipo || ''}">
                         <td class="small">${fecha}</td>
                         <td class="small">${salida.nombreMaterial || '-'}</td>
                         <td class="text-end small">${cantidad.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
@@ -1614,17 +2021,118 @@
         }
 
         // Ejecutar renderizado cuando el DOM esté listo
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                console.log('🎯 DOM completamente cargado, renderizando tablas...');
-                renderizarEntradas();
-                renderizarSalidas();
-            });
-        } else {
-            console.log('🎯 DOM ya estaba cargado, renderizando tablas...');
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎯 DOM completamente cargado, renderizando tablas...');
             renderizarEntradas();
             renderizarSalidas();
+            renderizarHistorial();
+
+            // Event listeners para filtros del historial
+            const btnFiltrar = document.getElementById('btnFiltrarHistorial');
+            const btnLimpiar = document.getElementById('btnLimpiarHistorial');
+            const inputMaterial = document.getElementById('filtroHistorialMaterial');
+
+            if (btnFiltrar) {
+                btnFiltrar.addEventListener('click', renderizarHistorial);
+            }
+
+            if (btnLimpiar) {
+                btnLimpiar.addEventListener('click', function() {
+                    $('#filtroHistorialMaterial').val('').trigger('change');
+                    $('#filtroHistorialCategoria').val('').trigger('change');
+                    $('#filtroHistorialTipo').val('').trigger('change');
+                    document.getElementById('filtroHistorialTipoMovimiento').value = '';
+                    document.getElementById('filtroHistorialDesde').value = '';
+                    document.getElementById('filtroHistorialHasta').value = '';
+                    renderizarHistorial();
+                });
+            }
+
+            if (inputMaterial) {
+                inputMaterial.addEventListener('change', renderizarHistorial);
+            }
+        });
+
+        // ========================================================
+        // FUNCIÓN PARA RENDERIZAR HISTORIAL GENERAL
+        // ========================================================
+        function renderizarHistorial() {
+            const tbody = document.getElementById('tablasHistorialBody');
+            if (!tbody) return;
+
+            const compras = (window.HISTORIAL_COMPRAS || []).map(c => ({
+                ...c,
+                tipo: 'Compra',
+                fecha: c.fechaCompra,
+                precio: c.precioCompra
+            }));
+
+            const ventas = (window.HISTORIAL_VENTAS || []).map(v => ({
+                ...v,
+                tipo: 'Venta',
+                fecha: v.fechaVenta,
+                precio: v.precioVenta
+            }));
+
+            // Combinar y ordenar por fecha DESC
+            const movimientos = [...compras, ...ventas].sort((a, b) => {
+                const fechaA = new Date(a.fecha || 0).getTime();
+                const fechaB = new Date(b.fecha || 0).getTime();
+                return fechaB - fechaA;
+            });
+
+            // Aplicar filtros
+            const material = document.getElementById('filtroHistorialMaterial')?.value || '';
+            const categoria = document.getElementById('filtroHistorialCategoria')?.value || '';
+            const tipoMaterial = document.getElementById('filtroHistorialTipo')?.value || '';
+            const tipoMovimiento = document.getElementById('filtroHistorialTipoMovimiento')?.value || '';
+            const fechaDesde = document.getElementById('filtroHistorialDesde')?.value || '';
+            const fechaHasta = document.getElementById('filtroHistorialHasta')?.value || '';
+
+            const movimientosFiltrados = movimientos.filter(mov => {
+                const cumpleMaterial = !material || (mov.nombreMaterial || '') === material;
+                const cumpleCategoria = !categoria || (mov.nombreCategoria || '') === categoria;
+                const cumpleTipo = !tipoMaterial || (mov.nombreTipo || '') === tipoMaterial;
+                const cumpleTipoMovimiento = !tipoMovimiento || (tipoMovimiento === 'compra' && mov.tipo === 'Compra') || (tipoMovimiento === 'venta' && mov.tipo === 'Venta');
+                const cumpleFechaDesde = !fechaDesde || new Date(mov.fecha).toISOString().split('T')[0] >= fechaDesde;
+                const cumpleFechaHasta = !fechaHasta || new Date(mov.fecha).toISOString().split('T')[0] <= fechaHasta;
+
+                return cumpleMaterial && cumpleCategoria && cumpleTipo && cumpleTipoMovimiento && cumpleFechaDesde && cumpleFechaHasta;
+            });
+
+            if (movimientosFiltrados.length === 0) {
+                tbody.innerHTML = '<tr class="text-muted text-center"><td colspan="6" class="py-4"><i class="bi bi-inbox"></i><p class="mb-0 mt-2">Sin movimientos registrados</p></td></tr>';
+                const badge = document.getElementById('badgeHistorialCount');
+                if (badge) badge.textContent = '0 registros';
+                return;
+            }
+
+            tbody.innerHTML = movimientosFiltrados.map(mov => {
+                const fecha = new Date(mov.fecha).toLocaleDateString('es-CO');
+                const cantidad = parseFloat(mov.cantidad || 0).toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                const precio = parseFloat(mov.precio || 0).toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                const tipoBadge = mov.tipo === 'Compra' ? '<span class="badge bg-danger">Compra</span>' : '<span class="badge bg-success">Venta</span>';
+
+                return `
+                    <tr>
+                        <td class="small">${fecha}</td>
+                        <td class="small">${tipoBadge}</td>
+                        <td class="small fw-bold">${mov.nombreMaterial || '-'}</td>
+                        <td class="text-end small">${cantidad}</td>
+                        <td class="text-end small">$${precio}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-info" title="Ver detalles">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            const badge = document.getElementById('badgeHistorialCount');
+            if (badge) badge.textContent = movimientosFiltrados.length + ' registros';
         }
+
 
         // Función global para cambiar el material seleccionado
         window.cambiarMaterial = function() {

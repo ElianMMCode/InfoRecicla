@@ -100,7 +100,6 @@ public class PuntoEcaController {
                     cargarSeccionMateriales(usuario, texto, categoria, tipo, alerta, unidad, ocupacion, model);
             case "perfil" -> cargarSeccionPerfil(usuario, model);
             case "movimientos" -> cargarSeccionMovimientos(usuario, model, page, size);
-            case "historial" -> cargarSeccionHistorial(usuario, model);
             case "centros" -> cargarSeccionCentros(usuario, model);
             case "configuracion" -> cargarSeccionConfiguracion(usuario, model);
             default -> cargarSeccionResumen(usuario, model);
@@ -209,14 +208,6 @@ public class PuntoEcaController {
         }
     }
 
-    /**
-     * Carga datos para la sección de Historial
-     */
-    private void cargarSeccionHistorial(UsuarioGestorResponseDTO usuario, Model model) {
-        Objects.requireNonNull(usuario);
-        Objects.requireNonNull(model);
-        // TODO: Implementar cuando haya servicio de auditoría/historial
-    }
 
     /**
      * Carga datos para la sección de Centros de Acopio
