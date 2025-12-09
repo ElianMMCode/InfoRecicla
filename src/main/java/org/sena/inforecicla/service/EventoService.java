@@ -85,14 +85,7 @@ public interface EventoService {
      */
     List<Evento> obtenerEventosPorPunto(String puntoId);
 
-    // ===== OPERACIONES DE INSTANCIAS =====
-
     /**
-     * Obtiene las instancias de eventos para mostrar en el calendario.
-     * Esta es la consulta principal para cargar el calendario.
-     *
-     * @param usuarioId ID del usuario
-     * @param puntoEcaId ID del Punto ECA
      * @param inicio Fecha de inicio del rango
      * @param fin Fecha de fin del rango
      * @return DTOs de eventos listos para FullCalendar

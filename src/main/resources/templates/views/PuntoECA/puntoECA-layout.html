@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
+
     <!-- FullCalendar CSS -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
     <!-- FullCalendar JS -->
@@ -21,16 +22,12 @@
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <!-- Select2 Custom CSS -->
     <link th:href="@{/css/PuntoECA/select2-custom.css}" rel="stylesheet">
-</head>
-<body class="bg-light m-0">
-
-    <!-- ... existing code ... -->
-
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- jQuery (necesario para Select2) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -449,36 +446,221 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Nota: El script específico del modal global fue movido a la plantilla de materiales. -->
+<!-- Script específico para la sección de CENTROS (búsqueda y filtrado con backend) -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔥 [CENTROS] Script de centros cargado (layout)');
+
+    // Comprobar si realmente estamos en una página que tiene la sección de centros
+    const sectionCentros = document.querySelector('section[data-punto-eca-id]');
+    if (!sectionCentros) {
+        console.log('ℹ️ [CENTROS] No hay section[data-punto-eca-id] en este HTML, no se inicializa lógica de centros.');
+        return;
+    }
+
+    console.log('✅ [CENTROS] Se encontró section[data-punto-eca-id]');
+
+    const puntoEcaId = sectionCentros.getAttribute('data-punto-eca-id');
+    console.log('📍 [CENTROS] Punto ECA ID (centros):', puntoEcaId);
+    if (!puntoEcaId) {
+        console.error('❌ [CENTROS] data-punto-eca-id vacío');
+        return;
+    }
+
+    function buscarCentros(esPropios) {
+        const prefix = esPropios ? 'propio' : 'global';
+
+        const nombre = document.querySelector(`.filtro-nombre-${prefix}`)?.value || '';
+        const tipo = document.querySelector(`.filtro-tipo-${prefix}`)?.value || '';
+        const localidadId = document.querySelector(`.filtro-localidad-${prefix}`)?.value || '';
+        const contacto = document.querySelector(`.filtro-contacto-${prefix}`)?.value || '';
+        const email = document.querySelector(`.filtro-email-${prefix}`)?.value || '';
+        const telefono = document.querySelector(`.filtro-telefono-${prefix}`)?.value || '';
+
+        console.log(`🔍 [CENTROS] Buscando centros ${esPropios ? 'PROPIOS' : 'GLOBALES'}...`, {
+            nombre, tipo, localidadId, contacto, email, telefono
+        });
+
+        const params = new URLSearchParams();
+        if (nombre) params.append('nombre', nombre);
+        if (tipo) params.append('tipo', tipo);
+        if (localidadId) params.append('localidadId', localidadId);
+        if (contacto) params.append('contacto', contacto);
+        if (email) params.append('email', email);
+        if (telefono) params.append('telefono', telefono);
+        params.append('esPropios', esPropios ? 'true' : 'false');
+
+        const url = `/punto-eca/${puntoEcaId}/filtrar-centros?` + params.toString();
+        console.log('🌐 [CENTROS] URL:', url);
+
+        fetch(url)
+            .then(resp => {
+                console.log('📡 [CENTROS] HTTP status:', resp.status);
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                return resp.json();
+            })
+            .then(data => {
+                console.log('✅ [CENTROS] Centros recibidos:', data.length);
+                if (esPropios) {
+                    renderCentrosPropios(data);
+                } else {
+                    renderCentrosGlobales(data);
+                }
+            })
+            .catch(err => {
+                console.error('❌ [CENTROS] Error al buscar centros:', err);
+                alert('Error al buscar centros: ' + err.message);
+            });
+    }
+
+    function renderCentrosGlobales(centros) {
+        const tbody = document.querySelector('#tablaCentrosGlobales tbody');
+        if (!tbody) {
+            console.error('❌ [CENTROS] tbody de tablaCentrosGlobales no encontrado');
+            return;
+        }
+
+        const filaSin = tbody.querySelector('.sin-resultados-global');
+        tbody.querySelectorAll('tr:not(.sin-resultados-global)').forEach(tr => tr.remove());
+
+        if (!centros.length) {
+            if (filaSin) filaSin.style.display = '';
+            console.log('ℹ️ [CENTROS] No hay centros para mostrar');
+            return;
+        }
+        if (filaSin) filaSin.style.display = 'none';
+
+        centros.forEach(c => {
+            const tr = document.createElement('tr');
+            const tipo = c.tipoCntAcp ? c.tipoCntAcp.replace('_', ' ') : '—';
+            tr.innerHTML = `
+                <td class="fw-semibold text-dark">${c.nombreCntAcp || '—'}</td>
+                <td>
+                    <span class="badge bg-info-subtle text-info">${tipo}</span>
+                </td>
+                <td>${c.ciudad || '—'}</td>
+                <td>${c.nombreContactoCntAcp || '—'}</td>
+                <td>
+                    ${c.celular ? `<a href="tel:${c.celular}" class="text-decoration-none">${c.celular}</a>` : '—'}
+                </td>
+                <td>
+                    ${c.email ? `<a href="mailto:${c.email}" class="text-decoration-none text-truncate d-block">${c.email}</a>` : '—'}
+                </td>`;
+            tbody.appendChild(tr);
+        });
+
+        console.log('✅ [CENTROS] Tabla global actualizada con', centros.length, 'filas');
+    }
+
+    function renderCentrosPropios(centros) {
+        const tbody = document.querySelector('#tablaCentrosPropios tbody');
+        if (!tbody) {
+            console.error('❌ [CENTROS] tbody de tablaCentrosPropios no encontrado');
+            return;
+        }
+        const filaSin = tbody.querySelector('.sin-resultados-propios');
+        tbody.querySelectorAll('tr:not(.sin-resultados-propios)').forEach(tr => tr.remove());
+        if (!centros.length) {
+            if (filaSin) filaSin.style.display = '';
+            console.log('ℹ️ [CENTROS] No hay centros propios para mostrar');
+            return;
+        }
+        if (filaSin) filaSin.style.display = 'none';
+        centros.forEach(c => {
+            const tr = document.createElement('tr');
+            tr.setAttribute('data-centro-id', c.cntAcpId);
+            const tipo = c.tipoCntAcp ? c.tipoCntAcp.replace('_', ' ') : '—';
+            tr.innerHTML = `
+                <td class="fw-semibold text-dark">${c.nombreCntAcp || '—'}</td>
+                <td>
+                    <span class="badge bg-success-subtle text-success">${tipo}</span>
+                </td>
+                <td>${c.localidad || '—'}</td>
+                <td>
+                    ${c.celular ? `<a href="tel:${c.celular}" class="text-decoration-none">${c.celular}</a>` : '—'}
+                </td>
+                <td>${c.nombreContactoCntAcp || '—'}</td>
+                <td>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-primary btn-sm"
+                                title="Ver detalles"
+                                data-centro-id="${c.cntAcpId}">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-warning btn-sm"
+                                title="Editar"
+                                data-centro-id="${c.cntAcpId}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                title="Eliminar"
+                                data-centro-id="${c.cntAcpId}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </td>`;
+            tbody.appendChild(tr);
+        });
+        console.log('✅ [CENTROS] Tabla de propios actualizada con', centros.length, 'filas');
+    }
+
+    const btnBuscarGlobal = document.querySelector('.btn-buscar-globales');
+    const btnLimpiarGlobal = document.querySelector('.btn-limpiar-globales');
+    const btnBuscarPropios = document.querySelector('.btn-buscar-propios');
+    const btnLimpiarPropios = document.querySelector('.btn-limpiar-propios');
+
+    console.log('🔎 [CENTROS] btnBuscarGlobal:', btnBuscarGlobal);
+    console.log('🔎 [CENTROS] btnBuscarPropios:', btnBuscarPropios);
+
+    if (btnBuscarGlobal) {
+        btnBuscarGlobal.addEventListener('click', () => {
+            console.log('🖱️ [CENTROS] CLICK Buscar GLOBAL');
+            buscarCentros(false);
+        });
+    }
+    if (btnLimpiarGlobal) {
+        btnLimpiarGlobal.addEventListener('click', () => {
+            document.querySelectorAll('.filtro-nombre-global, .filtro-tipo-global, .filtro-localidad-global, .filtro-contacto-global, .filtro-email-global, .filtro-telefono-global')
+                .forEach(el => el.value = '');
+            buscarCentros(false);
+        });
+    }
+
+    if (btnBuscarPropios) {
+        btnBuscarPropios.addEventListener('click', () => {
+            console.log('🖱️ [CENTROS] CLICK Buscar PROPIOS');
+            buscarCentros(true);
+        });
+    }
+    if (btnLimpiarPropios) {
+        btnLimpiarPropios.addEventListener('click', () => {
+            document.querySelectorAll('.filtro-nombre-propio, .filtro-tipo-propio, .filtro-localidad-propio, .filtro-contacto-propio, .filtro-email-propio, .filtro-telefono-propio')
+                .forEach(el => el.value = '');
+            buscarCentros(true);
+        });
+    }
+
+    console.log('✅ [CENTROS] Listeners de centros registrados');
+
+    // ===== MODAL DE DETALLES Y EDICIÓN DE CENTROS PROPIOS =====
+    // Nota: La inicialización del modal se hace en modal-centros-propios.js para evitar errores
+    // cuando el modal no existe en el DOM aún
+
+    // Código del modal comentado - se maneja en modal-centros-propios.js
+});
+</script>
+
+<!-- Nota: El script del modal está en modal-centros-propios.js -->
 
 <!-- Estilos CSS para el menú desplegable lateral -->
 <style>
-    /* Contenedor de desplegable */
-    .dropdown-menu-container {
-        position: relative;
+    /* Scroll suave en toda la página */
+    html {
+        scroll-behavior: smooth;
     }
+</style>
 
-    /* Icono de chevron con transición suave */
-    .dropdown-menu-container .bi-chevron-down {
-        transition: transform 0.3s ease-in-out;
-        display: inline-block;
-    }
-
-    /* Cuando el chevron tiene la clase rotated */
-    .dropdown-menu-container .bi-chevron-down.rotated {
-        transform: rotate(180deg);
-    }
-
-    /* Animación suave de collapse */
-    .dropdown-menu-container .collapse {
-        transition: all 0.3s ease-in-out;
-    }
-
-    /* Efecto hover en submenu */
-    .dropdown-menu-container .collapse .nav-link:hover {
-        padding-left: 1.5rem !important;
-    }
-
+<style>
     /* Scroll suave en toda la página */
     html {
         scroll-behavior: smooth;
@@ -557,5 +739,107 @@ document.addEventListener('hide.bs.collapse', function(e) {
 
 
 <script th:src="@{/js/PuntoECA/fullcalendar.js}"></script>
+
+<!-- Inicializar Select2 globalmente -->
+<script>
+console.log('🔧 Configurando Select2...');
+
+// Esperar a que el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ DOM Listo');
+    console.log('jQuery disponible:', !!window.jQuery);
+    console.log('Select2 disponible:', !!(window.jQuery && window.jQuery.fn && window.jQuery.fn.select2));
+
+    // Pequeño delay para asegurar que Select2 esté completamente cargado
+    setTimeout(function() {
+        inicializarTodosLosSelect2();
+    }, 100);
+});
+
+function inicializarTodosLosSelect2() {
+    if (!window.jQuery) {
+        console.error('jQuery no disponible');
+        return;
+    }
+
+    if (typeof window.jQuery.fn.select2 !== 'function') {
+        console.error('Select2 no disponible');
+        return;
+    }
+
+    const $ = window.jQuery;
+    console.log('🚀 Inicializando Select2 en todos los selects...');
+
+    // Buscar todos los selects que necesitan Select2
+    const selects = [
+        '#filtroTipoGlobal',
+        '#filtroLocalidadGlobal',
+        '#filtroTipoPropio',
+        '#filtroLocalidadPropio'
+    ];
+
+    selects.forEach(function(selector) {
+        const $select = $(selector);
+
+        if ($select.length === 0) {
+            console.warn('Select no encontrado:', selector);
+            return;
+        }
+
+        // Verificar si ya está inicializado
+        if ($select.hasClass('select2-hidden-accessible')) {
+            console.log('✅ Ya estaba inicializado:', selector);
+            return;
+        }
+
+        try {
+            $select.select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: 'Selecciona una opción',
+                allowClear: true,
+                language: 'es'
+            });
+            console.log('✅ Select2 inicializado:', selector);
+        } catch(error) {
+            console.error('❌ Error inicializando Select2 en', selector, ':', error);
+        }
+    });
+}
+
+// También intentar inicializar cuando se inserta nuevo contenido (para fragments dinámicos)
+if (window.MutationObserver) {
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.addedNodes.length) {
+                // Verificar si alguno de los nodos contiene selects
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) { // Element node
+                        if (node.querySelector && (node.querySelector('#filtroTipoGlobal') ||
+                            node.querySelector('#filtroLocalidadGlobal') ||
+                            node.querySelector('#filtroTipoPropio') ||
+                            node.querySelector('#filtroLocalidadPropio') ||
+                            node.id === 'filtroTipoGlobal' ||
+                            node.id === 'filtroLocalidadGlobal' ||
+                            node.id === 'filtroTipoPropio' ||
+                            node.id === 'filtroLocalidadPropio')) {
+                            console.log('🔄 Select detectado en DOM dinámico, reinicializando...');
+                            setTimeout(inicializarTodosLosSelect2, 100);
+                        }
+                    }
+                });
+            }
+        });
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+}
+</script>
+
+<!-- Script para modal de centros propios -->
+<script src="/js/modal-centros-propios.js"></script>
 </body>
 </html>

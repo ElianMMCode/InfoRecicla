@@ -22,15 +22,13 @@ public class CentroAcopioServiceImpl implements CentroAcopioService {
 
     @Override
     public List<CentroAcopio> listaCentrosPorPuntoEca(UUID puntoEcaId) {
-        return centroAcopioRepository.findAll().stream()
-                .filter(c -> c.getPuntoEca() != null && c.getPuntoEca().getPuntoEcaID() != null && c.getPuntoEca().getPuntoEcaID().equals(puntoEcaId))
-                .toList();
+        return centroAcopioRepository.findAllByPuntoEcaWithLocalidad(puntoEcaId);
     }
 
     @Override
     public List<CentroAcopio> obtenerCentrosGlobales() {
-        // Obtener todos los centros y filtrar aquellos cuyo puntoEca es null
-        return centroAcopioRepository.findAll().stream()
+        // Obtener todos los centros con localidad cargada y filtrar aquellos cuyo puntoEca es null
+        return centroAcopioRepository.findAllWithLocalidad().stream()
                 .filter(c -> c.getPuntoEca() == null)
                 .toList();
     }
@@ -40,8 +38,8 @@ public class CentroAcopioServiceImpl implements CentroAcopioService {
         try {
             System.out.println("🎯 Buscando centros para punto: " + puntoEcaId);
 
-            // Obtener TODOS los centros de la BD
-            List<CentroAcopio> todosCentros = centroAcopioRepository.findAll();
+            // Obtener TODOS los centros con localidad cargada
+            List<CentroAcopio> todosCentros = centroAcopioRepository.findAllWithLocalidad();
             System.out.println("📊 Total de centros en BD: " + todosCentros.size());
 
             // Filtrar en memoria:
@@ -54,14 +52,14 @@ public class CentroAcopioServiceImpl implements CentroAcopioService {
                             c.getPuntoEca().getPuntoEcaID() != null &&
                             c.getPuntoEca().getPuntoEcaID().equals(puntoEcaId)) {
                             System.out.println("  ✅ Centro DEL PUNTO: " + c.getNombreCntAcp() +
-                                             " (Tipo: " + c.getVisibilidad() + ")");
+                                             " (Localidad: " + (c.getLocalidad() != null ? c.getLocalidad().getNombre() : "SIN LOCALIDAD") + ")");
                             return true;
                         }
 
                         // Caso 2: Centro global (sin punto asignado)
                         if (c.getPuntoEca() == null) {
                             System.out.println("  🌍 Centro GLOBAL: " + c.getNombreCntAcp() +
-                                             " (Tipo: " + c.getVisibilidad() + ")");
+                                             " (Localidad: " + (c.getLocalidad() != null ? c.getLocalidad().getNombre() : "SIN LOCALIDAD") + ")");
                             return true;
                         }
 
@@ -89,12 +87,41 @@ public class CentroAcopioServiceImpl implements CentroAcopioService {
                 });
     }
 
-   @Override
+    @Override
     public CentroAcopio obtenerCentroValidoPunto(UUID centroId, UUID puntoId) {
         return centroAcopioRepository
                 .findAllByPuntoEca_PuntoEcaIDAndCntAcpId(puntoId, centroId)
                 .or(() -> centroAcopioRepository.findById(centroId))
                 .orElse(null);
+    }
+
+    @Override
+    public CentroAcopio actualizar(UUID centroId, CentroAcopio centroActualizado) {
+        CentroAcopio centroExistente = obtenerPorId(centroId);
+
+        if (centroActualizado.getNombreCntAcp() != null && !centroActualizado.getNombreCntAcp().isEmpty()) {
+            centroExistente.setNombreCntAcp(centroActualizado.getNombreCntAcp());
+        }
+        if (centroActualizado.getCelular() != null && !centroActualizado.getCelular().isEmpty()) {
+            centroExistente.setCelular(centroActualizado.getCelular());
+        }
+        if (centroActualizado.getEmail() != null && !centroActualizado.getEmail().isEmpty()) {
+            centroExistente.setEmail(centroActualizado.getEmail());
+        }
+        if (centroActualizado.getNombreContactoCntAcp() != null && !centroActualizado.getNombreContactoCntAcp().isEmpty()) {
+            centroExistente.setNombreContactoCntAcp(centroActualizado.getNombreContactoCntAcp());
+        }
+        if (centroActualizado.getNota() != null && !centroActualizado.getNota().isEmpty()) {
+            centroExistente.setNota(centroActualizado.getNota());
+        }
+
+        return centroAcopioRepository.save(centroExistente);
+    }
+
+    @Override
+    public void eliminar(UUID centroId) {
+        CentroAcopio centroExistente = obtenerPorId(centroId);
+        centroAcopioRepository.delete(centroExistente);
     }
 
 }
