@@ -6,17 +6,16 @@ import org.sena.inforecicla.dto.puntoEca.gestor.GestorUpdateDTO;
 import org.sena.inforecicla.dto.puntoEca.gestor.PuntoEcaUpdateDTO;
 import org.sena.inforecicla.dto.puntoEca.inventario.InventarioRequestDTO;
 import org.sena.inforecicla.dto.puntoEca.inventario.InventarioUpdateDTO;
-import org.sena.inforecicla.dto.puntoEca.inventario.movimientos.CompraInventarioRequestDTO;
-import org.sena.inforecicla.dto.puntoEca.inventario.movimientos.CompraInventarioResponseDTO;
-import org.sena.inforecicla.dto.puntoEca.inventario.movimientos.VentaInventarioRequestDTO;
-import org.sena.inforecicla.dto.puntoEca.inventario.movimientos.VentaInventarioResponseDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.movimientos.*;
 import org.sena.inforecicla.dto.puntoEca.materiales.CategoriaMaterialesInvResponseDTO;
 import org.sena.inforecicla.dto.puntoEca.materiales.MaterialInvResponseDTO;
+import org.sena.inforecicla.dto.puntoEca.materiales.MaterialResponseDTO;
 import org.sena.inforecicla.dto.puntoEca.materiales.TipoMaterialesInvResponseDTO;
 import org.sena.inforecicla.dto.usuario.UsuarioGestorResponseDTO;
 import org.sena.inforecicla.exception.InventarioFoundExistException;
 import org.sena.inforecicla.exception.InventarioNotFoundException;
 import org.sena.inforecicla.exception.PuntoEcaNotFoundException;
+import org.sena.inforecicla.model.CompraInventario;
 import org.sena.inforecicla.model.Localidad;
 import org.sena.inforecicla.model.enums.Alerta;
 import org.sena.inforecicla.model.enums.TipoDocumento;
@@ -42,6 +41,7 @@ public class PuntoEcaController {
     // ✅ Services (no repositories)
     private final GestorEcaService gestorEcaService;
     private final InventarioService inventarioService;
+    private final InventarioEliminacionService inventarioEliminacionService;
     private final LocalidadService localidadService;
     private final CentroAcopioService centroAcopioService;
     private final PuntoEcaService puntoEcaService;
@@ -60,6 +60,9 @@ public class PuntoEcaController {
         model.addAttribute("gestor", nombrePunto);
         model.addAttribute("seccion", "resumen");
         model.addAttribute("inventarios", inventarioService.mostrarInventarioPuntoEca(usuario.puntoEcaId()));
+        model.addAttribute("unidadesMedida", construirUnidadesMedida());
+        model.addAttribute("categoriaMateriales", categoriaMaterialService.listarCategoriasMateriales());
+        model.addAttribute("tiposMateriales", tipoMaterialService.listarTiposMateriales());
         return "views/PuntoECA/puntoECA-layout";
     }
 
@@ -97,7 +100,6 @@ public class PuntoEcaController {
                     cargarSeccionMateriales(usuario, texto, categoria, tipo, alerta, unidad, ocupacion, model);
             case "perfil" -> cargarSeccionPerfil(usuario, model);
             case "movimientos" -> cargarSeccionMovimientos(usuario, model, page, size);
-            case "historial" -> cargarSeccionHistorial(usuario, model);
             case "centros" -> cargarSeccionCentros(usuario, model);
             case "configuracion" -> cargarSeccionConfiguracion(usuario, model);
             default -> cargarSeccionResumen(usuario, model);
@@ -111,6 +113,9 @@ public class PuntoEcaController {
      */
     private void cargarSeccionResumen(UsuarioGestorResponseDTO usuario, Model model) {
         model.addAttribute("inventarios", inventarioService.mostrarInventarioPuntoEca(usuario.puntoEcaId()));
+        model.addAttribute("unidadesMedida", construirUnidadesMedida());
+        model.addAttribute("categoriaMateriales", categoriaMaterialService.listarCategoriasMateriales());
+        model.addAttribute("tiposMateriales", tipoMaterialService.listarTiposMateriales());
     }
 
     /**
@@ -140,18 +145,68 @@ public class PuntoEcaController {
                 inventarioFiltrado = inventarioService.mostrarInventarioPuntoEca(usuario.puntoEcaId());
             }
         } catch (Exception e) {
-            mensajeAlerta = "No se encontraron coincidencias con los filtros aplicados.";
+            logger.error("❌ Error en cargarSeccionMateriales: {}", e.getMessage(), e);
+            mensajeAlerta = "Error al cargar materiales: " + e.getMessage();
+            inventarioFiltrado = Collections.emptyList();
         }
 
-        model.addAttribute("inventario", inventarioFiltrado);
-        model.addAttribute("unidadesMedida", construirUnidadesMedida());
-        model.addAttribute("alerta", construirAlertas());
-
-        if (mensajeAlerta != null) {
-            model.addAttribute("mensajeAlerta", mensajeAlerta);
+        // Calcular categorías y tipos únicos presentes en el inventario
+        Set<String> categoriasInventario = new TreeSet<>();
+        Set<String> tiposInventario = new TreeSet<>();
+        try {
+            for (Object item : inventarioFiltrado) {
+                if (item instanceof MaterialInvResponseDTO m) {
+                    String cat = Optional.ofNullable(m.nmbCategoria()).orElse(null);
+                    String tip = Optional.ofNullable(m.nmbTipo()).orElse(null);
+                    if (cat != null && !cat.isBlank()) categoriasInventario.add(cat);
+                    if (tip != null && !tip.isBlank()) tiposInventario.add(tip);
+                } else if (item instanceof Map) {
+                    // fallback por si el servicio devuelve Map
+                    Map<?, ?> map = (Map<?, ?>) item;
+                    Object catObj = map.get("nmbCategoria");
+                    Object tipObj = map.get("nmbTipo");
+                    if (catObj instanceof String catStr && !catStr.isBlank()) categoriasInventario.add(catStr);
+                    if (tipObj instanceof String tipStr && !tipStr.isBlank()) tiposInventario.add(tipStr);
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("⚠ No fue posible calcular categorías/tipos del inventario: {}", e.getMessage());
         }
-        model.addAttribute("categoriaMateriales", categoriaMaterialService.listarCategoriasMateriales());
-        model.addAttribute("tiposMateriales", tipoMaterialService.listarTiposMateriales());
+
+        try {
+            // Log de debugging
+            logger.info("📊 Inventario filtrado: {} items", inventarioFiltrado.size());
+            logger.info("📋 Categorías del inventario: {} -> {}", categoriasInventario.size(), categoriasInventario);
+            logger.info("📋 Tipos del inventario: {} -> {}", tiposInventario.size(), tiposInventario);
+
+            // Agregar datos del inventario
+            model.addAttribute("inventario", inventarioFiltrado);
+            // Agregar listas dinámicas basadas en inventario
+            model.addAttribute("categoriasInventario", new ArrayList<>(categoriasInventario));
+            model.addAttribute("tiposInventario", new ArrayList<>(tiposInventario));
+
+            // Agregar catálogos generales (fallbacks)
+            var catalogoCategorias = categoriaMaterialService.listarCategoriasMateriales();
+            var catalogoTipos = tipoMaterialService.listarTiposMateriales();
+            logger.info("📚 Catálogo categorías: {} items", catalogoCategorias.size());
+            logger.info("📚 Catálogo tipos: {} items", catalogoTipos.size());
+
+            model.addAttribute("categoriaMateriales", catalogoCategorias);
+            model.addAttribute("tiposMateriales", catalogoTipos);
+
+            model.addAttribute("unidadesMedida", construirUnidadesMedida());
+            model.addAttribute("alerta", construirAlertas());
+            model.addAttribute("puntoEcaId", usuario.puntoEcaId());
+
+            // Mensaje
+            if (mensajeAlerta != null) {
+                model.addAttribute("mensajeAlerta", mensajeAlerta);
+            }
+        } catch (Exception e) {
+            logger.error("❌ Error agregando atributos al modelo: {}", e.getMessage(), e);
+            model.addAttribute("inventario", Collections.emptyList());
+            model.addAttribute("error", "Error al cargar la página: " + e.getMessage());
+        }
     }
 
     /**
@@ -171,12 +226,8 @@ public class PuntoEcaController {
      */
     private void cargarSeccionMovimientos(UsuarioGestorResponseDTO usuario, Model model, int page, int size) {
         try {
-            logger.debug("Cargando datos para sección de movimientos del usuario: {}", usuario.usuarioId());
 
             UUID puntoEcaId = usuario.puntoEcaId();
-
-            // Obtener detalles del inventario
-//            Map<String, List<Object>> detallesMap = inventarioDetalleService.listaDetallesMaterialesInventario(puntoEcaId);
 
             // Extraer y castear categorías correctamente
             List<CategoriaMaterialesInvResponseDTO> categoriaMateriales = inventarioDetalleService.obtenerCategoriasDelPunto(puntoEcaId);
@@ -206,14 +257,6 @@ public class PuntoEcaController {
         }
     }
 
-    /**
-     * Carga datos para la sección de Historial
-     */
-    private void cargarSeccionHistorial(UsuarioGestorResponseDTO usuario, Model model) {
-        Objects.requireNonNull(usuario);
-        Objects.requireNonNull(model);
-        // TODO: Implementar cuando haya servicio de auditoría/historial
-    }
 
     /**
      * Carga datos para la sección de Centros de Acopio
@@ -254,6 +297,14 @@ public class PuntoEcaController {
                     return map;
                 })
                 .toList();
+    }
+
+    /**
+     * Proporciona unidades de medida a todas las vistas
+     */
+    @ModelAttribute("unidadesMedida")
+    public List<Map<String, String>> unidadesMedidaModelAttribute() {
+        return construirUnidadesMedida();
     }
 
     /**
@@ -405,7 +456,7 @@ public class PuntoEcaController {
         try {
             // Primero intentar buscar en materiales EXISTENTES en inventario
             try {
-                List<MaterialInvResponseDTO> existentes = inventarioDetalleService.buscarMaterialExistentesFiltrandoInventario(puntoId, texto, categoria, tipo);
+                List<MaterialResponseDTO> existentes = inventarioDetalleService.buscarMaterialNuevoFiltrandoInventario(puntoId, texto, categoria, tipo);
                 if (!existentes.isEmpty()) {
                     logger.info("Materiales encontrados en inventario: {}", existentes.size());
                     return ResponseEntity.ok(existentes);
@@ -420,7 +471,7 @@ public class PuntoEcaController {
             // devolver un error mostramos las coincidencias existentes para que el
             // frontend las muestre (el usuario pidió ver coincidencias, no bloquear).
             try {
-                List<MaterialInvResponseDTO> existentes = inventarioDetalleService.buscarMaterialExistentesFiltrandoInventario(puntoId, texto, categoria, tipo);
+                List<MaterialResponseDTO> existentes = inventarioDetalleService.buscarMaterialNuevoFiltrandoInventario(puntoId, texto, categoria, tipo);
                 return ResponseEntity.ok(existentes);
             } catch (Exception ex) {
                 // Si algo falla al obtener los existentes, devolver mensaje de error legible
@@ -512,13 +563,15 @@ public class PuntoEcaController {
     public ResponseEntity<?> eliminarInventario(
             @PathVariable String nombrePunto,
             @PathVariable UUID gestorId,
-            @PathVariable UUID inventarioId
+            @PathVariable UUID inventarioId,
+            @RequestBody Map<String, String> request
     ) {
         // Evitar warnings por parámetros no usados
         Objects.requireNonNull(nombrePunto);
         Objects.requireNonNull(gestorId);
         try {
-            inventarioService.eliminarInventario(inventarioId);
+            UUID puntoId = UUID.fromString(request.get("puntoId"));
+            inventarioEliminacionService.eliminarInventarioConMovimientos(inventarioId, puntoId);
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "mensaje", "Material eliminado del inventario correctamente"
@@ -584,4 +637,62 @@ public class PuntoEcaController {
         }
     }
 
+    @PutMapping("/inventario/compra/{compraId}")
+    public ResponseEntity<?> actualizarCompra(
+            @PathVariable UUID compraId,
+            @RequestBody CompraInventarioUpdateDTO dto
+            ){
+        try {
+            var resultado = compraInventarioService.actualizarCompra(dto);
+            return ResponseEntity.ok(resultado);
+        }catch (InventarioNotFoundException e){
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", true,
+                    "mensaje", e.getMessage()
+
+            ));
+        }
+
+    }
+
+    @PutMapping("/inventario/venta/{ventaId}")
+    public ResponseEntity<?> actualizarVenta(
+            @PathVariable UUID ventaId,
+            @RequestBody VentaInventarioUpdateDTO dto
+    ){
+        try {
+            var resultado = ventaInventarioService.actualizarVenta(dto);
+            return ResponseEntity.ok(resultado);
+        }catch (InventarioNotFoundException e){
+            return ResponseEntity.status(400).body(Map.of(
+                    "error", true,
+                    "mensaje", e.getMessage()
+
+            ));
+        }
+    }
+
+    @DeleteMapping("/inventario/compra/{compraId}")
+    public ResponseEntity<Map<String, Object>> eliminarCompra(
+            @PathVariable UUID compraId,
+            @RequestBody CompraInventarioDeleteDTO dto) throws InventarioNotFoundException {
+        compraInventarioService.eliminarCompra(dto);
+        return ResponseEntity.ok(Map.of(
+                "mensaje", "Compra eliminada correctamente",
+                "compraId", compraId
+        ));
+    }
+
+    @DeleteMapping("/inventario/venta/{ventaId}")
+    public ResponseEntity<Map<String, Object>> eliminarVenta(
+            @PathVariable UUID ventaId,
+            @RequestBody VentaInventarioDeleteDTO dto) throws InventarioNotFoundException {
+        ventaInventarioService.eliminarVenta(dto);
+        return ResponseEntity.ok(Map.of(
+                "mensaje", "Venta eliminada correctamente",
+                "ventaId", ventaId
+        ));
+    }
+
 }
+

@@ -173,11 +173,12 @@ public class InventarioDetalleServiceImpl implements InventarioDetalleService {
         final String categoriaNormal = categoriaNormalizada.toLowerCase();
         final String tipoNormal = tipoNormalizado.toLowerCase();
 
-        // Obtener inventarios que ya existen en el punto, con sus materiales filtrados
+        // Obtener inventarios ACTIVOS que ya existen en el punto, con sus materiales filtrados
         List<Inventario> inventariosExistentes = inventarioRepository.findAllByPuntoEca_PuntoEcaID(puntoId).stream()
+                .filter(inventario -> inventario.getEstado().name().equals("Activo"))
                 .filter(inventario -> textoNormalizado.isEmpty() || inventario.getMaterial().getNombre().toLowerCase().contains(textoNormal))
-                .filter(inventario -> categoriaNormalizada.isEmpty() || inventario.getMaterial().getCtgMaterial().getNombre().toLowerCase().equals(categoriaNormal))
-                .filter(inventario -> tipoNormalizado.isEmpty() || inventario.getMaterial().getTipoMaterial().getNombre().toLowerCase().equals(tipoNormal))
+                .filter(inventario -> categoriaNormalizada.isEmpty() || (inventario.getMaterial().getCtgMaterial() != null && inventario.getMaterial().getCtgMaterial().getNombre().toLowerCase().equals(categoriaNormal)))
+                .filter(inventario -> tipoNormalizado.isEmpty() || (inventario.getMaterial().getTipoMaterial() != null && inventario.getMaterial().getTipoMaterial().getNombre().toLowerCase().equals(tipoNormal)))
                 .toList();
 
         // Convertir a DTOs pasando tanto Material como Inventario

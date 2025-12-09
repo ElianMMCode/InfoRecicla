@@ -10,9 +10,7 @@ import org.sena.inforecicla.model.Inventario;
 import org.sena.inforecicla.model.PuntoECA;
 import org.sena.inforecicla.model.enums.Alerta;
 import org.sena.inforecicla.model.enums.Estado;
-import org.sena.inforecicla.repository.InventarioRepository;
-import org.sena.inforecicla.repository.MaterialRepository;
-import org.sena.inforecicla.repository.PuntoEcaRepository;
+import org.sena.inforecicla.repository.*;
 import org.sena.inforecicla.service.InventarioService;
 import org.sena.inforecicla.service.PuntoEcaService;
 import org.springframework.stereotype.Service;
@@ -31,7 +29,6 @@ public class InventarioServiceImpl implements InventarioService {
 
     private final InventarioRepository inventarioRepository;
     private final PuntoEcaService puntoEcaService;
-    private final PuntoEcaRepository puntoEcaRepository;
     private final MaterialRepository materialRepository;
 
     // ...existing code...
@@ -78,14 +75,27 @@ public class InventarioServiceImpl implements InventarioService {
     }
 
     @Override
+    @Transactional
     public void guardarInventario(InventarioRequestDTO dto) throws PuntoEcaNotFoundException {
+
+        boolean existe = inventarioRepository.existsByPuntoEca_PuntoEcaIDAndMaterial_MaterialId(
+                dto.puntoEcaId(),
+                dto.materialId()
+        );
+
+        if (existe) {
+            throw new IllegalArgumentException(
+                    "Este material ya existe en el inventario de este punto"
+            );
+        }
+
         // Obtener Punto ECA a través del servicio
         PuntoECA punto = puntoEcaService.buscarPuntoEca(dto.puntoEcaId())
-                .orElseThrow(() -> new PuntoEcaNotFoundException("Punto ECA no encontrado"));
+                .orElseThrow(() -> new PuntoEcaNotFoundException("Punto ECA no encontrado con ID: " + dto.puntoEcaId()));
 
-        // Nota: Para obtener el Material necesitarías inyectar MaterialService o el Material vendría en el DTO
-        // Por ahora se asume que el Material se crea o se obtiene internamente
-        // Si necesitas obtenerlo desde repository, considera agregar MaterialService
+        // Obtener Material desde el repository
+        var material = materialRepository.findById(dto.materialId())
+                .orElseThrow(() -> new PuntoEcaNotFoundException("Material no encontrado con ID: " + dto.materialId()));
 
         // Calcular estado de alerta basado en ocupación y umbrales
         BigDecimal ocupacion = dto.stockActual()
@@ -108,6 +118,7 @@ public class InventarioServiceImpl implements InventarioService {
                 .precioVenta(dto.precioVenta())
                 .precioCompra(dto.precioCompra())
                 .puntoEca(punto)
+                .material(material)
                 .alerta(estadoAlerta)
                 .build();
 
@@ -150,12 +161,10 @@ public class InventarioServiceImpl implements InventarioService {
     }
 
     @Override
-    public void eliminarInventario(UUID inventarioId) throws InventarioNotFoundException {
-        Inventario inventario = inventarioRepository.findById(inventarioId).orElseThrow(
-                () -> new InventarioNotFoundException("Inventario no encontrado con ID: " + inventarioId)
-        );
-        inventario.setEstado(Estado.Inactivo);
-        inventarioRepository.save(inventario);
+    public void eliminarInventario(UUID inventarioId, UUID puntoId) throws InventarioNotFoundException {
+        // Este método fue movido a InventarioEliminacionService para evitar referencia circular
+        // No debe llamarse directamente desde aquí
+        throw new UnsupportedOperationException("Use InventarioEliminacionService.eliminarInventarioConMovimientos() en su lugar");
     }
 
     private boolean verificarOcupacion(Inventario inv, String ocupacion) {
@@ -178,13 +187,12 @@ public class InventarioServiceImpl implements InventarioService {
 
     @Transactional(readOnly = true)
     @Override
-    public Inventario obtenerInventarioValidoParaCompra(UUID inventarioId, UUID puntoId, UUID materialId) throws InventarioNotFoundException {
+    public Inventario obtenerInventarioValido(UUID inventarioId, UUID puntoId, UUID materialId) throws InventarioNotFoundException {
         return inventarioRepository
                 .findByInventarioIdAndPuntoEca_PuntoEcaIDAndMaterial_MaterialId(inventarioId, puntoId, materialId)
                 .orElseThrow(() -> new InventarioNotFoundException(
                         "No existe inventario con esos datos (inventario, punto, material)"
                 ));
-
     }
 
     @Override

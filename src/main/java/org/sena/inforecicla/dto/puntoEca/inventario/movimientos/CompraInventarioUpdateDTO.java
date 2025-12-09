@@ -3,11 +3,24 @@ package org.sena.inforecicla.dto.puntoEca.inventario.movimientos;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * DTO para actualizar una compra de inventario existente
  */
 public record CompraInventarioUpdateDTO(
+
+        @NotNull(message = "El ID del punto ECA es obligatorio")
+        UUID puntoId,
+
+        @NotNull(message = "El ID del material es obligatorio")
+        UUID materialId,
+
+        @NotNull(message = "El ID de la compra es obligatorio")
+        UUID compraId,
+
+        @NotNull(message = "El ID del inventario es obligatorio")
+        UUID inventarioId,
 
         @NotNull(message = "La fecha de compra es obligatoria")
         LocalDateTime fechaCompra,
