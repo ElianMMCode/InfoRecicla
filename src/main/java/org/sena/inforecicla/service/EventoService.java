@@ -11,9 +11,10 @@ import java.util.UUID;
 
 /**
  * Interfaz del servicio para gestionar eventos del calendario.
+ *
  * Los eventos son creados automáticamente a partir de ventas de material
  * y pueden tener repetición semanal, quincenal o mensual.
-
+ *
  * Todos los eventos están asociados a un usuario y un Punto ECA para
  * garantizar seguridad en el acceso.
  */
@@ -84,7 +85,8 @@ public interface EventoService {
      */
     List<Evento> obtenerEventosPorPunto(String puntoId);
 
-     /** @param inicio Fecha de inicio del rango
+    /**
+     * @param inicio Fecha de inicio del rango
      * @param fin Fecha de fin del rango
      * @return DTOs de eventos listos para FullCalendar
      */

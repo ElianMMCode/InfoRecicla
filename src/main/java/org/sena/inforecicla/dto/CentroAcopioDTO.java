@@ -50,6 +50,9 @@ public class CentroAcopioDTO {
     @JsonProperty("email")
     private String email;
 
+    @JsonProperty("localidad")
+    private String localidad;
+
     public static CentroAcopioDTO fromEntity(CentroAcopio centro) {
         if (centro == null) {
             return null;
@@ -67,6 +70,7 @@ public class CentroAcopioDTO {
                 .ciudad(centro.getCiudad())
                 .celular(centro.getCelular())
                 .email(centro.getEmail())
+                .localidad(centro.getLocalidad() != null ? centro.getLocalidad().getNombre() : null)
                 .build();
     }
 }

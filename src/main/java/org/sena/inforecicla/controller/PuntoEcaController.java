@@ -263,12 +263,37 @@ public class PuntoEcaController {
 
 
     /**
-     * Carga datos para la sección de Centros de Acopio
+     * Carga datos para la sección de Centros
      */
     private void cargarSeccionCentros(UsuarioGestorResponseDTO usuario, Model model) {
         Objects.requireNonNull(usuario);
         Objects.requireNonNull(model);
-        // TODO: Implementar cuando haya servicio de centros
+
+        try {
+            // Obtener centros globales (sin punto asignado)
+            List<CentroAcopio> centrosGlobales = centroAcopioService.obtenerCentrosGlobales();
+
+            // Obtener centros propios del punto (asignados a este punto específico)
+            List<CentroAcopio> centrosPropios = centroAcopioService.listaCentrosPorPuntoEca(usuario.puntoEcaId());
+
+            // Obtener localidades para el filtro
+            List<Localidad> localidades = localidadService.listadoLocalidades();
+
+            // Agregar datos al modelo
+            model.addAttribute("centrosGlobales", centrosGlobales);
+            model.addAttribute("centrosPropios", centrosPropios);
+            model.addAttribute("localidades", localidades);
+            model.addAttribute("totalCentrosGlobales", centrosGlobales.size());
+            model.addAttribute("totalCentrosPropios", centrosPropios.size());
+
+        } catch (Exception e) {
+            logger.error("❌ Error al cargar centros de acopio: {}", e.getMessage(), e);
+            model.addAttribute("centrosGlobales", Collections.emptyList());
+            model.addAttribute("centrosPropios", Collections.emptyList());
+            model.addAttribute("localidades", Collections.emptyList());
+            model.addAttribute("totalCentrosGlobales", 0);
+            model.addAttribute("totalCentrosPropios", 0);
+        }
     }
 
     /**
@@ -747,6 +772,101 @@ public class PuntoEcaController {
                 "error", true,
                 "mensaje", "Error al obtener centros de acopio: " + e.getMessage()
             ));
+        }
+    }
+
+    /**
+     * ENDPOINT REST: Buscar centros de acopio con filtros
+     *
+     * @param puntoEcaId ID del Punto ECA
+     * @param nombre Filtro por nombre
+     * @param tipo Filtro por tipo
+     * @param localidadId Filtro por localidad ID
+     * @param contacto Filtro por contacto
+     * @param email Filtro por email
+     * @param telefono Filtro por teléfono
+     * @param esPropios Si es true, busca centros propios; si es false, busca centros globales
+     * @return Lista de centros filtrados (como DTO)
+     */
+    @GetMapping("/{puntoEcaId}/filtrar-centros")
+    @ResponseBody
+    public ResponseEntity<List<org.sena.inforecicla.dto.CentroAcopioDTO>> filtrarCentros(
+            @PathVariable UUID puntoEcaId,
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) String tipo,
+            @RequestParam(required = false) String localidadId,
+            @RequestParam(required = false) String contacto,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String telefono,
+            @RequestParam(defaultValue = "false") boolean esPropios
+    ) {
+        try {
+            logger.info("🔍🔍🔍 Iniciando búsqueda de centros - PuntoECA: {}, Propios: {}", puntoEcaId, esPropios);
+            logger.info("📝 Parámetros recibidos: nombre='{}', tipo='{}', localidadId='{}', contacto='{}', email='{}', telefono='{}'",
+                    nombre, tipo, localidadId, contacto, email, telefono);
+
+            // Obtener todos los centros (propios o globales)
+            List<CentroAcopio> centros;
+            if (esPropios) {
+                centros = centroAcopioService.listaCentrosPorPuntoEca(puntoEcaId);
+                logger.info("📊 Centros PROPIOS obtenidos: {}", centros.size());
+            } else {
+                centros = centroAcopioService.obtenerCentrosGlobales();
+                logger.info("📊 Centros GLOBALES obtenidos: {}", centros.size());
+            }
+
+            // Log de todos los centros antes de filtrar
+            centros.forEach(c ->
+                logger.debug("  - Centro: nombre='{}', tipo='{}', localidad='{}', contacto='{}', celular='{}', email='{}'",
+                    c.getNombreCntAcp(),
+                    c.getTipoCntAcp() != null ? c.getTipoCntAcp().getTipo() : "null",
+                    c.getLocalidad() != null ? c.getLocalidad().getNombre() : "null",
+                    c.getNombreContactoCntAcp(),
+                    c.getCelular(),
+                    c.getEmail()
+                )
+            );
+
+            // Filtrar en memoria según los criterios
+            List<CentroAcopio> filtrados = centros.stream()
+                    .filter(c -> nombre == null || nombre.trim().isEmpty() ||
+                            c.getNombreCntAcp().toLowerCase().contains(nombre.toLowerCase()))
+                    .filter(c -> tipo == null || tipo.trim().isEmpty() ||
+                            (c.getTipoCntAcp() != null && c.getTipoCntAcp().getTipo().equalsIgnoreCase(tipo)))
+                    .filter(c -> localidadId == null || localidadId.trim().isEmpty() ||
+                            (c.getLocalidad() != null && c.getLocalidad().getLocalidadId().toString().equals(localidadId)))
+                    .filter(c -> contacto == null || contacto.trim().isEmpty() ||
+                            (c.getNombreContactoCntAcp() != null && c.getNombreContactoCntAcp().toLowerCase().contains(contacto.toLowerCase())))
+                    .filter(c -> email == null || email.trim().isEmpty() ||
+                            (c.getEmail() != null && c.getEmail().toLowerCase().contains(email.toLowerCase())))
+                    .filter(c -> telefono == null || telefono.trim().isEmpty() ||
+                            (c.getCelular() != null && c.getCelular().contains(telefono)))
+                    .toList();
+
+            logger.info("✅✅✅ Centros después del filtrado: {}", filtrados.size());
+
+            // Log de centros filtrados
+            filtrados.forEach(c ->
+                logger.info("  ✅ Centro FINAL: nombre='{}', tipo='{}', localidad='{}', celular='{}'",
+                    c.getNombreCntAcp(),
+                    c.getTipoCntAcp() != null ? c.getTipoCntAcp().getTipo() : "null",
+                    c.getLocalidad() != null ? c.getLocalidad().getNombre() : "null",
+                    c.getCelular()
+                )
+            );
+
+            // Convertir a DTO
+            List<org.sena.inforecicla.dto.CentroAcopioDTO> dtos = filtrados.stream()
+                    .map(org.sena.inforecicla.dto.CentroAcopioDTO::fromEntity)
+                    .toList();
+
+            logger.info("✅ DTOs creados: {}", dtos.size());
+
+            return ResponseEntity.ok(dtos);
+
+        } catch (Exception e) {
+            logger.error("❌ Error al filtrar centros: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
         }
     }
 }

@@ -3,6 +3,7 @@ package org.sena.inforecicla.repository;
 import org.sena.inforecicla.model.CentroAcopio;
 import org.sena.inforecicla.model.enums.Estado;
 import org.sena.inforecicla.model.enums.Visibilidad;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,5 +18,12 @@ public interface CentroAcopioRepository extends BaseRepository<CentroAcopio, UUI
     Optional<CentroAcopio> findByCntAcpIdAndPuntoEca_PuntoEcaID(UUID centroId, UUID puntoId);
 
     Optional<CentroAcopio> findAllByPuntoEca_PuntoEcaIDAndCntAcpId(UUID puntoId, UUID centroId);
+
+    // Métodos con Fetch JOIN para cargar localidad eagerly
+    @Query("SELECT DISTINCT c FROM CentroAcopio c LEFT JOIN FETCH c.localidad")
+    List<CentroAcopio> findAllWithLocalidad();
+
+    @Query("SELECT DISTINCT c FROM CentroAcopio c LEFT JOIN FETCH c.localidad WHERE c.puntoEca.puntoEcaID = :puntoId")
+    List<CentroAcopio> findAllByPuntoEcaWithLocalidad(UUID puntoId);
 }
 

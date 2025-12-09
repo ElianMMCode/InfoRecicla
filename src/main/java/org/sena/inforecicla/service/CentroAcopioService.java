@@ -35,6 +35,25 @@ public interface CentroAcopioService {
 
     CentroAcopio obtenerPorId(UUID centroAcopioId);
 
+    /**
+     * Obtiene un centro de acopio válido para un punto específico
+     */
     CentroAcopio obtenerCentroValidoPunto(UUID centroId, UUID puntoId);
+
+    /**
+     * Actualiza un centro de acopio
+     *
+     * @param centroId ID del Centro de Acopio
+     * @param centroActualizado Datos actualizados del centro
+     * @return Centro actualizado
+     */
+    CentroAcopio actualizar(UUID centroId, CentroAcopio centroActualizado);
+
+    /**
+     * Elimina un centro de acopio
+     *
+     * @param centroId ID del Centro de Acopio
+     */
+    void eliminar(UUID centroId);
 }
 
