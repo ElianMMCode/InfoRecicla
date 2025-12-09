@@ -20,6 +20,21 @@ public interface CentroAcopioService {
     List<CentroAcopio> listaCentrosPorPuntoEca(UUID puntoEcaId);
 
     /**
+     * Obtiene todos los centros de acopio globales (sin punto asignado)
+     *
+     * @return Lista de centros de acopio globales
+     */
+    List<CentroAcopio> obtenerCentrosGlobales();
+
+    /**
+     * Obtiene centros de acopio de un punto + centros globales
+     *
+     * @param puntoEcaId ID del Punto ECA
+     * @return Lista combinada de centros del punto y globales
+     */
+    List<CentroAcopio> obtenerCentrosPuntoYGlobales(UUID puntoEcaId);
+
+    /**
      * Obtiene un centro de acopio por su ID
      *
      * @param centroAcopioId ID del Centro de Acopio
