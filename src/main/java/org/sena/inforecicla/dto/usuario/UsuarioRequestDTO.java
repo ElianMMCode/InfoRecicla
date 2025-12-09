@@ -50,9 +50,6 @@ public record UsuarioRequestDTO(
         @NotBlank
         String localidad,
 
-        String fotoPerfil,
-
-        @Size(max = 500)
-        String biografia
+        String fotoPerfil
 
 ) {}
