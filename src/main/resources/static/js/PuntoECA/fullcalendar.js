@@ -270,6 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
         function mostrarDetallesEvento(evento) {
             console.log('📋 Mostrando detalles del evento:', evento.title);
             console.log('   Fecha inicio del evento:', evento.start);
+            console.log('   ID del evento:', evento.id);
 
             const modalDetalles = document.getElementById('modalDetallesEvento');
             if (!modalDetalles) {
@@ -293,6 +294,18 @@ document.addEventListener('DOMContentLoaded', function() {
             if (fechaFinEl) fechaFinEl.textContent = new Date(evento.end).toLocaleString('es-ES');
             if (materialEl) materialEl.textContent = evento.extendedProps?.material || 'Sin material';
             if (centroEl) centroEl.textContent = evento.extendedProps?.centro || 'Sin asignar';
+
+            // GUARDAR DATOS DEL EVENTO PARA USO EN BORRADO
+            // Esto es importante para poder detectar si es repetido o no
+            datosEventoEdicion = {
+                eventoId: evento.id,
+                fechaInicio: evento.start,
+                fechaFin: evento.end,
+                tipoRepeticion: evento.extendedProps?.tipoRepeticion || 'SIN_REPETICION',
+                esRepeticion: evento.extendedProps?.esRepeticion === true,
+                titulo: evento.title
+            };
+            console.log('📌 Datos guardados para borrado:', datosEventoEdicion);
 
             // Configurar botones - Pasar OBJETO del evento, no solo ID
             if (btnEditar) {
@@ -410,23 +423,39 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('   Datos edición:', datosEventoEdicion);
 
             // Verificar si es un evento repetido
-            const esRepeticion = datosEventoEdicion && datosEventoEdicion.tipoRepeticion && datosEventoEdicion.tipoRepeticion !== 'SIN_REPETICION';
+            // Un evento es repetido si:
+            // 1. datosEventoEdicion existe Y tiene tipoRepeticion !== 'SIN_REPETICION'
+            // OR
+            // 2. Tiene esRepeticion = true (es una instancia)
+            const tieneRepeticion = datosEventoEdicion &&
+                                   datosEventoEdicion.tipoRepeticion &&
+                                   datosEventoEdicion.tipoRepeticion !== 'SIN_REPETICION';
+            const esInstanciaRepetida = datosEventoEdicion && datosEventoEdicion.esRepeticion === true;
 
-            if (esRepeticion) {
-                // Si es repetido, preguntar qué borrar
+            console.log('   ¿Tiene repetición?:', tieneRepeticion);
+            console.log('   ¿Es instancia repetida?:', esInstanciaRepetida);
+
+            // Si es una instancia repetida O el evento tiene repetición
+            if (tieneRepeticion || esInstanciaRepetida) {
+                console.log('🔄 Detectado evento repetido');
+
+                // Preguntar qué borrar
                 const opcion = confirm('¿Desea borrar SOLO esta ocurrencia?\n\nAceptar = Solo esta ocurrencia\nCancelar = Borrar todo el evento');
 
                 if (!opcion) {
                     // Cancelar = Borrar todo el evento
+                    console.log('   Usuario eligió: Borrar TODO el evento');
                     if (confirm('¿Está seguro de que desea borrar TODO el evento repetido?')) {
                         borrarEventoCompleto(eventoId);
                     }
                 } else {
                     // Aceptar = Borrar solo esta ocurrencia
+                    console.log('   Usuario eligió: Borrar solo ESTA ocurrencia');
                     borrarSoloInstancia(eventoId);
                 }
             } else {
                 // Si no es repetido, borrar directamente
+                console.log('📌 Evento sin repetición, borrando directamente');
                 if (confirm('¿Está seguro de que desea borrar este evento?')) {
                     borrarEventoCompleto(eventoId);
                 }
