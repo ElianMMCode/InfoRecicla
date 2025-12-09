@@ -1,0 +1,49 @@
+package org.sena.inforecicla.dto.puntoEca.inventario.movimientos;
+
+import org.sena.inforecicla.model.CompraInventario;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+/**
+ * DTO para mostrar una compra de inventario con todos sus detalles
+ */
+public record CompraInventarioResponseDTO(
+
+        UUID compraId,
+        UUID inventarioId,
+        UUID materialId,
+        String nombreMaterial,
+        String nombreCategoria,
+        String nombreTipo,
+        LocalDateTime fechaCompra,
+        BigDecimal precioCompra,
+        BigDecimal cantidad,
+        String observaciones,
+        LocalDateTime fechaCreacion,
+        LocalDateTime fechaActualizacion
+
+) {
+
+    /**
+     * Convierte una entidad CompraInventario a su DTO de respuesta
+     */
+    public static CompraInventarioResponseDTO derivado(CompraInventario compra) {
+        return new CompraInventarioResponseDTO(
+                compra.getCompraId(),
+                compra.getInventario().getInventarioId(),
+                compra.getInventario().getMaterial().getMaterialId(),
+                compra.getInventario().getMaterial().getNombre(),
+                compra.getInventario().getMaterial().getCtgMaterial() != null ? compra.getInventario().getMaterial().getCtgMaterial().getNombre() : "",
+                compra.getInventario().getMaterial().getTipoMaterial() != null ? compra.getInventario().getMaterial().getTipoMaterial().getNombre() : "",
+                compra.getFechaCompra(),
+                compra.getPrecioCompra(),
+                compra.getCantidad(),
+                compra.getObservaciones(),
+                compra.getFechaCreacion(),
+                compra.getFechaActualizacion()
+        );
+    }
+
+}
+

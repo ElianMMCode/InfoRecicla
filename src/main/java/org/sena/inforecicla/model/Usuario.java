@@ -81,7 +81,7 @@ public class Usuario extends EntidadLocalizacion {
     private List<Conversaciones> conversaciones;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Publicaciones> publicaciones = new ArrayList<>();
+    private List<Publicacion> publicaciones = new ArrayList<>();
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Votos> votosRealizados;

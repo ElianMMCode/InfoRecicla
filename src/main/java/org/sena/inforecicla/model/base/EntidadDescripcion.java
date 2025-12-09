@@ -17,7 +17,7 @@ public abstract class EntidadDescripcion extends EntidadCreacionModificacion {
     private String nombre;
 
     @NotNull
-    @Column(nullable = false, length = 500)
+    @Column(nullable = false, length = 500, columnDefinition = "VARCHAR(500)")
     private String descripcion;
 
 }
