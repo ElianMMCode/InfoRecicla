@@ -138,12 +138,6 @@ public interface EventoRepository extends JpaRepository<Evento, UUID> {
 
     /**
      * Obtiene eventos asociados a un centro de acopio especfico.
-     *
-     * @param centroAcopioId ID del centro de acopio
-     * @return Lista de eventos del centro de acopio
-     */
-    @Query("SELECT e FROM Evento e WHERE e.centroAcopio.cntAcpId = :centroAcopioId ORDER BY e.fechaInicio DESC")
-    List<Evento> findByCentroAcopio(@Param("centroAcopioId") UUID centroAcopioId);
 
     /**
      * Obtiene todos los eventos de un Punto ECA específico.
@@ -167,5 +161,11 @@ public interface EventoRepository extends JpaRepository<Evento, UUID> {
         ORDER BY e.fechaInicio DESC
         """)
     List<Evento> findByPuntoEcaWithInstancias(@Param("puntoEcaId") UUID puntoEcaId);
+     /*
+     * @param centroAcopioId ID del centro de acopio
+     * @return Lista de eventos del centro de acopio
+     */
+    @Query("SELECT e FROM Evento e WHERE e.centroAcopio.cntAcpId = :centroAcopioId ORDER BY e.fechaInicio DESC")
+    List<Evento> findByCentroAcopio(@Param("centroAcopioId") UUID centroAcopioId);
 }
 

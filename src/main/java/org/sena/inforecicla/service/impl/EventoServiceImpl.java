@@ -290,16 +290,17 @@ public class EventoServiceImpl implements EventoService {
         log.info("⏱️  Duración del evento: {} horas", duracionTiempo.toHours());
         log.info("📅 Generando instancias desde {} hasta {}", fechaActual, fechaLimite);
 
-        while (fechaActual.isBefore(fechaLimite) || fechaActual.isEqual(fechaLimite)) {
+        while (fechaActual.toLocalDate().isBefore(fechaLimite.toLocalDate()) || fechaActual.toLocalDate().isEqual(fechaLimite.toLocalDate())) {
             LocalDateTime fechaFinInstancia = fechaActual.plus(duracionTiempo);
 
             // Verificación adicional: si la fecha inicio está DESPUÉS del límite, no crear
-            if (fechaActual.isAfter(fechaLimite)) {
+            if (fechaActual.toLocalDate().isAfter(fechaLimite.toLocalDate())) {
                 log.debug("⛔ DETENIENDO: fechaActual ({}) está después del límite ({})", fechaActual, fechaLimite);
                 break;
             }
 
             crearInstancia(evento, numeroRepeticion, fechaActual, fechaFinInstancia);
+            log.debug("   ✅ Instancia {} creada: {} a {}", numeroRepeticion, fechaActual, fechaFinInstancia);
 
             // Calcular siguiente fecha
             fechaActual = fechaActual.plusDays(intervaloDias);

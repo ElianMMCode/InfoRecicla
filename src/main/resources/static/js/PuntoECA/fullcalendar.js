@@ -230,30 +230,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // ===== ABRIR MODAL =====
         function abrirModal(fecha) {
-            const inputFecha = document.getElementById('inputFechaInicio');
-            if (inputFecha) {
-                const fechaStr = fecha.toISOString().split('T')[0];
-                inputFecha.value = fechaStr;
-            }
+            console.log('📅 Abriendo modal para fecha:', fecha);
+            console.log('   Reseteando estado de edición');
 
-            if (modalCrearEvento) {
-                const modal = new bootstrap.Modal(modalCrearEvento);
-                modal.show();
+            // IMPORTANTE: Resetear el estado de edición ANTES de abrir el modal
+            eventoActualEditando = null;
+            datosEventoEdicion = null;
 
-                // Cargar datos y mostrar el modal
-                cargarMateriales();
-                cargarCentrosAcopio();
+            // Esperar un pequeño delay para asegurar que se resetea el estado
+            setTimeout(() => {
+                const inputFecha = document.getElementById('inputFechaInicio');
+                if (inputFecha) {
+                    // Convertir la fecha a ISO format (YYYY-MM-DD)
+                    const fechaISO = fecha.toISOString().split('T')[0];
+                    inputFecha.value = fechaISO;
+                    console.log('✅ Fecha pre-cargada:', fechaISO);
+                } else {
+                    console.warn('⚠️ inputFechaInicio no encontrado');
+                }
 
-                // Inicializar Select2 del tipo de repetición después de que el modal sea visible
-                setTimeout(() => {
-                    inicializarSelect2();
-                }, 100);
-            }
+                if (modalCrearEvento) {
+                    const modal = new bootstrap.Modal(modalCrearEvento);
+                    modal.show();
+                    console.log('✅ Modal abierto');
+
+                    // Cargar datos y mostrar el modal
+                    cargarMateriales();
+                    cargarCentrosAcopio();
+
+                    // Inicializar Select2 del tipo de repetición después de que el modal sea visible
+                    setTimeout(() => {
+                        inicializarSelect2();
+                    }, 100);
+                }
+            }, 10);
         }
 
         // ===== MOSTRAR DETALLES DEL EVENTO =====
         function mostrarDetallesEvento(evento) {
             console.log('📋 Mostrando detalles del evento:', evento.title);
+            console.log('   Fecha inicio del evento:', evento.start);
 
             const modalDetalles = document.getElementById('modalDetallesEvento');
             if (!modalDetalles) {
@@ -278,9 +294,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (materialEl) materialEl.textContent = evento.extendedProps?.material || 'Sin material';
             if (centroEl) centroEl.textContent = evento.extendedProps?.centro || 'Sin asignar';
 
-            // Configurar botones
+            // Configurar botones - Pasar OBJETO del evento, no solo ID
             if (btnEditar) {
-                btnEditar.onclick = () => editarEvento(evento.id);
+                btnEditar.onclick = () => editarEvento(evento.id, evento);
             }
             if (btnBorrar) {
                 btnBorrar.onclick = () => borrarEvento(evento.id);
@@ -291,42 +307,212 @@ document.addEventListener('DOMContentLoaded', function() {
             modal.show();
         }
 
+        // Variables globales para guardar el evento actual y sus datos
+        let eventoActualEditando = null;
+        let datosEventoEdicion = null;
+
+        // ...existing code...
+
         // ===== EDITAR EVENTO =====
-        function editarEvento(eventoId) {
+        function editarEvento(eventoId, eventoClickeado) {
             console.log('✏️ Editando evento:', eventoId);
-            alert('Función de edición en desarrollo');
-            // TODO: Implementar edición de eventos
+            console.log('   Evento clickeado:', eventoClickeado);
+
+            // Guardar el evento actual
+            eventoActualEditando = eventoId;
+
+            // Si tenemos el evento clickeado, usar su fecha como inicio
+            let fechaInicioDelEvento = null;
+            if (eventoClickeado && eventoClickeado.start) {
+                fechaInicioDelEvento = new Date(eventoClickeado.start);
+                console.log('📅 Fecha del evento clickeado:', fechaInicioDelEvento);
+            }
+
+            // Obtener los datos del evento desde el servidor
+            fetch(`/api/eventos/${eventoId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('No se pudo obtener el evento');
+                    return response.json();
+                })
+                .then(evento => {
+                    console.log('📋 Evento obtenido:', evento);
+                    console.log('   Material ID:', evento.materialId, 'Material Nombre:', evento.materialNombre);
+                    console.log('   Centro ID:', evento.centroAcopioId, 'Centro Nombre:', evento.centroAcopioNombre);
+
+                    // Guardar los datos para seleccionar después
+                    datosEventoEdicion = evento;
+
+                    // Llenar el formulario de crear evento con los datos actuales
+                    document.getElementById('inputTitulo').value = evento.titulo || '';
+                    document.getElementById('inputDescripcion').value = evento.descripcion || '';
+                    document.getElementById('inputColor').value = evento.color || '#28a745';
+
+                    // Setear las fechas
+                    // SI CLICKEÓ UN EVENTO REPETIDO, USAR LA FECHA DEL EVENTO CLICKEADO
+                    // SI NO, USAR LA FECHA DEL EVENTO BASE
+                    const fechaInicio = fechaInicioDelEvento || new Date(evento.fechaInicio);
+                    const fechaFin = new Date(evento.fechaFin);
+
+                    console.log('📅 Fechas a usar:');
+                    console.log('   fechaInicio (clickeada):', fechaInicioDelEvento);
+                    console.log('   fechaInicio (base):', evento.fechaInicio);
+                    console.log('   fechaInicio final:', fechaInicio);
+
+                    // Formatear fechas para los inputs
+                    const fechaInicioISO = fechaInicio.toISOString().split('T')[0];
+                    const horaInicioStr = String(fechaInicio.getHours()).padStart(2, '0') + ':' +
+                                         String(fechaInicio.getMinutes()).padStart(2, '0');
+                    const horaFinStr = String(fechaFin.getHours()).padStart(2, '0') + ':' +
+                                      String(fechaFin.getMinutes()).padStart(2, '0');
+
+                    document.getElementById('inputFechaInicio').value = fechaInicioISO;
+                    document.getElementById('inputHoraInicio').value = horaInicioStr;
+                    document.getElementById('inputHoraFin').value = horaFinStr;
+
+                    console.log('✅ Fechas asignadas:');
+                    console.log('   inputFechaInicio:', fechaInicioISO);
+                    console.log('   inputHoraInicio:', horaInicioStr);
+                    console.log('   inputHoraFin:', horaFinStr);
+
+                    // Tipo de repetición
+                    document.getElementById('selectTipoRepeticion').value = evento.tipoRepeticion || 'SIN_REPETICION';
+
+                    // Cargar materiales y centros (sin seleccionar aún)
+                    console.log('🔄 Cargando materiales y centros...');
+                    cargarMateriales();
+                    cargarCentrosAcopio();
+
+                    // Cambiar el botón de guardar
+                    const btnGuardar = document.getElementById('btnGuardarEvento');
+                    btnGuardar.innerHTML = '<i class="bi bi-pencil"></i> Actualizar Evento';
+                    btnGuardar.className = 'btn btn-warning btn-sm';
+
+                    // Cerrar modal de detalles
+                    const modalDetalles = document.getElementById('modalDetallesEvento');
+                    const modalActual = bootstrap.Modal.getInstance(modalDetalles);
+                    if (modalActual) modalActual.hide();
+
+                    // Abrir modal de edición
+                    setTimeout(() => {
+                        const modalCrear = new bootstrap.Modal(document.getElementById('modalCrearEvento'));
+                        modalCrear.show();
+                    }, 300);
+                })
+                .catch(error => {
+                    console.error('❌ Error obteniendo evento:', error);
+                    alert('Error al obtener los datos del evento');
+                });
         }
 
         // ===== BORRAR EVENTO =====
         function borrarEvento(eventoId) {
             console.log('🗑️ Borrando evento:', eventoId);
+            console.log('   Datos edición:', datosEventoEdicion);
 
-            if (confirm('¿Está seguro de que desea borrar este evento?')) {
-                fetch(`/api/eventos/${eventoId}`, {
-                    method: 'DELETE'
-                })
-                .then(response => {
-                    if (response.ok) {
-                        console.log('✅ Evento borrado');
-                        alert('Evento borrado correctamente');
+            // Verificar si es un evento repetido
+            const esRepeticion = datosEventoEdicion && datosEventoEdicion.tipoRepeticion && datosEventoEdicion.tipoRepeticion !== 'SIN_REPETICION';
 
-                        // Recargar calendario
-                        if (calendar) calendar.refetchEvents();
+            if (esRepeticion) {
+                // Si es repetido, preguntar qué borrar
+                const opcion = confirm('¿Desea borrar SOLO esta ocurrencia?\n\nAceptar = Solo esta ocurrencia\nCancelar = Borrar todo el evento');
 
-                        // Cerrar modal
-                        const modalDetalles = document.getElementById('modalDetallesEvento');
+                if (!opcion) {
+                    // Cancelar = Borrar todo el evento
+                    if (confirm('¿Está seguro de que desea borrar TODO el evento repetido?')) {
+                        borrarEventoCompleto(eventoId);
+                    }
+                } else {
+                    // Aceptar = Borrar solo esta ocurrencia
+                    borrarSoloInstancia(eventoId);
+                }
+            } else {
+                // Si no es repetido, borrar directamente
+                if (confirm('¿Está seguro de que desea borrar este evento?')) {
+                    borrarEventoCompleto(eventoId);
+                }
+            }
+        }
+
+        function borrarEventoCompleto(eventoId) {
+            console.log('🗑️ Borrando evento completo:', eventoId);
+
+            fetch(`/api/eventos/${eventoId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => {
+                console.log('📡 Response status:', response.status);
+                if (response.ok) {
+                    console.log('✅ Evento borrado completamente');
+                    alert('Evento borrado correctamente');
+
+                    // Recargar calendario
+                    if (calendar) calendar.refetchEvents();
+
+                    // Cerrar modal
+                    const modalDetalles = document.getElementById('modalDetallesEvento');
+                    if (modalDetalles) {
                         const modal = bootstrap.Modal.getInstance(modalDetalles);
                         if (modal) modal.hide();
-                    } else {
-                        alert('❌ Error al borrar el evento');
                     }
-                })
-                .catch(error => {
-                    console.error('❌ Error:', error);
-                    alert('❌ Error al borrar el evento');
-                });
+                } else {
+                    return response.json().then(err => {
+                        throw new Error(err.error || 'Error desconocido');
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error:', error);
+                alert('❌ Error al borrar el evento: ' + error.message);
+            });
+        }
+
+        function borrarSoloInstancia(eventoId) {
+            console.log('🗑️ Borrando solo esta instancia:', eventoId);
+            console.log('   Datos edición:', datosEventoEdicion);
+
+            // Construir el payload con fechaInstancia (y opcionalmente instanciaId si está disponible)
+            const payload = {
+                fechaInstancia: datosEventoEdicion.fechaInicio
+            };
+
+            // Si tenemos un instanciaId en los datos, agregarlo también
+            if (datosEventoEdicion.instanciaId) {
+                payload.instanciaId = datosEventoEdicion.instanciaId;
             }
+
+            console.log('📦 Enviando payload:', payload);
+
+            fetch(`/api/eventos/${eventoId}/instancia`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                console.log('📡 Response status:', response.status);
+                if (response.ok) {
+                    console.log('✅ Instancia borrada');
+                    alert('Ocurrencia borrada correctamente');
+
+                    // Recargar calendario
+                    if (calendar) calendar.refetchEvents();
+
+                    // Cerrar modal
+                    const modalDetalles = document.getElementById('modalDetallesEvento');
+                    if (modalDetalles) {
+                        const modal = bootstrap.Modal.getInstance(modalDetalles);
+                        if (modal) modal.hide();
+                    }
+                } else {
+                    return response.json().then(err => {
+                        throw new Error(err.error || 'Error desconocido');
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error:', error);
+                alert('❌ Error al borrar la ocurrencia: ' + error.message);
+            });
         }
 
         // ===== GUARDAR EVENTO =====
@@ -367,8 +553,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     btnGuardarEvento.innerHTML = 'Guardando...';
                 }
 
-                const res = await fetch('/api/eventos/crear-venta', {
-                    method: 'POST',
+                // Determinar si es creación o edición
+                let url = '/api/eventos/crear-venta';
+                let metodo = 'POST';
+
+                if (eventoActualEditando) {
+                    url = `/api/eventos/${eventoActualEditando}`;
+                    metodo = 'PUT';
+                    console.log('✏️ Actualizando evento existente:', eventoActualEditando);
+                } else {
+                    console.log('➕ Creando nuevo evento');
+                }
+
+                const res = await fetch(url, {
+                    method: metodo,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(datos)
                 });
@@ -378,7 +576,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (res.ok) {
                     const respuesta = await res.json();
                     console.log('✅ Evento guardado:', respuesta);
-                    alert('✅ Evento creado correctamente');
+                    const mensaje = eventoActualEditando ? 'Evento actualizado correctamente' : 'Evento creado correctamente';
+                    alert('✅ ' + mensaje);
 
                     // Recargar calendario
                     if (calendar) calendar.refetchEvents();
@@ -401,26 +600,153 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (btnGuardarEvento) {
                     btnGuardarEvento.disabled = false;
                     btnGuardarEvento.innerHTML = '<i class="bi bi-save"></i> Guardar Evento';
+                    btnGuardarEvento.className = 'btn btn-success btn-sm';
                 }
+
+                // Resetear estado de edición
+                eventoActualEditando = null;
             }
         }
 
         // ===== EVENT LISTENERS =====
-        if (btnGuardarEvento) {
-            // Remover listeners anteriores para evitar duplicados
-            btnGuardarEvento.replaceWith(btnGuardarEvento.cloneNode(true));
-            const btnNuevo = document.getElementById('btnGuardarEvento');
+        // Usar una bandera para evitar agregar múltiples listeners
+        let guardaEventoListenerAgregado = false;
 
-            if (btnNuevo) {
-                btnNuevo.addEventListener('click', guardarEvento);
+        function agregarListenerGuardarEvento() {
+            if (guardaEventoListenerAgregado) {
+                console.log('⚠️ Listener de guardar evento ya fue agregado, evitando duplicado');
+                return;
+            }
+
+            if (!btnGuardarEvento) {
+                console.warn('⚠️ btnGuardarEvento no encontrado');
+                return;
+            }
+
+            console.log('➕ Agregando listener a btnGuardarEvento');
+
+            // Remover listeners anteriores clonando el elemento
+            const btnNuevo = btnGuardarEvento.cloneNode(true);
+            btnGuardarEvento.replaceWith(btnNuevo);
+
+            // Actualizar referencia
+            window.btnGuardarEvento = document.getElementById('btnGuardarEvento');
+
+            if (window.btnGuardarEvento) {
+                window.btnGuardarEvento.addEventListener('click', guardarEvento);
+                guardaEventoListenerAgregado = true;
+                console.log('✅ Listener agregado correctamente');
             }
         }
 
+        // Agregar listener en la carga inicial
+        setTimeout(() => {
+            agregarListenerGuardarEvento();
+        }, 500);
+
         if (modalCrearEvento) {
             modalCrearEvento.addEventListener('show.bs.modal', () => {
-                console.log('📋 Modal abierto');
+                console.log('📋 Modal abierto - evento en edición:', eventoActualEditando);
+
+                // GUARDAR LA FECHA SI ESTÁ PRE-CARGADA (crear evento nuevo)
+                const fechaGuardada = document.getElementById('inputFechaInicio')?.value;
+                console.log('   Fecha pre-cargada antes de resetear:', fechaGuardada);
+
+                // Si NO estamos editando, resetear el formulario
+                if (!eventoActualEditando) {
+                    console.log('➕ Modo: CREAR nuevo evento');
+                    if (formCrearEvento) {
+                        formCrearEvento.reset();
+                        console.log('   Formulario reseteado');
+                    }
+
+                    // RESTAURAR LA FECHA GUARDADA
+                    if (fechaGuardada) {
+                        document.getElementById('inputFechaInicio').value = fechaGuardada;
+                        console.log('   ✅ Fecha restaurada:', fechaGuardada);
+                    }
+
+                    // Resetear botón a su estado original
+                    if (btnGuardarEvento) {
+                        btnGuardarEvento.innerHTML = '<i class="bi bi-save"></i> Guardar Evento';
+                        btnGuardarEvento.className = 'btn btn-success btn-sm';
+                    }
+                } else {
+                    console.log('✏️ Modo: EDITAR evento');
+                }
+
                 cargarMateriales();
                 cargarCentrosAcopio();
+            });
+
+            // Escuchar cuando el modal se ha mostrado completamente
+            modalCrearEvento.addEventListener('shown.bs.modal', () => {
+                console.log('📋 Modal completamente abierto');
+
+                // Si estamos editando, seleccionar el material y centro ahora
+                if (eventoActualEditando && datosEventoEdicion) {
+                    console.log('⏳ Seleccionando material y centro después de inicializar...');
+
+                    // Esperar a que Select2 esté completamente inicializado
+                    const $ = jQuery;
+
+                    // Número máximo de intentos de sincronización
+                    let intentos = 0;
+                    const maxIntentos = 10;
+                    const intervalo = setInterval(() => {
+                        intentos++;
+                        console.log(`🔄 Intento ${intentos} de sincronizar Select2...`);
+
+                        // Seleccionar Material
+                        if (datosEventoEdicion.materialId) {
+                            const selectMaterialElement = document.getElementById('selectMaterial');
+                            if (selectMaterialElement) {
+                                const opcionesMaterial = Array.from(selectMaterialElement.options).map(o => ({value: o.value, text: o.text}));
+                                const existeMaterial = opcionesMaterial.find(o => o.value === datosEventoEdicion.materialId);
+
+                                if (existeMaterial) {
+                                    console.log('✅ Material encontrado en opciones:', datosEventoEdicion.materialId);
+                                    selectMaterialElement.value = datosEventoEdicion.materialId;
+                                    $(selectMaterialElement).trigger('change');
+                                    console.log('   Material seleccionado:', datosEventoEdicion.materialNombre);
+                                } else {
+                                    console.warn('⚠️ Material no encontrado en opciones. Disponibles:', opcionesMaterial);
+                                    if (intentos < maxIntentos) {
+                                        return; // Reintentar
+                                    }
+                                }
+                            }
+                        }
+
+                        // Seleccionar Centro
+                        if (datosEventoEdicion.centroAcopioId) {
+                            const selectCentroElement = document.getElementById('selectCentroAcopio');
+                            if (selectCentroElement) {
+                                const opcionesCentro = Array.from(selectCentroElement.options).map(o => ({value: o.value, text: o.text}));
+                                const existeCentro = opcionesCentro.find(o => o.value === datosEventoEdicion.centroAcopioId);
+
+                                if (existeCentro) {
+                                    console.log('✅ Centro encontrado en opciones:', datosEventoEdicion.centroAcopioId);
+                                    selectCentroElement.value = datosEventoEdicion.centroAcopioId;
+                                    $(selectCentroElement).trigger('change');
+                                    console.log('   Centro seleccionado:', datosEventoEdicion.centroAcopioNombre);
+                                } else {
+                                    console.warn('⚠️ Centro no encontrado en opciones. Disponibles:', opcionesCentro);
+                                    if (intentos < maxIntentos) {
+                                        return; // Reintentar
+                                    }
+                                }
+                            }
+                        }
+
+                        // Ambos encontrados o máximo de intentos
+                        clearInterval(intervalo);
+                        console.log('✅ Sincronización completada');
+                    }, 200); // Reintentar cada 200ms
+
+                    // Limpiar intervalo después de máximo tiempo
+                    setTimeout(() => clearInterval(intervalo), maxIntentos * 200 + 100);
+                }
             });
         }
 
