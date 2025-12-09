@@ -145,19 +145,68 @@ public class PuntoEcaController {
                 inventarioFiltrado = inventarioService.mostrarInventarioPuntoEca(usuario.puntoEcaId());
             }
         } catch (Exception e) {
-            mensajeAlerta = "No se encontraron coincidencias con los filtros aplicados.";
+            logger.error("❌ Error en cargarSeccionMateriales: {}", e.getMessage(), e);
+            mensajeAlerta = "Error al cargar materiales: " + e.getMessage();
+            inventarioFiltrado = Collections.emptyList();
         }
 
-        model.addAttribute("inventario", inventarioFiltrado);
-        model.addAttribute("unidadesMedida", construirUnidadesMedida());
-        model.addAttribute("alerta", construirAlertas());
-        model.addAttribute("puntoEcaId", usuario.puntoEcaId());
-
-        if (mensajeAlerta != null) {
-            model.addAttribute("mensajeAlerta", mensajeAlerta);
+        // Calcular categorías y tipos únicos presentes en el inventario
+        Set<String> categoriasInventario = new TreeSet<>();
+        Set<String> tiposInventario = new TreeSet<>();
+        try {
+            for (Object item : inventarioFiltrado) {
+                if (item instanceof MaterialInvResponseDTO m) {
+                    String cat = Optional.ofNullable(m.nmbCategoria()).orElse(null);
+                    String tip = Optional.ofNullable(m.nmbTipo()).orElse(null);
+                    if (cat != null && !cat.isBlank()) categoriasInventario.add(cat);
+                    if (tip != null && !tip.isBlank()) tiposInventario.add(tip);
+                } else if (item instanceof Map) {
+                    // fallback por si el servicio devuelve Map
+                    Map<?, ?> map = (Map<?, ?>) item;
+                    Object catObj = map.get("nmbCategoria");
+                    Object tipObj = map.get("nmbTipo");
+                    if (catObj instanceof String catStr && !catStr.isBlank()) categoriasInventario.add(catStr);
+                    if (tipObj instanceof String tipStr && !tipStr.isBlank()) tiposInventario.add(tipStr);
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("⚠ No fue posible calcular categorías/tipos del inventario: {}", e.getMessage());
         }
-        model.addAttribute("categoriaMateriales", categoriaMaterialService.listarCategoriasMateriales());
-        model.addAttribute("tiposMateriales", tipoMaterialService.listarTiposMateriales());
+
+        try {
+            // Log de debugging
+            logger.info("📊 Inventario filtrado: {} items", inventarioFiltrado.size());
+            logger.info("📋 Categorías del inventario: {} -> {}", categoriasInventario.size(), categoriasInventario);
+            logger.info("📋 Tipos del inventario: {} -> {}", tiposInventario.size(), tiposInventario);
+
+            // Agregar datos del inventario
+            model.addAttribute("inventario", inventarioFiltrado);
+            // Agregar listas dinámicas basadas en inventario
+            model.addAttribute("categoriasInventario", new ArrayList<>(categoriasInventario));
+            model.addAttribute("tiposInventario", new ArrayList<>(tiposInventario));
+
+            // Agregar catálogos generales (fallbacks)
+            var catalogoCategorias = categoriaMaterialService.listarCategoriasMateriales();
+            var catalogoTipos = tipoMaterialService.listarTiposMateriales();
+            logger.info("📚 Catálogo categorías: {} items", catalogoCategorias.size());
+            logger.info("📚 Catálogo tipos: {} items", catalogoTipos.size());
+
+            model.addAttribute("categoriaMateriales", catalogoCategorias);
+            model.addAttribute("tiposMateriales", catalogoTipos);
+
+            model.addAttribute("unidadesMedida", construirUnidadesMedida());
+            model.addAttribute("alerta", construirAlertas());
+            model.addAttribute("puntoEcaId", usuario.puntoEcaId());
+
+            // Mensaje
+            if (mensajeAlerta != null) {
+                model.addAttribute("mensajeAlerta", mensajeAlerta);
+            }
+        } catch (Exception e) {
+            logger.error("❌ Error agregando atributos al modelo: {}", e.getMessage(), e);
+            model.addAttribute("inventario", Collections.emptyList());
+            model.addAttribute("error", "Error al cargar la página: " + e.getMessage());
+        }
     }
 
     /**
