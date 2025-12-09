@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba FullCalendar - Inforecicla</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #calendar {
+            min-height: 600px;
+        }
+        .test-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #28a745;
+        }
+        .test-button {
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">
+            <i class="bi bi-calendar-event"></i> Prueba de FullCalendar
+        </h1>
+
+        <!-- Calendario -->
+        <div id="calendar"></div>
+
+        <!-- Sección de pruebas -->
+        <div class="test-section">
+            <h3>🧪 Sección de Pruebas</h3>
+            <p>Utiliza estos botones para verificar que los endpoints estén funcionando correctamente.</p>
+
+            <button class="btn btn-primary test-button" onclick="testObtenerEventos()">
+                Obtener Eventos (GET)
+            </button>
+            <button class="btn btn-success test-button" onclick="testCrearEvento()">
+                Crear Evento (POST)
+            </button>
+            <button class="btn btn-info test-button" onclick="limpiarConsola()">
+                Limpiar Consola
+            </button>
+
+            <h4 class="mt-4">Resultados:</h4>
+            <pre id="resultado" style="background-color: #fff; padding: 15px; border-radius: 4px; max-height: 300px; overflow-y: auto; font-size: 0.9rem;">
+Esperando pruebas...
+            </pre>
+        </div>
+
+        <!-- Instrucciones -->
+        <div class="test-section mt-4" style="border-left-color: #007bff;">
+            <h3>📋 Instrucciones de Prueba</h3>
+            <ol>
+                <li>Abre la consola del navegador (F12) para ver los detalles</li>
+                <li>Haz clic en "Obtener Eventos" para verificar que el endpoint GET funciona</li>
+                <li>Haz clic en "Crear Evento" para probar la creación de eventos</li>
+                <li>Verifica que los eventos aparezcan en el calendario</li>
+                <li>Revisa la pestaña "Network" en devtools para ver las solicitudes HTTP</li>
+            </ol>
+        </div>
+
+        <!-- URLs de Referencia -->
+        <div class="test-section mt-4" style="border-left-color: #ffc107;">
+            <h3>🔗 URLs de Referencia</h3>
+            <p><strong>Obtener eventos:</strong></p>
+            <code>GET /api/punto-eca/{gestorId}/eventos?start=2025-12-01T00:00:00&end=2025-12-31T23:59:59</code>
+
+            <p class="mt-3"><strong>Crear evento:</strong></p>
+            <code>POST /api/punto-eca/{puntoEcaId}/eventos</code>
+
+            <p class="mt-3"><strong>Actualizar evento:</strong></p>
+            <code>PUT /api/punto-eca/eventos/{eventoId}</code>
+
+            <p class="mt-3"><strong>Eliminar evento:</strong></p>
+            <code>DELETE /api/punto-eca/eventos/{eventoId}</code>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales/es.global.min.js"></script>
+
+    <script>
+        // Configuración - CAMBIAR ESTOS VALORES
+        const CONFIG = {
+            gestorId: 1,
+            puntoEcaId: 1,
+            apiBaseUrl: 'http://localhost:8080' // Ajusta según tu servidor
+        };
+
+        // Inicializar FullCalendar
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                locale: 'es',
+                events: {
+                    url: `${CONFIG.apiBaseUrl}/api/punto-eca/${CONFIG.gestorId}/eventos`,
+                    method: 'GET',
+                    failure: function() {
+                        console.error('Error cargando eventos');
+                    }
+                },
+                editable: false,
+                selectable: true,
+                selectConstraint: 'businessHours',
+                eventDisplay: 'block',
+                eventBackgroundColor: '#28a745',
+                eventBorderColor: '#1e7e34'
+            });
+
+            calendar.render();
+            window.calendar = calendar;
+        });
+
+        // Función para obtener eventos
+        function testObtenerEventos() {
+            const url = `${CONFIG.apiBaseUrl}/api/punto-eca/${CONFIG.gestorId}/eventos`;
+            console.log('🔍 GET:', url);
+
+            fetch(url)
+                .then(response => {
+                    console.log('Status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('✅ Respuesta:', data);
+                    mostrarResultado('✅ Eventos obtenidos:\n' + JSON.stringify(data, null, 2));
+                })
+                .catch(error => {
+                    console.error('❌ Error:', error);
+                    mostrarResultado('❌ Error: ' + error.message);
+                });
+        }
+
+        // Función para crear evento
+        function testCrearEvento() {
+            const evento = {
+                titulo: 'Evento de Prueba',
+                descripcion: 'Este es un evento creado desde la prueba',
+                fechaInicio: new Date(new Date().getTime() + 86400000).toISOString().split('T')[0] + 'T10:00:00',
+                fechaFin: new Date(new Date().getTime() + 86400000).toISOString().split('T')[0] + 'T12:00:00',
+                color: '#28a745'
+            };
+
+            const url = `${CONFIG.apiBaseUrl}/api/punto-eca/${CONFIG.puntoEcaId}/eventos`;
+            console.log('📝 POST:', url);
+            console.log('Datos:', evento);
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(evento)
+            })
+            .then(response => {
+                console.log('Status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('✅ Evento creado:', data);
+                mostrarResultado('✅ Evento creado:\n' + JSON.stringify(data, null, 2));
+                // Recargar el calendario
+                if (window.calendar) {
+                    window.calendar.refetchEvents();
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error:', error);
+                mostrarResultado('❌ Error: ' + error.message);
+            });
+        }
+
+        // Función para mostrar resultados
+        function mostrarResultado(texto) {
+            const elemento = document.getElementById('resultado');
+            elemento.textContent = texto;
+        }
+
+        // Función para limpiar la consola
+        function limpiarConsola() {
+            document.getElementById('resultado').textContent = 'Consola limpiada...';
+            console.clear();
+        }
+
+        // Mensaje inicial
+        console.log('%c🎯 FullCalendar Test Suite', 'font-size: 16px; font-weight: bold; color: #28a745;');
+        console.log('Configuración:', CONFIG);
+        console.log('Abre las herramientas de desarrollo (F12) para ver los detalles');
+    </script>
+</body>
+</html>
+

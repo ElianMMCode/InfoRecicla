@@ -15,6 +15,7 @@ import org.sena.inforecicla.dto.usuario.UsuarioGestorResponseDTO;
 import org.sena.inforecicla.exception.InventarioFoundExistException;
 import org.sena.inforecicla.exception.InventarioNotFoundException;
 import org.sena.inforecicla.exception.PuntoEcaNotFoundException;
+import org.sena.inforecicla.model.CentroAcopio;
 import org.sena.inforecicla.model.CompraInventario;
 import org.sena.inforecicla.model.Localidad;
 import org.sena.inforecicla.model.enums.Alerta;
@@ -28,6 +29,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+
 
 import java.util.*;
 
@@ -694,5 +698,55 @@ public class PuntoEcaController {
         ));
     }
 
-}
+    /**
+     * ENDPOINT REST: Obtener centros de acopio (del punto + globales)
+     * Utilizado por el modal de creación de eventos
+     *
+     * @param puntoEcaId ID del punto ECA
+     * @return Lista de centros de acopio del punto + globales en formato JSON
+     */
+    @GetMapping("/{puntoEcaId}/centros-acopio")
+    @ResponseBody
+    public ResponseEntity<?> obtenerCentrosAcopioPunto(@PathVariable UUID puntoEcaId) {
+        try {
+            logger.info("🎯 Obteniendo centros de acopio para punto ECA: {}", puntoEcaId);
 
+            // Obtener centros del punto + globales
+            List<CentroAcopio> todosCentros = centroAcopioService.obtenerCentrosPuntoYGlobales(puntoEcaId);
+
+            logger.info("📊 Centros obtenidos del servicio: {}", todosCentros.size());
+
+            if (!todosCentros.isEmpty()) {
+                CentroAcopio primero = todosCentros.get(0);
+                logger.info("   📍 Primer centro ID: {}", primero.getCntAcpId());
+                logger.info("   📍 Primer centro Nombre: {}", primero.getNombreCntAcp());
+                logger.info("   📍 Primer centro Punto: {}", primero.getPuntoEca());
+            }
+
+            // Convertir a DTOs
+            List<org.sena.inforecicla.dto.CentroAcopioDTO> centrosDTO = todosCentros.stream()
+                    .map(org.sena.inforecicla.dto.CentroAcopioDTO::fromEntity)
+                    .toList();
+
+            logger.info("✅ DTOs creados: {}", centrosDTO.size());
+
+            if (!centrosDTO.isEmpty()) {
+                org.sena.inforecicla.dto.CentroAcopioDTO primero = centrosDTO.get(0);
+                logger.info("   DTO Primer centro ID: {}", primero.getCntAcpId());
+                logger.info("   DTO Primer centro Nombre: {}", primero.getNombreCntAcp());
+                logger.info("   DTO Primer centro Punto: {}", primero.getTienePuntoEca());
+            }
+
+            logger.info("✅ Total de centros retornados (punto + globales): {}", centrosDTO.size());
+            return ResponseEntity.ok(centrosDTO);
+
+
+        } catch (Exception e) {
+            logger.error("❌ Error obteniendo centros de acopio: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(Map.of(
+                "error", true,
+                "mensaje", "Error al obtener centros de acopio: " + e.getMessage()
+            ));
+        }
+    }
+}
