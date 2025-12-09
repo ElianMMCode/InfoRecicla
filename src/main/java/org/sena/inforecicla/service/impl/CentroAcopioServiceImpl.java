@@ -90,7 +90,7 @@ public class CentroAcopioServiceImpl implements CentroAcopioService {
     }
 
    @Override
-    public CentroAcopio obtenerCentroValidoPunto(UUID centroId, UUID puntoId) {
+   public CentroAcopio obtenerCentroValidoPunto(UUID centroId, UUID puntoId) {
         return centroAcopioRepository
                 .findAllByPuntoEca_PuntoEcaIDAndCntAcpId(puntoId, centroId)
                 .or(() -> centroAcopioRepository.findById(centroId))

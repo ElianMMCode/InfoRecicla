@@ -208,27 +208,4 @@
             </div>
         </div>
     </div>
-
-    <!-- Script de FullCalendar -->
-    <script th:src="@{/js/PuntoECA/fullcalendar.js}"></script>
-
-    <!-- Script para inicializar Select2 cuando el modal se muestre -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const modalCrearEvento = document.getElementById('modalCrearEvento');
-            if (modalCrearEvento) {
-                modalCrearEvento.addEventListener('shown.bs.modal', function() {
-                    // Esperar a que Select2 se haya inicializado y luego abrir el dropdown
-                    setTimeout(function() {
-                        // Ajustar altura del modal si es necesario
-                        const modalBody = modalCrearEvento.querySelector('.modal-body');
-                        if (modalBody) {
-                            modalBody.style.maxHeight = '70vh';
-                            modalBody.style.overflowY = 'auto';
-                        }
-                    }, 100);
-                });
-            }
-        });
-    </script>
 </section>
