@@ -252,35 +252,67 @@ public class EventoServiceImpl implements EventoService {
 
     @Override
     public void generarInstancias(Evento evento) {
-        log.info("Generando instancias para evento: {}", evento.getEventoId());
+        log.info("\n=== GENERANDO INSTANCIAS ===");
+        log.info("Evento: {}", evento.getEventoId());
+        log.info("Título: {}", evento.getTitulo());
+        log.info("Tipo de repetición: {}", evento.getTipoRepeticion().getNombre());
+        log.info("Fecha inicio evento: {}", evento.getFechaInicio());
+        log.info("Fecha fin evento: {}", evento.getFechaFin());
+        log.info("❓ FechaFinRepeticion en DB: {}", evento.getFechaFinRepeticion());
+        log.info("❓ FechaFinRepeticion es null: {}", evento.getFechaFinRepeticion() == null);
 
         if (!evento.getTipoRepeticion().tieneRepeticion()) {
-            // Crear una única instancia
+            log.info("✅ Sin repetición, creando una única instancia");
             crearInstancia(evento, 1, evento.getFechaInicio(), evento.getFechaFin());
             return;
         }
 
         // Generar instancias hasta la fecha fin de repetición
         LocalDateTime fechaActual = evento.getFechaInicio();
-        LocalDateTime fechaFin = evento.getFechaFinRepeticion() != null
-            ? evento.getFechaFinRepeticion()
-            : evento.getFechaInicio().plusDays(MAX_INSTANCIAS_FUTURAS);
+
+        // Determinar fecha límite - CRUCIAL: debe ser el último día a las 23:59:59
+        LocalDateTime fechaLimite;
+        if (evento.getFechaFinRepeticion() != null) {
+            // Asegurarse que la fecha límite es el ÚLTIMO MOMENTO del día especificado
+            fechaLimite = evento.getFechaFinRepeticion().withHour(23).withMinute(59).withSecond(59);
+            log.info("🎯 Usando fecha límite EXPLÍCITA: {}", fechaLimite);
+        } else {
+            // Si no hay fecha fin, usar el máximo de días
+            fechaLimite = evento.getFechaInicio().plusDays(MAX_INSTANCIAS_FUTURAS).withHour(23).withMinute(59).withSecond(59);
+            log.info("🎯 Usando fecha límite POR DEFECTO (365 días): {}", fechaLimite);
+        }
 
         int numeroRepeticion = 1;
+        java.time.Duration duracionTiempo = java.time.Duration.between(evento.getFechaInicio(), evento.getFechaFin());
+        int intervaloDias = evento.getTipoRepeticion().getIntervaloDias();
 
-        while (fechaActual.isBefore(fechaFin)) {
-            LocalDateTime fechaFinInstancia = fechaActual.plus(
-                java.time.Duration.between(evento.getFechaInicio(), evento.getFechaFin())
-            );
+        log.info("⏱️  Intervalo de repetición: {} días", intervaloDias);
+        log.info("⏱️  Duración del evento: {} horas", duracionTiempo.toHours());
+        log.info("📅 Generando instancias desde {} hasta {}", fechaActual, fechaLimite);
+
+        while (fechaActual.isBefore(fechaLimite) || fechaActual.isEqual(fechaLimite)) {
+            LocalDateTime fechaFinInstancia = fechaActual.plus(duracionTiempo);
+
+            // Verificación adicional: si la fecha inicio está DESPUÉS del límite, no crear
+            if (fechaActual.isAfter(fechaLimite)) {
+                log.debug("⛔ DETENIENDO: fechaActual ({}) está después del límite ({})", fechaActual, fechaLimite);
+                break;
+            }
 
             crearInstancia(evento, numeroRepeticion, fechaActual, fechaFinInstancia);
 
             // Calcular siguiente fecha
-            fechaActual = fechaActual.plusDays(evento.getTipoRepeticion().getIntervaloDias());
+            fechaActual = fechaActual.plusDays(intervaloDias);
             numeroRepeticion++;
+
+            // Verificación de seguridad para evitar bucles infinitos
+            if (numeroRepeticion > 1000) {
+                log.warn("⚠️ LÍMITE DE SEGURIDAD: Se alcanzó el máximo de 1000 instancias");
+                break;
+            }
         }
 
-        log.info("Se generaron {} instancias para el evento: {}", numeroRepeticion - 1, evento.getEventoId());
+        log.info("✅ SE GENERARON {} INSTANCIAS TOTALES\n", numeroRepeticion - 1);
     }
 
     @Override
@@ -424,6 +456,37 @@ public class EventoServiceImpl implements EventoService {
             .puntoEcaId(evento.getPuntoEca().getPuntoEcaID())
             .usuarioId(evento.getUsuario().getUsuarioId())
             .build();
+    }
+
+    @Override
+    public List<Evento> obtenerEventosPorPunto(String puntoId) {
+        try {
+            // Convertir el puntoId a UUID si es posible
+            UUID puntoUuid = null;
+            try {
+                puntoUuid = UUID.fromString(puntoId);
+            } catch (IllegalArgumentException e) {
+                log.warn("puntoId no es un UUID válido: {}", puntoId);
+                return new ArrayList<>();
+            }
+
+            // Obtener todos los eventos del punto con sus instancias precargadas
+            List<Evento> eventos = eventoRepository.findByPuntoEcaWithInstancias(puntoUuid);
+
+            log.info("Se encontraron {} eventos para el punto {}", eventos.size(), puntoId);
+
+            for (Evento evento : eventos) {
+                List<EventoInstancia> instancias = evento.getInstancias();
+                log.info("  ✅ Evento: {} - Instancias: {}",
+                    evento.getTitulo(),
+                    instancias != null ? instancias.size() : 0);
+            }
+
+            return eventos != null ? eventos : new ArrayList<>();
+        } catch (Exception e) {
+            log.error("Error obteniendo eventos del punto: {}", puntoId, e);
+            return new ArrayList<>();
+        }
     }
 }
 

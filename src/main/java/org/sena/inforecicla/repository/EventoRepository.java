@@ -137,12 +137,35 @@ public interface EventoRepository extends JpaRepository<Evento, UUID> {
     List<Evento> findByMaterial(@Param("materialId") UUID materialId);
 
     /**
-     * Obtiene eventos asociados a un centro de acopio específico.
+     * Obtiene eventos asociados a un centro de acopio especfico.
      *
      * @param centroAcopioId ID del centro de acopio
      * @return Lista de eventos del centro de acopio
      */
     @Query("SELECT e FROM Evento e WHERE e.centroAcopio.cntAcpId = :centroAcopioId ORDER BY e.fechaInicio DESC")
     List<Evento> findByCentroAcopio(@Param("centroAcopioId") UUID centroAcopioId);
+
+    /**
+     * Obtiene todos los eventos de un Punto ECA específico.
+     *
+     * @param puntoEcaId ID del Punto ECA
+     * @return Lista de eventos del punto
+     */
+    @Query("SELECT e FROM Evento e WHERE e.puntoEca.puntoEcaID = :puntoEcaId ORDER BY e.fechaInicio DESC")
+    List<Evento> findByPuntoEca_PuntoEcaID(@Param("puntoEcaId") UUID puntoEcaId);
+
+    /**
+     * Obtiene todos los eventos de un Punto ECA con eager loading de instancias.
+     *
+     * @param puntoEcaId ID del Punto ECA
+     * @return Lista de eventos con instancias precargadas
+     */
+    @Query("""
+        SELECT DISTINCT e FROM Evento e 
+        LEFT JOIN FETCH e.instancias
+        WHERE e.puntoEca.puntoEcaID = :puntoEcaId 
+        ORDER BY e.fechaInicio DESC
+        """)
+    List<Evento> findByPuntoEcaWithInstancias(@Param("puntoEcaId") UUID puntoEcaId);
 }
 

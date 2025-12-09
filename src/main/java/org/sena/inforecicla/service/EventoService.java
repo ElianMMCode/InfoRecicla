@@ -77,6 +77,14 @@ public interface EventoService {
      */
     List<Evento> obtenerEventosConRepeticion(UUID usuarioId, TipoRepeticion tipoRepeticion);
 
+    /**
+     * Obtiene todos los eventos de un Punto ECA.
+     *
+     * @param puntoId ID del Punto ECA (puede ser UUID o String)
+     * @return Lista de Evento del punto
+     */
+    List<Evento> obtenerEventosPorPunto(String puntoId);
+
     // ===== OPERACIONES DE INSTANCIAS =====
 
     /**

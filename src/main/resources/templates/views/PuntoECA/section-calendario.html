@@ -145,6 +145,70 @@
         </div>
     </div>
 
+    <!-- ===== MODAL PARA VER DETALLES DEL EVENTO ===== -->
+    <div class="modal fade" id="modalDetallesEvento" tabindex="-1" aria-labelledby="modalDetallesEventoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="modalDetallesEventoLabel">
+                        <i class="bi bi-calendar-event"></i> Detalles del Evento
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h5 class="text-success">
+                                <i class="bi bi-calendar-check"></i> <span id="detallesTitulo">Título del Evento</span>
+                            </h5>
+                            <hr>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Descripción:</strong>
+                            <p id="detallesDescripcion" class="text-muted">Sin descripción</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Material:</strong>
+                            <p id="detallesMaterial" class="text-muted">Sin material</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Fecha y Hora Inicio:</strong>
+                            <p id="detallesFechaInicio" class="text-muted">--</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Fecha y Hora Fin:</strong>
+                            <p id="detallesFechaFin" class="text-muted">--</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Centro de Acopio:</strong>
+                            <p id="detallesCentro" class="text-muted">Sin asignar</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-warning btn-sm" id="btnEditarEvento">
+                        <i class="bi bi-pencil"></i> Editar
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" id="btnBorrarEvento">
+                        <i class="bi bi-trash"></i> Borrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Script de FullCalendar -->
     <script th:src="@{/js/PuntoECA/fullcalendar.js}"></script>
 
