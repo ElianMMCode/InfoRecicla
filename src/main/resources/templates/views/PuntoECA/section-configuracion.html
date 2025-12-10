@@ -33,12 +33,12 @@
                             <label class="form-label" for="contrasenaNueva">Contraseña Nueva</label>
                             <input class="form-control" id="contrasenaNueva" name="contrasenaNueva" type="password" required
                                    minlength="8" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$">
-                            <small class="text-muted d-block">
-                                ✓ Mínimo 8 caracteres<br>
-                                ✓ Mayúsculas (A-Z)<br>
-                                ✓ Minúsculas (a-z)<br>
-                                ✓ Números (0-9)<br>
-                                ✓ Caracteres especiales (@$!%*?&)
+                            <small class="text-muted d-block mt-2">
+                                <div id="reqMinusculas">❌ Mínimo una letra minúscula (a-z)</div>
+                                <div id="reqMayusculas">❌ Mínimo una letra mayúscula (A-Z)</div>
+                                <div id="reqNumeros">❌ Mínimo un número (0-9)</div>
+                                <div id="reqEspeciales">❌ Mínimo un carácter especial (@$!%*?&)</div>
+                                <div id="reqLongitud">❌ Mínimo 8 caracteres</div>
                             </small>
                         </div>
 
@@ -49,7 +49,7 @@
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button class="btn btn-success" id="btnCambiarContrasena" type="button" disabled>
+                            <button class="btn btn-success" id="btnCambiarContrasena" type="button" onclick="cambiarContrasena()">
                                 <i class="bi bi-check-circle me-2"></i>Cambiar Contraseña
                             </button>
                         </div>
@@ -146,93 +146,4 @@
     </div>
 </section>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const contrasenaActual = document.getElementById('contrasenaActual');
-    const contrasenaNueva = document.getElementById('contrasenaNueva');
-    const confirmarContrasena = document.getElementById('confirmarContrasena');
-    const btnCambiar = document.getElementById('btnCambiarContrasena');
-    const mensajeCoincidencia = document.getElementById('mensajeCoincidencia');
-
-    function validarCoincidencia() {
-        if (contrasenaNueva.value && confirmarContrasena.value) {
-            if (contrasenaNueva.value === confirmarContrasena.value) {
-                confirmarContrasena.classList.remove('is-invalid');
-                confirmarContrasena.classList.add('is-valid');
-                mensajeCoincidencia.textContent = '✓ Las contraseñas coinciden';
-                mensajeCoincidencia.classList.add('text-success');
-                mensajeCoincidencia.classList.remove('text-danger');
-            } else {
-                confirmarContrasena.classList.remove('is-valid');
-                confirmarContrasena.classList.add('is-invalid');
-                mensajeCoincidencia.textContent = '✗ Las contraseñas no coinciden';
-                mensajeCoincidencia.classList.remove('text-success');
-                mensajeCoincidencia.classList.add('text-danger');
-            }
-        } else {
-            confirmarContrasena.classList.remove('is-valid', 'is-invalid');
-            mensajeCoincidencia.textContent = '';
-        }
-        actualizarEstadoBoton();
-    }
-
-    function validarRequisitos(password) {
-        const tieneMinuscula = /[a-z]/.test(password);
-        const tieneMayuscula = /[A-Z]/.test(password);
-        const tieneNumero = /\d/.test(password);
-        const tieneEspecial = /[@$!%*?&]/.test(password);
-        const tieneLongitud = password.length >= 8;
-
-        return tieneMinuscula && tieneMayuscula && tieneNumero && tieneEspecial && tieneLongitud;
-    }
-
-    function actualizarEstadoBoton() {
-        const todosLlenos = contrasenaActual.value && contrasenaNueva.value && confirmarContrasena.value;
-        const coinciden = contrasenaNueva.value === confirmarContrasena.value;
-        const valida = validarRequisitos(contrasenaNueva.value);
-
-        btnCambiar.disabled = !(todosLlenos && coinciden && valida);
-    }
-
-    // Event listeners
-    contrasenaNueva.addEventListener('input', function() {
-        validarCoincidencia();
-        actualizarEstadoBoton();
-    });
-    confirmarContrasena.addEventListener('input', function() {
-        validarCoincidencia();
-        actualizarEstadoBoton();
-    });
-    contrasenaActual.addEventListener('input', actualizarEstadoBoton);
-
-    // Enviar formulario
-    btnCambiar.addEventListener('click', function(e) {
-        e.preventDefault();
-
-        const formData = new FormData();
-        formData.append('contrasenaActual', contrasenaActual.value);
-        formData.append('contrasenaNueva', contrasenaNueva.value);
-        formData.append('confirmarContrasena', confirmarContrasena.value);
-
-        fetch('/punto-eca/cambiar-contrasena', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (response.redirected) {
-                window.location.href = response.url;
-            } else {
-                return response.text().then(text => {
-                    console.error('Error response:', text);
-                    alert('Error al cambiar la contraseña');
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error al cambiar la contraseña: ' + error);
-        });
-    });
-});
-</script>
 
