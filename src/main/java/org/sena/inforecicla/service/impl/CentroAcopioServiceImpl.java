@@ -1,9 +1,18 @@
 package org.sena.inforecicla.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.sena.inforecicla.dto.CentroAcopioCreateDTO;
 import org.sena.inforecicla.model.CentroAcopio;
+import org.sena.inforecicla.model.Localidad;
+import org.sena.inforecicla.model.PuntoECA;
+import org.sena.inforecicla.model.enums.TipoCentroAcopio;
+import org.sena.inforecicla.model.enums.Visibilidad;
 import org.sena.inforecicla.repository.CentroAcopioRepository;
 import org.sena.inforecicla.service.CentroAcopioService;
+import org.sena.inforecicla.service.LocalidadService;
+import org.sena.inforecicla.service.PuntoEcaService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,8 +26,94 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CentroAcopioServiceImpl implements CentroAcopioService {
 
-
+    private static final Logger logger = LoggerFactory.getLogger(CentroAcopioServiceImpl.class);
     private final CentroAcopioRepository centroAcopioRepository;
+    private final PuntoEcaService puntoEcaService;
+    private final LocalidadService localidadService;
+
+    @Override
+    public CentroAcopio crear(UUID puntoEcaId, CentroAcopioCreateDTO dto) {
+        logger.info("➕ [CENTRO-ACOPIO] Creando nuevo centro para punto: {}", puntoEcaId);
+        logger.info("   📋 Datos recibidos: nombre={}, tipo={}, celular={}, email={}, localidadId={}",
+                dto.getNombreCntAcp(), dto.getTipoCntAcp(), dto.getCelular(), dto.getEmail(), dto.getLocalidadId());
+
+        try {
+            // Validar que el PuntoECA exista
+            PuntoECA puntoEca = puntoEcaService.buscarPuntoEca(puntoEcaId)
+                    .orElseThrow(() -> new IllegalArgumentException("Punto ECA no encontrado: " + puntoEcaId));
+            logger.info("   ✅ Punto ECA encontrado: {}", puntoEca.getNombrePunto());
+
+            // Validar que la localidad exista
+            UUID localidadId = UUID.fromString(dto.getLocalidadId());
+            Localidad localidad = localidadService.buscarPorId(localidadId)
+                    .orElseThrow(() -> new IllegalArgumentException("Localidad no encontrada: " + localidadId));
+            logger.info("   ✅ Localidad encontrada: {}", localidad.getNombre());
+
+            // Crear la entidad CentroAcopio
+            CentroAcopio centro = CentroAcopio.builder()
+                    .nombreCntAcp(dto.getNombreCntAcp().trim())
+                    .nombreContactoCntAcp(dto.getNombreContactoCntAcp() != null ?
+                                         dto.getNombreContactoCntAcp().trim() : null)
+                    .nota(dto.getNota() != null ? dto.getNota().trim() : null)
+                    .descripcion(dto.getDescripcion() != null ? dto.getDescripcion().trim() : null)
+                    .puntoEca(puntoEca)
+                    .build();
+
+            // Establecer campos heredados (atributos de la clase base)
+            centro.setLocalidad(localidad);
+            if (dto.getCiudad() != null) {
+                centro.setCiudad(dto.getCiudad().trim());
+            }
+            centro.setLatitud(dto.getLatitud() != null ? dto.getLatitud() : 0.0);
+            centro.setLongitud(dto.getLongitud() != null ? dto.getLongitud() : 0.0);
+
+            // Establecer atributos heredados
+            if (dto.getCelular() != null) {
+                centro.setCelular(dto.getCelular().trim());
+            }
+            if (dto.getEmail() != null) {
+                centro.setEmail(dto.getEmail().trim());
+            }
+
+            // Convertir el tipo a enum
+            if (dto.getTipoCntAcp() != null && !dto.getTipoCntAcp().trim().isEmpty()) {
+                try {
+                    String tipoValue = dto.getTipoCntAcp().trim();
+                    TipoCentroAcopio tipo = TipoCentroAcopio.porTipo(tipoValue);
+                    centro.setTipoCntAcp(tipo);
+                    logger.info("   ✅ Tipo convertido: {}", tipo.getTipo());
+                } catch (IllegalArgumentException e) {
+                    logger.error("   ❌ Tipo de centro inválido: {}", dto.getTipoCntAcp());
+                    throw new IllegalArgumentException("Tipo de centro no válido. Valores permitidos: Planta, Proveedor, OTRO");
+                }
+            }
+
+            // Establecer visibilidad (ECA por defecto para centros de un punto)
+            Visibilidad visibilidad = Visibilidad.ECA;
+            if (dto.getVisibilidad() != null && !dto.getVisibilidad().isEmpty()) {
+                try {
+                    visibilidad = Visibilidad.valueOf(dto.getVisibilidad().toUpperCase());
+                    logger.info("   ✅ Visibilidad establecida: {}", visibilidad.getAlcance());
+                } catch (IllegalArgumentException e) {
+                    logger.warn("   ⚠️ Visibilidad inválida, usando ECA por defecto");
+                    visibilidad = Visibilidad.ECA;
+                }
+            } else {
+                logger.info("   ℹ️ Visibilidad no especificada, usando ECA por defecto");
+            }
+            centro.setVisibilidad(visibilidad);
+
+            // Guardar el centro
+            CentroAcopio centroGuardado = centroAcopioRepository.save(centro);
+            logger.info("   ✅ Centro creado exitosamente: {}", centroGuardado.getCntAcpId());
+
+            return centroGuardado;
+
+        } catch (Exception e) {
+            logger.error("   ❌ Error al crear centro: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
 
     @Override
     public List<CentroAcopio> listaCentrosPorPuntoEca(UUID puntoEcaId) {
@@ -36,11 +131,11 @@ public class CentroAcopioServiceImpl implements CentroAcopioService {
     @Override
     public List<CentroAcopio> obtenerCentrosPuntoYGlobales(UUID puntoEcaId) {
         try {
-            System.out.println("🎯 Buscando centros para punto: " + puntoEcaId);
+            logger.info("🎯 Buscando centros para punto: {}", puntoEcaId);
 
             // Obtener TODOS los centros con localidad cargada
             List<CentroAcopio> todosCentros = centroAcopioRepository.findAllWithLocalidad();
-            System.out.println("📊 Total de centros en BD: " + todosCentros.size());
+            logger.info("📊 Total de centros en BD: {}", todosCentros.size());
 
             // Filtrar en memoria:
             // 1. Centros que pertenecen a ESTE punto específico (puntoEca.puntoEcaID == puntoEcaId)
@@ -51,30 +146,31 @@ public class CentroAcopioServiceImpl implements CentroAcopioService {
                         if (c.getPuntoEca() != null &&
                             c.getPuntoEca().getPuntoEcaID() != null &&
                             c.getPuntoEca().getPuntoEcaID().equals(puntoEcaId)) {
-                            System.out.println("  ✅ Centro DEL PUNTO: " + c.getNombreCntAcp() +
-                                             " (Localidad: " + (c.getLocalidad() != null ? c.getLocalidad().getNombre() : "SIN LOCALIDAD") + ")");
+                            logger.info("  ✅ Centro DEL PUNTO: {} (Localidad: {})",
+                                    c.getNombreCntAcp(),
+                                    c.getLocalidad() != null ? c.getLocalidad().getNombre() : "SIN LOCALIDAD");
                             return true;
                         }
 
                         // Caso 2: Centro global (sin punto asignado)
                         if (c.getPuntoEca() == null) {
-                            System.out.println("  🌍 Centro GLOBAL: " + c.getNombreCntAcp() +
-                                             " (Localidad: " + (c.getLocalidad() != null ? c.getLocalidad().getNombre() : "SIN LOCALIDAD") + ")");
+                            logger.info("  🌍 Centro GLOBAL: {} (Localidad: {})",
+                                    c.getNombreCntAcp(),
+                                    c.getLocalidad() != null ? c.getLocalidad().getNombre() : "SIN LOCALIDAD");
                             return true;
                         }
 
                         // No incluir: centros de otros puntos
-                        System.out.println("  ❌ Centro IGNORADO (otro punto): " + c.getNombreCntAcp());
+                        logger.debug("  ❌ Centro IGNORADO (otro punto): {}", c.getNombreCntAcp());
                         return false;
                     })
                     .toList();
 
-            System.out.println("✅ Total retornado: " + resultado.size());
+            logger.info("✅ Total retornado: {}", resultado.size());
             return resultado;
 
         } catch (Exception e) {
-            System.err.println("❌ Error en obtenerCentrosPuntoYGlobales: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("❌ Error en obtenerCentrosPuntoYGlobales: {}", e.getMessage(), e);
             return new ArrayList<>();
         }
     }
@@ -82,9 +178,7 @@ public class CentroAcopioServiceImpl implements CentroAcopioService {
     @Override
     public CentroAcopio obtenerPorId(UUID centroAcopioId) {
         return centroAcopioRepository.findById(centroAcopioId)
-                .orElseThrow(() -> {
-                    return new IllegalArgumentException("Centro de acopio no encontrado: " + centroAcopioId);
-                });
+                .orElseThrow(() -> new IllegalArgumentException("Centro de acopio no encontrado: " + centroAcopioId));
     }
 
     @Override
@@ -113,6 +207,9 @@ public class CentroAcopioServiceImpl implements CentroAcopioService {
         }
         if (centroActualizado.getNota() != null && !centroActualizado.getNota().isEmpty()) {
             centroExistente.setNota(centroActualizado.getNota());
+        }
+        if (centroActualizado.getTipoCntAcp() != null) {
+            centroExistente.setTipoCntAcp(centroActualizado.getTipoCntAcp());
         }
 
         return centroAcopioRepository.save(centroExistente);

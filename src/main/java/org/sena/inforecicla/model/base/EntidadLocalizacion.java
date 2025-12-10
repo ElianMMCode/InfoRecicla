@@ -13,8 +13,8 @@ import org.sena.inforecicla.model.Localidad;
 @Setter
 public abstract class EntidadLocalizacion extends EntidadContacto {
 
-    @Column(length = 15,nullable = false)
-    private String ciudad;
+    @Column(length = 15, nullable = false)
+    private String ciudad = "Bogotá";
 
     @NotNull(message = "Debe escoger una localidad")
     @ManyToOne(fetch = FetchType.LAZY)
