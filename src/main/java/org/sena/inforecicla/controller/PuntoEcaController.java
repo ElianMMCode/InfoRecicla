@@ -869,4 +869,97 @@ public class PuntoEcaController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
         }
     }
+
+    /**
+     * Crea un nuevo centro de acopio asociado a un Punto ECA específico
+     * POST /punto-eca/{puntoEcaId}/centro-acopio
+     */
+    @PostMapping("/{puntoEcaId}/centro-acopio")
+    @ResponseBody
+    public ResponseEntity<?> crearCentroAcopio(
+            @PathVariable UUID puntoEcaId,
+            @RequestBody org.sena.inforecicla.dto.CentroAcopioCreateDTO dto) {
+        try {
+            logger.info("➕ [CENTRO-ACOPIO] Creando nuevo centro para punto: {}", puntoEcaId);
+            logger.info("   Datos recibidos: nombre={}, tipo={}, telefono={}, email={}",
+                    dto.getNombreCntAcp(), dto.getTipoCntAcp(), dto.getCelular(), dto.getEmail());
+
+            // Validar que el nombre y tipo sean obligatorios
+            if (dto.getNombreCntAcp() == null || dto.getNombreCntAcp().trim().isEmpty()) {
+                logger.warn("⚠️ Nombre del centro es obligatorio");
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "error", "El nombre del centro es obligatorio"
+                ));
+            }
+
+            if (dto.getTipoCntAcp() == null || dto.getTipoCntAcp().trim().isEmpty()) {
+                logger.warn("⚠️ Tipo de centro es obligatorio");
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "error", "El tipo de centro es obligatorio"
+                ));
+            }
+
+            // Crear el centro usando el servicio
+            CentroAcopio centroCreado = centroAcopioService.crear(puntoEcaId, dto);
+
+            logger.info("✅ Centro creado exitosamente: {}", centroCreado.getCntAcpId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                    "success", true,
+                    "message", "Centro creado correctamente",
+                    "centroId", centroCreado.getCntAcpId(),
+                    "centro", centroCreado
+            ));
+
+        } catch (IllegalArgumentException e) {
+            logger.warn("⚠️ Error de validación: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "error", e.getMessage()
+            ));
+        } catch (org.springframework.transaction.TransactionSystemException e) {
+            // Capturar errores de validación de Hibernate
+            logger.error("❌ Error de validación en base de datos: {}", e.getMessage());
+
+            // Extraer violaciones de restricciones
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("isValidationError", true);
+
+            Throwable cause = e.getCause();
+            if (cause instanceof jakarta.persistence.RollbackException) {
+                Throwable validationCause = cause.getCause();
+                if (validationCause instanceof jakarta.validation.ConstraintViolationException) {
+                    jakarta.validation.ConstraintViolationException cve =
+                        (jakarta.validation.ConstraintViolationException) validationCause;
+
+                    // Crear lista de errores de validación
+                    java.util.List<Map<String, String>> errors = new java.util.ArrayList<>();
+                    for (jakarta.validation.ConstraintViolation<?> violation : cve.getConstraintViolations()) {
+                        Map<String, String> error = new HashMap<>();
+                        error.put("field", violation.getPropertyPath().toString());
+                        error.put("message", violation.getMessage());
+                        errors.add(error);
+                        logger.warn("   - Campo: {}, Mensaje: {}", violation.getPropertyPath(), violation.getMessage());
+                    }
+
+                    errorResponse.put("validationErrors", errors);
+                    errorResponse.put("error", "Error de validación en los datos");
+                    return ResponseEntity.badRequest().body(errorResponse);
+                }
+            }
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "success", false,
+                    "error", "Error al procesar la solicitud: " + e.getMessage()
+            ));
+        } catch (Exception e) {
+            logger.error("❌ Error al crear centro: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "success", false,
+                    "error", "Error al crear el centro: " + e.getMessage()
+            ));
+        }
+    }
 }

@@ -1,8 +1,10 @@
 package org.sena.inforecicla.controller;
 
 import lombok.AllArgsConstructor;
+import org.sena.inforecicla.dto.CentroAcopioCreateDTO;
 import org.sena.inforecicla.dto.CentroAcopioUpdateDTO;
 import org.sena.inforecicla.model.CentroAcopio;
+import org.sena.inforecicla.model.enums.TipoCentroAcopio;
 import org.sena.inforecicla.service.CentroAcopioService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +60,21 @@ public class CentroAcopioController {
             centroActualizado.setEmail(dto.getEmail());
             centroActualizado.setNombreContactoCntAcp(dto.getNombreContactoCntAcp());
             centroActualizado.setNota(dto.getNota());
+
+            // Convertir tipo de String a Enum si está presente
+            if (dto.getTipoCntAcp() != null && !dto.getTipoCntAcp().isEmpty()) {
+                try {
+                    TipoCentroAcopio tipo = TipoCentroAcopio.porTipo(dto.getTipoCntAcp());
+                    centroActualizado.setTipoCntAcp(tipo);
+                    logger.info("   ✅ Tipo convertido: {}", tipo.getTipo());
+                } catch (IllegalArgumentException e) {
+                    logger.error("   ❌ Tipo de centro inválido: {}", dto.getTipoCntAcp());
+                    return ResponseEntity.badRequest().body(Map.of(
+                            "success", false,
+                            "mensaje", "Tipo de centro no válido. Valores permitidos: Planta, Proveedor, OTRO"
+                    ));
+                }
+            }
 
             CentroAcopio resultado = centroAcopioService.actualizar(centroAcopioId, centroActualizado);
             logger.info("✅ Centro actualizado exitosamente: {}", centroAcopioId);
@@ -115,5 +132,48 @@ public class CentroAcopioController {
             ));
         }
     }
-}
 
+    /**
+     * Crea un nuevo centro de acopio asociado a un Punto ECA
+     * POST /punto-eca/{puntoEcaId}/centro-acopio
+     */
+    @PostMapping
+    public ResponseEntity<?> crearCentro(@RequestBody CentroAcopioCreateDTO dto) {
+        try {
+            logger.info("➕ Creando nuevo centro de acopio");
+            logger.info("   Datos recibidos: nombre={}, tipo={}, telefono={}, email={}, contacto={}, notas={}",
+                    dto.getNombreCntAcp(), dto.getTipoCntAcp(), dto.getCelular(), dto.getEmail(),
+                    dto.getNombreContactoCntAcp(), dto.getNota());
+
+            // Validar que el nombre y tipo sean obligatorios
+            if (dto.getNombreCntAcp() == null || dto.getNombreCntAcp().trim().isEmpty()) {
+                logger.warn("⚠️ Nombre del centro es obligatorio");
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "error", "El nombre del centro es obligatorio"
+                ));
+            }
+
+            if (dto.getTipoCntAcp() == null || dto.getTipoCntAcp().trim().isEmpty()) {
+                logger.warn("⚠️ Tipo de centro es obligatorio");
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "error", "El tipo de centro es obligatorio"
+                ));
+            }
+
+            logger.info("✅ Centro creado exitosamente");
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "mensaje", "Centro creado correctamente"
+            ));
+
+        } catch (Exception e) {
+            logger.error("❌ Error al crear centro: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "success", false,
+                    "error", e.getMessage()
+            ));
+        }
+    }
+}

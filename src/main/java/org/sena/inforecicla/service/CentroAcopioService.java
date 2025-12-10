@@ -1,5 +1,6 @@
 package org.sena.inforecicla.service;
 
+import org.sena.inforecicla.dto.CentroAcopioCreateDTO;
 import org.sena.inforecicla.model.CentroAcopio;
 
 import java.util.List;
@@ -9,6 +10,15 @@ import java.util.UUID;
  * Servicio para gestionar operaciones relacionadas con Centros de Acopio
  */
 public interface CentroAcopioService {
+
+    /**
+     * Crea un nuevo centro de acopio asociado a un Punto ECA
+     *
+     * @param puntoEcaId ID del Punto ECA
+     * @param dto DTO con los datos del centro a crear
+     * @return Centro de acopio creado
+     */
+    CentroAcopio crear(UUID puntoEcaId, CentroAcopioCreateDTO dto);
 
     /**
      * Obtiene todos los centros de acopio asociados a un Punto ECA específico
