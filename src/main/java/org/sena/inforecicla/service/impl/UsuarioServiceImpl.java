@@ -34,12 +34,52 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public UsuarioGestorResponseDTO crearUsuarioGestorEca(UsuarioRequestDTO dto) {
-        return null;
+        try {
+            // Validaciones previas
+            validarDatosUnicos(dto.email(), dto.celular(), null);
+
+            // Buscar la localidad
+            Localidad localidad = localidadRepository.findByNombreIgnoreCase(dto.localidad())
+                    .orElseThrow(() -> new RuntimeException("Localidad '" + dto.localidad() + "' no encontrada"));
+
+            // Crear el usuario (gestor del ECA)
+            Usuario usuario = new Usuario();
+            usuario.setNombres(dto.nombres());
+            usuario.setApellidos(dto.apellidos());
+            usuario.setEmail(dto.email());
+            usuario.setCelular(dto.celular());
+            usuario.setPassword(passwordEncoder.encode(dto.password()));
+            usuario.setTipoUsuario(TipoUsuario.GestorECA);
+            usuario.setTipoDocumento(dto.tipoDocumento());
+            usuario.setNumeroDocumento(dto.numeroDocumento());
+            usuario.setFechaNacimiento(dto.fechaNacimiento());
+            usuario.setCiudad(dto.ciudad());
+            usuario.setLocalidad(localidad);
+            usuario.setFotoPerfil(dto.fotoPerfil());
+            usuario.setEstado(Estado.Activo);
+            usuario.setActivo(true);
+
+            Usuario usuarioGuardado = usuarioRepository.save(usuario);
+
+            return UsuarioGestorResponseDTO.derivado(usuarioGuardado, null);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al crear gestor ECA: " + e.getMessage(), e);
+        }
     }
 
     @Override
     public UsuarioGestorResponseDTO buscarPorId(UUID id) {
-        return null;
+        try {
+            Usuario usuario = usuarioRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+
+            // Si tiene punto ECA asociado, obtenerlo
+            PuntoECA puntoEca = puntoEcaRepository.findByUsuario_UsuarioId(id).orElse(null);
+
+            return UsuarioGestorResponseDTO.derivado(usuario, puntoEca);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al buscar usuario: " + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -76,15 +116,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
             Usuario usuarioGuardado = usuarioRepository.save(usuario);
 
-            return new UsuarioResponseDTO(
-                    usuarioGuardado.getUsuarioId(),
-                    usuarioGuardado.getNombres(),
-                    usuarioGuardado.getApellidos(),
-                    usuarioGuardado.getEmail(),
-                    usuarioGuardado.getCelular(),
-                    usuarioGuardado.getTipoUsuario().toString(),
-                    "Ciudadano registrado exitosamente"
-            );
+            return UsuarioResponseDTO.derivado(usuarioGuardado);
         } catch (Exception e) {
             throw new RuntimeException("Error al registrar ciudadano: " + e.getMessage(), e);
         }
@@ -128,7 +160,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
             // Crear el Punto ECA asociado
             PuntoECA puntoEca = new PuntoECA();
-            puntoEca.setNombrePunto(dto.nombres()); // Usar el nombre de la institución
+            puntoEca.setNombrePunto(dto.nombres());
             puntoEca.setDescripcion(dto.descripcion());
             puntoEca.setUsuario(usuarioGuardado);
 
@@ -148,15 +180,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
             puntoEcaRepository.save(puntoEca);
 
-            return new UsuarioResponseDTO(
-                    usuarioGuardado.getUsuarioId(),
-                    usuarioGuardado.getNombres(),
-                    usuarioGuardado.getApellidos(),
-                    usuarioGuardado.getEmail(),
-                    usuarioGuardado.getCelular(),
-                    usuarioGuardado.getTipoUsuario().toString(),
-                    "Punto ECA registrado exitosamente"
-            );
+            return UsuarioResponseDTO.derivado(usuarioGuardado);
         } catch (Exception e) {
             throw new RuntimeException("Error al registrar Punto ECA: " + e.getMessage(), e);
         }

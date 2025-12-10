@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ public class DashboardController {
     private PuntoEcaRepository puntoEcaRepository;
 
     @GetMapping("")
+    @Transactional(readOnly = true)
     public String dashboard(Model model, HttpServletRequest request) {
         log.info("🏠 Acceso al dashboard desde: {}", request.getRequestURI());
         log.info("🔍 Query string: {}", request.getQueryString());
@@ -62,7 +64,7 @@ public class DashboardController {
                     }
                 case Ciudadano:
                     log.info("👥 Redirigiendo a dashboard de ciudadano");
-                    return "dashboard/ciudadano-dashboard";
+                    return "redirect:/ciudadano/" + usuario.getUsuarioId();
                 default:
                     log.info("❓ Tipo de usuario desconocido, usando dashboard general");
                     return "dashboard/general-dashboard";
