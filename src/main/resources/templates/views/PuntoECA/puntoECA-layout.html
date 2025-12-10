@@ -172,6 +172,16 @@
                             </ul>
                         </div>
                     </li>
+
+                    <!-- CERRAR SESIÓN -->
+                    <li class="nav-item mt-3 border-top border-white-50 pt-3">
+                        <form th:action="@{/logout}" method="post" class="w-100">
+                            <button type="submit" class="nav-link w-100 text-start d-flex align-items-center text-danger bg-danger-subtle rounded"
+                                    style="border: none; padding: 0.5rem 0.75rem;">
+                                <i class="bi bi-box-arrow-left me-2"></i>Cerrar Sesión
+                            </button>
+                        </form>
+                    </li>
                 </ul>
             </nav>
 
@@ -240,12 +250,24 @@
                            th:attr="aria-current=${#strings.equals(seccion,'configuracion') ? 'page' : null}"
                            th:href="@{'/punto-eca/' +${gestor}+'/'+ ${usuario.usuarioId} + '/configuracion'}">Configuración</a>
                     </li>
+                    <li class="nav-item">
+                        <form th:action="@{/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="nav-link text-white bg-danger-subtle border-bottom border-3 border-danger rounded-bottom"
+                                    style="border: none; padding: 0.5rem 1rem;">Logout</button>
+                        </form>
+                    </li>
                 </ul>
             </nav>
         </div>
 
         <!-- Main content column (offset on md+ so it doesn't go under the fixed sidebar) -->
         <main class="col offset-md-2 p-4 pt-5 pt-md-0">
+            <!-- Header con nombre del Punto ECA -->
+            <div class="mb-4 pb-3 border-bottom">
+                <h1 class="h2 fw-bold text-success mb-1">Punto ECA</h1>
+                <p class="text-muted mb-0" th:text="${usuario.nombrePunto}"></p>
+            </div>
+
             <div th:switch="${#strings.isEmpty(seccion) ? 'resumen' : seccion}">
                 <div th:case="'resumen'" th:insert="~{views/PuntoECA/section-resumen :: resumen}"></div>
                 <div th:case="'perfil'" th:insert="~{views/PuntoECA/section-perfil :: perfil}"></div>

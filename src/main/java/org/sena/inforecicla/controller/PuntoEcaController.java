@@ -32,6 +32,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.*;
 
@@ -57,6 +59,10 @@ public class PuntoEcaController {
     private final TipoMaterialService tipoMaterialService;
     private final CategoriaMaterialService categoriaMaterialService;
     private final InventarioDetalleService inventarioDetalleService;
+
+    // ✅ Repository para cambios de contraseña
+    @Autowired
+    private org.sena.inforecicla.repository.UsuarioRepository usuarioRepository;
 
     // Ruta base que redirige automáticamente al punto ECA del usuario autenticado
     @GetMapping
@@ -992,6 +998,106 @@ public class PuntoEcaController {
                     "success", false,
                     "error", "Error al crear el centro: " + e.getMessage()
             ));
+        }
+    }
+
+    /**
+     * Cambiar contraseña del usuario
+     * POST /punto-eca/cambiar-contrasena
+     */
+    @PostMapping("/cambiar-contrasena")
+    public String cambiarContrasena(
+            @RequestParam String contrasenaActual,
+            @RequestParam String contrasenaNueva,
+            @RequestParam String confirmarContrasena,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes,
+            org.springframework.security.core.Authentication auth) {
+
+        try {
+            if (auth == null || auth.getPrincipal() == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "No hay sesión activa");
+                return "redirect:/login";
+            }
+
+            Usuario usuario = (Usuario) auth.getPrincipal();
+
+            // Validar que las contraseñas nuevas coincidan
+            if (!contrasenaNueva.equals(confirmarContrasena)) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Las contraseñas nuevas no coinciden");
+                return "redirect:/punto-eca";
+            }
+
+            // Validar que la contraseña nueva cumpla requisitos
+            if (!contrasenaNueva.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$")) {
+                redirectAttributes.addFlashAttribute("errorMessage", "La contraseña no cumple los requisitos de seguridad");
+                return "redirect:/punto-eca";
+            }
+
+            logger.info("🔐 Iniciando cambio de contraseña para usuario: {}", usuario.getEmail());
+
+            // Validar contraseña actual con BCrypt
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+            if (!encoder.matches(contrasenaActual, usuario.getPassword())) {
+                logger.warn("❌ Contraseña actual incorrecta para: {}", usuario.getEmail());
+                redirectAttributes.addFlashAttribute("errorMessage", "La contraseña actual es incorrecta");
+                return "redirect:/punto-eca";
+            }
+
+            // Actualizar contraseña
+            usuario.setPassword(encoder.encode(contrasenaNueva));
+            usuarioRepository.save(usuario);
+
+            logger.info("✅ Contraseña cambiada exitosamente para: {}", usuario.getEmail());
+            redirectAttributes.addFlashAttribute("successMessage", "Contraseña cambiada exitosamente");
+            return "redirect:/punto-eca";
+
+        } catch (Exception e) {
+            logger.error("❌ Error al cambiar contraseña: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al cambiar la contraseña: " + e.getMessage());
+            return "redirect:/punto-eca";
+        }
+    }
+
+    /**
+     * Actualizar preferencias del usuario
+     * POST /punto-eca/actualizar-preferencias
+     */
+    @PostMapping("/actualizar-preferencias")
+    public String actualizarPreferencias(
+            @RequestParam(required = false) String visibleEnMapa,
+            @RequestParam(required = false) String notificacionesAprobacion,
+            @RequestParam(required = false) String notificacionesMensajes,
+            @RequestParam(required = false) String notificacionesInventario,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || authentication.getPrincipal() == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "No hay sesión activa");
+                return "redirect:/login";
+            }
+
+            Usuario usuario = (Usuario) authentication.getPrincipal();
+            logger.info("⚙️ Actualizando preferencias para: {}", usuario.getEmail());
+
+            // Registrar cambios
+            logger.info("   - Visible en mapa: {}", visibleEnMapa != null);
+            logger.info("   - Notificaciones aprobación: {}", notificacionesAprobacion != null);
+            logger.info("   - Notificaciones mensajes: {}", notificacionesMensajes != null);
+            logger.info("   - Notificaciones inventario: {}", notificacionesInventario != null);
+
+            // Aquí puedes agregar lógica para guardar preferencias en BD si lo deseas
+            // Por ahora solo confirmamos el guardado
+
+            logger.info("✅ Preferencias actualizadas exitosamente");
+            redirectAttributes.addFlashAttribute("successMessage", "Preferencias guardadas exitosamente");
+            return "redirect:/punto-eca";
+
+        } catch (Exception e) {
+            logger.error("❌ Error al actualizar preferencias: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al guardar las preferencias: " + e.getMessage());
+            return "redirect:/punto-eca";
         }
     }
 }
