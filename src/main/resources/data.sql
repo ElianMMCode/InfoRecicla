@@ -463,26 +463,6 @@ INSERT IGNORE INTO `usuario` (
     `fecha_creacion`,
     `fecha_actualizacion`
 ) VALUES
-      ('1d5437da-7bb7-4e77-b548-5633118c2b85',
-       'Admin',
-       'InfoRecicla',
-       '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
-       'Admin',
-       'CC',
-       '900000001',
-       NULL,
-       '3000000000',
-       'admin@inforecicla.org',
-       'BOGOTA',
-       'a1b2c3d4-e5f6-47a9-b12d-cdef01234501',
-       NULL,
-       'Cuenta administrativa principal del sistema InfoRecicla.',
-       NULL,
-       NULL,
-       'Activo',
-       NOW(),
-       NOW()),
-
       ('33333333-3333-3333-3333-333333333333',
        'Laura',
        'García',
@@ -1000,3 +980,9 @@ INSERT IGNORE INTO `venta_inventario` (
        'Activo',
        NOW(),
        NOW());
+
+/* =========================================================
+  NOTA: El usuario admin se crea automáticamente en DataInitializer.java
+  usando el PasswordEncoder de Spring para encriptar la contraseña
+  ========================================================= */
+

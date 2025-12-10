@@ -1,5 +1,6 @@
 package org.sena.inforecicla.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.sena.inforecicla.dto.puntoEca.gestor.GestorUpdateDTO;
@@ -18,8 +19,10 @@ import org.sena.inforecicla.exception.PuntoEcaNotFoundException;
 import org.sena.inforecicla.model.CentroAcopio;
 import org.sena.inforecicla.model.CompraInventario;
 import org.sena.inforecicla.model.Localidad;
+import org.sena.inforecicla.model.Usuario;
 import org.sena.inforecicla.model.enums.Alerta;
 import org.sena.inforecicla.model.enums.TipoDocumento;
+import org.sena.inforecicla.model.enums.TipoUsuario;
 import org.sena.inforecicla.model.enums.UnidadMedida;
 import org.sena.inforecicla.service.*;
 import org.slf4j.Logger;
@@ -32,8 +35,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-
-import java.util.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Controller
 @AllArgsConstructor
@@ -54,6 +57,35 @@ public class PuntoEcaController {
     private final TipoMaterialService tipoMaterialService;
     private final CategoriaMaterialService categoriaMaterialService;
     private final InventarioDetalleService inventarioDetalleService;
+
+    // Ruta base que redirige automáticamente al punto ECA del usuario autenticado
+    @GetMapping
+    public String puntoEcaBase(HttpServletRequest request) {
+        // Obtener el usuario autenticado
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof Usuario) {
+            Usuario usuario = (Usuario) auth.getPrincipal();
+
+            // Si es GestorECA, buscar su punto ECA y redirigir
+            if (usuario.getTipoUsuario() == TipoUsuario.GestorECA) {
+                try {
+                    // Buscar el punto ECA asociado al usuario
+                    UsuarioGestorResponseDTO gestorData = gestorEcaService.buscarGestorPuntoEca(usuario.getUsuarioId());
+                    if (gestorData != null && gestorData.puntoEcaId() != null) {
+                        String nombrePunto = gestorData.nombrePunto() != null ?
+                            gestorData.nombrePunto().replace(" ", "-") : "punto-eca";
+                        return "redirect:/punto-eca/" + nombrePunto + "/" + usuario.getUsuarioId();
+                    }
+                } catch (Exception e) {
+                    logger.warn("Error al buscar punto ECA para usuario {}: {}", usuario.getUsuarioId(), e.getMessage());
+                }
+            }
+        }
+
+        // Si no se puede determinar el punto ECA, redirigir al dashboard
+        return "redirect:/dashboard";
+    }
 
     // Vista principal con usuarioId
     @GetMapping("/{nombrePunto}/{gestorId}")
