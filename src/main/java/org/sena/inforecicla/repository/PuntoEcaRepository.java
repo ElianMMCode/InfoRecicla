@@ -10,4 +10,6 @@ public interface PuntoEcaRepository extends BaseRepository<PuntoECA, UUID> {
     Optional<PuntoECA> findByPuntoEcaIDAndGestorId(UUID puntoEcaId, UUID usuarioId);
 
     Optional<PuntoECA> findByPuntoEcaIDAndEstado(UUID puntoEcaID, Estado estado);
+
+    Optional<PuntoECA> findByUsuario_UsuarioId(UUID usuarioId);
 }

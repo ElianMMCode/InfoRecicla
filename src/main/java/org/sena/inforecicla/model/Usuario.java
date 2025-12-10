@@ -6,8 +6,11 @@ import lombok.*;
 import org.sena.inforecicla.model.base.EntidadLocalizacion;
 import org.sena.inforecicla.model.enums.TipoDocumento;
 import org.sena.inforecicla.model.enums.TipoUsuario;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,16 +20,10 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@AttributeOverrides({
-        @AttributeOverride(name = "celular", column = @Column(name = "celular", nullable = false, length = 10, unique = true)),
-        @AttributeOverride(name = "email", column = @Column(name = "email", nullable = false, unique = true, length = 150)),
-        @AttributeOverride(name = "ciudad", column = @Column(name = "ciudad", length = 15)),
-        @AttributeOverride(name = "localidad", column = @Column(name = "localidad", nullable = false, length = 20))
-})
-public class Usuario extends EntidadLocalizacion {
+public class Usuario extends EntidadLocalizacion implements UserDetails {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false, updatable = false)
     private UUID usuarioId;
 
@@ -44,7 +41,7 @@ public class Usuario extends EntidadLocalizacion {
     @NotBlank
     @Size(min = 8, max = 60)
     @Pattern(
-            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).+$",
+            regexp = "^(\\$2[abyv]\\$\\d{2}\\$.{53}|(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).{8,})$",
             message = "Debe incluir mayúscula, minúscula, número y símbolo"
     )
     private String password;
@@ -86,5 +83,49 @@ public class Usuario extends EntidadLocalizacion {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Votos> votosRealizados;
 
+    @Column(name = "activo", nullable = false)
+    private Boolean activo = true;
 
+    // Métodos de UserDetails
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        // Agregar autoridad basada en el tipo de usuario
+        authorities.add(() -> "ROLE_" + this.tipoUsuario.name());
+        return authorities;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.activo;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.getEmail();
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 }
+
+
+
+

@@ -1,0 +1,142 @@
+DIAGNÓSTICO DE LOGIN - PASOS A SEGUIR
+═════════════════════════════════════════════════════════════════════════════
+
+PASO 1: EJECUTAR SQL DE DIAGNÓSTICO
+────────────────────────────────────────────────────────────────────────────
+
+Abre tu cliente MySQL/MariaDB y ejecuta:
+$ mysql -u root -p inforecicla < diagnose_admin_login.sql
+
+O copia y pega manualmente en tu cliente:
+
+```sql
+-- Ver si existe el usuario admin
+SELECT
+    usuario_id,
+    email,
+    nombres,
+    tipo_usuario,
+    activo,
+    estado,
+    CHAR_LENGTH(password) as password_length
+FROM usuario
+WHERE email = 'admin@inforecicla.com';
+
+-- Ver todos los usuarios
+SELECT email, tipo_usuario, activo FROM usuario;
+```
+
+PASO 2: VERIFICAR RESULTADOS
+────────────────────────────────────────────────────────────────────────────
+
+Si NO aparece admin@inforecicla.com:
+  → El usuario NO se creó. Ejecuta setup_admin_correcto.sql
+
+Si APARECE admin@inforecicla.com pero con:
+  - activo = 0 (false): Ejecuta UPDATE para activarlo
+  - estado = 'Suspendido' o 'Inactivo': Cambia a 'Activo'
+  - password = NULL o vacío: Necesita contraseña
+
+PASO 3: INSERTAR/ACTUALIZAR ADMIN CORRECTO
+────────────────────────────────────────────────────────────────────────────
+
+Ejecuta este script para asegurar que el admin esté correcto:
+
+```sql
+-- 1. Obtener localidad o crearla
+SET @localidad_id = (SELECT localidad_id FROM localidad WHERE nombre = 'Chapinero' LIMIT 1);
+
+INSERT INTO localidad (localidad_id, nombre, estado, fecha_creacion, fecha_actualizacion)
+SELECT UUID(), 'Chapinero', 'Activo', NOW(), NOW()
+WHERE NOT EXISTS (SELECT 1 FROM localidad WHERE nombre = 'Chapinero');
+
+SET @localidad_id = (SELECT localidad_id FROM localidad WHERE nombre = 'Chapinero' LIMIT 1);
+
+-- 2. Eliminar admin anterior (si existe)
+DELETE FROM usuario WHERE email = 'admin@inforecicla.com';
+
+-- 3. Insertar admin con contraseña correcta
+INSERT INTO usuario (
+    usuario_id, nombres, apellidos, email, celular, password,
+    tipo_usuario, tipo_documento, numero_documento, fecha_nacimiento,
+    biografia, activo, ciudad, localidad_id, latitud, longitud, estado,
+    fecha_creacion, fecha_actualizacion
+)
+VALUES (
+    UUID(), 'Admin', 'Sistema', 'admin@inforecicla.com', '3001234567',
+    '$2a$10$slYQmyNdGzin7olVN3DOCeK3kQ8PfzQG5Sy3EQq/vY2zCKTLu7l5m',
+    'Admin', 'CC', '1000000000', '1990-01-01',
+    'Usuario administrador del sistema', 1, 'Bogotá', @localidad_id,
+    4.7110, -74.0721, 'Activo', NOW(), NOW()
+);
+
+-- 4. Verificar que se insertó
+SELECT email, nombres, activo, estado FROM usuario WHERE email = 'admin@inforecicla.com';
+```
+
+PASO 4: REINICIAR APLICACIÓN
+────────────────────────────────────────────────────────────────────────────
+
+Una vez ejecutado el SQL:
+
+$ cd /home/rorschard/Documents/Java/Inforecicla
+$ mvn clean install
+$ mvn spring-boot:run
+
+PASO 5: PROBAR LOGIN
+────────────────────────────────────────────────────────────────────────────
+
+URL:      http://localhost:8080/login
+Email:    admin@inforecicla.com
+Contraseña: Admin@123456
+
+PASO 6: REVISAR LOGS
+────────────────────────────────────────────────────────────────────────────
+
+Si aún falla, busca en los logs:
+
+Busca líneas como:
+  ✅ Usuario encontrado: admin@inforecicla.com
+  ❌ Usuario no encontrado con email: admin@inforecicla.com
+  ❌ Usuario desactivado: admin@inforecicla.com
+
+Esto te indicará exactamente dónde está el problema.
+
+═════════════════════════════════════════════════════════════════════════════
+
+PROBLEMAS POSIBLES Y SOLUCIONES
+═════════════════════════════════════════════════════════════════════════════
+
+PROBLEMA 1: "Usuario no encontrado"
+CAUSA: El usuario admin no existe en la BD
+SOLUCIÓN: Ejecutar setup_admin_correcto.sql
+
+PROBLEMA 2: "Usuario desactivado"
+CAUSA: El campo activo = 0 o estado != 'Activo'
+SOLUCIÓN:
+  UPDATE usuario SET activo = 1, estado = 'Activo'
+  WHERE email = 'admin@inforecicla.com';
+
+PROBLEMA 3: "Credenciales inválidas"
+CAUSA: El hash de contraseña es incorrecto
+SOLUCIÓN: Actualizar con hash verificado:
+  UPDATE usuario
+  SET password = '$2a$10$slYQmyNdGzin7olVN3DOCeK3kQ8PfzQG5Sy3EQq/vY2zCKTLu7l5m'
+  WHERE email = 'admin@inforecicla.com';
+
+PROBLEMA 4: "Localidad no encontrada"
+CAUSA: No existe la localidad Chapinero
+SOLUCIÓN: Crearla primero (ver PASO 3, parte 1)
+
+═════════════════════════════════════════════════════════════════════════════
+
+NOTAS IMPORTANTES:
+  - La contraseña en texto plano es: Admin@123456
+  - El hash BCrypt es: $2a$10$slYQmyNdGzin7olVN3DOCeK3kQ8PfzQG5Sy3EQq/vY2zCKTLu7l5m
+  - Este hash es válido y puede validarse con BCrypt
+  - activo debe ser 1 (true)
+  - estado debe ser 'Activo'
+  - tipo_usuario debe ser 'Admin'
+
+═════════════════════════════════════════════════════════════════════════════
+

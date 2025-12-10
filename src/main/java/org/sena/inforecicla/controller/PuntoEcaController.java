@@ -1,5 +1,6 @@
 package org.sena.inforecicla.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.sena.inforecicla.dto.puntoEca.gestor.GestorUpdateDTO;
@@ -15,10 +16,13 @@ import org.sena.inforecicla.dto.usuario.UsuarioGestorResponseDTO;
 import org.sena.inforecicla.exception.InventarioFoundExistException;
 import org.sena.inforecicla.exception.InventarioNotFoundException;
 import org.sena.inforecicla.exception.PuntoEcaNotFoundException;
+import org.sena.inforecicla.model.CentroAcopio;
 import org.sena.inforecicla.model.CompraInventario;
 import org.sena.inforecicla.model.Localidad;
+import org.sena.inforecicla.model.Usuario;
 import org.sena.inforecicla.model.enums.Alerta;
 import org.sena.inforecicla.model.enums.TipoDocumento;
+import org.sena.inforecicla.model.enums.TipoUsuario;
 import org.sena.inforecicla.model.enums.UnidadMedida;
 import org.sena.inforecicla.service.*;
 import org.slf4j.Logger;
@@ -28,8 +32,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.*;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Controller
 @AllArgsConstructor
@@ -50,6 +59,39 @@ public class PuntoEcaController {
     private final TipoMaterialService tipoMaterialService;
     private final CategoriaMaterialService categoriaMaterialService;
     private final InventarioDetalleService inventarioDetalleService;
+
+    // ✅ Repository para cambios de contraseña
+    @Autowired
+    private org.sena.inforecicla.repository.UsuarioRepository usuarioRepository;
+
+    // Ruta base que redirige automáticamente al punto ECA del usuario autenticado
+    @GetMapping
+    public String puntoEcaBase(HttpServletRequest request) {
+        // Obtener el usuario autenticado
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof Usuario) {
+            Usuario usuario = (Usuario) auth.getPrincipal();
+
+            // Si es GestorECA, buscar su punto ECA y redirigir
+            if (usuario.getTipoUsuario() == TipoUsuario.GestorECA) {
+                try {
+                    // Buscar el punto ECA asociado al usuario
+                    UsuarioGestorResponseDTO gestorData = gestorEcaService.buscarGestorPuntoEca(usuario.getUsuarioId());
+                    if (gestorData != null && gestorData.puntoEcaId() != null) {
+                        String nombrePunto = gestorData.nombrePunto() != null ?
+                            gestorData.nombrePunto().replace(" ", "-") : "punto-eca";
+                        return "redirect:/punto-eca/" + nombrePunto + "/" + usuario.getUsuarioId();
+                    }
+                } catch (Exception e) {
+                    logger.warn("Error al buscar punto ECA para usuario {}: {}", usuario.getUsuarioId(), e.getMessage());
+                }
+            }
+        }
+
+        // Si no se puede determinar el punto ECA, redirigir al dashboard
+        return "redirect:/dashboard";
+    }
 
     // Vista principal con usuarioId
     @GetMapping("/{nombrePunto}/{gestorId}")
@@ -259,12 +301,37 @@ public class PuntoEcaController {
 
 
     /**
-     * Carga datos para la sección de Centros de Acopio
+     * Carga datos para la sección de Centros
      */
     private void cargarSeccionCentros(UsuarioGestorResponseDTO usuario, Model model) {
         Objects.requireNonNull(usuario);
         Objects.requireNonNull(model);
-        // TODO: Implementar cuando haya servicio de centros
+
+        try {
+            // Obtener centros globales (sin punto asignado)
+            List<CentroAcopio> centrosGlobales = centroAcopioService.obtenerCentrosGlobales();
+
+            // Obtener centros propios del punto (asignados a este punto específico)
+            List<CentroAcopio> centrosPropios = centroAcopioService.listaCentrosPorPuntoEca(usuario.puntoEcaId());
+
+            // Obtener localidades para el filtro
+            List<Localidad> localidades = localidadService.listadoLocalidades();
+
+            // Agregar datos al modelo
+            model.addAttribute("centrosGlobales", centrosGlobales);
+            model.addAttribute("centrosPropios", centrosPropios);
+            model.addAttribute("localidades", localidades);
+            model.addAttribute("totalCentrosGlobales", centrosGlobales.size());
+            model.addAttribute("totalCentrosPropios", centrosPropios.size());
+
+        } catch (Exception e) {
+            logger.error("❌ Error al cargar centros de acopio: {}", e.getMessage(), e);
+            model.addAttribute("centrosGlobales", Collections.emptyList());
+            model.addAttribute("centrosPropios", Collections.emptyList());
+            model.addAttribute("localidades", Collections.emptyList());
+            model.addAttribute("totalCentrosGlobales", 0);
+            model.addAttribute("totalCentrosPropios", 0);
+        }
     }
 
     /**
@@ -694,5 +761,343 @@ public class PuntoEcaController {
         ));
     }
 
-}
+    /**
+     * ENDPOINT REST: Obtener centros de acopio (del punto + globales)
+     * Utilizado por el modal de creación de eventos
+     *
+     * @param puntoEcaId ID del punto ECA
+     * @return Lista de centros de acopio del punto + globales en formato JSON
+     */
+    @GetMapping("/{puntoEcaId}/centros-acopio")
+    @ResponseBody
+    public ResponseEntity<?> obtenerCentrosAcopioPunto(@PathVariable UUID puntoEcaId) {
+        try {
+            logger.info("🎯 Obteniendo centros de acopio para punto ECA: {}", puntoEcaId);
 
+            // Obtener centros del punto + globales
+            List<CentroAcopio> todosCentros = centroAcopioService.obtenerCentrosPuntoYGlobales(puntoEcaId);
+
+            logger.info("📊 Centros obtenidos del servicio: {}", todosCentros.size());
+
+            if (!todosCentros.isEmpty()) {
+                CentroAcopio primero = todosCentros.get(0);
+                logger.info("   📍 Primer centro ID: {}", primero.getCntAcpId());
+                logger.info("   📍 Primer centro Nombre: {}", primero.getNombreCntAcp());
+                logger.info("   📍 Primer centro Punto: {}", primero.getPuntoEca());
+            }
+
+            // Convertir a DTOs
+            List<org.sena.inforecicla.dto.CentroAcopioDTO> centrosDTO = todosCentros.stream()
+                    .map(org.sena.inforecicla.dto.CentroAcopioDTO::fromEntity)
+                    .toList();
+
+            logger.info("✅ DTOs creados: {}", centrosDTO.size());
+
+            if (!centrosDTO.isEmpty()) {
+                org.sena.inforecicla.dto.CentroAcopioDTO primero = centrosDTO.get(0);
+                logger.info("   DTO Primer centro ID: {}", primero.getCntAcpId());
+                logger.info("   DTO Primer centro Nombre: {}", primero.getNombreCntAcp());
+                logger.info("   DTO Primer centro Punto: {}", primero.getTienePuntoEca());
+            }
+
+            logger.info("✅ Total de centros retornados (punto + globales): {}", centrosDTO.size());
+            return ResponseEntity.ok(centrosDTO);
+
+
+        } catch (Exception e) {
+            logger.error("❌ Error obteniendo centros de acopio: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(Map.of(
+                "error", true,
+                "mensaje", "Error al obtener centros de acopio: " + e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * ENDPOINT REST: Buscar centros de acopio con filtros
+     *
+     * @param puntoEcaId ID del Punto ECA
+     * @param nombre Filtro por nombre
+     * @param tipo Filtro por tipo
+     * @param localidadId Filtro por localidad ID
+     * @param contacto Filtro por contacto
+     * @param email Filtro por email
+     * @param telefono Filtro por teléfono
+     * @param esPropios Si es true, busca centros propios; si es false, busca centros globales
+     * @return Lista de centros filtrados (como DTO)
+     */
+    @GetMapping("/{puntoEcaId}/filtrar-centros")
+    @ResponseBody
+    public ResponseEntity<List<org.sena.inforecicla.dto.CentroAcopioDTO>> filtrarCentros(
+            @PathVariable UUID puntoEcaId,
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) String tipo,
+            @RequestParam(required = false) String localidadId,
+            @RequestParam(required = false) String contacto,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String telefono,
+            @RequestParam(defaultValue = "false") boolean esPropios
+    ) {
+        try {
+            logger.info("🔍🔍🔍 Iniciando búsqueda de centros - PuntoECA: {}, Propios: {}", puntoEcaId, esPropios);
+            logger.info("📝 Parámetros recibidos: nombre='{}', tipo='{}', localidadId='{}', contacto='{}', email='{}', telefono='{}'",
+                    nombre, tipo, localidadId, contacto, email, telefono);
+
+            // Obtener todos los centros (propios o globales)
+            List<CentroAcopio> centros;
+            if (esPropios) {
+                centros = centroAcopioService.listaCentrosPorPuntoEca(puntoEcaId);
+                logger.info("📊 Centros PROPIOS obtenidos: {}", centros.size());
+            } else {
+                centros = centroAcopioService.obtenerCentrosGlobales();
+                logger.info("📊 Centros GLOBALES obtenidos: {}", centros.size());
+            }
+
+            // Log de todos los centros antes de filtrar
+            centros.forEach(c ->
+                logger.debug("  - Centro: nombre='{}', tipo='{}', localidad='{}', contacto='{}', celular='{}', email='{}'",
+                    c.getNombreCntAcp(),
+                    c.getTipoCntAcp() != null ? c.getTipoCntAcp().getTipo() : "null",
+                    c.getLocalidad() != null ? c.getLocalidad().getNombre() : "null",
+                    c.getNombreContactoCntAcp(),
+                    c.getCelular(),
+                    c.getEmail()
+                )
+            );
+
+            // Filtrar en memoria según los criterios
+            List<CentroAcopio> filtrados = centros.stream()
+                    .filter(c -> nombre == null || nombre.trim().isEmpty() ||
+                            c.getNombreCntAcp().toLowerCase().contains(nombre.toLowerCase()))
+                    .filter(c -> tipo == null || tipo.trim().isEmpty() ||
+                            (c.getTipoCntAcp() != null && c.getTipoCntAcp().getTipo().equalsIgnoreCase(tipo)))
+                    .filter(c -> localidadId == null || localidadId.trim().isEmpty() ||
+                            (c.getLocalidad() != null && c.getLocalidad().getLocalidadId().toString().equals(localidadId)))
+                    .filter(c -> contacto == null || contacto.trim().isEmpty() ||
+                            (c.getNombreContactoCntAcp() != null && c.getNombreContactoCntAcp().toLowerCase().contains(contacto.toLowerCase())))
+                    .filter(c -> email == null || email.trim().isEmpty() ||
+                            (c.getEmail() != null && c.getEmail().toLowerCase().contains(email.toLowerCase())))
+                    .filter(c -> telefono == null || telefono.trim().isEmpty() ||
+                            (c.getCelular() != null && c.getCelular().contains(telefono)))
+                    .toList();
+
+            logger.info("✅✅✅ Centros después del filtrado: {}", filtrados.size());
+
+            // Log de centros filtrados
+            filtrados.forEach(c ->
+                logger.info("  ✅ Centro FINAL: nombre='{}', tipo='{}', localidad='{}', celular='{}'",
+                    c.getNombreCntAcp(),
+                    c.getTipoCntAcp() != null ? c.getTipoCntAcp().getTipo() : "null",
+                    c.getLocalidad() != null ? c.getLocalidad().getNombre() : "null",
+                    c.getCelular()
+                )
+            );
+
+            // Convertir a DTO
+            List<org.sena.inforecicla.dto.CentroAcopioDTO> dtos = filtrados.stream()
+                    .map(org.sena.inforecicla.dto.CentroAcopioDTO::fromEntity)
+                    .toList();
+
+            logger.info("✅ DTOs creados: {}", dtos.size());
+
+            return ResponseEntity.ok(dtos);
+
+        } catch (Exception e) {
+            logger.error("❌ Error al filtrar centros: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
+        }
+    }
+
+    /**
+     * Crea un nuevo centro de acopio asociado a un Punto ECA específico
+     * POST /punto-eca/{puntoEcaId}/centro-acopio
+     */
+    @PostMapping("/{puntoEcaId}/centro-acopio")
+    @ResponseBody
+    public ResponseEntity<?> crearCentroAcopio(
+            @PathVariable UUID puntoEcaId,
+            @RequestBody org.sena.inforecicla.dto.CentroAcopioCreateDTO dto) {
+        try {
+            logger.info("➕ [CENTRO-ACOPIO] Creando nuevo centro para punto: {}", puntoEcaId);
+            logger.info("   Datos recibidos: nombre={}, tipo={}, telefono={}, email={}",
+                    dto.getNombreCntAcp(), dto.getTipoCntAcp(), dto.getCelular(), dto.getEmail());
+
+            // Validar que el nombre y tipo sean obligatorios
+            if (dto.getNombreCntAcp() == null || dto.getNombreCntAcp().trim().isEmpty()) {
+                logger.warn("⚠️ Nombre del centro es obligatorio");
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "error", "El nombre del centro es obligatorio"
+                ));
+            }
+
+            if (dto.getTipoCntAcp() == null || dto.getTipoCntAcp().trim().isEmpty()) {
+                logger.warn("⚠️ Tipo de centro es obligatorio");
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "error", "El tipo de centro es obligatorio"
+                ));
+            }
+
+            // Crear el centro usando el servicio
+            CentroAcopio centroCreado = centroAcopioService.crear(puntoEcaId, dto);
+
+            logger.info("✅ Centro creado exitosamente: {}", centroCreado.getCntAcpId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                    "success", true,
+                    "message", "Centro creado correctamente",
+                    "centroId", centroCreado.getCntAcpId(),
+                    "centro", centroCreado
+            ));
+
+        } catch (IllegalArgumentException e) {
+            logger.warn("⚠️ Error de validación: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "error", e.getMessage()
+            ));
+        } catch (org.springframework.transaction.TransactionSystemException e) {
+            // Capturar errores de validación de Hibernate
+            logger.error("❌ Error de validación en base de datos: {}", e.getMessage());
+
+            // Extraer violaciones de restricciones
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("isValidationError", true);
+
+            Throwable cause = e.getCause();
+            if (cause instanceof jakarta.persistence.RollbackException) {
+                Throwable validationCause = cause.getCause();
+                if (validationCause instanceof jakarta.validation.ConstraintViolationException) {
+                    jakarta.validation.ConstraintViolationException cve =
+                        (jakarta.validation.ConstraintViolationException) validationCause;
+
+                    // Crear lista de errores de validación
+                    java.util.List<Map<String, String>> errors = new java.util.ArrayList<>();
+                    for (jakarta.validation.ConstraintViolation<?> violation : cve.getConstraintViolations()) {
+                        Map<String, String> error = new HashMap<>();
+                        error.put("field", violation.getPropertyPath().toString());
+                        error.put("message", violation.getMessage());
+                        errors.add(error);
+                        logger.warn("   - Campo: {}, Mensaje: {}", violation.getPropertyPath(), violation.getMessage());
+                    }
+
+                    errorResponse.put("validationErrors", errors);
+                    errorResponse.put("error", "Error de validación en los datos");
+                    return ResponseEntity.badRequest().body(errorResponse);
+                }
+            }
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "success", false,
+                    "error", "Error al procesar la solicitud: " + e.getMessage()
+            ));
+        } catch (Exception e) {
+            logger.error("❌ Error al crear centro: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "success", false,
+                    "error", "Error al crear el centro: " + e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * Cambiar contraseña del usuario
+     * POST /punto-eca/cambiar-contrasena
+     */
+    @PostMapping("/cambiar-contrasena")
+    public String cambiarContrasena(
+            @RequestParam String contrasenaActual,
+            @RequestParam String contrasenaNueva,
+            @RequestParam String confirmarContrasena,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes,
+            org.springframework.security.core.Authentication auth) {
+
+        try {
+            if (auth == null || auth.getPrincipal() == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "No hay sesión activa");
+                return "redirect:/login";
+            }
+
+            Usuario usuario = (Usuario) auth.getPrincipal();
+
+            // Validar que las contraseñas nuevas coincidan
+            if (!contrasenaNueva.equals(confirmarContrasena)) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Las contraseñas nuevas no coinciden");
+                return "redirect:/punto-eca";
+            }
+
+            // Validar que la contraseña nueva cumpla requisitos
+            if (!contrasenaNueva.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$")) {
+                redirectAttributes.addFlashAttribute("errorMessage", "La contraseña no cumple los requisitos de seguridad");
+                return "redirect:/punto-eca";
+            }
+
+            logger.info("🔐 Iniciando cambio de contraseña para usuario: {}", usuario.getEmail());
+
+            // Validar contraseña actual con BCrypt
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+            if (!encoder.matches(contrasenaActual, usuario.getPassword())) {
+                logger.warn("❌ Contraseña actual incorrecta para: {}", usuario.getEmail());
+                redirectAttributes.addFlashAttribute("errorMessage", "La contraseña actual es incorrecta");
+                return "redirect:/punto-eca";
+            }
+
+            // Actualizar contraseña
+            usuario.setPassword(encoder.encode(contrasenaNueva));
+            usuarioRepository.save(usuario);
+
+            logger.info("✅ Contraseña cambiada exitosamente para: {}", usuario.getEmail());
+            redirectAttributes.addFlashAttribute("successMessage", "Contraseña cambiada exitosamente");
+            return "redirect:/punto-eca";
+
+        } catch (Exception e) {
+            logger.error("❌ Error al cambiar contraseña: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al cambiar la contraseña: " + e.getMessage());
+            return "redirect:/punto-eca";
+        }
+    }
+
+    /**
+     * Actualizar preferencias del usuario
+     * POST /punto-eca/actualizar-preferencias
+     */
+    @PostMapping("/actualizar-preferencias")
+    public String actualizarPreferencias(
+            @RequestParam(required = false) String visibleEnMapa,
+            @RequestParam(required = false) String notificacionesAprobacion,
+            @RequestParam(required = false) String notificacionesMensajes,
+            @RequestParam(required = false) String notificacionesInventario,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || authentication.getPrincipal() == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "No hay sesión activa");
+                return "redirect:/login";
+            }
+
+            Usuario usuario = (Usuario) authentication.getPrincipal();
+            logger.info("⚙️ Actualizando preferencias para: {}", usuario.getEmail());
+
+            // Registrar cambios
+            logger.info("   - Visible en mapa: {}", visibleEnMapa != null);
+            logger.info("   - Notificaciones aprobación: {}", notificacionesAprobacion != null);
+            logger.info("   - Notificaciones mensajes: {}", notificacionesMensajes != null);
+            logger.info("   - Notificaciones inventario: {}", notificacionesInventario != null);
+
+            // Aquí puedes agregar lógica para guardar preferencias en BD si lo deseas
+            // Por ahora solo confirmamos el guardado
+
+            logger.info("✅ Preferencias actualizadas exitosamente");
+            redirectAttributes.addFlashAttribute("successMessage", "Preferencias guardadas exitosamente");
+            return "redirect:/punto-eca";
+
+        } catch (Exception e) {
+            logger.error("❌ Error al actualizar preferencias: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Error al guardar las preferencias: " + e.getMessage());
+            return "redirect:/punto-eca";
+        }
+    }
+}

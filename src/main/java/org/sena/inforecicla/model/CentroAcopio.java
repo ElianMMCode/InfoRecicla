@@ -1,5 +1,6 @@
 package org.sena.inforecicla.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -20,13 +21,13 @@ import java.util.UUID;
 @AttributeOverrides({
         @AttributeOverride(name = "celular", column = @Column(name = "celular_centro_acopio", length = 10, unique = true)),
         @AttributeOverride(name = "email", column = @Column(name = "email_centro_acopio", unique = true, length = 150)),
-        @AttributeOverride(name = "sitioWeb", column = @Column(name = "sitio_web_centro_copio")),
+        @AttributeOverride(name = "sitioWeb", column = @Column(name = "sitio_web_centro_acopio")),
         @AttributeOverride(name = "horarioAtencion", column = @Column(name = "horario_atencion_centro_acopio", length = 150))
 })
 public class CentroAcopio extends EntidadLocalizacionWebHorario {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name="centro_acopio_id",nullable = false, updatable = false)
     private UUID cntAcpId;
 
@@ -35,20 +36,22 @@ public class CentroAcopio extends EntidadLocalizacionWebHorario {
     @Size(min = 3, max = 30)
     private String nombreCntAcp;
 
-    @NotNull(message = "Debe escoger un tipo de Centro de Acopio")
+    @JsonProperty("tipoCntAcp")
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_centro_acopio", nullable = false, length = 10)
+    @Column(name = "tipo_centro_acopio")
     private TipoCentroAcopio tipoCntAcp;
 
     @NotNull(message = "Debe escoger una visibilidad para el Centro de Acopio")
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false, length = 10, name = "visibilidad")
+    @JsonProperty("visibilidad")
     private Visibilidad visibilidad;
 
-    @Column(length = 500)
+    @JsonProperty("descripcion")
+    @Column(name = "descripcion", length = 500)
     private String descripcion;
 
-    @Column(length = 500)
+    @Column(name = "nota", length = 500)
     private String nota;
 
     @Column(name = "nombre_contacto_centro_acopio", length = 30)
@@ -57,6 +60,7 @@ public class CentroAcopio extends EntidadLocalizacionWebHorario {
 
     @ManyToOne
     @JoinColumn(name = "punto_eca_id", foreignKey = @ForeignKey(name = "fk_puntoeca_centroacopio"))
+    @JsonProperty("puntoEca")
     private PuntoECA puntoEca;
 
     @OneToMany(mappedBy = "ctrAcopio", cascade = CascadeType.ALL, orphanRemoval = true)
