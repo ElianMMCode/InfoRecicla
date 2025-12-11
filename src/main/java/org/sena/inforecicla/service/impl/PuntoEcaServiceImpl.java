@@ -3,8 +3,10 @@ package org.sena.inforecicla.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.sena.inforecicla.dto.puntoEca.PuntoEcaMapDTO;
 import org.sena.inforecicla.dto.puntoEca.PuntoEcaDetalleDTO;
+import org.sena.inforecicla.dto.puntoEca.MaterialDTO;
 import org.sena.inforecicla.model.PuntoECA;
 import org.sena.inforecicla.model.Inventario;
+import org.sena.inforecicla.model.Material;
 import org.sena.inforecicla.model.enums.Estado;
 import org.sena.inforecicla.repository.PuntoEcaRepository;
 import org.sena.inforecicla.service.PuntoEcaService;
@@ -12,9 +14,7 @@ import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -100,6 +100,67 @@ public class PuntoEcaServiceImpl implements PuntoEcaService {
                 .horarioAtencion(punto.getHorarioAtencion())
                 .materiales(materiales)
                 .build();
+    }
+
+    @Override
+    public List<MaterialDTO> obtenerMaterialesDisponibles() {
+        logger.info("📦 Obteniendo materiales disponibles");
+
+        Map<Material, Integer> materialCount = new HashMap<>();
+
+        // Recorrer todos los puntos activos
+        List<PuntoECA> puntosActivos = puntoEcaRepository.findAll().stream()
+                .filter(p -> p.getEstado() == Estado.Activo)
+                .toList();
+
+        // Contar cuántos puntos tienen cada material
+        puntosActivos.forEach(punto ->
+            punto.getInventarios().stream()
+                .filter(inv -> inv.getEstado() == Estado.Activo && inv.getMaterial() != null)
+                .map(Inventario::getMaterial)
+                .forEach(material ->
+                    materialCount.put(material, materialCount.getOrDefault(material, 0) + 1)
+                )
+        );
+
+        // Convertir a DTOs
+        List<MaterialDTO> materiales = materialCount.entrySet().stream()
+                .map(entry -> MaterialDTO.builder()
+                        .materialId(entry.getKey().getMaterialId())
+                        .nombre(entry.getKey().getNombre())
+                        .categoria(entry.getKey().getCtgMaterial() != null ?
+                                entry.getKey().getCtgMaterial().getNombre() : "Sin categoría")
+                        .tipo(entry.getKey().getTipoMaterial() != null ?
+                                entry.getKey().getTipoMaterial().getNombre() : "Sin tipo")
+                        .puntosCantidad(entry.getValue())
+                        .build())
+                .sorted(Comparator.comparing(MaterialDTO::getNombre))
+                .collect(Collectors.toList());
+
+        logger.info("✅ Se encontraron {} materiales únicos", materiales.size());
+        return materiales;
+    }
+
+    @Override
+    public List<PuntoEcaMapDTO> obtenerPuntosPorMaterial(UUID materialId) {
+        logger.info("🔍 Buscando puntos ECA con material: {}", materialId);
+
+        List<PuntoECA> puntosActivos = puntoEcaRepository.findAll().stream()
+                .filter(p -> p.getEstado() == Estado.Activo && p.getLatitud() != null && p.getLongitud() != null)
+                .filter(punto ->
+                    punto.getInventarios().stream()
+                        .anyMatch(inv -> inv.getEstado() == Estado.Activo &&
+                                inv.getMaterial() != null &&
+                                inv.getMaterial().getMaterialId().equals(materialId))
+                )
+                .toList();
+
+        List<PuntoEcaMapDTO> puntosDTO = puntosActivos.stream()
+                .map(this::toPuntoEcaMapDTO)
+                .toList();
+
+        logger.info("✅ Se encontraron {} puntos con el material", puntosDTO.size());
+        return puntosDTO;
     }
 
     private PuntoEcaDetalleDTO.MaterialInventarioDTO toMaterialInventarioDTO(Inventario inventario) {

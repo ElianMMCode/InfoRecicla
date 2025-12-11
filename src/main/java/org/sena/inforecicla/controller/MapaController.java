@@ -1,6 +1,7 @@
 package org.sena.inforecicla.controller;
 
 import lombok.AllArgsConstructor;
+import org.sena.inforecicla.dto.puntoEca.MaterialDTO;
 import org.sena.inforecicla.dto.puntoEca.PuntoEcaMapDTO;
 import org.sena.inforecicla.dto.puntoEca.PuntoEcaDetalleDTO;
 import org.sena.inforecicla.service.PuntoEcaService;
@@ -179,6 +180,55 @@ public class MapaController {
         } catch (Exception e) {
             logger.error("❌ Error al obtener detalles: {}", e.getMessage(), e);
             throw new RuntimeException("Error al obtener detalles del punto ECA", e);
+        }
+    }
+
+    /**
+     * Endpoint REST para obtener lista de todos los materiales disponibles
+     * Utilizado para autocompletar Select2 en el buscador
+     *
+     * @return Lista de materiales con sus detalles
+     */
+    @GetMapping("/api/materiales")
+    @ResponseBody
+    public List<MaterialDTO> obtenerMateriales() {
+        try {
+            logger.info("📦 Obteniendo lista de materiales disponibles");
+
+            List<MaterialDTO> materiales = puntoEcaService.obtenerMaterialesDisponibles();
+
+            logger.info("✅ Se encontraron {} materiales", materiales.size());
+
+            return materiales;
+
+        } catch (Exception e) {
+            logger.error("❌ Error al obtener materiales: {}", e.getMessage(), e);
+            throw new RuntimeException("Error al obtener materiales", e);
+        }
+    }
+
+    /**
+     * Endpoint REST para obtener puntos ECA que contienen un material específico
+     * Utilizado cuando se selecciona un material en el filtro
+     *
+     * @param materialId ID del material a buscar
+     * @return Lista de puntos ECA que tienen el material
+     */
+    @GetMapping("/api/puntos-eca/por-material/{materialId}")
+    @ResponseBody
+    public List<PuntoEcaMapDTO> obtenerPuntosPorMaterial(@PathVariable String materialId) {
+        try {
+            logger.info("🔍 Buscando puntos ECA con material: {}", materialId);
+
+            List<PuntoEcaMapDTO> puntos = puntoEcaService.obtenerPuntosPorMaterial(java.util.UUID.fromString(materialId));
+
+            logger.info("✅ Se encontraron {} puntos con el material", puntos.size());
+
+            return puntos;
+
+        } catch (Exception e) {
+            logger.error("❌ Error al obtener puntos por material: {}", e.getMessage(), e);
+            throw new RuntimeException("Error al obtener puntos por material", e);
         }
     }
 }

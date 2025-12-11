@@ -18,6 +18,9 @@
     <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
     <style>
         body, html {
             height: 100%;
@@ -390,16 +393,39 @@
 
                 <!-- Buscador -->
                 <div class="sidebar-busqueda">
-                    <div class="input-group input-group-sm">
+                    <!-- Filtro por Nombre -->
+                    <div class="mb-2">
+                        <label class="form-label small mb-1">
+                            <i class="fas fa-search text-success"></i> Buscar por Nombre
+                        </label>
                         <input
                             type="text"
-                            class="form-control"
-                            id="inputBusqueda"
-                            placeholder="Buscar por nombre..."
-                            aria-label="Buscar puntos ECA"
+                            class="form-control form-control-sm"
+                            id="inputBusquedaNombre"
+                            placeholder="Ej: Centro, Chapinero..."
+                            aria-label="Buscar por nombre"
                         >
-                        <button class="btn btn-outline-secondary" type="button" id="btnBuscar">
-                            <i class="fas fa-search"></i>
+                    </div>
+
+                    <!-- Filtro por Material con Select2 -->
+                    <div class="mb-2">
+                        <label class="form-label small mb-1">
+                            <i class="fas fa-box text-success"></i> Filtrar por Material
+                        </label>
+                        <select
+                            id="selectMaterial"
+                            class="form-select form-select-sm"
+                            style="width: 100%"
+                            aria-label="Filtrar por material"
+                        >
+                            <option value="">Seleccionar material...</option>
+                        </select>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success btn-sm" id="btnLimpiarFiltros">
+                            <i class="fas fa-redo"></i> Limpiar Filtros
                         </button>
                     </div>
                 </div>
@@ -521,6 +547,12 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- jQuery (necesario para Select2) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- JavaScript personalizado del mapa -->
     <script th:src="@{/js/Mapa/mapa-interactivo.js}"></script>

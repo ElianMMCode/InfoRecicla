@@ -573,23 +573,35 @@ class MapaInteractivo {
      * Configura los event listeners
      */
     configurarEventos() {
-        // Búsqueda
-        const inputBusqueda = document.getElementById('inputBusqueda');
-        const btnBuscar = document.getElementById('btnBuscar');
-
-        inputBusqueda.addEventListener('input', (e) => {
-            this.buscar(e.target.value);
+        // Búsqueda por nombre
+        const inputBusquedaNombre = document.getElementById('inputBusquedaNombre');
+        inputBusquedaNombre.addEventListener('input', (e) => {
+            this.aplicarFiltros();
         });
 
-        btnBuscar.addEventListener('click', () => {
-            this.buscar(inputBusqueda.value);
+        // Inicializar Select2 para materiales
+        const selectMaterial = document.getElementById('selectMaterial');
+        $(selectMaterial).select2({
+            placeholder: 'Seleccionar material...',
+            allowClear: true,
+            width: '100%',
+            language: 'es'
         });
 
-        // Enter en el input de búsqueda
-        inputBusqueda.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.buscar(inputBusqueda.value);
-            }
+        // Cargar materiales en Select2
+        this.cargarMaterialesEnSelect2();
+
+        // Event listener para cambio en Select2
+        $(selectMaterial).on('change', () => {
+            this.aplicarFiltros();
+        });
+
+        // Botón limpiar filtros
+        document.getElementById('btnLimpiarFiltros').addEventListener('click', () => {
+            inputBusquedaNombre.value = '';
+            $(selectMaterial).val(null).trigger('change');
+            this.renderizarLista();
+            this.centrarMapa();
         });
 
         // Botón Centrar
@@ -599,7 +611,8 @@ class MapaInteractivo {
 
         // Botón Recargar
         document.getElementById('btnRecargar').addEventListener('click', () => {
-            inputBusqueda.value = '';
+            inputBusquedaNombre.value = '';
+            $(selectMaterial).val(null).trigger('change');
             this.cargarPuntosECA();
         });
 
@@ -621,6 +634,236 @@ class MapaInteractivo {
         }
 
         console.log('✅ Event listeners configurados');
+    }
+
+    /**
+     * Carga los materiales disponibles en Select2
+     */
+    cargarMaterialesEnSelect2() {
+        console.log('📦 Cargando materiales para Select2...');
+
+        fetch('/mapa/api/materiales')
+            .then(response => {
+                if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+                return response.json();
+            })
+            .then(materiales => {
+                console.log(`✅ ${materiales.length} materiales cargados`);
+
+                const selectMaterial = document.getElementById('selectMaterial');
+                const opcionesHTML = materiales.map(mat =>
+                    `<option value="${mat.materialId}">${mat.nombre} (${mat.puntosCantidad} puntos)</option>`
+                ).join('');
+
+                selectMaterial.innerHTML = '<option value="">Seleccionar material...</option>' + opcionesHTML;
+                $(selectMaterial).trigger('change');
+            })
+            .catch(error => {
+                console.error('❌ Error al cargar materiales:', error);
+            });
+    }
+
+    /**
+     * Aplica los filtros de búsqueda (nombre y material)
+     */
+    aplicarFiltros() {
+        console.log('🔍 Aplicando filtros...');
+
+        const inputNombre = document.getElementById('inputBusquedaNombre').value.toLowerCase();
+        const materialId = document.getElementById('selectMaterial').value;
+
+        if (!materialId) {
+            // Si no hay material seleccionado, filtrar solo por nombre
+            this.filtrarPorNombre(inputNombre);
+        } else {
+            // Si hay material seleccionado, obtener puntos que lo contengan
+            this.filtrarPorMaterial(materialId, inputNombre);
+        }
+    }
+
+    /**
+     * Filtra puntos solo por nombre
+     */
+    filtrarPorNombre(termino) {
+        console.log(`🔎 Filtrando por nombre: "${termino}"`);
+
+        const contenedorLista = document.getElementById('listaPuntos');
+
+        if (!termino.trim()) {
+            this.renderizarLista();
+            this.actualizarMarcadores(this.puntosECA);
+            return;
+        }
+
+        const puntosFiltrados = this.puntosECA.filter(p =>
+            p.nombrePunto.toLowerCase().includes(termino) ||
+            (p.localidadNombre && p.localidadNombre.toLowerCase().includes(termino)) ||
+            (p.direccion && p.direccion.toLowerCase().includes(termino))
+        );
+
+        console.log(`✅ Se encontraron ${puntosFiltrados.length} resultados`);
+
+        this.mostrarListaFiltrada(puntosFiltrados);
+        this.actualizarMarcadores(puntosFiltrados);
+        document.getElementById('contadorActual').textContent = puntosFiltrados.length;
+    }
+
+    /**
+     * Filtra puntos por material
+     */
+    filtrarPorMaterial(materialId, terminoNombre) {
+        console.log(`📦 Filtrando por material: ${materialId}`);
+
+        fetch(`/mapa/api/puntos-eca/por-material/${materialId}`)
+            .then(response => {
+                if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+                return response.json();
+            })
+            .then(puntosConMaterial => {
+                console.log(`✅ Se encontraron ${puntosConMaterial.length} puntos con el material`);
+
+                // Filtrar también por nombre si está especificado
+                let puntosFiltrados = puntosConMaterial;
+                if (terminoNombre.trim()) {
+                    puntosFiltrados = puntosConMaterial.filter(p =>
+                        p.nombrePunto.toLowerCase().includes(terminoNombre) ||
+                        (p.localidadNombre && p.localidadNombre.toLowerCase().includes(terminoNombre))
+                    );
+                    console.log(`✅ Después de filtrar por nombre: ${puntosFiltrados.length} puntos`);
+                }
+
+                this.mostrarListaFiltrada(puntosFiltrados);
+                this.actualizarMarcadores(puntosFiltrados);
+                document.getElementById('contadorActual').textContent = puntosFiltrados.length;
+            })
+            .catch(error => {
+                console.error('❌ Error al filtrar por material:', error);
+            });
+    }
+
+    /**
+     * Muestra la lista filtrada
+     */
+    mostrarListaFiltrada(puntos) {
+        const contenedorLista = document.getElementById('listaPuntos');
+
+        if (puntos.length === 0) {
+            contenedorLista.innerHTML = `
+                <div class="text-center py-5">
+                    <p class="text-muted">
+                        <i class="fas fa-search"></i>
+                        No se encontraron resultados
+                    </p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '<div class="lista-puntos">';
+
+        puntos.forEach(punto => {
+            html += `
+                <div class="tarjeta-punto" data-punto-id="${punto.puntoEcaID}">
+                    <div class="tarjeta-titulo">
+                        <h6 class="mb-1">${this.escaparHTML(punto.nombrePunto)}</h6>
+                        ${punto.localidadNombre ? `
+                            <small class="text-muted">${this.escaparHTML(punto.localidadNombre)}</small>
+                        ` : ''}
+                    </div>
+
+                    <div class="tarjeta-detalles">
+                        ${punto.direccion ? `
+                            <small>
+                                <i class="fas fa-road"></i> ${this.escaparHTML(punto.direccion)}
+                            </small>
+                        ` : ''}
+
+                        ${punto.celular ? `
+                            <small>
+                                <i class="fas fa-phone"></i> 
+                                <a href="tel:${punto.celular}">${punto.celular}</a>
+                            </small>
+                        ` : ''}
+
+                        ${punto.email ? `
+                            <small>
+                                <i class="fas fa-envelope"></i>
+                                <a href="mailto:${punto.email}">${this.escaparHTML(punto.email)}</a>
+                            </small>
+                        ` : ''}
+
+                        ${punto.horarioAtencion ? `
+                            <small>
+                                <i class="fas fa-clock"></i> ${this.escaparHTML(punto.horarioAtencion)}
+                            </small>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        contenedorLista.innerHTML = html;
+
+        // Agregar event listeners
+        document.querySelectorAll('.tarjeta-punto').forEach(tarjeta => {
+            tarjeta.addEventListener('click', () => {
+                const puntoId = tarjeta.dataset.puntoId;
+                this.seleccionarPunto(puntoId);
+            });
+        });
+    }
+
+    /**
+     * Actualiza qué marcadores se muestran en el mapa
+     */
+    actualizarMarcadores(puntos) {
+        // Ocultar todos los marcadores primero
+        Object.values(this.marcadores).forEach(marcador => {
+            this.mapa.removeLayer(marcador);
+        });
+
+        // Mostrar solo los marcadores de los puntos filtrados
+        puntos.forEach(punto => {
+            const marcador = this.crearMarcador(punto);
+            if (marcador) {
+                marcador.addTo(this.mapa);
+            }
+        });
+
+        console.log(`✅ Mapa actualizado con ${puntos.length} marcadores`);
+    }
+
+    /**
+     * Crea un marcador para un punto (helper)
+     */
+    crearMarcador(punto) {
+        const icono = L.divIcon({
+            html: `<div class="marcador-custom" style="background-color: ${this.colores.defecto};">
+                        <i class="fas fa-leaf"></i>
+                   </div>`,
+            className: 'marcador-contenedor',
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+            popupAnchor: [0, -40]
+        });
+
+        const popup = L.popup()
+            .setContent(`
+                <strong>${this.escaparHTML(punto.nombrePunto)}</strong><br>
+                ${punto.localidadNombre ? `<em>${this.escaparHTML(punto.localidadNombre)}</em><br>` : ''}
+                ${punto.direccion ? `<small>${this.escaparHTML(punto.direccion)}</small>` : ''}
+            `);
+
+        const marcador = L.marker([punto.latitud, punto.longitud], { icon: icono })
+            .bindPopup(popup);
+
+        marcador.on('click', () => {
+            this.seleccionarPunto(punto.puntoEcaID);
+        });
+
+        this.marcadores[punto.puntoEcaID] = marcador;
+        return marcador;
     }
 
     /**
