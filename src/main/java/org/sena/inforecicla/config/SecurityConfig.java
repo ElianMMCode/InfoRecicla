@@ -54,6 +54,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/inicio", "/publicaciones", "/mapa").permitAll()
+                        .requestMatchers("/mapa/api/**").permitAll()  // ✅ Permitir todos los endpoints de mapa públicamente
                         .requestMatchers("/login", "/registro/**").permitAll()
                         .requestMatchers("/test-registros").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/imagenes/**", "/static/**").permitAll()
