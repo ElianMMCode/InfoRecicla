@@ -1,19 +1,5 @@
 <!-- Fragment: Resumen Punto ECA - Totalmente Bootstrap -->
 <section th:fragment="resumen" class="container-fluid py-4 px-3 px-md-4" th:attr="data-punto-eca-id=${puntoId}, data-resumen-datos=${datosResumenJSON}">
-    <!-- DEBUG: Logs de información recibida -->
-    <script th:inline="javascript">
-        console.log("═══════════════════════════════════════════════════════════════");
-        console.log("📊 INFORMACIÓN RECIBIDA EN LA VISTA THYMELEAF");
-        console.log("═══════════════════════════════════════════════════════════════");
-        console.log("🔹 puntoId:", [[${puntoId}]]);
-        console.log("🔹 datosResumenJSON disponible:", !!document.querySelector('[data-resumen-datos]')?.getAttribute('data-resumen-datos'));
-        const jsonSize = document.querySelector('[data-resumen-datos]')?.getAttribute('data-resumen-datos')?.length || 0;
-        console.log("🔹 Tamaño del JSON en vista:", jsonSize, "caracteres");
-        const jsonData = [[${datosResumenJSON}]];
-        console.log("🔹 Datos del resumen:", jsonData);
-        console.log("═══════════════════════════════════════════════════════════════");
-    </script>
-
     <!-- Header con título y botón -->
     <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
