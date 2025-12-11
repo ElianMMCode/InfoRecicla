@@ -38,6 +38,26 @@ public class CompraInventarioServiceImpl implements CompraInventarioService, Mov
 
         Inventario inv = inventarioService.obtenerInventarioValido(inventarioId, puntoId, materialId);
 
+        // ========== VALIDACIONES ==========
+        // 1. Validar que la cantidad no supere la capacidad máxima
+        if (inv.getCapacidadMaxima().compareTo(dto.cantidad()) < 0) {
+            throw new InventarioNotFoundException(
+                    "La cantidad a registrar (" + dto.cantidad() + " kg) supera la capacidad máxima del inventario (" +
+                            inv.getCapacidadMaxima() + " kg). Por favor, ingresa una cantidad menor."
+            );
+        }
+
+        // 2. Validar que la cantidad no supere el stock actual disponible
+        BigDecimal stockDisponible = inv.getCapacidadMaxima().subtract(inv.getStockActual());
+        if (stockDisponible.compareTo(dto.cantidad()) < 0) {
+            throw new InventarioNotFoundException(
+                    "La cantidad a registrar (" + dto.cantidad() + " kg) supera el espacio disponible en el inventario. " +
+                            "Stock actual: " + inv.getStockActual() + " kg, " +
+                            "Capacidad disponible: " + stockDisponible + " kg. " +
+                            "Por favor, ingresa una cantidad menor."
+            );
+        }
+
         CompraInventario compra = CompraInventario.builder()
                 .cantidad(dto.cantidad())
                 .fechaCompra(dto.fechaCompra())
@@ -124,14 +144,9 @@ public class CompraInventarioServiceImpl implements CompraInventarioService, Mov
     }
 
     @Override
-    public void actualizarStockInventario(CompraInventarioRequestDTO dto, Inventario inv) throws InventarioNotFoundException {
-
-        if (inv.getCapacidadMaxima().compareTo(dto.cantidad()) < 0) {
-            throw new InventarioNotFoundException(
-                    "La cantidad a registrar (" + dto.cantidad() + " kg) supera la capacidad máxima del inventario (" +
-                            inv.getCapacidadMaxima() + " kg). Por favor, ingresa una cantidad menor."
-            );
-        }
+    public void actualizarStockInventario(CompraInventarioRequestDTO dto, Inventario inv) {
+        // Las validaciones ya se hacen en registrarCompra()
+        // Solo actualizar el stock
         inv.setStockActual(inv.getStockActual().add(dto.cantidad()));
 
         inventarioService.actualizarStock(inv);

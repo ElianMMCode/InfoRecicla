@@ -1,11 +1,11 @@
 package org.sena.inforecicla.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.sena.inforecicla.dto.puntoEca.gestor.GestorUpdateDTO;
 import org.sena.inforecicla.dto.puntoEca.gestor.PuntoEcaUpdateDTO;
 import org.sena.inforecicla.dto.puntoEca.inventario.InventarioRequestDTO;
+import org.sena.inforecicla.dto.puntoEca.inventario.InventarioResponseDTO;
 import org.sena.inforecicla.dto.puntoEca.inventario.InventarioUpdateDTO;
 import org.sena.inforecicla.dto.puntoEca.inventario.movimientos.*;
 import org.sena.inforecicla.dto.puntoEca.materiales.CategoriaMaterialesInvResponseDTO;
@@ -17,7 +17,6 @@ import org.sena.inforecicla.exception.InventarioFoundExistException;
 import org.sena.inforecicla.exception.InventarioNotFoundException;
 import org.sena.inforecicla.exception.PuntoEcaNotFoundException;
 import org.sena.inforecicla.model.CentroAcopio;
-import org.sena.inforecicla.model.CompraInventario;
 import org.sena.inforecicla.model.Localidad;
 import org.sena.inforecicla.model.Usuario;
 import org.sena.inforecicla.model.enums.Alerta;
@@ -27,6 +26,7 @@ import org.sena.inforecicla.model.enums.UnidadMedida;
 import org.sena.inforecicla.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -66,13 +66,11 @@ public class PuntoEcaController {
 
     // Ruta base que redirige automáticamente al punto ECA del usuario autenticado
     @GetMapping
-    public String puntoEcaBase(HttpServletRequest request) {
+    public String puntoEcaBase() {
         // Obtener el usuario autenticado
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof Usuario) {
-            Usuario usuario = (Usuario) auth.getPrincipal();
-
+        if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof Usuario usuario) {
             // Si es GestorECA, buscar su punto ECA y redirigir
             if (usuario.getTipoUsuario() == TipoUsuario.GestorECA) {
                 try {
@@ -101,10 +99,10 @@ public class PuntoEcaController {
         // Usar el path variable nombrePunto para evitar warning por parámetro no usado
         model.addAttribute("gestor", nombrePunto);
         model.addAttribute("seccion", "resumen");
-        model.addAttribute("inventarios", inventarioService.mostrarInventarioPuntoEca(usuario.puntoEcaId()));
-        model.addAttribute("unidadesMedida", construirUnidadesMedida());
-        model.addAttribute("categoriaMateriales", categoriaMaterialService.listarCategoriasMateriales());
-        model.addAttribute("tiposMateriales", tipoMaterialService.listarTiposMateriales());
+
+        // Cargar datos completos de la sección de resumen
+        cargarSeccionResumen(usuario, model);
+
         return "views/PuntoECA/puntoECA-layout";
     }
 
@@ -154,10 +152,299 @@ public class PuntoEcaController {
      * Carga datos para la sección de Resumen
      */
     private void cargarSeccionResumen(UsuarioGestorResponseDTO usuario, Model model) {
-        model.addAttribute("inventarios", inventarioService.mostrarInventarioPuntoEca(usuario.puntoEcaId()));
-        model.addAttribute("unidadesMedida", construirUnidadesMedida());
-        model.addAttribute("categoriaMateriales", categoriaMaterialService.listarCategoriasMateriales());
-        model.addAttribute("tiposMateriales", tipoMaterialService.listarTiposMateriales());
+        try {
+            UUID puntoEcaId = usuario.puntoEcaId();
+
+            logger.info("═══════════════════════════════════════════════════════════════");
+            logger.info("📊 INICIANDO CARGA DE DATOS DE RESUMEN");
+            logger.info("═══════════════════════════════════════════════════════════════");
+            logger.info("🔹 Usuario ID: {}", usuario.usuarioId());
+            logger.info("🔹 Punto ECA ID: {}", puntoEcaId);
+            logger.info("🔹 Punto ECA Nombre: {}", usuario.nombrePunto());
+
+            // ========== INVENTARIOS ==========
+            logger.info("\n📦 PASO 1: Obteniendo INVENTARIOS...");
+            List<?> inventarios = inventarioService.mostrarInventarioPuntoEca(puntoEcaId);
+            logger.info("   ✅ Inventarios retornados: {} items", inventarios != null ? inventarios.size() : 0);
+            logger.info("   🔍 Tipo de lista: {}", inventarios != null ? inventarios.getClass().getSimpleName() : "null");
+
+            if (inventarios != null && !inventarios.isEmpty()) {
+                logger.info("   📋 Primeros 3 inventarios:");
+                int count = 0;
+                for (Object inv : inventarios) {
+                    if (count >= 3) break;
+                    logger.info("      [{}] Tipo: {}", count + 1, inv.getClass().getSimpleName());
+                    if (inv instanceof InventarioResponseDTO invDTO) {
+                        logger.info("         Material: {}", invDTO.nombreMaterial());
+                        logger.info("         Stock Actual: {} (tipo: {})", invDTO.stockActual(),
+                            invDTO.stockActual() != null ? invDTO.stockActual().getClass().getSimpleName() : "null");
+                        logger.info("         Capacidad Máxima: {}", invDTO.capacidadMaxima());
+                    } else {
+                        logger.warn("         ⚠️ No es InventarioResponseDTO, es: {}", inv.getClass().getName());
+                    }
+                    count++;
+                }
+
+                // MOSTRAR TODOS LOS INVENTARIOS PARA DEBUGGING
+                logger.info("   📋 LISTANDO TODOS LOS INVENTARIOS ({} items):", inventarios.size());
+                int idx = 0;
+                for (Object inv : inventarios) {
+                    if (inv instanceof InventarioResponseDTO invDTO) {
+                        logger.info("      [{}] {} - Stock: {}",
+                            idx + 1, invDTO.nombreMaterial(),
+                            invDTO.stockActual() != null ? invDTO.stockActual() : "NULL");
+                    }
+                    idx++;
+                }
+            } else {
+                logger.warn("   ⚠️ Lista de inventarios es null o vacía");
+            }
+
+            // ========== CALCULAR INVENTARIO TOTAL ==========
+            logger.info("\n   🧮 CALCULANDO INVENTARIO TOTAL...");
+            double inventarioTotal = 0.0;
+            int contadorMateriales = 0;
+            int contadorNulos = 0;
+
+            if (inventarios != null && !inventarios.isEmpty()) {
+                logger.info("   📊 Procesando {} inventarios:", inventarios.size());
+                for (Object inv : inventarios) {
+                    if (inv instanceof InventarioResponseDTO invDTO) {
+                        contadorMateriales++;
+                        if (invDTO.stockActual() != null) {
+                            double stock = invDTO.stockActual().doubleValue();
+                            inventarioTotal += stock;
+                            logger.info("      [{}] ➕ Material: {}, Stock: {} kg",
+                                contadorMateriales, invDTO.nombreMaterial(), stock);
+                        } else {
+                            contadorNulos++;
+                            logger.warn("      [{}] ⚠️ Material: {} - Stock es NULL (ignorado)",
+                                contadorMateriales, invDTO.nombreMaterial());
+                        }
+                    } else {
+                        logger.warn("      ❌ Objeto no es InventarioResponseDTO: {}", inv.getClass().getName());
+                    }
+                }
+            }
+
+            logger.info("   📊 RESUMEN DEL CÁLCULO:");
+            logger.info("      - Materiales procesados: {}", contadorMateriales);
+            logger.info("      - Materiales con stock NULL: {}", contadorNulos);
+            logger.info("      - Total inventario calculado: {} kg", String.format("%.2f", inventarioTotal));
+            logger.info("      - Capacidad máxima (asumida): 2000 kg");
+            logger.info("      - Porcentaje de uso: {}%", Math.min((int) (inventarioTotal / 2000 * 100), 100));
+
+            // ========== COMPRAS (ENTRADAS) ==========
+            logger.info("\n📥 PASO 2: Obteniendo COMPRAS (ENTRADAS)...");
+            Page<CompraInventarioResponseDTO> comprasDelMes = compraInventarioService.comprasDelPunto(puntoEcaId, 0, 100);
+
+            long totalComprasItems;
+            if (comprasDelMes != null) {
+                totalComprasItems = comprasDelMes.getTotalElements();
+                logger.info("   ✅ Compras retornadas: {} items (total en BD)", totalComprasItems);
+                logger.info("   📄 Contenido en página actual: {} items",
+                    comprasDelMes.hasContent() ? comprasDelMes.getContent().size() : 0);
+
+                if (comprasDelMes.hasContent()) {
+                    logger.info("   📋 Primeras 2 compras:");
+                    int count = 0;
+                    for (CompraInventarioResponseDTO compra : comprasDelMes) {
+                        if (count >= 2) break;
+                        logger.info("      [{}] Material: {}, Cantidad: {}, Fecha: {}",
+                            count + 1, compra.nombreMaterial(), compra.cantidad(), compra.fechaCompra());
+                        count++;
+                    }
+                }
+            } else {
+                logger.warn("   ⚠️ Page de compras es null");
+            }
+
+            double totalCompras = 0.0;
+            if (comprasDelMes != null && comprasDelMes.hasContent()) {
+                for (CompraInventarioResponseDTO compra : comprasDelMes) {
+                    if (compra.cantidad() != null) {
+                        totalCompras += compra.cantidad().doubleValue();
+                    }
+                }
+            }
+            logger.info("   💯 TOTAL COMPRAS CALCULADO: {} kg", String.format("%.2f", totalCompras));
+
+            // ========== VENTAS (SALIDAS) ==========
+            logger.info("\n📤 PASO 3: Obteniendo VENTAS (SALIDAS)...");
+            Page<VentaInventarioResponseDTO> ventasDelMes = ventaInventarioService.ventasDelPunto(puntoEcaId, 0, 100);
+
+            long totalVentasItems;
+            if (ventasDelMes != null) {
+                totalVentasItems = ventasDelMes.getTotalElements();
+                logger.info("   ✅ Ventas retornadas: {} items (total en BD)", totalVentasItems);
+                logger.info("   📄 Contenido en página actual: {} items",
+                    ventasDelMes.hasContent() ? ventasDelMes.getContent().size() : 0);
+
+                if (ventasDelMes.hasContent()) {
+                    logger.info("   📋 Primeras 2 ventas:");
+                    int count = 0;
+                    for (VentaInventarioResponseDTO venta : ventasDelMes) {
+                        if (count >= 2) break;
+                        logger.info("      [{}] Material: {}, Cantidad: {}, Fecha: {}",
+                            count + 1, venta.nombreMaterial(), venta.cantidad(), venta.fechaVenta());
+                        count++;
+                    }
+                }
+            } else {
+                logger.warn("   ⚠️ Page de ventas es null");
+            }
+
+            double totalVentas = 0.0;
+            if (ventasDelMes != null && ventasDelMes.hasContent()) {
+                for (VentaInventarioResponseDTO venta : ventasDelMes) {
+                    if (venta.cantidad() != null) {
+                        totalVentas += venta.cantidad().doubleValue();
+                    }
+                }
+            }
+            logger.info("   💯 TOTAL VENTAS CALCULADO: {} kg", String.format("%.2f", totalVentas));
+
+            // ========== CREAR MAPA DE RESUMEN ==========
+            logger.info("\n📝 PASO 4: CREANDO MAPA DE DATOS...");
+            Map<String, Object> datosResumen = new HashMap<>();
+
+            String invTotal = String.format("%.2f", inventarioTotal);
+            String entTotal = String.format("%.2f", totalCompras);
+            String salTotal = String.format("%.2f", totalVentas);
+            int capacidad = Math.min((int) (inventarioTotal / 2000 * 100), 100);
+
+            datosResumen.put("inventarioTotal", invTotal);
+            datosResumen.put("entradasMes", entTotal);
+            datosResumen.put("salidasMes", salTotal);
+            datosResumen.put("capacidadPorcentaje", capacidad);
+            datosResumen.put("proximoDespacho", "Pendiente");
+            datosResumen.put("proximaFecha", "2025-12-15");
+
+            logger.info("   ✅ Datos principales agregados:");
+            logger.info("      📦 Inventario Total: {} kg", invTotal);
+            logger.info("      📥 Entradas: {} kg", entTotal);
+            logger.info("      📤 Salidas: {} kg", salTotal);
+            logger.info("      📊 Capacidad: {}%", capacidad);
+
+            // ========== ALERTAS ==========
+            logger.info("\n⚠️  PASO 5: GENERANDO ALERTAS...");
+            List<Map<String, Object>> alertas = new ArrayList<>();
+            if (inventarioTotal > 1500) {
+                alertas.add(Map.of(
+                    "titulo", "Inventario Alto",
+                    "descripcion", "El inventario está por encima del 75% de capacidad",
+                    "tipo", "warning"
+                ));
+                logger.info("   ✅ Alerta: Inventario Alto ({} kg)", inventarioTotal);
+            }
+            if (totalCompras == 0) {
+                alertas.add(Map.of(
+                    "titulo", "Sin Entradas",
+                    "descripcion", "No hay entradas registradas este mes",
+                    "tipo", "info"
+                ));
+                logger.info("   ✅ Alerta: Sin Entradas");
+            }
+            datosResumen.put("alertas", alertas);
+            datosResumen.put("alertaCount", alertas.size());
+            logger.info("   📊 Total de alertas: {}", alertas.size());
+
+            // ========== ÚLTIMOS MOVIMIENTOS ==========
+            logger.info("\n📋 PASO 6: RECOPILANDO ÚLTIMOS MOVIMIENTOS...");
+            List<Map<String, String>> movimientos = new ArrayList<>();
+
+            if (comprasDelMes != null && comprasDelMes.hasContent()) {
+                int count = 0;
+                for (CompraInventarioResponseDTO compra : comprasDelMes) {
+                    if (count >= 3) break;
+                    movimientos.add(Map.of(
+                        "fecha", compra.fechaCompra() != null ? compra.fechaCompra().toString().split("T")[0] : "N/A",
+                        "tipo", "Entrada",
+                        "cantidad", compra.cantidad() != null ? String.format("%.2f", compra.cantidad()) : "0",
+                        "descripcion", compra.nombreMaterial() != null ? compra.nombreMaterial() : "Material",
+                        "usuario", usuario.nombres(),
+                        "icono", "arrow-down-circle-fill",
+                        "color", "text-info"
+                    ));
+                    count++;
+                }
+                logger.info("   ✅ Compras agregadas: {} items", count);
+            }
+
+            if (ventasDelMes != null && ventasDelMes.hasContent()) {
+                int count = 0;
+                for (VentaInventarioResponseDTO venta : ventasDelMes) {
+                    if (count >= 2) break;
+                    movimientos.add(Map.of(
+                        "fecha", venta.fechaVenta() != null ? venta.fechaVenta().toString().split("T")[0] : "N/A",
+                        "tipo", "Salida",
+                        "cantidad", venta.cantidad() != null ? String.format("%.2f", venta.cantidad()) : "0",
+                        "descripcion", venta.nombreMaterial() != null ? venta.nombreMaterial() : "Material",
+                        "usuario", "Sistema",
+                        "icono", "arrow-up-circle-fill",
+                        "color", "text-warning"
+                    ));
+                    count++;
+                }
+                logger.info("   ✅ Ventas agregadas: {} items", count);
+            }
+
+            datosResumen.put("movimientos", movimientos);
+            logger.info("   📊 Total de movimientos: {}", movimientos.size());
+
+            // ========== SERIALIZAR A JSON ==========
+            logger.info("\n🔄 PASO 7: SERIALIZANDO A JSON...");
+            String datosResumenJSON = "{}";
+            try {
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                datosResumenJSON = mapper.writeValueAsString(datosResumen);
+                logger.info("   ✅ JSON serializado correctamente");
+                logger.info("   📝 Tamaño del JSON: {} caracteres", datosResumenJSON.length());
+                logger.info("   🔍 Primeros 200 caracteres del JSON:");
+                logger.info("      {}", datosResumenJSON.substring(0, Math.min(200, datosResumenJSON.length())));
+            } catch (Exception e) {
+                logger.error("   ❌ Error serializando JSON: {}", e.getMessage());
+            }
+
+            // ========== AGREGAR AL MODELO ==========
+            logger.info("\n📌 PASO 8: AGREGANDO ATRIBUTOS AL MODELO...");
+            model.addAttribute("puntoId", puntoEcaId.toString());
+            model.addAttribute("datosResumen", datosResumen);
+            model.addAttribute("datosResumenJSON", datosResumenJSON);
+            model.addAttribute("inventarios", inventarios);
+            model.addAttribute("comprasDelMes", comprasDelMes);
+            model.addAttribute("ventasDelMes", ventasDelMes);
+            model.addAttribute("unidadesMedida", construirUnidadesMedida());
+            model.addAttribute("categoriaMateriales", categoriaMaterialService.listarCategoriasMateriales());
+            model.addAttribute("tiposMateriales", tipoMaterialService.listarTiposMateriales());
+
+            logger.info("   ✅ Atributos agregados al modelo:");
+            logger.info("      - puntoId: {}", puntoEcaId);
+            logger.info("      - datosResumen: {} propiedades", datosResumen.size());
+            logger.info("      - datosResumenJSON: {} caracteres", datosResumenJSON.length());
+            logger.info("      - inventarios: {} items", inventarios != null ? inventarios.size() : 0);
+            logger.info("      - comprasDelMes: {} items", comprasDelMes != null ? comprasDelMes.getTotalElements() : 0);
+            logger.info("      - ventasDelMes: {} items", ventasDelMes != null ? ventasDelMes.getTotalElements() : 0);
+
+            logger.info("\n═══════════════════════════════════════════════════════════════");
+            logger.info("✅ CARGA DE DATOS DE RESUMEN COMPLETADA EXITOSAMENTE");
+            logger.info("═══════════════════════════════════════════════════════════════\n");
+
+        } catch (Exception e) {
+            logger.error("═══════════════════════════════════════════════════════════════");
+            logger.error("❌ ERROR AL CARGAR SECCIÓN RESUMEN", e);
+            logger.error("═══════════════════════════════════════════════════════════════");
+            logger.error("Mensaje de error: {}", e.getMessage());
+            logger.error("Stack trace: ", e);
+
+            model.addAttribute("error", "Error al cargar el resumen: " + e.getMessage());
+
+            // Cargar datos por defecto en caso de error
+            model.addAttribute("inventarios", Collections.emptyList());
+            model.addAttribute("unidadesMedida", construirUnidadesMedida());
+            model.addAttribute("categoriaMateriales", categoriaMaterialService.listarCategoriasMateriales());
+            model.addAttribute("tiposMateriales", tipoMaterialService.listarTiposMateriales());
+        }
     }
 
     /**
@@ -690,7 +977,7 @@ public class PuntoEcaController {
             @RequestBody VentaInventarioRequestDTO ventaDTO
     ) {
         try {
-            VentaInventarioResponseDTO venta = ventaInventarioService.registrarVenta(ventaDTO);
+            ventaInventarioService.registrarVenta(ventaDTO);
             return ResponseEntity.ok(Map.of(
                     "error", false,
                     "mensaje", "Salida registrada correctamente",
@@ -706,7 +993,6 @@ public class PuntoEcaController {
 
     @PutMapping("/inventario/compra/{compraId}")
     public ResponseEntity<?> actualizarCompra(
-            @PathVariable UUID compraId,
             @RequestBody CompraInventarioUpdateDTO dto
             ){
         try {
@@ -724,7 +1010,6 @@ public class PuntoEcaController {
 
     @PutMapping("/inventario/venta/{ventaId}")
     public ResponseEntity<?> actualizarVenta(
-            @PathVariable UUID ventaId,
             @RequestBody VentaInventarioUpdateDTO dto
     ){
         try {

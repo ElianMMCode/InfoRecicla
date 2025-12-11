@@ -36,10 +36,6 @@ public class CiudadanoController {
             Usuario usuario = usuarioRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-            // Forzar carga de la localidad para evitar LazyInitializationException
-            if (usuario.getLocalidad() != null) {
-                usuario.getLocalidad().getNombre();
-            }
 
             model.addAttribute("ciudadano", usuario);
             log.info("✅ Perfil cargado correctamente para: {}", usuario.getEmail());
