@@ -596,6 +596,83 @@
     </div>
     <!-- FIN DEL ACORDEÓN -->
 
+    <!-- ═════════════════════════════════════════════════════════════ -->
+    <!-- MODAL: DETALLES DEL MOVIMIENTO -->
+    <!-- ═════════════════════════════════════════════════════════════ -->
+    <div class="modal fade" id="modalDetallesMovimiento" tabindex="-1" aria-labelledby="modalDetallesLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title" id="modalDetallesLabel">
+                        <i class="bi bi-receipt me-2"></i>Detalles del Movimiento
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <!-- Tipo de Movimiento -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Tipo de Movimiento</label>
+                            <p class="mb-0">
+                                <span id="detallesTipo" class="badge bg-secondary"></span>
+                            </p>
+                        </div>
+                        <!-- Fecha -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Fecha</label>
+                            <p id="detallesFecha" class="mb-0 fw-semibold">-</p>
+                        </div>
+                        <!-- Material -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-muted small">Material</label>
+                            <p id="detallesMaterial" class="mb-0 fw-semibold">-</p>
+                        </div>
+                        <!-- Categoría -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Categoría</label>
+                            <p id="detallesCategoria" class="mb-0">-</p>
+                        </div>
+                        <!-- Tipo Material -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Tipo de Material</label>
+                            <p id="detallesTipoMaterial" class="mb-0">-</p>
+                        </div>
+                        <!-- Cantidad -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Cantidad (kg)</label>
+                            <p id="detallesCantidad" class="mb-0 fw-bold text-success">-</p>
+                        </div>
+                        <!-- Precio Unitario -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-muted small">Precio Unitario</label>
+                            <p id="detallesPrecio" class="mb-0 fw-bold">$0.00</p>
+                        </div>
+                        <!-- Total -->
+                        <div class="col-12">
+                            <div class="alert alert-info alert-sm mb-0">
+                                <strong>Total:</strong>
+                                <span id="detallesTotal" class="fw-bold">$0.00</span>
+                            </div>
+                        </div>
+                        <!-- Observaciones -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-muted small">Observaciones</label>
+                            <p id="detallesObservaciones" class="mb-0 text-muted small">-</p>
+                        </div>
+                        <!-- Centro Acopio (solo para ventas) -->
+                        <div class="col-12" id="detallesContenedorCentro" style="display: none;">
+                            <label class="form-label fw-semibold text-muted small">Centro de Acopio Destino</label>
+                            <p id="detallesCentroAcopio" class="mb-0">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- SELECT2 ASSETS (jQuery + Select2 CSS/JS con tema Bootstrap4) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -2121,7 +2198,7 @@
                         <td class="text-end small">${cantidad}</td>
                         <td class="text-end small">$${precio}</td>
                         <td class="text-center">
-                            <button class="btn btn-sm btn-info" title="Ver detalles">
+                            <button class="btn btn-sm btn-info btnVerDetalles" title="Ver detalles" data-mov-id="${mov.compraId || mov.ventaId}" data-mov-tipo="${mov.tipo}" data-mov-data='${JSON.stringify(mov)}'>
                                 <i class="bi bi-eye"></i>
                             </button>
                         </td>
@@ -2133,6 +2210,57 @@
             if (badge) badge.textContent = movimientosFiltrados.length + ' registros';
         }
 
+        // ========================================================
+        // EVENT LISTENER PARA VER DETALLES DE MOVIMIENTO
+        // ========================================================
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.btnVerDetalles')) {
+                const btn = e.target.closest('.btnVerDetalles');
+                try {
+                    const movData = JSON.parse(btn.dataset.movData);
+                    const tipo = btn.dataset.movTipo;
+
+                    // Llenar el modal con los datos
+                    const detallesTipo = document.getElementById('detallesTipo');
+                    detallesTipo.textContent = tipo;
+                    detallesTipo.className = tipo === 'Compra' ? 'badge bg-danger' : 'badge bg-success';
+
+                    const fecha = new Date(movData.fecha || movData.fechaCompra || movData.fechaVenta).toLocaleDateString('es-CO');
+                    document.getElementById('detallesFecha').textContent = fecha;
+
+                    document.getElementById('detallesMaterial').textContent = movData.nombreMaterial || '-';
+                    document.getElementById('detallesCategoria').textContent = movData.nombreCategoria || '-';
+                    document.getElementById('detallesTipoMaterial').textContent = movData.nombreTipo || '-';
+
+                    const cantidad = parseFloat(movData.cantidad || 0).toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    document.getElementById('detallesCantidad').textContent = cantidad + ' kg';
+
+                    const precio = parseFloat(movData.precio || movData.precioCompra || movData.precioVenta || 0).toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    document.getElementById('detallesPrecio').textContent = '$' + precio;
+
+                    const total = (parseFloat(movData.cantidad || 0) * parseFloat(movData.precio || movData.precioCompra || movData.precioVenta || 0)).toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    document.getElementById('detallesTotal').textContent = '$' + total;
+
+                    document.getElementById('detallesObservaciones').textContent = movData.observaciones || 'Sin observaciones';
+
+                    // Mostrar centro acopio solo para ventas
+                    const contenedorCentro = document.getElementById('detallesContenedorCentro');
+                    if (tipo === 'Venta') {
+                        contenedorCentro.style.display = '';
+                        document.getElementById('detallesCentroAcopio').textContent = movData.nombreCentroAcopio || '-';
+                    } else {
+                        contenedorCentro.style.display = 'none';
+                    }
+
+                    // Abrir el modal
+                    const modal = new bootstrap.Modal(document.getElementById('modalDetallesMovimiento'));
+                    modal.show();
+                } catch (error) {
+                    console.error('Error al abrir detalles:', error);
+                    alert('Error al cargar los detalles del movimiento');
+                }
+            }
+        });
 
         // Función global para cambiar el material seleccionado
         window.cambiarMaterial = function() {
